@@ -1,0 +1,1523 @@
+
+
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>(r620)</title>
+<style>
+
+#logTable {
+  display: block;
+  max-height: calc(20 * 42px); /* ~40px per row incl. padding/border */
+  overflow-y: auto;
+}
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #f9f9f9;
+        color: #000;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        color: #007aff;
+    }
+
+    .controls {
+        margin-bottom: 20px;
+    }
+
+    .controls button, .controls label {
+        margin-right: 10px;
+    }
+
+    input, select, textarea {
+        background: #fff;
+        color: #000;
+        border: 1px solid #ccc;
+        padding: 6px 10px;
+        border-radius: 6px;
+        margin: 4px;
+        font-size: 9px;
+    }
+
+    .score-columns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .score-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 5px;
+    }
+
+    .score-column button {
+        width: 120px;
+        height: 30px;
+        margin: 1px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #fff;
+    }
+
+    .selected-score {
+        background-color: #007aff !important;
+        color: #fff !important;
+        font-weight: bold;
+        border: 2px solid #000;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        margin-top: 20px;
+    }
+
+    table, th, td {
+        border: 1px solid #ccc;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        font-size: 10px;
+    }
+    
+    #extraNoteButtons {
+        display: grid;
+        grid-template-columns: repeat(8, 80px);
+        gap: 2px;
+        margin-top: 10px;
+    }
+
+    .note-btn {
+        width: 80px;
+        height: 20px;
+        font-size: 8px;
+        padding: 0;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #f2f2f2;
+        color: #000;
+        transition: box-shadow 0.1s;
+        margin: 0;
+    }
+
+    .note-btn.selected-score {
+        box-shadow: 0 0 0 2px #000;
+        color: #fff;
+    }
+
+    .note-btn[data-category="gold"] {
+        background: gold;
+        color: #000;
+    }
+
+    .note-btn[data-category="dose"] {
+        background: #444;
+        color: #fff;
+    }
+
+    .note-btn[data-category="blue"] {
+        background: #007aff;
+        color: #fff;
+    }
+
+    .note-btn[data-category="red"] {
+        background: red;
+        color: #fff;
+    }
+
+    .note-btn[data-category="green"] {
+        background: green;
+        color: #fff;
+    }
+
+    .note-btn[data-category="orange"] {
+        background: orange;
+        color: #000;
+    }
+
+    .note-btn[data-category="yellow"] {
+        background: #ffeb3b;
+        color: #000;
+    }
+
+    #scoreModal {
+        display: none;
+        position: fixed;
+        top: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        padding: 20px;
+        border: 2px solid #007aff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+
+    #scoreModal input {
+        width: 60px;
+    }
+    
+  .note-btn[data-category="purple"] {
+    background-color: rebeccapurple;
+    color: #fff;
+  }
+
+/* Auto-summary Button */
+    #autoSummaryToggleBtn {
+        top: 90px;
+        right: 20px;
+        position: fixed;
+        background: #008CBA;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        z-index: 9998;
+    }
+    </style>
+<style>
+#summaryToggleBtn {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    z-index: 9999;
+    background: #007aff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+</style></head>
+<body><button id="summaryToggleBtn" onclick="createSummaryPopupTable()">Summary</button>
+    <button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
+<h1>r620</h1>
+<div class="controls">
+<button onclick="newTrip()">New Log</button>
+<button onclick="resetTimer()">Reset Timer</button>
+<button onclick="pauseTimer()">Pause Timer</button>
+<label>
+<input id="redoseCheckbox" type="checkbox"/>
+             Redose
+        </label>
+<button id="addBtn" onclick="addEntry()">Add Entry</button>
+<button onclick="deleteSelected()">Delete Selected</button>
+<button onclick="editSelected()">Edit Selected</button>
+<button onclick="exportCSV()">Export CSV</button>
+<button onclick="openScoreModal()">Manual Score Entry</button>
+<button onclick="openEmotionModal()">Emotion Wheel</button>
+</div>
+<div>
+<label>
+            Phase: 
+            <input id="eventInput" maxlength="50" size="50" type="text"/>
+</label>
+<br/>
+<label>
+            Scale: 
+            <input id="scaleInput" maxlength="50" size="30" type="text"/>
+</label>
+<br/>
+<label>
+            Add:
+                  
+            <select id="drugSelect">
+<option value="">--Select--</option>
+<option value="x-PiHP">x-PiHP</option>
+<option value="PYRO">PYRO</option>
+<option value="Cathinone">Cathinone</option>
+<option value="Unknown">Unknown</option>
+<option value="Food">Food</option>
+<option value="Drink">Drink</option>
+<option value="Sleep">Sleep</option>
+<option value="Exercise">Exercise</option>
+<option value="NN-DMC">NN-DMC</option>
+<option value="MD-PiHP">MD-PiHP</option>
+<option value="2ME-PiHP">2ME-PiHP</option>
+<option value="A-PiHP">A-PiHP</option>
+<option value="3F-PiHP">3F-PiHP</option>
+<option value="Meth">Meth</option>
+<option value="MDMA">MDMA</option>
+<option value="3-MMC">3-MMC</option>
+<option value="Dust">Dust</option>
+<option value="Speed">Speed</option>
+<option value="Cocaine">Cocaine</option>
+<option value="Crack">Crack</option>
+<option value="Vodka">Vodka</option>
+<option value="Weed">Weed</option>
+<option value="THC">THC</option>
+<option value="Alcohol">Alcohol</option>
+<option value="Benzodiazepine">Benzodiazepine</option>
+<option value="Diazepam">Diazepam</option>
+<option value="Alprazolam">Alprazolam</option>
+<option value="Bromazolam">Bromazolam</option>
+<option value="LSD">LSD</option>
+</select>
+</label>
+<label>
+            qty: 
+            <input id="qtyInput" size="6" type="number"/>
+</label>
+<label>
+            Detail: 
+            <input id="roaInput" size="10" type="text"/>
+</label>
+<br/>
+<label>Notes:</label>
+<br/>
+<textarea cols="50" id="notesInput" rows="3"></textarea>
+<br/>
+<div style="display: flex; gap: 10px;"><label>Last:</label>
+<br/>
+<textarea cols="50" id="customNotesInput" rows="3"></textarea></div>
+</div>
+<div style="display: flex; align-items: flex-start; gap: 20px;">
+<div class="score-columns" id="scoreColumns"></div>
+<div id="noteButtons"></div>
+<div id="extraNoteButtons"></div>
+</div>
+<div id="timer" style="margin-top: 10px;">Time: 00:00:00</div>
+<table id="logTable">
+<thead>
+<tr>
+<th>Select</th>
+<th>Timestamp</th>
+<th>Since</th>
+<th>Elapsed</th>
+<th>Phase</th>
+<th>Scale</th>
+<th>Drug</th>
+<th>QTY</th>
+<th>ROA</th>
+<th>Rush</th>
+<th>Rush</th>
+<th>Mood</th>
+<th>Mood</th>
+<th>Social</th>
+<th>Social</th>
+<th>Energy</th>
+<th>Energy </th>
+<th>Focus</th>
+<th>Focus</th>
+<th>Anxiety</th>
+<th>Anxiety</th>
+<th>Impair</th>
+<th>Impair</th><th>Cer</th><th>C2</th><th>Deg</th><th>D2</th><th>Oth</th><th>O2</th>
+<th>Score</th>
+<th>Max</th>
+<th>Min</th>
+<th>VL</th>
+<th>sM</th>
+<th>sB</th>
+<th>sF</th>
+<th>Last</th>
+<th>Notes</th>
+<th>WGT</th><th>5Max</th><th>GS</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+<script>
+// Michael Anthony Ralph / Special Technology Services, August 2025
+    const labelMappings = {
+        rush: {
+            "0": 'None',
+            "1": 'Minimal',
+            "2": 'Some',
+            "3": 'Clear',
+            "4": 'Strong',
+            "5": 'Intense',
+            "6": 'Extreme',
+            "7": 'Ultra'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        mood: {
+            "-2": '',
+            "0": 'No Change',
+            "1": 'Minimal',
+            "2": 'Ignorable',
+            "3": 'Clear',
+            "4": 'Obvious',
+            "5": 'Slightly Euphoric',
+            "6": 'Super',
+            "7": 'Strong Euphoria'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        social: {
+            "-2": '',
+            "0": 'Flat',
+            "1": 'Think',
+            "2": 'Want',
+            "3": 'Urge/Desire',
+            "4": 'Actively',
+            "5": 'Social',
+            "6": 'Outgoing',
+            "7": 'Disinhibited'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        energy: {
+            "-2": '',
+            "0": 'None',
+            "1": 'Alert',
+            "2": 'Increased',
+            "3": 'Energetic',
+            "4": 'Very Energetic',
+            "5": 'Hyper',
+            "6": 'Manic'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        focus: {
+            "-2": '',
+            "0": 'None',
+            "1": 'Alert',
+            "2": 'Increased',
+            "3": 'Enhanced',
+            "4": 'Focused',
+            "5": 'Obsessive',
+            "6": 'Wired',
+            "7": 'Laser'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        anxiety: {
+            "0": 'No Anxiety',
+            "1": 'Normal/Think',
+            "2": 'Excessive',
+            "3": 'Anxious',
+            "4": 'Adverse',
+            "5": 'ImpactBehaviour',
+            "6": 'Severe',
+            "7": 'Panic'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        impair: {
+            "0": 'None',
+            "1": 'Side Effects',
+            "2": 'Ignorable',
+            "3": 'Some',
+            "4": 'Impaired',
+            "5": 'ImpactBehaviour',
+            "6": 'Adverse',
+            "7": 'Serious',
+            "8": 'Severe'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        Certainty: {
+            "-1": '',
+            "0": 'False',
+            "2": 'Excessive',
+            "3": 'Worrying',
+            "4": 'Anxious',
+            "5": 'Panic',
+            "6": 'Severe'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        Degree: {
+            "-1": 'Inverse',
+            "0": 'False',
+            "2": 'Excessive',
+            "3": 'Worrying',
+            "4": 'Anxious',
+            "5": 'Panic',
+            "10": 'Severe'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+        Other: {
+            "-1": 'Inverse',
+            "0": 'False',
+            "2": 'Excessive',
+            "3": 'Worrying',
+            "4": 'Anxious',
+            "5": 'Panic',
+            "10": 'Severe'
+, "1.5": "+", "-0.5": "-", "-1.5": "-" }
+    };
+['placeholder'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
+
+    function getLabels(metric, values) {
+        if (!Array.isArray(values))
+            values = [values];
+        return Array.from(new Set(values))
+        .sort((a, b) => b - a)
+        .map(v => labelMappings[metric][v] || '')
+        .filter(Boolean);
+    }
+
+    function getSum(arr) {
+        return Array.isArray(arr) && arr.length
+        ? arr.reduce((a, b) => a + b, 0)
+        : 0;
+    }
+
+    const metrics = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair','certainty','degree','other'];
+    let selections = {},
+        logData = [],
+        timerInterval,
+        startTime,
+        doseTime,
+        editIndex = null;
+
+    function initSelections() {
+        metrics.forEach(m => selections[m] = []);
+    }
+
+    function buildButtons() {
+        // Score buttons
+        const sc = document.getElementById('scoreColumns');
+        sc.innerHTML = '';
+        metrics.forEach(f => {
+            const col = document.createElement('div');
+            col.className = 'score-column';
+            const t = document.createElement('strong');
+            t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
+            col.appendChild(t);
+           [10, 9, 8, 7, 6, 5, 5.5, 4, 3, 2.5, 2, 1, 0.6, 0.4, 0, -0.5, -1, -2, -3, -4].forEach(v => {
+                const b = document.createElement('button');
+                let customLabel = '';
+if (v === -2) customLabel = '';
+if (v === -4) customLabel = '';
+if (v === -1) customLabel = '';
+if (v === -3) customLabel = '';
+//else if (v === 6) customLabel = 'Extra/Prominent';
+else if (v === 0.2) customLabel = '';
+else if (v === 2.5) customLabel = '';
+else if (v === 5.5) customLabel = '';
+else if (v === 6.5) customLabel = '';
+else if (v === 0.5) customLabel = '+';
+else if (v === -0.5) customLabel = '-';
+else if (v === 0.8) customLabel = '';
+else if (v === 0.9) customLabel = '+obvious';
+else if (v === -0.9) customLabel = '-obvious';
+else if (v === 0.7) customLabel = '+clear';
+else if (v === -0.7) customLabel = '-clear';
+else if (v === 0.3) customLabel = '+some';
+else if (v === -0.3) customLabel = '-some';
+else if (v === 0.1) customLabel = '+maybe';
+else if (v === 0.4) customLabel = '';
+else if (v === -0.1) customLabel = '-maybe';
+//else if (v === 8) customLabel = 'Very High/Strong';
+//else if (v === 10) customLabel = 'Maximum';
+//else if (v === 6) customLabel = 'Extra/Prominent';
+else customLabel = labelMappings[f]?.[v] ?? '';
+b.innerText = `${v}: ${customLabel}`;
+                b.onclick = () => {
+                    const i = selections[f].indexOf(v);
+                    if (i < 0) {
+                        selections[f].push(v);
+                        b.classList.add('selected-score');
+                    }
+                    else {
+                        selections[f].splice(i, 1);
+                        b.classList.remove('selected-score');
+                    }
+                };
+                col.appendChild(b);
+            });
+            sc.appendChild(col);
+        
+});
+
+        // Original notes
+        const noteCont = document.getElementById('noteButtons');
+        noteCont.innerHTML = '';
+        const palette = {
+            CONTEXT: 'other',
+            PRE: 'time',
+            POST: 'time',
+            ONSET: 'time',
+            After: 'time',
+            Before: 'time',
+            Estimate: 'time',
+            RUSH: 'effect',
+            Good: 'positive',
+            Bad: 'negative',
+            Anxiety: 'emotional',
+            Craving: 'emotional',
+            Joy: 'positive',
+            Physical: 'physical',
+            Visual: 'effect',
+            Audio: 'effect',
+            Cognitive: 'mental',
+            Social: 'effect',
+            Paranoia: 'emotional',
+            Peaceful: 'positive',
+            Insight: 'mental',
+            Sleep: 'other',
+            Alert: 'effect',
+            Fatigue: 'physical',
+            Euphoria: 'positive',
+            Pain: 'physical',
+            Discomfort: 'physical',
+            Calm: 'positive',
+            Tension: 'emotional',
+            Fun: 'positive',
+            Confusion: 'mental'
+        };
+        // Extra notes (gold)
+        const extraCont = document.getElementById('extraNoteButtons');
+        extraCont.innerHTML = '';
+        const extra = ['Start', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over,', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'UnsureIfUsable', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute'];
+        extra.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'gold');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                }
+                else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        // Dark grey dose buttons
+        const darkLabels = ["Note", "Context", "Associate", "Change", "Review", "Weighed", "Yes", "No", "Maybe", "Certain", "Half", ">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<30mg", "RESIDUE", "FILM", "CARBON", "COLOUR", "BURNED", "TRUE", "FALSE", "POSITIVE", "NEGATIVE", "UNKNOWN", "UNSURE", "SOME", "HALF", "MOST"];
+        darkLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'dose');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                }
+                else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        // Bright blue custom buttons
+        const blueLabels = ['VisibleVapour', 'InvisibleVapour', 'Billowing', 'WarmAir', 'Plumes', 'Burned', 'WarmAir', 'ThickVapour', 'DarkVapour', 'Smoke', 'NiceSmell', 'NiceTaste', 'BadSensation', 'INVISIBLE', 'DARK', 'WARM',
+        'Smoke', 'Vapour', 'BurnedSmell', 'HalfBurned'];
+        blueLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'blue');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        // Bright red custom buttons
+        const redLabels = ['Mental', 'Physical', 'BloodPressure', 'BodyTemp', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
+        redLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'red');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        const greenLabels = ["ThroatSuction", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
+        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "TwoHits", "MultipleHits", "LowHeat", "HighHeat", "Burned", "Destroyed", "BurnedRemains",
+        "HeatedOnce", "AlreadyHeated", "NotYetHeated"];
+        greenLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'green');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        const orangeLabels = ['Lighter', 'Candle', 'Jet', 'Blowtorch', 'Vape', 'Hotrail', 'Cone', 'Snowcone', 'Bong', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Broken', 'Loose', 'Liquid', 'Sludge', 'PropyleneGlycol', 'Melted', 'Vapourised', 'SomeColour', 'ColourChange', 'Loose', 'NotMoving', 'Chunks'];
+        orangeLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'orange');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        const yellowLabels = JSON.parse('["Positive", "Negative", "Flat", "BadSideEffCD"]');
+// Purple category labels
+yellowLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.textContent = lbl;
+            b.setAttribute('data-category', 'yellow');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+
+
+    // ─── APPEND PURPLE LABELS ───────────────────────────────────────────────
+    const purpleLabels = [
+      '5_Secs', '15sLate','Deep','Shallow','Hold','Long','Short','Slow','Rapid','OneBreath','Multiple','Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone', 'BuildingAlone'
+    ];
+    const purpleContainer = document.querySelector('#extraNoteButtons');
+    purpleLabels.forEach(label => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = label;
+      btn.dataset.category = 'purple';
+      btn.classList.add('note-btn');
+      btn.addEventListener('click', () => {
+        const notes = document.querySelector('#notesInput');
+        if (notes.value.includes(label)) {
+          notes.value = notes.value.replace(new RegExp(`\\b${label}\\b`, 'g'), '').trim();
+        } else {
+          notes.value = (notes.value + ' ' + label).trim();
+        }
+      });
+      purpleContainer.appendChild(btn);
+    });
+    // ──────────────────────────────────────────────────────────────────────────
+    }
+
+    function resetTimer() {
+        startTime = doseTime = new Date();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            document.getElementById('timer').innerText = 'Trip Time: ' + getElapsed(startTime);
+        }, 1000);
+    }
+    function pauseTimer() {
+        clearInterval(timerInterval);
+    }
+    function newTrip() {
+        logData = [];
+        localStorage.removeItem('tripLog');
+        renderTable();
+        clearInterval(timerInterval);
+        document.getElementById('timer').innerText = 'Time: 00:00:00';
+        startTime = doseTime = null;
+    }
+    function getElapsed(start) {
+        if (!start)
+            return "00:00:00";
+        let d = Math.floor((new Date() - start) / 1000),
+            h = String(Math.floor(d / 3600)).padStart(2, '0'),
+            m = String(Math.floor((d % 3600) / 60)).padStart(2, '0'),
+            s = String(d % 60).padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+    function addEntry() {
+        if (!startTime)
+            resetTimer();
+        setInterval(addSummaryRowSum, 60000); // every 60 seconds
+        const now = new Date(),
+            ts = now.toLocaleString('en-AU', {
+                hour12: false
+            });
+        if (document.getElementById('redoseCheckbox').checked && document.getElementById('drugSelect').value)
+            doseTime = new Date();
+        const entry = {
+   			 _ts: Date.now(),
+   			 timestamp: ts,
+            sincedose: getElapsed(doseTime),
+            elapsed: getElapsed(startTime),
+            info: document.getElementById('eventInput').value,
+            scale: document.getElementById('scaleInput').value,
+            drug: document.getElementById('drugSelect').value,
+            qty: document.getElementById('qtyInput').value,
+            roa: document.getElementById('roaInput').value,
+            notes: document.getElementById('notesInput').value,
+            customNotes: document.getElementById('customNotesInput').value
+        };
+        metrics.forEach(f => {
+            entry[f] = selections[f].length ? Array.from(new Set(selections[f])).sort((a, b) => b - a) : [];
+            entry[f + 'Label'] = getLabels(f, entry[f]).join(', ');
+            entry[f + 'Sum'] = getSum(entry[f]);
+        });
+        entry.score = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum + entry.focusSum - entry.anxietySum - entry.impairSum;
+        entry.max = ['rush', 'mood', 'social', 'energy', 'focus'].reduce((a, f) => a + (entry[f + 'Sum'] || 0), 0);
+        entry.min = entry.anxietySum + entry.impairSum;
+        entry.maxPercent = +(entry.max / 50 * 100).toFixed(1);
+        entry.minPercent = +(entry.min / 20 * 100).toFixed(1);
+        entry.min = entry.anxietySum + entry.impairSum;
+        let val = 0;
+        ['rush', 'mood', 'social', 'energy', 'focus'].forEach(m => entry[m].some(v => v >= 3) && val++);
+        ['anxiety', 'impair'].forEach(m => entry[m].some(v => v >= 3) && val--);
+        entry.valence = val;
+        entry.scaleMood = entry.notes.split(/\s+/).includes('Good') ? 3 : 0;
+        entry.scaleBad = entry.notes.split(/\s+/).includes('Bad') ? 3 : 0;
+        entry.scaleFocus = entry.notes.split(/\s+/).includes('Wired') ? 7 : 0;
+entry.weighted = (
+    (entry.rushSum || 0) * 3 +
+    (entry.socialSum || 0) * 2 +
+    (entry.moodSum || 0) * 2 +
+    (entry.energySum || 0) * 1.5 +
+    (entry.focusSum || 0) * 1.5
+);
+entry.goodSum = 0;
+        logData.push(entry);
+        localStorage.setItem('tripLog', JSON.stringify(logData));
+        renderTable();
+        ['eventInput', 'scaleInput', 'drugSelect', 'qtyInput', 'roaInput', 'notesInput', 'customNotesInput'].forEach(id => document.getElementById(id).value = '');
+        initSelections();
+        buildButtons();
+        document.getElementById('addBtn').innerText = 'Add Entry';
+    }
+    
+function addSummaryRowSum() {
+
+    const now = Date.now();
+    const windowStart = now - 1 * 60 * 1000;
+    const recentEntries = logData.filter(entry => entry._ts && entry._ts >= windowStart);
+    if (!recentEntries.length) return;
+
+    const fields = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const means = {};
+    fields.forEach(f => {
+        const vals = recentEntries.map(e => e[f + 'Sum']).filter(v => typeof v === 'number');
+        const mean = vals.length ? vals.reduce((a,b)=>a+b,0) / vals.length : 0;
+        means[f] = +mean.toFixed(2);
+    });
+
+    const tr = document.createElement('tr');
+    const ts = new Date().toLocaleTimeString('en-AU', {hour12:false});
+    tr.innerHTML = `<td>${ts} Average</td>`;
+
+    const colourMap = {
+      rush:[0,255,0], mood:[0,255,0], social:[0,255,0],
+      energy:[255,215,0], focus:[255,215,0],
+      anxiety:[255,0,0], impair:[255,0,0]
+    };
+
+    fields.forEach(f => {
+        const v = means[f];
+        const [r,g,b] = colourMap[f];
+        const opacity = Math.min(v, 10) / 10;
+        tr.innerHTML += `<td style="background-color:rgba(${r},${g},${b},${opacity})">${v}</td>`;
+    });
+
+    const table = document.querySelector("#summaryPopupTable tbody");
+    if (table) table.appendChild(tr);
+
+
+}
+
+function renderTable() {
+        const tb = document.querySelector('#logTable tbody');
+        tb.innerHTML = '';
+        logData.forEach((r, i) => {
+            const tr = document.createElement('tr');
+            let h = `<td><input type="checkbox" name="rowSelect" data-index="${i}"></td>`;
+            ['timestamp', 'sincedose', 'elapsed', 'info', 'scale', 'drug', 'qty', 'roa'].forEach(k => h += `<td>${r[k] || ''}</td>`);
+            metrics.forEach(f => {
+                h += `<td data-field="${f}Sum" data-value="${r[f + 'Sum']}">${r[f + 'Sum']}</td>`;
+                h += `<td data-label-for="${f}Sum" data-value="${r[f + 'Sum']}">${r[f + 'Label']}</td>`;
+            });
+        h += `<td class="score-cell">${r.score}</td><td class="max-cell">${r.max || ""} (${r.maxPercent || 0}%)</td><td class="min-cell">${r.min || 0} (${r.minPercent || 0}%)</td><td>${r.valence}</td><td>${r.scaleMood || 0}</td><td>${r.scaleBad || 0}</td><td>${r.scaleFocus || 0}</td><td>${r.customNotes || ""}</td><td>${r.notes || ""}</td><td>${r.weighted || 0}</td><td>${(r.weighted / 10).toFixed(2)}</td><td>${r.goodSum || ""}</td>`;
+            
+            tr.innerHTML = h;
+            // ─── Additional Cell Shading ───────────────────────────────────────
+            const scoreCell = tr.children[23];
+            const scoreOpacity = Math.min(r.score, 50) / 50;
+            scoreCell.style.backgroundColor = `rgba(0,0,1,${scoreOpacity})`;
+
+            const maxCell = tr.children[24];
+            const maxOpacity = Math.min(r.maxPercent, 100) / 100;
+            maxCell.style.backgroundColor = `rgba(0,0,1,${maxOpacity})`;
+
+            const minCell = tr.children[25];
+            const minOpacity = Math.min(r.minPercent, 100) / 100;
+            minCell.style.backgroundColor = `rgba(0,0,1,${minOpacity})`;
+            // ─────────────────────────────────────────────────────────────────────
+
+            // ─── Auto-shade Sum cells ────────────────────────────────────────
+            const shadeFields = [
+                { field: 'rushSum',   colour: [0, 255, 0] },
+                { field: 'moodSum',   colour: [0, 255, 0] },
+                { field: 'socialSum', colour: [0, 255, 0] },
+                { field: 'focusSum',  colour: [255, 215,   0] },
+                { field: 'energySum', colour: [255, 215,   0] },
+                { field: 'anxietySum',colour: [255,   0,   0] },
+                { field: 'impairSum', colour: [255,   0,   0] }
+
+            ];
+            shadeFields.forEach(cfg => {
+                const cell = tr.querySelector(`td[data-field="${cfg.field}"]`);
+                const val = r[cfg.field];
+                const opacity = Math.min(val, 10) / 10;
+                if (val > 0 && cell) {
+                    cell.style.backgroundColor = `rgba(${cfg.colour[0]},${cfg.colour[1]},${cfg.colour[2]},${opacity})`;
+                }
+            });
+            // ───────────────────────────────────────────────────────────────────
+
+            // ─── Dynamic shading for Score, Max, Min ──────────────────
+            ['score','max','min'].forEach(field => {
+                const cell = tr.querySelector(`.${field}-cell`);
+                if (cell) {
+                    let opacity = 0;
+                    if (field === 'score') opacity = Math.min(r.score / 50, 1);
+                    if (field === 'max')   opacity = Math.min(r.maxPercent / 100, 1);
+                    if (field === 'min')   opacity = Math.min(r.minPercent / 100, 1);
+                    const colourMap = { score: '0,255,0', max: '0,215,0', min: '255,0,0' };
+                    cell.style.backgroundColor = `rgba(${colourMap[field]},${opacity})`;
+                }
+            });
+            // ──────────────────────────────────────────────────────────────
+
+            tb.appendChild(tr);
+        });
+    }
+    function deleteSelected() {
+        const toDel = Array.from(document.querySelectorAll('input[name="rowSelect"]:checked')).map(cb => +cb.dataset.index);
+        logData = logData.filter((_, i) => !toDel.includes(i));
+        localStorage.setItem('tripLog', JSON.stringify(logData));
+        renderTable();
+    }
+    function editSelected() {
+        const sel = document.querySelector('input[name="rowSelect"]:checked');
+        if (!sel)
+            return alert('Select one row');
+        editIndex = +sel.dataset.index;
+        const r = logData[editIndex];
+        document.getElementById('eventInput').value = r.info;
+        document.getElementById('scaleInput').value = r.scale;
+        document.getElementById('drugSelect').value = r.drug;
+        document.getElementById('qtyInput').value = r.qty;
+        document.getElementById('roaInput').value = r.roa;
+        document.getElementById('notesInput').value = r.notes;
+        document.getElementById('customNotesInput').value = r.customNotes;
+        document.getElementById('addBtn').innerText = 'Save Changes';
+        initSelections();
+        buildButtons();
+        metrics.forEach((f, idx) => r[f].forEach(v => {
+            const btn = document.querySelectorAll('.score-column')[idx].querySelector(`button:nth-child(${8 - v})`);
+            btn && btn.classList.add('selected-score');
+        }));
+    }
+    function exportCSV() {
+        const h = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
+        metrics.forEach(f => h.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
+        h.push("Score","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum");
+        const rows = [h.join(",")];
+        logData.forEach(r => {
+            const L = [r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa];
+            metrics.forEach(f => L.push(r[f + "Sum"], r[f + "Label"]));
+            L.push(r.score, r.max || '', r.min || 0, r.maxPercent || 0, r.minPercent || 0, r.valence, r.scaleMood || 0, r.scaleBad || 0, r.scaleFocus || 0, r.customNotes || '', r.notes || '', r.weighted || 0, (r.weighted / 10).toFixed(2), r.goodSum || '');
+            rows.push(L.map(x => `"${(x + "").replace(/"/g, '""')}"`).join(","))
+        });
+        const blob = new Blob([rows.join("\n")], {
+                type: "text/csv"
+            }),
+            url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "log.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    // Manual Score Entry Modal functions
+    function openScoreModal() {
+        document.getElementById('scoreModal').style.display = 'block';
+    }
+    function closeScoreModal() {
+        document.getElementById('scoreModal').style.display = 'none';
+        document.querySelectorAll('#scoreModal input').forEach(inp => inp.value = '');
+    }
+    function applyManualScores() {
+        const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
+        fields.forEach(f => {
+            const val = parseInt(document.getElementById('manual' + f.charAt(0).toUpperCase() + f.slice(1)).value, 10);
+            if (!isNaN(val) && val >= 0 && val <= 10) {
+                if (!selections[f])
+                    selections[f] = [];
+                if (!selections[f].includes(val))
+                    selections[f].push(val);
+            }
+        });
+        buildButtons();
+        closeScoreModal();
+    }
+    window.onload = () => {
+        initSelections();
+        buildButtons();
+        try {
+            logData = JSON.parse(localStorage.getItem("tripLog")) || [];
+        } catch {}
+        renderTable();
+    };
+    </script>
+<!-- Manual Score Entry Modal -->
+<div id="scoreModal">
+<h3>Manual Score Entry</h3>
+<label>
+            Rush: 
+            <input id="manualRush" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Mood: 
+            <input id="manualMood" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Social: 
+            <input id="manualSocial" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Energy: 
+            <input id="manualEnergy" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Focus: 
+            <input id="manualFocus" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Anxiety: 
+            <input id="manualAnxiety" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Impair: 
+            <input id="manualImpair" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<br/>
+<button onclick="applyManualScores()">Apply</button>
+<button onclick="closeScoreModal()">Cancel</button>
+</div>
+<!-- Emotion Wheel Modal -->
+<div id="emotionModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%);
+     background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000; max-height:80%; overflow:auto;">
+<h3>Select Emotions</h3>
+<img alt="Emotion Wheel" src="emotion_wheel.jpg" style="width:100%; max-width:500px; margin-bottom:10px; border:1px solid #ccc;"/>
+<div id="emotionButtons" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; justify-content:center;"></div>
+<br/>
+<button onclick="closeEmotionModal()">Close</button>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.score-column button').forEach(btn => {
+        const val = btn.textContent.trim().split(':')[0];
+        if (["0", "1", "2", "3", "4", "5"].includes(val)) {
+            btn.style.height = '40px';
+        }
+    });
+});
+</script>
+<script>
+function showSummaryPopup() {
+
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.top = '40px';
+    popup.style.right = '40px';
+    popup.style.background = '#fff';
+    popup.style.border = '2px solid #444';
+    popup.style.borderRadius = '10px';
+    popup.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
+    popup.style.maxHeight = '80vh';
+    popup.style.overflow = 'auto';
+    popup.style.zIndex = '9999';
+    popup.style.padding = '20px';
+    popup.style.fontSize = '12px';
+    popup.style.maxWidth = '95vw';
+
+    const close = document.createElement('button');
+    close.innerText = 'Close';
+    close.style.float = 'right';
+    close.style.marginBottom = '10px';
+    close.style.background = '#e33';
+    close.style.color = '#fff';
+    close.style.border = 'none';
+    close.style.borderRadius = '5px';
+    close.style.padding = '5px 10px';
+    close.onclick = () => popup.remove();
+
+    const table = document.createElement('table');
+    table.className = document.querySelector('#logTable').className;
+    table.style.borderCollapse = 'collapse';
+    table.style.width = '100%';
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th></tr>';
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
+    const grouped = {};
+    logData.forEach(entry => {
+        if (!entry._ts) return;
+        const min = Math.floor(entry._ts / 60000);
+        if (!grouped[min]) grouped[min] = [];
+        grouped[min].push(entry);
+    });
+
+    const fields = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const colourMap = {
+      rush:[0,255,0], mood:[0,255,0], social:[0,255,0],
+      energy:[255,215,0], focus:[255,215,0],
+      anxiety:[255,0,0], impair:[255,0,0]
+    };
+
+    Object.entries(grouped).sort().forEach(([minuteKey, entries]) => {
+        const ts = new Date(parseInt(minuteKey) * 60000).toLocaleTimeString('en-AU', { hour12: false });
+
+        const stats = fields.map(f => {
+            const vals = entries.map(r => r[f + 'Sum']).filter(v => typeof v === 'number');
+            const mean = +(vals.reduce((a, b) => a + b, 0) / (vals.length || 1)).toFixed(2);
+            return { f, mean };
+        });
+
+        const tr = document.createElement('tr');
+        tr.style.fontWeight = 'bold';
+        tr.style.backgroundColor = '#f0f8ff';
+
+        tr.innerHTML = `<td>${ts} Average</td>`;
+        stats.forEach(stat => {
+            const val = stat.mean;
+            const [r,g,b] = colourMap[stat.f];
+            const opacity = Math.min(val, 10) / 10;
+            const shaded = `rgba(${r},${g},${b},${opacity})`;
+            tr.innerHTML += `<td style="background-color:${shaded}">${Math.round(val)}</td>`;
+        });
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    popup.appendChild(close);
+    popup.appendChild(table);
+    document.body.appendChild(popup);
+
+
+};
+
+stats.forEach(stat => {
+    const val = stat.mean;
+    const [r, g, b] = colourMap[stat.f];
+    const intensity = Math.min(val / maxVal, 1);
+    const shaded = `rgba(${r},${g},${b},${intensity.toFixed(2)})`;
+    tr.innerHTML += `<td style="background-color:${shaded}">${Math.round(val)}</td><td></td>`;
+});            tr.innerHTML += `<td style="background-color:${shaded}">${Math.round(val)}</td><td></td>`;
+        });
+        tr.innerHTML += '<td colspan="11"></td>';
+        tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    popup.appendChild(close);
+    popup.appendChild(table);
+    document.body.appendChild(popup);
+}
+</script>
+<style>
+#summaryToggleBtn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  padding: 10px 16px;
+  font-size: 14px;
+  background-color: #007aff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+#summaryToggleBtn:hover {
+  background-color: #005bb5;
+}
+</style>
+<script>
+setInterval(() => {
+    const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
+    const tableBody = document.querySelector('#logTable tbody');
+    const now = Date.now();
+    const minuteKey = Math.floor(now / 60000);
+
+    const windowStart = Date.now() - 5 * 60 * 1000;const entriesThisMinute = logData.filter(entry => entry._ts && entry._ts >= windowStart);
+        if (!entry._ts) return false;
+        return Math.floor(entry._ts / 60000) === minuteKey - 1; // completed minute only
+    });
+
+    if (!entriesThisMinute.length) return;
+
+    const stats = fields.map(f => {
+        const vals = entriesThisMinute.map(r => r[f + 'Sum']).filter(v => typeof v === 'number');
+        const mean = +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
+        return { f, mean };
+    });
+
+    const sincedose = Math.floor(Math.min(...entriesThisMinute.map(e => parseFloat(e.sincedose) || 0)));
+    const elapsed = Math.ceil(Math.max(...entriesThisMinute.map(e => parseFloat(e.elapsed) || 0)));
+    const ts = new Date(minuteKey * 60000).toLocaleTimeString('en-AU', { hour12: false });
+
+    const tr = document.createElement('tr');
+    tr.style.fontWeight = 'bold';
+    tr.style.backgroundColor = '#f0f8ff';
+    tr.innerHTML = `<td>${ts} Average</td><td>${sincedose}m</td><td>${elapsed}m</td><td colspan="6"></td>`;
+
+    const values = stats.map(s => s.mean);
+    const maxVal = Math.max(...values, 1); // per-row shading
+
+    stats.forEach(stat => {
+        const val = stat.mean;
+        const intensity = Math.min(val / maxVal, 1);
+        const shaded = `rgba(0,255,0,${intensity.toFixed(2)})`;
+        tr.innerHTML += `<td style="background-color:${shaded}">${Math.round(val)}</td><td></td>`;
+    });
+
+    tr.innerHTML += '<td colspan="11"></td>';
+    tableBody.appendChild(tr);
+}, 60000);</script>
+<script>
+function createSummaryPopupTable() {
+    let existing = document.getElementById("summaryPopup");
+    if (existing) {
+        existing.remove();
+        return;
+    }
+
+    const popup = document.createElement("div");
+    popup.id = "summaryPopup";
+    popup.style.position = "fixed";
+    popup.style.top = "50px";
+    popup.style.right = "20px";
+    popup.style.background = "white";
+    popup.style.border = "1px solid #ccc";
+    popup.style.padding = "10px";
+    popup.style.maxHeight = "400px";
+    popup.style.overflowY = "auto";
+    popup.style.zIndex = "9999";
+    popup.style.boxShadow = "0 0 10px rgba(0,0,0,0.3)";
+
+    const close = document.createElement("button");
+    close.textContent = "×";
+    close.style.float = "right";
+    close.onclick = () => popup.remove();
+
+    const exportBtn = document.createElement("button");
+    exportBtn.textContent = "Export CSV";
+    exportBtn.onclick = () => {
+        let csv = "Time,Since,Phase,Scale,Drug,Qty,ROA,Rush,Mood,Social,Energy,Focus,Anxiety,Impair\n";
+        document.querySelectorAll("#summaryPopupTable tbody tr").forEach(row => {
+            csv += Array.from(row.children).map(cell => cell.textContent).join(",") + "\n";
+        });
+        const blob = new Blob([csv], {type: "text/csv"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "summary.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const table = document.createElement("table");
+    table.id = "summaryPopupTable";
+    const thead = document.createElement("thead");
+    thead.innerHTML = "<tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th></tr>";
+    const tbody = document.createElement("tbody");
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    popup.appendChild(exportBtn);
+    popup.appendChild(close);
+    popup.appendChild(table);
+    document.body.appendChild(popup);
+}
+
+function addSummaryRowSum() {
+    const now = Date.now();
+    const windowStart = now - 1 * 60 * 1000;
+    const recentEntries = logData.filter(entry => entry._ts && entry._ts >= windowStart);
+
+    if (recentEntries.length === 0) return;
+
+    const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
+    const means = {};
+    fields.forEach(f => {
+        means[f] = recentEntries.reduce((acc, e) => acc + (parseFloat(e[f]) || 0), 0) / recentEntries.length;
+    });
+
+    const tr = document.createElement("tr");
+    const ts = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    tr.innerHTML = `<td>${ts} Average</td><td colspan="6"></td>` + fields.map(f => {
+        const v = means[f].toFixed(2);
+        const shade = Math.min(1, parseFloat(v) / 10);
+        return `<td style="background-color:rgba(0,255,0,${shade})">${v}</td>`;
+    }).join("");
+
+    const table = document.querySelector("#summaryPopupTable tbody");
+    if (table) table.appendChild(tr);
+}
+
+setInterval(addSummaryRowSum, 60000); // every 5 minutes</script>
+<script>
+</script>
+
+</body>
+<script>
+function openEmotionModal() {
+    document.getElementById('emotionModal').style.display = 'block';
+    buildEmotionButtons();
+}
+function closeEmotionModal() {
+    document.getElementById('emotionModal').style.display = 'none';
+}
+function buildEmotionButtons() {
+    const container = document.getElementById("emotionButtons");
+    if (container.childNodes.length > 0) return; // Avoid rebuilding
+    const emotions = [
+        "Joy","Happy","Cheerful","Content","Proud","Optimistic","Excited","Energetic","Affectionate","Compassionate","Peaceful","Relieved","Satisfied","Love",
+        "Fear","Scared","Frightened","Helpless","Panic","Insecure","Worried","Nervous","Horrified","Terrified","Hysterical","Anxious","Overwhelmed",
+        "Anger","Annoyed","Agitated","Frustrated","Mad","Rage","Hostile","Hateful","Jealous","Bitter","Irritated","Exasperated",
+        "Sadness","Depressed","Lonely","Isolated","Ashamed","Guilty","Disappointed","Sorrow","Grief","Despair","Hurt","Powerless","Neglected",
+        "Surprise","Amazed","Startled","Stunned","Confused","Shocked","Speechless","Awestruck","Overcome","Perplexed","Disillusioned"
+    ];
+    emotions.forEach(word => {
+        const btn = document.createElement('button');
+        btn.textContent = word;
+        btn.className = 'note-btn';
+        btn.style.minWidth = '80px';
+        btn.onclick = () => {
+            const notes = document.getElementById('notesInput');
+            if (!notes.value.includes(word)) {
+                notes.value = (notes.value + ' ' + word).trim();
+            }
+        };
+        container.appendChild(btn);
+    });
+}
+</script>
+
+<script>
+// --- Spliced Auto-summary popup functions from later version ---
+function calculateRollingAverages(seconds) {
+  const now = Date.now();
+  const start = now - seconds * 1000;
+  const fields = ['rush','mood','social','energy','focus','anxiety','impair','certainty','degree','other'];
+
+  if (!Array.isArray(logData) || logData.length === 0) {
+    const zero = {}; fields.forEach(f => zero[f] = 0); return zero;
+  }
+
+  const entries = logData
+    .filter(e => e && e._ts && e._ts <= now)
+    .sort((a,b) => a._ts - b._ts);
+
+  if (entries.length === 0) {
+    const zero = {}; fields.forEach(f => zero[f] = 0); return zero;
+  }
+
+  let idx = entries.findIndex(e => e._ts >= start);
+  const lastBefore = idx > 0 ? entries[idx - 1] : (entries[0]._ts > start ? null : entries[0]);
+
+  const points = [];
+  const valueAt = (e, f) => {
+    const v = e && (e[f + 'Sum'] ?? e[f]);
+    return typeof v === 'number' ? v : 0;
+  };
+
+  const seed = {};
+  fields.forEach(f => seed[f] = valueAt(lastBefore ?? entries[0], f));
+  points.push({ t: start, vals: seed });
+
+  entries.forEach(e => {
+    if (e._ts >= start) {
+      const obj = {};
+      fields.forEach(f => obj[f] = valueAt(e, f));
+      points.push({ t: e._ts, vals: obj });
+    }
+  });
+
+  const tailVals = points.length ? points[points.length - 1].vals : seed;
+  points.push({ t: now, vals: tailVals });
+
+  const totals = {}; fields.forEach(f => totals[f] = 0);
+  for (let i = 0; i < points.length - 1; i++) {
+    const dt = Math.max(0, points[i + 1].t - points[i].t);
+    fields.forEach(f => { totals[f] += points[i].vals[f] * dt; });
+  }
+
+  const duration = Math.max(1, now - start);
+  const avg = {};
+  fields.forEach(f => { avg[f] = +(totals[f] / duration).toFixed(2); });
+  return avg;
+}
+
+function createAutoPopupTable() {
+    const existing = document.getElementById('autoSummaryPopup');
+    if (existing) { existing.remove(); return; }
+    const popup = document.createElement('div');
+    popup.id = 'autoSummaryPopup';
+    const closeBtn = document.createElement('button');
+    closeBtn.innerText = 'Close';
+    closeBtn.onclick = () => popup.remove();
+    popup.appendChild(closeBtn);
+    const exportBtn = document.createElement('button');
+    exportBtn.innerText = 'Export CSV';
+    exportBtn.onclick = () => exportPopupCSV('autoSummaryPopup');
+    popup.appendChild(exportBtn);
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Timestamp</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Certainty</th><th>Degree</th><th>Other</th></tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+    popup.appendChild(table);
+    document.body.appendChild(popup);
+    updateAutoPopupTable();
+}
+
+function updateAutoPopupTable() {
+
+    const avg = calculateRollingAverages(60);
+    const popup = document.getElementById('autoSummaryPopup');
+    if (!popup || !avg) return;
+    const tbody = popup.querySelector('tbody');
+    const tr = document.createElement('tr');
+    const ts = new Date().toLocaleTimeString('en-AU', {hour12:false});
+
+    const colourMap = {
+      rush:[0,255,0], mood:[0,255,0], social:[0,255,0],
+      energy:[255,215,0], focus:[255,215,0],
+      anxiety:[255,0,0], impair:[255,0,0]
+    };
+
+    const fields = ['rush','mood','social','energy','focus','anxiety','impair','certainty','degree','other'];
+
+    let cells = '<td>' + ts + '</td>';
+    fields.forEach(f => {
+      if (colourMap[f]) {
+        const val = avg[f];
+        const [r,g,b] = colourMap[f];
+        const opacity = Math.min(val, 10) / 10;
+        cells += `<td style="background-color:rgba(${r},${g},${b},${opacity})">${val}</td>`;
+      } else {
+        cells += `<td>${avg[f]}</td>`; // mirror Main: no shading for certainty/degree/other
+      }
+    });
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+
+
+}
+
+let autoInterval = null;
+function toggleAutoSummary() {
+    const btn = document.getElementById('autoSummaryToggleBtn');
+    const popup = document.getElementById('autoSummaryPopup');
+    if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+        if (popup) popup.remove();
+        btn.innerText = 'Auto';
+    } else {
+        createAutoPopupTable();
+        autoInterval = setInterval(updateAutoPopupTable, 60000);
+        btn.innerText = 'Auto (On)';
+    }
+}
+
+// Optionally start automatic updates on load (disabled by default)
+// window.addEventListener('load', () => {
+//     autoInterval = setInterval(updateAutoPopupTable, 60000);
+// ;
+</script>
+
+</html>
+<script>
+function exportPopupCSV(containerId) {
+  const root = document.getElementById(containerId);
+  if (!root) return;
+  const table = root.querySelector('table');
+  if (!table) return;
+  const head = Array.from(table.querySelectorAll('thead th'))
+    .map(th => th.textContent.trim());
+  const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr =>
+    Array.from(tr.children).map(td =>
+      `"${td.textContent.replace(/"/g,'""').trim()}"`
+    ).join(',')
+  );
+  const csv = [head.join(',')].concat(rows).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'summary.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
