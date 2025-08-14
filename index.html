@@ -1,14 +1,22 @@
 
+
+
+
+
+
 <!DOCTYPE html>
 
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>v555</title>
+<title>v1.33 (r704)</title>
 <style>
+
 #logTable {
   display: block;
-  max-height: calc(20 * 42px); /* ~40px per row incl. padding/border */
+  max-height: calc(15 * 42px); /* ~40px per row incl. padding/border // Michael Anthony Ralph / Special Technology Services, August 2025
+ */
+
   overflow-y: auto;
 }
     body {
@@ -38,13 +46,13 @@
         padding: 6px 10px;
         border-radius: 6px;
         margin: 4px;
-        font-size: 9px;
+        font-size: 10px;
     }
 
     .score-columns {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 5px;
         margin-top: 10px;
     }
 
@@ -90,13 +98,13 @@
     
     #extraNoteButtons {
         display: grid;
-        grid-template-columns: repeat(8, 75px);
-        gap: 4px;
+        grid-template-columns: repeat(8, 80px);
+        gap: 2px;
         margin-top: 10px;
     }
 
     .note-btn {
-        width: 70px;
+        width: 80px;
         height: 20px;
         font-size: 9px;
         padding: 0;
@@ -171,32 +179,98 @@
     color: #fff;
   }
 
-/* New informational columns styling */
-.col-certainty, .col-degree, .col-other {
-    text-align: center;
-    color: #000;
+/* Auto-summary Button */
+    #autoSummaryToggleBtn{ /* fixed removed */ }
+    
+/* Horizontal layout for summary buttons at top-right */
+.summary-controls{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  padding:8px 10px;
 }
-.col-certainty { background-color: #39FF14; }
-.col-degree    { background-color: #BF00FF; }
-.col-other     { background-color: #C0C0C0; }
+.summary-controls button{
+  width:auto; /* allow natural width */
+  white-space:nowrap;
+}
+
+</style>
+<!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+<style>
+#autoSummaryDock{
+  margin-top: 20px;
+}
+#autoSummaryTable{
+  width:100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+#autoSummaryTable th, #autoSummaryTable td{
+  border:1px solid #ccc;
+  padding:10px;
+  text-align:center;
+  font-size:10px;
+}
+#autoSummaryTitle{
+  font-weight:600;
+  margin:6px 0;
+}
 </style>
 <style>
-#summaryToggleBtn {
-    position: fixed;
-    top: 10px;
-    right: 20px;
-    z-index: 9999;
-    background: #007aff;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
+
+/* ==== Summary Controls Layout Override (spread horizontally) ==== */
+.summary-controls{
+  position: fixed;
+  top: 10px;
+  left: 20px;
+  right: 20px;           /* span across screen */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; /* spread across full width */
+  gap: 16px;
+  z-index: 9999;
+  pointer-events: auto;
 }
-</style></head>
-<body><button id="summaryToggleBtn" onclick="createSummaryPopupTable()">Summary</button>
-<h1>Recorder v555</h1>
+.summary-controls button{
+  position: static !important; /* cancel fixed on individual buttons */
+  top: auto !important;
+  right: auto !important;
+  width: auto;
+  white-space: nowrap;
+  background: #007aff;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.summary-controls #autoSummaryToggleBtn{
+  background: #008CBA; /* keep distinct colour for Auto */
+}
+
+/* Explicitly override any earlier fixed rules on these IDs */
+#summary5Btn, #summary15Btn, #summary60Btn, #autoSummaryToggleBtn{
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+}
+
+</style>
+</head>
+<body>
+<div class="summary-controls">
+<button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
+    <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
+    <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
+    <button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
+
+</div>
+<h1>v1.3.3 (r704)</h1>
 <div class="controls">
+<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
 <button onclick="resetTimer()">Reset Timer</button>
 <button onclick="pauseTimer()">Pause Timer</button>
@@ -208,6 +282,8 @@
 <button onclick="deleteSelected()">Delete Selected</button>
 <button onclick="editSelected()">Edit Selected</button>
 <button onclick="exportCSV()">Export CSV</button>
+<button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
+<input id="openLogInput" type="file" accept=".csv,text/csv" style="display:none" />
 <button onclick="openScoreModal()">Manual Score Entry</button>
 <button onclick="openEmotionModal()">Emotion Wheel</button>
 </div>
@@ -231,6 +307,10 @@
 <option value="PYRO">PYRO</option>
 <option value="Cathinone">Cathinone</option>
 <option value="Unknown">Unknown</option>
+<option value="Food">Food</option>
+<option value="Drink">Drink</option>
+<option value="Sleep">Sleep</option>
+<option value="Exercise">Exercise</option>
 <option value="NN-DMC">NN-DMC</option>
 <option value="MD-PiHP">MD-PiHP</option>
 <option value="2ME-PiHP">2ME-PiHP</option>
@@ -245,9 +325,16 @@
 <option value="Crack">Crack</option>
 <option value="Vodka">Vodka</option>
 <option value="Weed">Weed</option>
+<option value="Cone">Cone</option>
+<option value="Brownie">Brownie</option>
+<option value="Snowcone">TSnowconeHC</option>
+<option value="Edible">Edible</option>
 <option value="THC">THC</option>
 <option value="Alcohol">Alcohol</option>
 <option value="Benzodiazepine">Benzodiazepine</option>
+<option value="Diazepam">Diazepam</option>
+<option value="Alprazolam">Alprazolam</option>
+<option value="Bromazolam">Bromazolam</option>
 <option value="LSD">LSD</option>
 </select>
 </label>
@@ -277,121 +364,361 @@
 <table id="logTable">
 <thead>
 <tr>
-<th>Select</th>
-<th>Timestamp</th>
-<th>Since</th>
-<th>Elapsed</th>
-<th>Phase</th>
-<th>Scale</th>
-<th>Drug</th>
-<th>QTY</th>
-<th>ROA</th>
-<th>Rush</th>
-<th>Rush</th>
-<th>Mood</th>
-<th>Mood</th>
-<th>Social</th>
-<th>Social</th>
-<th>Energy</th>
-<th>Energy </th>
-<th>Focus</th>
-<th>Focus</th>
-<th>Anxiety</th>
-<th>Anxiety</th>
-<th>Impair</th>
-<th>Impair</th><th>Certainty</th><th>CertaintyLbl</th><th>Degree</th><th>DegreeLbl</th><th>Other</th><th>OtherLbl</th>
-<th>Score</th>
-<th>Max</th>
-<th>Min</th>
-<th>VL</th>
-<th>sM</th>
-<th>sB</th>
-<th>sF</th>
-<th>Last</th>
-<th>Notes</th>
-<th>Weighted</th><th>Score5</th><th>Good</th>
+<th data-col="Select">Select</th>
+<th data-col="Timestamp">Timestamp</th>
+<th data-col="Since">Since</th>
+<th data-col="Elapsed">Elapsed</th>
+<th data-col="Phase">Phase</th>
+<th data-col="Scale">Scale</th>
+<th data-col="Drug">Drug</th>
+<th data-col="QTY">QTY</th>
+<th data-col="ROA">ROA</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Mood">Mood</th>
+<th data-col="Mood">Mood</th>
+<th data-col="Social">Social</th>
+<th data-col="Social">Social</th>
+<th data-col="Energy">Energy</th>
+<th data-col="Energy">Energy </th>
+<th data-col="Focus">Focus</th>
+<th data-col="Focus">Focus</th>
+<th data-col="Anxiety">Anxiety</th>
+<th data-col="Anxiety">Anxiety</th>
+<th data-col="Impair">Impair</th>
+<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
+<th data-col="Score">Score</th>
+<th data-col="Max">Max</th>
+<th data-col="Min">Min</th>
+<th data-col="VL">VL</th>
+<th data-col="sM">sM</th>
+<th data-col="sB">sB</th>
+<th data-col="sF">sF</th>
+<th data-col="Last">Last</th>
+<th data-col="Notes">Notes</th>
+<th data-col="Weighted">Weighted</th><th data-col="5Max">5Max</th><th data-col="GS">GS</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
+
+<div id="autoSummaryDock">
+  <div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
+  <table id="autoSummaryTable">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<!-- Additional Summary Docks (separate targets) -->
+<div id="summary5Dock" style="margin-top:20px;">
+  <div id="summary5Title">Summary 5m (rolling)</div>
+  <table id="summary5Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="summary15Dock" style="margin-top:20px;">
+  <div id="summary15Title">Summary 15m (rolling)</div>
+  <table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="summary60Dock" style="margin-top:20px;">
+  <div id="summary60Title">Summary 60m (rolling)</div>
+  <table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+
 <script>
+
+// === UI Column Visibility & Shading Config ===
+const HIDE_IN_UI = ['VL','sM','sB','sF','GS','change','Deg','D2','Oth','O2'];
+const NO_SHADE = new Set(['change','Change','Deg']);
+
+// Shading caps (max value that maps to full opacity)
+const SHADE_CAP = {
+  'Score': 25,
+  'Max': 25,
+  'Min': 10,
+  'Weighted': 100,
+  '5Max': 10
+};
+
+const GREEN_SET = new Set(['Rush','Mood','Social','Score','Weighted','5Max','Max']);
+const GOLD_SET  = new Set(['Energy','Focus']);
+const RED_SET   = new Set(['Anxiety','Impair','Min']);
+
+function applyUiColumnVisibility() {
+  const id = 'uiHideCols';
+  if (document.getElementById(id)) return;
+  const style = document.createElement('style');
+  style.id = id;
+  style.textContent = HIDE_IN_UI
+    .map(c => `th[data-col="${c}"], td[data-col="${c}"]{display:none !important;}`)
+    .join('');
+  document.head.appendChild(style);
+
+  // Ensure no background on no-shade set
+  const id2 = 'noShadeOverride';
+  if (!document.getElementById(id2)) {
+    const s = document.createElement('style');
+    s.id = id2;
+    s.textContent = `
+      th[data-col="change"], td[data-col="change"],
+      th[data-col="Change"],  td[data-col="Change"],
+      th[data-col="Deg"], td[data-col="Deg"] { background: transparent !important; }
+    `;
+    document.head.appendChild(s);
+  }
+}
+
+// Map each cell to its column name using the header texts
+function tagRowCells(tr) {
+  const header = document.querySelectorAll('#logTable thead th');
+  Array.from(tr.children).forEach((td, idx) => {
+    const name = header[idx] ? header[idx].textContent.trim() : '';
+    if (name) td.setAttribute('data-col', name);
+  });
+}
+
+function cellBgFor(colName, value) {
+  if (NO_SHADE.has(colName)) return '';
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '';
+  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 5;
+  const opacity = Math.min(Math.max(num, 0), cap) / cap;
+  if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
+  if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
+  if (RED_SET.has(colName))   return `rgba(255,0,0,${opacity})`;
+  return '';
+}
+
+function applyRowShading(tr) {
+  Array.from(tr.children).forEach(td => {
+    const col = td.getAttribute('data-col') || '';
+    const bg = cellBgFor(col, td.textContent.trim());
+    if (bg) td.style.backgroundColor = bg;
+    else td.style.background = '';
+  });
+}
+
     const labelMappings = {
         rush: {
-            "-2": 'Dysphoric',
-            "0": 'No',
-            "1": 'Slight',
-            "2": 'Some',
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'None',
+//            "1": 'Low',
+//            "2": 'Some',
+//            "3": 'Clear',
+//            "4": 'Strong',
+//            "5": 'Intense',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
             "3": 'Moderate',
-            "4": 'Strong',
-            "5": 'Intense',
-            "9": 'Extreme',
-            "10": 'Rush'
-, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
         mood: {
-            "-2": 'Negative',
-            "0": 'Neutral',
-            "1": 'Noticed',
-            "2": 'Ignorable',
-            "3": 'Clear',
-            "4": 'Obvious',
-            "5": 'Euphoric',
-            "9": 'Manic',
-            "10": 'Rush'
-, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'No Change',
+//            "1": 'Ignorable',
+//            "2": 'OK',
+//            "2.5": '',
+//            "3": 'Clear',
+//            "4": 'Obvious',
+//            "5": 'Super',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
         social: {
-            "-2": 'Avoidant',
-            "0": 'Flat',
-            "1": 'Think/Want',
-            "2": 'Motivated',
-            "3": 'Active',
-            "4": 'Social',
-            "5": 'Outgoing',
-            "9": 'Disinhibited',
-            "10": 'Autopilot'
-, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'Flat',
+//            "1": 'Think',
+//            "2": 'Want',
+//            "3": 'Urge/Desire',
+//            "4": 'Social',
+//            "5": 'Outgoing',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
         energy: {
-            "-2": 'Tired',
-            "0": 'None',
-            "1": 'Alert',
-            "2": 'Increased',
-            "3": 'Significant',
-            "4": 'Energetic',
-            "5": 'Hyper/Manic',
-            "9": 'Super',
-            "10": 'Rapid'
-, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'Normal',
+//            "1": 'Slight',
+//            "2": 'Increased',
+//            "2.5": '',
+//            "3": 'Clear/Push',
+//            "4": 'Energetic',
+//            "4.5": '',
+//            "5": 'Hyper',
+//            "6": 'Manic',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
         focus: {
-            "-2": 'Scattered',
-            "0": 'No',
-            "1": 'Alert',
-            "2": 'Increased',
-            "3": 'Focused',
-            "4": 'Wired',
-            "5": 'Obsessive',
-            "9": 'Laser',
-            "10": 'Flow'
-, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'No',
+//            "1": 'Alert',
+//            "2": 'Vigilant',
+//            "3": 'Increased',
+//            "4": 'Focused',
+//            "5": 'Obsessive',
+//            "6": 'Wired',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
         anxiety: {
-            "0": 'None',
-            "1": 'Thinking',
-            "2": 'Excessive',
-            "3": 'Worrying',
-            "4": 'Anxious',
-            "5": 'Panic',
-            "10": 'Severe'
-, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'No/None',
+//            "1": 'Normal',
+//            "2": 'Excessive',
+//            "3": 'Clear/Feel',
+//            "4": 'Extra',
+//            "5": 'Impacting',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
         impair: {
-            "-2": 'Motivated',
-            "0": 'None',
-            "1": 'Tremors',
-            "2": 'Excessive',
-            "3": 'Affecting',
-            "4": 'Controlling',
-            "5": 'Crippled',
-            "10": 'Severe'
-, "1.5": "+", "-0.5": "-", "-1.5": "-" },
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'None',
+//            "1": 'Minimal',
+//            "2": 'Low',
+//            "2.5": '',
+//            "3": 'Visibly',
+//            "4": 'Impaired',
+//            "4.5": '',
+//            "5": 'Behaviour',
+//            "6": 'AdverseImpact',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        change: {
+            "-1": 'Aware Of',
+            "-2": 'Bad Choices',
+            "0": 'No Change',
+            "1": 'Maybe',
+            "2": 'Required Thinking',
+            "2.5": 'Some',
+            "3": 'Clear',
+            "3.5": 'Prominent',
+            "4": 'Obvious',
+            "5": 'Controlling',
+            "6": 'Autopilot/Hindsight',
+            "8": 'Dominant',
+            "9": 'High',
+            "10": 'Certain'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        degree: {
+//            "0": 'None',
+//            "1": 'Minimal',
+//            "2": 'Low/Ignore',
+//            "3": 'Low/Clear',
+//            "4": 'Mid/Ignore',
+//            "5": 'Mid/Clear',
+//            "6": 'High/Maskable',
+//            "7": 'High/Obvious',
+//            "8": 'Very High',
+//            "9": 'Extreme',
+            "10": 'Maximum'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        other: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'Zero',
+//            "0": 'Hungry',
+//            "1": 'Eat',
+//            "2": 'Thirsty',
+//            "3": 'Drink',
+//            "4": 'Tired',
+//            "5": 'Slept',
+//            "6": 'Sleeping',
+//            "7": 'Headache',
+//            "8": 'Nausea',
+            "9": 'False',
+            "10": 'True'
+             }
     };
-['certainty','degree','other'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
+['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
 
     function getLabels(metric, values) {
         if (!Array.isArray(values))
@@ -408,7 +735,9 @@
         : 0;
     }
 
-    const metrics = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair','certainty','degree','other'];
+    function fmt2(x){ const n = Number.parseFloat(x); return Number.isFinite(n) ? n.toFixed(2) : (x ?? ""); }
+
+    const metrics = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair','change','degree','other'];
     let selections = {},
         logData = [],
         timerInterval,
@@ -430,17 +759,42 @@
             const t = document.createElement('strong');
             t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
             col.appendChild(t);
-           [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0.75, 0.25, 0, -1, -2, -3].forEach(v => {
+  //         [10, 9, 8, 7, 6, 5.5, 5, 4, 3.5, 3, 2, 1, 0.5, 0, -0.5, -1, -2, -3, -0.4, -0.3, -0.2, -0.1, 3.4, 3.3, 3.2, 3.1, 2.4, 2.3, 2.2, 2.1, 1.4, 1.3, 1.2, 1.1].forEach(v => {
+           [6, 5, 4 ,3.5, 3, 2.5, 2, 1, 0.5, 0, -0.5, -1].forEach(v => {
+
                 const b = document.createElement('button');
                 let customLabel = '';
-if (v === 1.75) customLabel = 'Very';
-if (v === -1) customLabel = '-';
-if (v === -3) customLabel = '---';
+if (v === -222) customLabel = '';
+if (v === -444) customLabel = '';
+if (v === -111) customLabel = '-';
 //else if (v === 6) customLabel = 'Extra/Prominent';
-else if (v === 0.75) customLabel = '+';
-//else if (v === 8) customLabel = 'Very High/Strong';
+else if (v === 9) customLabel = '';
+else if (v === 0.1) customLabel = 'Maybe/Unsure';
+else if (v === 0.01) customLabel = '+';
+else if (v === -0.01) customLabel = '-';
+else if (v === -0.1) customLabel = '';
+else if (v === 0.2) customLabel = 'Ignorable';
+else if (v === -0.2) customLabel = '';
+else if (v === 0.3) customLabel = 'Required Thinking';
+else if (v === -0.3) customLabel = '';
+else if (v === 0.4) customLabel = 'Some';
+else if (v === -0.4) customLabel = '';
+else if (v === 0.6) customLabel = 'Clear';
+else if (v === -0.6) customLabel = '';
+else if (v === 0.7) customLabel = 'Obvious';
+else if (v === -0.7) customLabel = '';
+else if (v === 0.8) customLabel = 'Controlling';
+else if (v === -0.8) customLabel = '';
+else if (v === -0.5) customLabel = '-';
+else if (v === -1) customLabel = '--';
+else if (v === 7) customLabel = '';
+else if (v === 8) customLabel = '';
+else if (v === 9) customLabel = '';
+else if (v === 10) customLabel = '';
+else if (v === 9) customLabel = '';
+else if (v === 9) customLabel = '';
 //else if (v === 10) customLabel = 'Maximum';
-
+//else if (v === 6) customLabel = 'Extra/Prominent';
 else customLabel = labelMappings[f]?.[v] ?? '';
 b.innerText = `${v}: ${customLabel}`;
                 b.onclick = () => {
@@ -496,10 +850,11 @@ b.innerText = `${v}: ${customLabel}`;
             Fun: 'positive',
             Confusion: 'mental'
         };
-        // Extra notes (gold)
+        (function(){const h=document.createElement("h4");h.textContent="Gold";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Extra notes (gold)
         const extraCont = document.getElementById('extraNoteButtons');
         extraCont.innerHTML = '';
-        const extra = ['Start', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over,', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'YellowOrange', 'SomeColour', 'Film', 'Comparative', 'Absolute'];
+        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over,', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'UnsureIfUsable', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
         extra.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -522,8 +877,9 @@ b.innerText = `${v}: ${customLabel}`;
             extraCont.appendChild(b);
         });
 
-        // Dark grey dose buttons
-        const darkLabels = ["Note", "Context", "Associate", "Change", "Review", "Weighed", "Yes", "No", "Maybe", "Certain", "Half", ">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "RESIDUE", "FILM", "CARBON", "COLOUR", "BURNED", "TRUE", "FALSE", "POSITIVE", "NEGATIVE", "UNKNOWN", "UNSURE", "SOME", "HALF", "MOST"];
+        (function(){const h=document.createElement("h4");h.textContent="Dose";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Dark grey dose buttons
+        const darkLabels = ["Note", "Context", "Associate", "Change", "Review", "Weighed", "Yes", "No", "Maybe", "Certain", "Half", ">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<30mg"];
         darkLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -546,8 +902,9 @@ b.innerText = `${v}: ${customLabel}`;
             extraCont.appendChild(b);
         });
 
-        // Bright blue custom buttons
-        const blueLabels = ['VisibleVapour', 'InvisibleVapour', 'Billowing', 'WarmAir', 'Plumes', 'Burned', 'WarmAir', 'ThickVapour', 'DarkVapour', 'Smoke', 'NiceSmell', 'NiceTaste', 'BadSensation', 'INVISIBLE', 'DARK', 'WARM',
+        (function(){const h=document.createElement("h4");h.textContent="Blue";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Bright blue custom buttons
+        const blueLabels = ['VisibleVapour', 'InvisibleVapour', 'Billowing', 'WarmAir', 'Plumes', 'Burned', 'WarmAir', 'ThickVapour', 'DarkVapour', 'Smoke', 'NiceSmell', 'NiceTaste', 'BadSensation', 'Invisible', 'Dark', 'Warm',
         'Smoke', 'Vapour', 'BurnedSmell', 'HalfBurned'];
         blueLabels.forEach(lbl => {
             const b = document.createElement('button');
@@ -570,8 +927,9 @@ b.innerText = `${v}: ${customLabel}`;
             extraCont.appendChild(b);
         });
 
-        // Bright red custom buttons
-        const redLabels = ['Mental', 'Physical', 'BloodPressure', 'BodyTemp', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'Tremors', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
+        (function(){const h=document.createElement("h4");h.textContent="Red";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Bright red custom buttons
+        const redLabels = ['Mental', 'FocusLocked', 'Locked', 'Computer', 'MusicOn', 'MusicOff', 'GoodSong', 'Visceral', 'Physical', 'BloodPressure', 'BodyTemp', 'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
         redLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -592,8 +950,9 @@ b.innerText = `${v}: ${customLabel}`;
             };
             extraCont.appendChild(b);
         });
-        const greenLabels = ["ThroatSuction", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
-        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "TwoHits", "MultipleHits", "LowHeat", "HighHeat", "Burned", "Destroyed", "BurnedRemains",
+        (function(){const h=document.createElement("h4");h.textContent="Green";document.getElementById("extraNoteButtons").appendChild(h);})();
+const greenLabels =  ["ThroatSuction", "Suck", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
+        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "TwoHits", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Destroyed", "BurnedRemains",
         "HeatedOnce", "AlreadyHeated", "NotYetHeated"];
         greenLabels.forEach(lbl => {
             const b = document.createElement('button');
@@ -615,7 +974,8 @@ b.innerText = `${v}: ${customLabel}`;
             };
             extraCont.appendChild(b);
         });
-        const orangeLabels = ['Lighter', 'Candle', 'Jet', 'Blowtorch', 'Vape', 'Hotrail', 'Cone', 'Snowcone', 'Bong', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Broken', 'Loose', 'Liquid', 'Sludge', 'PropyleneGlycol', 'Melted', 'Vapourised', 'SomeColour', 'ColourChange', 'Loose', 'NotMoving', 'Chunks'];
+        (function(){const h=document.createElement("h4");h.textContent="Orange";document.getElementById("extraNoteButtons").appendChild(h);})();
+const orangeLabels =  ['Lighter', 'Candle', 'Jet', 'Blowtorch', 'Vape', 'Hotrail', 'Cone', 'Snowcone', 'Bong', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Broken', 'Loose', 'Liquid', 'Sludge', 'PropyleneGlycol', 'Melted', 'Vapourised', 'SomeColour', 'ColourChange', 'Loose', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed', 'AwareBad', 'BadChoices', 'DoseToDetriment'];
         orangeLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -636,7 +996,8 @@ b.innerText = `${v}: ${customLabel}`;
             };
             extraCont.appendChild(b);
         });
-        const yellowLabels = JSON.parse('["UP","DOWN"]');
+        (function(){const h=document.createElement("h4");h.textContent="Yellow";document.getElementById("extraNoteButtons").appendChild(h);})();
+const yellowLabels =  JSON.parse('["Positive", "Negative", "Flat", "BadSideEffCD"]');
 // Purple category labels
 yellowLabels.forEach(lbl => {
             const b = document.createElement('button');
@@ -662,8 +1023,9 @@ yellowLabels.forEach(lbl => {
 
 
     // ─── APPEND PURPLE LABELS ───────────────────────────────────────────────
-    const purpleLabels = [
-      '5_Seconds','Deep','Shallow','Hold','Long','Short','Slow','Rapid','OneBreath','Multiple','Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone', 'BuildingAlone'
+    (function(){const h=document.createElement("h4");h.textContent="Purple";document.getElementById("extraNoteButtons").appendChild(h);})();
+const purpleLabels =  [
+      '5_Secs', '15sLate','Deep','Shallow','Hold','Long','Short','Slow','Rapid','OneBreath','Multiple','Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone', 'BuildingAlone'
     ];
     const purpleContainer = document.querySelector('#extraNoteButtons');
     purpleLabels.forEach(label => {
@@ -674,11 +1036,10 @@ yellowLabels.forEach(lbl => {
       btn.classList.add('note-btn');
       btn.addEventListener('click', () => {
         const notes = document.querySelector('#notesInput');
-        if (notes.value.includes(label)) {
-          notes.value = notes.value.replace(new RegExp(`\\b${label}\\b`, 'g'), '').trim();
-        } else {
-          notes.value = (notes.value + ' ' + label).trim();
-        }
+        const toks = notes.value.split(/\s+/).filter(Boolean);
+        const i = toks.indexOf(label);
+        if (i >= 0) { toks.splice(i, 1); } else { toks.push(label); }
+        notes.value = toks.join(' ');
       });
       purpleContainer.appendChild(btn);
     });
@@ -713,9 +1074,10 @@ yellowLabels.forEach(lbl => {
         return `${h}:${m}:${s}`;
     }
     function addEntry() {
-        if (!startTime)
+if (!startTime)
             resetTimer();
-        setInterval(addSummaryRowSum, 300000); // every 300 seconds
+        // [disabled duplicate summary timer]
+
         const now = new Date(),
             ts = now.toLocaleString('en-AU', {
                 hour12: false
@@ -752,13 +1114,13 @@ yellowLabels.forEach(lbl => {
         entry.valence = val;
         entry.scaleMood = entry.notes.split(/\s+/).includes('Good') ? 3 : 0;
         entry.scaleBad = entry.notes.split(/\s+/).includes('Bad') ? 3 : 0;
-        entry.scaleFocus = entry.notes.split(/\s+/).includes('Wired') ? 5 : 0;
+        entry.scaleFocus = entry.notes.split(/\s+/).includes('Wired') ? 7 : 0;
 entry.weighted = (
-    (entry.rushSum || 0) * 4 +
-    (entry.socialSum || 0) * 1.5 +
-    (entry.moodSum || 0) * 1.5 +
-    (entry.energySum || 0) * 1.5 +
-    (entry.focusSum || 0) * 1.5
+    (entry.rushSum || 0) * 6 +
+    (entry.socialSum || 0) * 4 +
+    (entry.moodSum || 0) * 4 +
+    (entry.energySum || 0) * 3 +
+    (entry.focusSum || 0) * 3
 );
 entry.goodSum = 0;
         logData.push(entry);
@@ -770,62 +1132,6 @@ entry.goodSum = 0;
         document.getElementById('addBtn').innerText = 'Add Entry';
     }
     
-function addSummaryRowSum() {
-    const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
-    const tableBody = document.querySelector('#logTable tbody');
-    if (!logData.length) return;
-
-    const now = Date.now();
-    const recent = logData.filter(r => r._ts && (now - r._ts <= 300000));
-    if (!recent.length) return;
-
-    const getCol = f => recent.map(r => r[f + 'Sum']).filter(v => typeof v === 'number');
-    const getMinuteBounds = () => {
-        const mins = recent
-            .map(r => parseFloat(r.sincedose))
-            .filter(v => !isNaN(v))
-            .sort((a, b) => a - b);
-        const minStart = Math.floor(mins[0] || 0);
-        const maxEnd = Math.ceil(mins[mins.length - 1] || 0);
-        return [minStart, maxEnd];
-    };
-
-    const [sinceMin, elapsedMin] = getMinuteBounds();
-
-    const stats = fields.map(f => {
-        const vals = getCol(f).sort((a, b) => a - b);
-        const sum = vals.reduce((a, b) => a + b, 0);
-        const mean = +(sum / vals.length).toFixed(2);
-        return { f, sum, mean };
-    });
-
-    const makeRow = (label, prop, baseColor) => {
-        const tr = document.createElement('tr');
-        tr.style.fontWeight = 'bold';
-        tr.style.backgroundColor = '#eee';
-        let rowData = {
-            timestamp: label,
-            sincedose: sinceMin + "m",
-            elapsed: elapsedMin + "m"
-        };
-        tr.innerHTML = `<td colspan="1">${label}</td><td colspan="1">${sinceMin}m</td><td colspan="1">${elapsedMin}m</td><td colspan="6"></td>`;
-        stats.forEach(stat => {
-            const val = +stat[prop];
-            rowData[stat.f + 'Sum'] = val;
-            const intensity = Math.min(val / 40, 1);
-            const [r, g, b] = baseColor;
-            const shaded = `rgba(${r},${g},${b},${intensity.toFixed(2)})`;
-            tr.innerHTML += `<td style="background-color:${shaded}">${Math.round(val)}</td><td></td>`;
-        });
-        tr.innerHTML += '<td colspan="11"></td>';
-        tableBody.appendChild(tr);
-        logData.push(rowData);
-    };
-
-    makeRow('Σ SUM', 'sum', [0, 255, 0]);
-    makeRow('μ MEAN', 'mean', [0, 255, 0]);
-}
-
 function renderTable() {
         const tb = document.querySelector('#logTable tbody');
         tb.innerHTML = '';
@@ -834,60 +1140,34 @@ function renderTable() {
             let h = `<td><input type="checkbox" name="rowSelect" data-index="${i}"></td>`;
             ['timestamp', 'sincedose', 'elapsed', 'info', 'scale', 'drug', 'qty', 'roa'].forEach(k => h += `<td>${r[k] || ''}</td>`);
             metrics.forEach(f => {
-                h += `<td data-field="${f}Sum" data-value="${r[f + 'Sum']}">${r[f + 'Sum']}</td>`;
+                h += `<td data-field="${f}Sum" data-value="${r[f + 'Sum']}">${fmt2(r[f + 'Sum'])}</td>`;
                 h += `<td data-label-for="${f}Sum" data-value="${r[f + 'Sum']}">${r[f + 'Label']}</td>`;
             });
-        h += `<td class="score-cell">${r.score}</td><td class="max-cell">${r.max || ""} (${r.maxPercent || 0}%)</td><td class="min-cell">${r.min || 0} (${r.minPercent || 0}%)</td><td>${r.valence}</td><td>${r.scaleMood || 0}</td><td>${r.scaleBad || 0}</td><td>${r.scaleFocus || 0}</td><td>${r.customNotes || ""}</td><td>${r.notes || ""}</td><td>${r.weighted || 0}</td><td>${(r.weighted / 10 + 5).toFixed(2)}</td><td>${r.goodSum || ""}</td>`;
+        h += `<td data-col="Score" class="score-cell">${fmt2(r.score)}</td>` +
+     `<td data-col="Max" class="max-cell">${fmt2(r.max || 0)}</td>` +
+     `<td data-col="Min" class="min-cell">${fmt2(r.min || 0)}</td>` +
+     `<td data-col="VL">${fmt2(r.valence)}</td>` +
+     `<td data-col="sM">${fmt2(r.scaleMood || 0)}</td>` +
+     `<td data-col="sB">${fmt2(r.scaleBad || 0)}</td>` +
+     `<td data-col="sF">${fmt2(r.scaleFocus || 0)}</td>` +
+     `<td data-col="Last">${r.customNotes || ""}</td>` +
+     `<td data-col="Notes">${r.notes || ""}</td>` +
+     `<td data-col="Weighted">${fmt2(r.weighted || 0)}</td>` +
+     `<td data-col="5Max">${(r.weighted / 10).toFixed(2)}</td>` +
+     `<td data-col="GS">${fmt2(r.goodSum || 0)}</td>`;
             
             tr.innerHTML = h;
-            // ─── Additional Cell Shading ───────────────────────────────────────
-            const scoreCell = tr.children[23];
-            const scoreOpacity = Math.min(r.score, 50) / 50;
-            scoreCell.style.backgroundColor = `rgba(0,255,0,${scoreOpacity})`;
-
-            const maxCell = tr.children[24];
-            const maxOpacity = Math.min(r.maxPercent, 100) / 100;
-            maxCell.style.backgroundColor = `rgba(0,215,0,${maxOpacity})`;
-
-            const minCell = tr.children[25];
-            const minOpacity = Math.min(r.minPercent, 100) / 100;
-            minCell.style.backgroundColor = `rgba(255,0,0,${minOpacity})`;
-            // ─────────────────────────────────────────────────────────────────────
-
-            // ─── Auto-shade Sum cells ────────────────────────────────────────
-            const shadeFields = [
-                { field: 'rushSum',   colour: [0, 255, 0] },
-                { field: 'moodSum',   colour: [0, 255, 0] },
-                { field: 'socialSum', colour: [0, 255, 0] },
-                { field: 'focusSum',  colour: [255, 215,   0] },
-                { field: 'energySum', colour: [255, 215,   0] },
-                { field: 'anxietySum',colour: [255,   0,   0] },
-                { field: 'impairSum', colour: [255,   0,   0] }
-            ];
-            shadeFields.forEach(cfg => {
-                const cell = tr.querySelector(`td[data-field="${cfg.field}"]`);
-                const val = r[cfg.field];
-                const opacity = Math.min(val, 10) / 10;
-                if (val > 0 && cell) {
-                    cell.style.backgroundColor = `rgba(${cfg.colour[0]},${cfg.colour[1]},${cfg.colour[2]},${opacity})`;
-                }
-            });
-            // ───────────────────────────────────────────────────────────────────
-
-            // ─── Dynamic shading for Score, Max, Min ──────────────────
-            ['score','max','min'].forEach(field => {
-                const cell = tr.querySelector(`.${field}-cell`);
-                if (cell) {
-                    let opacity = 0;
-                    if (field === 'score') opacity = Math.min(r.score / 50, 1);
-                    if (field === 'max')   opacity = Math.min(r.maxPercent / 100, 1);
-                    if (field === 'min')   opacity = Math.min(r.minPercent / 100, 1);
-                    const colourMap = { score: '0,255,0', max: '0,215,0', min: '255,0,0' };
-                    cell.style.backgroundColor = `rgba(${colourMap[field]},${opacity})`;
-                }
-            });
-            // ──────────────────────────────────────────────────────────────
-
+            tr.setAttribute('data-ts', String(r._ts || 0));
+            tagRowCells(tr);
+            // Set tooltip percentages for Max/Min without affecting shading text
+            (function(){
+              const maxCell = tr.querySelector('td[data-col="Max"]');
+              if (maxCell && r.maxPercent != null) maxCell.title = String(r.maxPercent) + '%';
+              const minCell = tr.querySelector('td[data-col="Min"]');
+              if (minCell && r.minPercent != null) minCell.title = String(r.minPercent) + '%';
+            })();
+            applyRowShading(tr);
+            applyUiColumnVisibility();
             tb.appendChild(tr);
         });
     }
@@ -919,15 +1199,14 @@ function renderTable() {
         }));
     }
     function exportCSV() {
-        const h = ["Timestamp", "Since Dose", "Elapsed", "Info", "Scale", "Drug", "Qty", "ROA"];
-        h.push("Notes", "Last", "Next");
-        metrics.forEach(f => h.push(f.charAt(0).toUpperCase() + f.slice(1) + " Sum", f.charAt(0).toUpperCase() + f.slice(1) + " Label"));
-        h.push("Score", "Max", "Min", "Max %", "Min %", "Valence", "scaleMood", "scaleBad", "scaleFocus", "Custom Notes", "Notes", "Weighted","Score5","Good Sum");
+        const h = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
+        metrics.forEach(f => h.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
+        h.push("Score","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum");
         const rows = [h.join(",")];
         logData.forEach(r => {
             const L = [r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa];
-            metrics.forEach(f => L.push(r[f + "Sum"], r[f + "Label"]));
-            L.push(r.score, r.max || '', r.min || 0, r.maxPercent || 0, r.minPercent || 0, r.valence, r.scaleMood || 0, r.scaleBad || 0, r.scaleFocus || 0, r.customNotes || '', r.notes || '', r.weighted || 0, (r.weighted / 10 + 5).toFixed(2), r.goodSum || '');
+            metrics.forEach(f => L.push((+r[f + "Sum"]||0).toFixed(2), r[f + "Label"]));
+            L.push((+r.score||0).toFixed(2), (+r.max||0).toFixed(2), (+r.min||0).toFixed(2), r.maxPercent || 0, r.minPercent || 0, (+r.valence||0).toFixed(2), (+r.scaleMood||0).toFixed(2), (+r.scaleBad||0).toFixed(2), (+r.scaleFocus||0).toFixed(2), r.customNotes || '', r.notes || '', (+r.weighted || 0).toFixed(2), (r.weighted / 10).toFixed(2), (+r.goodSum||0).toFixed(2));
             rows.push(L.map(x => `"${(x + "").replace(/"/g, '""')}"`).join(","))
         });
         const blob = new Blob([rows.join("\n")], {
@@ -970,7 +1249,293 @@ function renderTable() {
         } catch {}
         renderTable();
     };
-    </script>
+    
+// === Open Existing Log (CSV) ===
+// Paranoid-safe: local File API only. No network. 
+
+function openExistingLog(){
+  // Confirm if table has data
+  try{
+    const hasRows = Array.isArray(logData) && logData.length > 0;
+    if (hasRows && !confirm("Append imported file to the current log? (OK = append, Cancel = abort)")) return;
+  }catch(e){}
+  const inp = document.getElementById('openLogInput');
+  if (!inp) return alert("File input missing.");
+  inp.value = "";
+  inp.onchange = handleFileSelected;
+  inp.click();
+}
+
+function handleFileSelected(ev){
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = String(reader.result || "");
+      const parsed = parseCSV(text);
+      if (!parsed || !parsed.header || !parsed.rows || parsed.rows.length === 0){
+        alert("CSV appears empty.");
+        return;
+      }
+      const map = mapSchema(parsed.header);
+      if (!map.valid){
+        alert("Unsupported CSV: export from this app required.\nMissing: " + map.missing.join(", "));
+        return;
+      }
+      const imported = rowsToLogData(parsed.rows, map);
+      if (!imported.length){
+        alert("No rows could be imported.");
+        return;
+      }
+      // Append + Dedupe + Sort + Persist
+logData = mergeAppendDedupeSort(logData, imported);
+try { localStorage.setItem('tripLog', JSON.stringify(logData)); } catch(e){}
+renderTable();
+// If auto summary is active, clear and emit an immediate row
+      try {
+        const tbody = document.querySelector('#autoSummaryTable tbody'); if (tbody) tbody.innerHTML='';
+        if (window.autoSummaryActive){
+          const endMs = Date.now();
+          const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+          const C = M ? computeCompositeFromMeans(M) : null;
+          const d = new Date();
+          if (M) appendSummaryRowToTable('autoSummaryTable', d, M, C, {labelSuffix: ' 5m Now'});
+        }
+      } catch(e){ console.warn(e); }
+      // Status line
+      showStatus(`Loaded ${imported.length} rows from ${file.name}`);
+    } catch(err){
+      console.error(err);
+      alert("Failed to import CSV: " + err.message);
+    }
+  };
+  reader.onerror = () => alert("Failed to read file.");
+  reader.readAsText(file);
+}
+
+// Minimal RFC4180 CSV parser (handles quotes and escaped quotes)
+function parseCSV(text){
+  const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n");
+  const rows = [];
+  for (let i=0;i<lines.length;i++){
+    const line = lines[i];
+    if (line === "") continue;
+    rows.push(parseCSVLine(line));
+  }
+  if (!rows.length) return {header:[], rows:[]};
+  const header = rows.shift();
+  return {header, rows};
+}
+function parseCSVLine(line){
+  const out = [];
+  let cur = "";
+  let inQ = false;
+  for (let i=0;i<line.length;i++){
+    const ch = line[i];
+    if (inQ){
+      if (ch === '"'){
+        if (i+1 < line.length && line[i+1] === '"'){ cur += '"'; i++; }
+        else { inQ = false; }
+      } else {
+        cur += ch;
+      }
+    } else {
+      if (ch === '"'){ inQ = true; }
+      else if (ch === ','){ out.push(cur); cur = ""; }
+      else { cur += ch; }
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+// Case-insensitive header lookup
+function findHeader(header, names){
+  const idx = header.findIndex(h => names.some(n => (h||"").trim().toLowerCase() === n.trim().toLowerCase()));
+  return idx >= 0 ? idx : -1;
+}
+
+// Schema mapping for app-exported CSV
+function mapSchema(header){
+  const need = {
+    ts: ["Timestamp"],
+    since: ["Since Dose","Since"],
+    elapsed: ["Elapsed"],
+    info: ["Info"],
+    scale: ["Scale"],
+    drug: ["Drug"],
+    qty: ["Qty","QTY"],
+    roa: ["ROA","Detail"],
+    score: ["Score"],
+    max: ["Max"],
+    min: ["Min"],
+    maxp: ["Max %","Max%","Max Percent"],
+    minp: ["Min %","Min%","Min Percent"],
+    valence: ["Valence","VL"],
+    sM: ["scaleMood","sM"],
+    sB: ["scaleBad","sB"],
+    sF: ["scaleFocus","sF"],
+    last: ["Custom Notes","Last"],
+    notes: ["Notes"],
+    weighted: ["Weighted"],
+    score5: ["Score5","5Max"],
+    goodSum: ["Good Sum","GS"],
+    rushSum: ["Rush Sum"],
+    rushLabel: ["Rush Label"],
+    moodSum: ["Mood Sum"],
+    moodLabel: ["Mood Label"],
+    socialSum: ["Social Sum"],
+    socialLabel: ["Social Label"],
+    energySum: ["Energy Sum"],
+    energyLabel: ["Energy Label"],
+    focusSum: ["Focus Sum"],
+    focusLabel: ["Focus Label"],
+    anxietySum: ["Anxiety Sum"],
+    anxietyLabel: ["Anxiety Label"],
+    impairSum: ["Impair Sum"],
+    impairLabel: ["Impair Label"]
+  };
+  const map = {};
+  const missing = [];
+  Object.keys(need).forEach(k => {
+    const idx = findHeader(header, need[k]);
+    if (idx === -1) missing.push(need[k][0]);
+    map[k] = idx;
+  });
+  // Only hard-require the columns that this app always exports
+  const hard = ["ts","since","elapsed","info","scale","drug","qty","roa","score","max","min","last","notes","weighted","score5"];
+  const valid = hard.every(k => map[k] !== -1);
+  return {map, missing, valid, header};
+}
+
+// Parse AU datetime like "13/08/2025, 16:57:12" or "13/08/2025 16:57:12"
+function parseAUDatetime(s){
+  if (!s) return null;
+  const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})\s*$/);
+  if (!m) return null;
+  const [_, d, mo, y, h, mi, se] = m.map(x => parseInt(x,10));
+  const dt = new Date(y, mo-1, d, h, mi, se); // treated as local
+  return dt.getTime();
+}
+
+// Build internal rows from CSV rows
+function rowsToLogData(rows, mapped){
+  const H = mapped.map;
+  const out = [];
+  for (const r of rows){
+    const val = (idx) => (idx>=0 && idx<r.length) ? r[idx] : "";
+    const entry = {
+      _ts: parseAUDatetime(val(H.ts)) || Date.now(),
+      timestamp: val(H.ts),
+      sincedose: val(H.since),
+      elapsed: val(H.elapsed),
+      info: val(H.info),
+      scale: val(H.scale),
+      drug: val(H.drug),
+      qty: val(H.qty),
+      roa: val(H.roa),
+      notes: val(H.notes),
+      customNotes: val(H.last)
+    };
+    // metric sums + labels
+    const metricPairs = [
+      ["rush","rushSum","rushLabel"],
+      ["mood","moodSum","moodLabel"],
+      ["social","socialSum","socialLabel"],
+      ["energy","energySum","energyLabel"],
+      ["focus","focusSum","focusLabel"],
+      ["anxiety","anxietySum","anxietyLabel"],
+      ["impair","impairSum","impairLabel"],
+    ];
+    metricPairs.forEach(([name, sumKey, labelKey])=>{
+      const sumIdx = H[sumKey], labIdx = H[labelKey];
+      const sum = parseFloat(val(sumIdx)) || 0;
+      entry[name] = []; // original discrete selections not preserved in CSV
+      entry[name + "Sum"] = sum;
+      entry[name + "Label"] = val(labIdx) || "";
+    });
+    // Derived / composites (recompute)
+    entry.score = (+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum) - (+entry.anxietySum + +entry.impairSum);
+    entry.max = (+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum);
+    entry.min = (+entry.anxietySum + +entry.impairSum);
+    entry.maxPercent = Math.round((entry.max / 50) * 1000)/10;
+    entry.minPercent = Math.round((entry.min / 20) * 1000)/10;
+    entry.valence = 0; // cannot safely reconstruct; leave 0
+    entry.scaleMood = 0;
+    entry.scaleBad = 0;
+    entry.scaleFocus = 0;
+    entry.weighted = (+entry.rushSum*6) + (+entry.socialSum*4) + (+entry.moodSum*4) + (+entry.energySum*3) + (+entry.focusSum*3);
+    entry.goodSum = 0;
+    out.push(entry);
+  }
+  return out;
+}
+
+
+// Merge + Dedupe + Sort helper (append-only import)
+function mergeAppendDedupeSort(existing, incoming){
+  const left  = Array.isArray(existing) ? existing : [];
+  const right = Array.isArray(incoming) ? incoming : [];
+  
+  // Drop blank/empty rows from the right side before merging
+  const filteredRight = right.filter(isNonEmptyLogRow);
+  const all = left.concat(filteredRight);
+
+  const seen = new Set();
+  const out = [];
+  for (const r of all){
+    const key = JSON.stringify([
+      r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa,
+      r.notes, r.customNotes,
+      r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum, r.anxietySum, r.impairSum,
+      r.score, r.max, r.min, r.weighted, r.maxPercent, r.minPercent
+    ]);
+    if (!seen.has(key)){ seen.add(key); out.push(r); }
+  }
+  out.sort((a,b)=> (a && a._ts ? a._ts : 0) - (b && b._ts ? b._ts : 0));
+  return out;
+}
+
+// Helper: determine if a row (log entry) is effectively empty/blank (all key numbers 0/NaN/absent)
+function isNonEmptyLogRow(r){
+  if (!r) return false;
+  const numericVals = [
+    r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum,
+    r.anxietySum, r.impairSum, r.score, r.max, r.min, r.weighted,
+    r.maxPercent, r.minPercent
+  ].map(v => Number(v));
+  return numericVals.some(v => Number.isFinite(v) && v !== 0);
+}
+
+// Helper: determine if a summary payload (means + composites) has any non-zero signal
+function isNonEmptySummary(M, C){
+  if (!M || typeof M!=="object") return false;
+  const mv = [M.rush, M.mood, M.social, M.energy, M.focus, M.anxiety, M.impair]
+            .map(v=>Number(v));
+  const hasMeans = mv.some(v => Number.isFinite(v) && v !== 0);
+  const cv = C && typeof C==="object"
+    ? [C.score, C.max, C.min, C.weighted, C.fiveMax].map(v=>Number(v))
+    : [];
+  const hasComp = cv.some(v => Number.isFinite(v) && v !== 0);
+  return hasMeans || hasComp;
+}
+
+// Status line / toast
+function showStatus(msg){
+  let el = document.getElementById("statusLine");
+  if (!el){
+    el = document.createElement("div");
+    el.id = "statusLine";
+    Object.assign(el.style, {position:"fixed", top:"46px", right:"20px", background:"#007aff", color:"#fff", padding:"6px 10px", borderRadius:"6px", zIndex:"9999"});
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.remove(); }, 5000);
+}
+
+</script>
 <!-- Manual Score Entry Modal -->
 <div id="scoreModal">
 <h3>Manual Score Entry</h3>
@@ -1032,251 +1597,350 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+
+<!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+
+
+
+
+
+
+
 <script>
-function showSummaryPopup() {
-    const popup = document.createElement('div');
-    popup.style.position = 'fixed';
-    popup.style.top = '40px';
-    popup.style.right = '40px';
-    popup.style.background = '#fff';
-    popup.style.border = '2px solid #444';
-    popup.style.borderRadius = '10px';
-    popup.style.boxShadow = '0 4px 16px rgba(0,0,0,0.3)';
-    popup.style.maxHeight = '80vh';
-    popup.style.overflow = 'auto';
-    popup.style.zIndex = '9999';
-    popup.style.padding = '20px';
-    popup.style.fontSize = '12px';
-    popup.style.maxWidth = '95vw';
+// === Summary Core (revised to read ONLY from main table) ===
 
-    const close = document.createElement('button');
-    close.innerText = 'Close';
-    close.style.float = 'right';
-    close.style.marginBottom = '10px';
-    close.style.background = '#e33';
-    close.style.color = '#fff';
-    close.style.border = 'none';
-    close.style.borderRadius = '5px';
-    close.style.padding = '5px 10px';
-    close.onclick = () => popup.remove();
+let SUMMARY_WINDOW_MINUTES = 5;
+function setSummaryWindowAndOpen(mins){ SUMMARY_WINDOW_MINUTES = mins; createSummaryPopupTable(); }
 
-    const table = document.createElement('table');
-    table.className = document.querySelector('#logTable').className;
-    table.style.borderCollapse = 'collapse';
-    table.style.width = '100%';
 
-    const thead = document.createElement('thead');
-    thead.innerHTML = document.querySelector('#logTable thead').innerHTML;
-    table.appendChild(thead);
+// Columns for popup + CSV
+const SUMMARY_COLUMNS = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
 
-    const tbody = document.createElement('tbody');
-    const grouped = {};
+// Timers/state
+let auto1mIntervalId = null;
+let lastAuto1mKey = null;
+let auto5mIntervalId = null;
+let lastAuto5mKey = null;
+let autoSummaryActive = false;
 
-    logData.forEach(entry => {
-        if (!entry._ts) return;
-        const min = Math.floor(entry._ts / 60000);
-        if (!grouped[min]) grouped[min] = [];
-        grouped[min].push(entry);
-    });
-
-    const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
-
-    Object.entries(grouped).sort().forEach(([minuteKey, entries]) => {
-        const ts = new Date(parseInt(minuteKey) * 60000).toLocaleTimeString('en-AU', { hour12: false });
-        const sincedose = Math.floor(Math.min(...entries.map(e => parseFloat(e.sincedose) || 0)));
-        const elapsed = Math.ceil(Math.max(...entries.map(e => parseFloat(e.elapsed) || 0)));
-
-        const stats = fields.map(f => {
-            const vals = entries.map(r => r[f + 'Sum']).filter(v => typeof v === 'number');
-            const mean = +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
-            return { f, mean };
-        });
-
-        const tr = document.createElement('tr');
-        tr.style.fontWeight = 'bold';
-        tr.style.backgroundColor = '#f0f8ff';
-
-        const values = stats.map(s => s.mean);
-        const maxVal = Math.max(...values, 1);
-
-        tr.innerHTML = `<td>${ts} μ MEAN</td><td>${sincedose}m</td><td>${elapsed}m</td><td colspan="6"></td>`;
-        stats.forEach(stat => {
-            const val = stat.mean;
-            const intensity = Math.min(val / maxVal, 1);
-const colourMap = {
-    rush:   [0, 255, 0],
-    mood:   [0, 255, 0],
-    social: [0, 255, 0],
-    energy: [255, 215, 0],
-    focus:  [255, 215, 0],
-    anxiety:[255, 0, 0],
-    impair: [255, 0, 0]
-};
-
-stats.forEach(stat => {
-    const val = stat.mean;
-    const [r, g, b] = colourMap[stat.f];
-    const intensity = Math.min(val / maxVal, 1);
-    const shaded = `rgba(${r},${g},${b},${intensity.toFixed(2)})`;
-    tr.innerHTML += `<td style="background-color:${shaded}">${Math.round(val)}</td><td></td>`;
-});            tr.innerHTML += `<td style="background-color:${shaded}">${Math.round(val)}</td><td></td>`;
-        });
-        tr.innerHTML += '<td colspan="11"></td>';
-        tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-    popup.appendChild(close);
-    popup.appendChild(table);
-    document.body.appendChild(popup);
+// Utility: minute key & label
+function minuteKey(d){
+  return d.getFullYear()
+    + String(d.getMonth()+1).padStart(2,"0")
+    + String(d.getDate()).padStart(2,"0")
+    + String(d.getHours()).padStart(2,"0")
+    + String(d.getMinutes()).padStart(2,"0");
 }
-</script>
-<style>
-#summaryToggleBtn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  padding: 10px 16px;
-  font-size: 14px;
-  background-color: #007aff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+function formatMinuteLabel(d){
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mm = String(d.getMinutes()).padStart(2,"0");
+  return `${hh}:${mm} Average`;
 }
-#summaryToggleBtn:hover {
-  background-color: #005bb5;
-}
-</style>
-<script>
-setInterval(() => {
-    const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
-    const tableBody = document.querySelector('#logTable tbody');
-    const now = Date.now();
-    const minuteKey = Math.floor(now / 300000);
 
-    const windowStart = Date.now() - 5 * 60 * 1000;
-    const windowStart = Date.now() - 5 * 60 * 1000;
-    const windowStart = Date.now() - 5 * 60 * 1000;
-    const entriesThisMinute = logData.filter(entry => entry._ts && entry._ts >= windowStart);
-        if (!entry._ts) return false;
-        return Math.floor(entry._ts / 300000) === minuteKey - 1; // completed minute only
-    });
-
-    if (!entriesThisMinute.length) return;
-
-    const stats = fields.map(f => {
-        const vals = entriesThisMinute.map(r => r[f + 'Sum']).filter(v => typeof v === 'number');
-        const mean = +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
-        return { f, mean };
-    });
-
-    const sincedose = Math.floor(Math.min(...entriesThisMinute.map(e => parseFloat(e.sincedose) || 0)));
-    const elapsed = Math.ceil(Math.max(...entriesThisMinute.map(e => parseFloat(e.elapsed) || 0)));
-    const ts = new Date(minuteKey * 300000).toLocaleTimeString('en-AU', { hour12: false });
-
-    const tr = document.createElement('tr');
-    tr.style.fontWeight = 'bold';
-    tr.style.backgroundColor = '#f0f8ff';
-    tr.innerHTML = `<td>${ts} μ MEAN</td><td>${sincedose}m</td><td>${elapsed}m</td><td colspan="6"></td>`;
-
-    const values = stats.map(s => s.mean);
-    const maxVal = Math.max(...values, 1); // per-row shading
-
-    stats.forEach(stat => {
-        const val = stat.mean;
-        const intensity = Math.min(val / maxVal, 1);
-        const shaded = `rgba(0,0,255,${intensity.toFixed(2)})`;
-        tr.innerHTML += `<td style="background-color:${shaded}">${Math.round(val)}</td><td></td>`;
-    });
-
-    tr.innerHTML += '<td colspan="11"></td>';
-    tableBody.appendChild(tr);
-}, 300000);</script>
-<script>
-function createSummaryPopupTable() {
-    let existing = document.getElementById("summaryPopup");
-    if (existing) {
-        existing.remove();
-        return;
-    }
-
-    const popup = document.createElement("div");
-    popup.id = "summaryPopup";
-    popup.style.position = "fixed";
-    popup.style.top = "50px";
-    popup.style.right = "20px";
-    popup.style.background = "white";
-    popup.style.border = "1px solid #ccc";
-    popup.style.padding = "10px";
-    popup.style.maxHeight = "400px";
-    popup.style.overflowY = "auto";
-    popup.style.zIndex = "9999";
-    popup.style.boxShadow = "0 0 10px rgba(0,0,0,0.3)";
-
-    const close = document.createElement("button");
-    close.textContent = "×";
-    close.style.float = "right";
-    close.onclick = () => popup.remove();
-
-    const exportBtn = document.createElement("button");
-    exportBtn.textContent = "Export CSV";
-    exportBtn.onclick = () => {
-        let csv = "Time,Since,Phase,Scale,Drug,Qty,ROA,Rush,Mood,Social,Energy,Focus,Anxiety,Impair\n";
-        document.querySelectorAll("#summaryPopupTable tbody tr").forEach(row => {
-            csv += Array.from(row.children).map(cell => cell.textContent).join(",") + "\n";
-        });
-        const blob = new Blob([csv], {type: "text/csv"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "summary.csv";
-        a.click();
-        URL.revokeObjectURL(url);
+// === Snapshot strictly from the MAIN TABLE DOM ===
+// Never read from popup or auto-dock.
+function snapshotFromMainTable(){
+  const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+  return rows.map(tr => {
+    const ts = +(tr.getAttribute('data-ts')||0);
+    const get = (field) => {
+      const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+      if (!td) return 0;
+      const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+      return Number.isFinite(v) ? v : 0;
     };
-
-    const table = document.createElement("table");
-    table.id = "summaryPopupTable";
-    const thead = document.createElement("thead");
-    thead.innerHTML = "<tr><th>Time</th><th>Since</th><th>Phase</th><th>Scale</th><th>Drug</th><th>Qty</th><th>ROA</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th></tr>";
-    const tbody = document.createElement("tbody");
-    table.appendChild(thead);
-    table.appendChild(tbody);
-
-    popup.appendChild(exportBtn);
-    popup.appendChild(close);
-    popup.appendChild(table);
-    document.body.appendChild(popup);
+    const pack = {
+      _ts: ts,
+      rush: get('rush'),
+      mood: get('mood'),
+      social: get('social'),
+      energy: get('energy'),
+      focus: get('focus'),
+      anxiety: get('anxiety'),
+      impair: get('impair')
+    };
+    return pack;
+  }).filter(o => o._ts>0);
 }
 
-function addSummaryRowSum() {
+// Means over window [startMs, endMs)
+function computeMeansForWindow(startMs, endMs){
+  const snap = snapshotFromMainTable();
+  const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+  if (!sel.length) return null;
+  const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+  const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+  sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+  const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
+  return means;
+}
+
+// Rolling means of last N minutes ending at endMs
+function computeRollingMeans(endMs, minutes){
+  return computeMeansForWindow(endMs - minutes*60*1000, endMs);
+}
+
+// Composite scores from means
+function computeCompositeFromMeans(M){
+  const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+  const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
+  const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
+  const weighted = (M.rush + M.mood + M.social + 1.5*M.energy + 1.5*M.focus) - (M.anxiety + M.impair);
+  const fiveMax  = ((score/5)+5);
+  return {score, max, min, weighted, fiveMax};
+}
+
+// Append a row to a table by id ('summaryPopupTable' or 'autoSummaryTable')
+function appendSummaryRowToTable(tableId, d, M, C, opts){
+  
+  // Skip if summary is empty/blank
+  if (!isNonEmptySummary(M, C)) { return; }
+const table = document.getElementById(tableId);
+  if (!table) return;
+  const tbody = table.querySelector('tbody'); if (!tbody) return;
+  const suffix = (opts && opts.labelSuffix) ? opts.labelSuffix : "";
+  const row = [
+    formatMinuteLabel(d) + suffix,
+    M?.rush, M?.mood, M?.social, M?.energy, M?.focus, M?.anxiety, M?.impair,
+    C?.score, C?.max, C?.min, C?.weighted, C?.fiveMax
+  ];
+  const tr = document.createElement("tr");
+  tr.innerHTML = row.map((v,i)=>{
+    const name = SUMMARY_COLUMNS[i];
+    if (i===0) return `<td>${v??''}</td>`;
+    const num = Number(v);
+    const isNum = Number.isFinite(num);
+    const bg = isNum && typeof cellBgFor==='function' ? cellBgFor(name, num) : '';
+    const val = isNum ? num.toFixed(2) : (v ?? '');
+    return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+  }).join("");
+  // Tooltips for Max/Min (percent of 10)
+  const cells = tr.children;
+  const idxMax = SUMMARY_COLUMNS.indexOf('Max');
+  const idxMin = SUMMARY_COLUMNS.indexOf('Min');
+  if (idxMax>-1 && cells[idxMax]) {
+    const v = parseFloat(cells[idxMax].textContent); if (!Number.isNaN(v)) cells[idxMax].title = `${Math.round((v/10)*100)}%`;
+  }
+  if (idxMin>-1 && cells[idxMin]) {
+    const v = parseFloat(cells[idxMin].textContent); if (!Number.isNaN(v)) cells[idxMin].title = `${Math.round((v/10)*100)}%`;
+  }
+  tbody.appendChild(tr);
+}
+
+// Emit 1-minute rolling average (used by Auto)
+function emitAuto1m(){
+  const now = new Date();
+  const prev = new Date(now.getTime() - 60*1000); prev.setSeconds(0,0);
+  const key = minuteKey(prev);
+  if (lastAuto1mKey === key) return;
+  lastAuto1mKey = key;
+  const endMs = prev.getTime() + 60*1000;
+  const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+  const C = M ? computeCompositeFromMeans(M) : null;
+  if (M) {
+    appendSummaryRowToTable('autoSummaryTable', prev, M, C, {bold:false, labelSuffix:' 5m Avg'});
+    // If popup exists, mirror there as well (still isolated from its own data)
+    if (document.getElementById('summaryPopupTable')) {
+      appendSummaryRowToTable('summaryPopupTable', prev, M, C, {bold:false, labelSuffix:' 5m Avg'});
+    }
+  } else { /* skip empty immediate emit */ }
+}
+
+// Emit 5-minute rolling average at each 5-minute boundary (popup)
+function emitAuto5m(){
+//  ensureSummaryPopup();
+//  const now = new Date();
+//  const mm = now.getMinutes() - (now.getMinutes()%5);
+//  const boundary = new Date(now); boundary.setMinutes(mm,0,0);
+//  const key = minuteKey(boundary);
+//  if (lastAuto5mKey === key) return;
+//  lastAuto5mKey = key;
+//  const endMs = boundary.getTime() + 60*1000;
+//  const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+//  const C = M ? computeCompositeFromMeans(M) : null;
+//  if (M) {
+//    appendSummaryRowToTable('summaryPopupTable', boundary, M, C, {bold:false, labelSuffix:' 5m Avg'});
+//  } else {
+//    appendSummaryRowToTable('summaryPopupTable', boundary, {}, {}, {bold:false, labelSuffix:' 5m Avg '});
+//  }
+}
+
+// Toggle Auto (1-minute rolling stream) — sync both buttons and emit immediately
+function toggleAutoSummary(){
+  autoSummaryActive = !autoSummaryActive;
+  const btn1 = document.getElementById('autoSummaryBtn');       // popup button
+  const btn2 = document.getElementById('autoSummaryToggleBtn'); // fixed header button
+  if (autoSummaryActive){
+    if (btn1) btn1.textContent = 'Auto (On)';
+    if (btn2) btn2.textContent = 'Auto (On)';
+    // emit immediate row
+    (function immediateEmit(){
+      const endMs = Date.now();
+      const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+      const C = M ? computeCompositeFromMeans(M) : null;
+      const d = new Date();
+      if (M) {
+        appendSummaryRowToTable('autoSummaryTable', d, M, C, {bold:false, labelSuffix:' 5m Now'});
+        if (document.getElementById('summaryPopupTable')) appendSummaryRowToTable('summaryPopupTable', d, M, C, {bold:false, labelSuffix:' 5m Now'});
+      } else { /* skip empty auto-summary row */ }
+    })();
+    // schedule boundary-aligned loop
+    if (auto1mIntervalId) clearInterval(auto1mIntervalId);
+    const now = new Date();
+    const msToNext = (60 - now.getSeconds())*1000 - now.getMilliseconds();
+    setTimeout(()=>{
+      emitAuto1m();
+      auto1mIntervalId = setInterval(emitAuto1m, 1000);
+    }, Math.max(0, msToNext));
+  } else {
+    if (btn1) btn1.textContent = 'Auto (Off)';
+    if (btn2) btn2.textContent = 'Auto';
+    if (auto1mIntervalId){ clearInterval(auto1mIntervalId); auto1mIntervalId=null; }
+  }
+}
+
+// Popup builder (id=summaryPopup, #summaryPopupTable) — unchanged shell
+function ensureSummaryPopup(){
+  let popup = document.getElementById("summaryPopup");
+  if (popup) return popup;
+  popup = document.createElement("div");
+  popup.id = "summaryPopup";
+  Object.assign(popup.style, {
+    position:"fixed", top:"70px", right:"20px", background:"#fff", border:"1px solid #ccc",
+    borderRadius:"8px", boxShadow:"0 4px 16px rgba(0,0,0,0.2)", maxHeight:"70vh", overflow:"auto",
+    zIndex:"9999", padding:"10px"
+  });
+
+  const head = document.createElement("div");
+  Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
+  head.innerHTML = `<strong>Summary</strong>`;
+  const controls = document.createElement("div");
+
+  const exportBtn = document.createElement("button");
+  exportBtn.textContent = "Export CSV";
+  exportBtn.onclick = exportPopupCSV;
+
+  const autoBtn = document.createElement("button");
+  autoBtn.id = "autoSummaryBtn";
+  autoBtn.textContent = autoSummaryActive ? "Auto (On)" : "Auto (Off)";
+  autoBtn.onclick = toggleAutoSummary;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "×";
+  closeBtn.style.marginLeft = "8px";
+  closeBtn.onclick = ()=>popup.remove();
+
+  controls.appendChild(exportBtn);
+  
+  const instant5Btn = document.createElement("button");
+  instant5Btn.textContent = "5m Now";
+  instant5Btn.onclick = ()=>appendInstantSummaryToPopup(5);
+  controls.appendChild(instant5Btn);
+
+  const instant15Btn = document.createElement("button");
+  instant15Btn.textContent = "15m Now";
+  instant15Btn.onclick = ()=>appendInstantSummaryToPopup(15);
+  controls.appendChild(instant15Btn);
+
+  controls.appendChild(autoBtn);
+  controls.appendChild(closeBtn);
+  head.appendChild(controls);
+  popup.appendChild(head);
+
+  const table = document.createElement("table");
+  table.id = "summaryPopupTable";
+  table.style.borderCollapse="collapse";
+  table.style.width="100%";
+  const thead = document.createElement("thead");
+  thead.innerHTML = `<tr>${SUMMARY_COLUMNS.map(c=>`<th>${c}</th>`).join("")}</tr>`;
+  table.appendChild(thead);
+  table.appendChild(document.createElement("tbody"));
+  popup.appendChild(table);
+  document.body.appendChild(popup);
+  return popup;
+}
+
+// Create/open popup, dense backfill based on MAIN TABLE data, then start 5m cadence
+function createSummaryPopupTable(){
+  ensureSummaryPopup();
+  // Backfill: find min and max _ts from main table
+  const snap = snapshotFromMainTable();
+  if (snap.length){
+    const minTs = Math.min(...snap.map(x=>x._ts));
     const now = Date.now();
-    const windowStart = now - 5 * 60 * 1000;
-    const recentEntries = logData.filter(entry => entry._ts && entry._ts >= windowStart);
-
-    if (recentEntries.length === 0) return;
-
-    const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
-    const means = {};
-    fields.forEach(f => {
-        means[f] = recentEntries.reduce((acc, e) => acc + (parseFloat(e[f]) || 0), 0) / recentEntries.length;
-    });
-
-    const tr = document.createElement("tr");
-    const ts = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-    tr.innerHTML = `<td>${ts} μ MEAN</td><td colspan="6"></td>` + fields.map(f => {
-        const v = means[f].toFixed(2);
-        const shade = Math.min(1, parseFloat(v) / 10);
-        return `<td style="background-color:rgba(0,0,255,${shade})">${v}</td>`;
-    }).join("");
-
-    const table = document.querySelector("#summaryPopupTable tbody");
-    if (table) table.appendChild(tr);
+    // Build completed 5-min boundaries between minTs and now
+    const start = new Date(minTs); start.setSeconds(0,0);
+    start.setMinutes(start.getMinutes() - (start.getMinutes()%5), 0, 0);
+    for (let t = start.getTime(); t <= now; t += 5*60000){
+      const endMs = t + 60000; // 1 minute after boundary for window end
+      const d = new Date(t);
+      const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+      if (M){
+        appendSummaryRowToTable('summaryPopupTable', d, M, computeCompositeFromMeans(M), {labelSuffix:'   '});
+      } else {
+        appendSummaryRowToTable('summaryPopupTable', d, {}, {}, {labelSuffix:'   '});
+      }
+    }
+    // Also append a "now" row
+    const Mnow = computeRollingMeans(Date.now(), SUMMARY_WINDOW_MINUTES);
+    const dnow = new Date();
+    if (Mnow){
+      appendSummaryRowToTable('summaryPopupTable', dnow, Mnow, computeCompositeFromMeans(Mnow), {bold:false, labelSuffix:'   '});
+    } else {
+      appendSummaryRowToTable('summaryPopupTable', dnow, {}, {}, {bold:false, labelSuffix:' (5m)'});
+    }
+  }
+  // Start cadence
+  emitAuto5m();
+  startAuto5mTimer();
 }
 
-setInterval(addSummaryRowSum, 300000); // every 5 minutes</script></body>
+// Start 5-minute timer (popup flow)
+function startAuto5mTimer(){
+  if (auto5mIntervalId) return;
+  const now = new Date();
+  const mod = now.getMinutes()%5;
+  const msToNext = ((5 - mod) % 5)*60000 + (59-now.getSeconds())*1000 + (1000-now.getMilliseconds());
+  setTimeout(()=>{
+    emitAuto5m();
+    auto5mIntervalId = setInterval(emitAuto5m, 300000);
+  }, Math.max(0, msToNext));
+}
+
+// Append one immediate summary row for a given window into the popup
+function appendInstantSummaryToPopup(minutes){
+  ensureSummaryPopup();
+  const now = Date.now();
+  const M = computeRollingMeans(now, minutes);
+  const d = new Date();
+  if (M){
+    appendSummaryRowToTable('summaryPopupTable', d, M, computeCompositeFromMeans(M), {labelSuffix: ` ${minutes}m Now`});
+  } else {
+    appendSummaryRowToTable('summaryPopupTable', d, {}, {}, {labelSuffix: ` ${minutes}m Now`});
+  }
+}
+
+// CSV export (popup)
+function exportPopupCSV(){
+  const table = document.getElementById("summaryPopupTable"); if (!table) return;
+  const rows = [SUMMARY_COLUMNS.join(",")];
+  table.querySelectorAll("tbody tr").forEach(tr=>{
+    const vals = Array.from(tr.children).slice(0, SUMMARY_COLUMNS.length).map(td=>{
+      const t = td.textContent.trim();
+      return /[",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
+    });
+    rows.push(vals.join(","));
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n")], {type:"text/csv;charset=utf-8"}));
+  a.download = "summary.csv"; document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+}
+window.createSummaryPopupTable = createSummaryPopupTable;
+window.toggleAutoSummary = toggleAutoSummary;
+</script>
+
+
+</body>
 <script>
 function openEmotionModal() {
     document.getElementById('emotionModal').style.display = 'block';
@@ -1310,4 +1974,202 @@ function buildEmotionButtons() {
     });
 }
 </script>
+
+
+
 </html>
+<!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
+<script>
+(function(){
+  // Ensure globals exist from earlier script
+  window.autoSummaryActive = !!window.autoSummaryActive;
+
+  // Local state for four cadences
+  let int1 = null, int5 = null, int15 = null, int60 = null;
+  let last1 = null, last5 = null, last15 = null, last60 = null;
+
+  // Helper: compute minute key "YYYYMMDDHHmm"
+  function minuteKey(d){
+    return d.getFullYear()
+      + String(d.getMonth()+1).padStart(2,"0")
+      + String(d.getDate()).padStart(2,"0")
+      + String(d.getHours()).padStart(2,"0")
+      + String(d.getMinutes()).padStart(2,"0");
+  }
+  // Label "HH:MM Average"
+  function formatMinuteLabel(d){
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    return `${hh}:${mm} Average`;
+  }
+
+  // Read-only snapshot from main table (same invariant as existing code)
+  function snapshotFromMainTable(){
+    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(tr => {
+      const ts = +(tr.getAttribute('data-ts')||0);
+      const get = (field) => {
+        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+        if (!td) return 0;
+        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
+      };
+      const pack = {
+        _ts: ts,
+        rush: get('rush'),
+        mood: get('mood'),
+        social: get('social'),
+        energy: get('energy'),
+        focus: get('focus'),
+        anxiety: get('anxiety'),
+        impair: get('impair')
+      };
+      return pack;
+    }).filter(o => o._ts>0);
+  }
+
+  function computeMeansForWindow(startMs, endMs){
+    const snap = snapshotFromMainTable();
+    const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+    if (!sel.length) return null;
+    const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+    const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
+    return means;
+  }
+  function computeRollingMeans(endMs, minutes){
+    return computeMeansForWindow(endMs - minutes*60*1000, endMs);
+  }
+  function computeCompositeFromMeans(M){
+    const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+    const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
+    const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
+    const weighted = (M.rush + M.mood + M.social + 1.5*M.energy + 1.5*M.focus) - (M.anxiety + M.impair);
+    const fiveMax  = ((score/5)+5);
+    return {score, max, min, weighted, fiveMax};
+  }
+
+  function appendSummaryRowToTable(tableId, d, M, C, labelSuffix){
+    if (!M) return;
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody'); if (!tbody) return;
+    const row = [
+      (formatMinuteLabel(d) + (labelSuffix?(" "+labelSuffix):"")),
+      M.rush, M.mood, M.social, M.energy, M.focus, M.anxiety, M.impair,
+      C.score, C.max, C.min, C.weighted, C.fiveMax
+    ];
+    const tr = document.createElement("tr");
+    const cols = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    tr.innerHTML = row.map((v,i)=>{
+      if (i===0) return `<td>${v??''}</td>`;
+      const num = Number(v);
+      const isNum = Number.isFinite(num);
+      // reuse global cellBgFor if present
+      const name = cols[i];
+      const bg = isNum && typeof window.cellBgFor==='function' ? window.cellBgFor(name, num) : '';
+      const val = isNum ? num.toFixed(2) : (v ?? '');
+      return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+    }).join("");
+    tbody.appendChild(tr);
+  }
+
+  // Boundary alignment helpers
+  function msToNextMinute(d){ const t = new Date(d); t.setSeconds(0,0); return 60000 - (d - t); }
+  function msToNextMultipleMinutes(d, m){
+    const t = new Date(d);
+    const curMin = t.getMinutes();
+    const next = curMin + (m - (curMin % m || 0));
+    t.setMinutes(next, 0, 0);
+    return t.getTime() - d.getTime();
+  }
+  function msToTopOfHour(d){
+    const t = new Date(d); t.setMinutes(60,0,0);
+    return t.getTime() - d.getTime();
+  }
+
+  // Emitters for 1/5/15/60 with de-dup keys
+  function emitCadence(periodMin, tableId, lastKeyRef){
+    const now = new Date();
+    const end = new Date(now); end.setSeconds(0,0);
+    const key = end.getFullYear()
+      + String(end.getMonth()+1).padStart(2,"0")
+      + String(end.getDate()).padStart(2,"0")
+      + String(end.getHours()).padStart(2,"0")
+      + String(end.getMinutes()).padStart(2,"0");
+    if (lastKeyRef.key === key) return;
+    lastKeyRef.key = key;
+    const M = computeRollingMeans(end.getTime(), periodMin);
+    if (!M) return;
+    const C = computeCompositeFromMeans(M);
+    appendSummaryRowToTable(tableId, end, M, C, `${periodMin}m Avg`);
+  }
+
+  // Clear all timers
+  function clearAll(){
+    [int1,int5,int15,int60].forEach(x => { if (x) { clearInterval(x); } });
+    int1=int5=int15=int60=null;
+    last1=last5=last15=last60=null;
+  }
+
+  // Public toggle override
+  window.toggleAutoSummary = function(){
+    const btn = document.getElementById('autoSummaryToggleBtn');
+    const wasActive = !!window.autoSummaryActive;
+    if (wasActive){
+      clearAll();
+      window.autoSummaryActive = false;
+      if (btn) btn.textContent = 'Auto';
+      return;
+    }
+    // Turning ON
+    clearAll();
+    window.autoSummaryActive = true;
+    if (btn) btn.textContent = 'Auto (On)';
+    // Update titles to reflect 1m rolling
+    const t = document.getElementById('autoSummaryTitle');
+    if (t) t.textContent = 'Auto Summary (1m rolling)';
+    // Ensure tables exist
+    ['autoSummaryTable','summary5Table','summary15Table','summary60Table'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el){
+        const tb = el.querySelector('tbody');
+        if (tb) tb.innerHTML=''; // clear on (re)start
+      }
+    });
+    // Schedule boundary-aligned timers
+    const now = new Date();
+    // 1 minute cadence -> autoSummaryTable
+    last1 = {key:null};
+    setTimeout(()=>{
+      emitCadence(1, 'autoSummaryTable', last1);
+      int1 = setInterval(()=>emitCadence(1, 'autoSummaryTable', last1), 60000);
+    }, msToNextMinute(now));
+    // 5 minute cadence -> summary5Table
+    last5 = {key:null};
+    setTimeout(()=>{
+      emitCadence(5, 'summary5Table', last5);
+      int5 = setInterval(()=>emitCadence(5, 'summary5Table', last5), 300000);
+    }, msToNextMultipleMinutes(now, 5));
+    // 15 minute cadence -> summary15Table
+    last15 = {key:null};
+    setTimeout(()=>{
+      emitCadence(15, 'summary15Table', last15);
+      int15 = setInterval(()=>emitCadence(15, 'summary15Table', last15), 900000);
+    }, msToNextMultipleMinutes(now, 15));
+    // 60 minute cadence -> summary60Table
+    last60 = {key:null};
+    setTimeout(()=>{
+      emitCadence(60, 'summary60Table', last60);
+      int60 = setInterval(()=>emitCadence(60, 'summary60Table', last60), 3600000);
+    }, msToTopOfHour(now));
+  };
+
+  // Remove any immediate "Now" or mirroring behaviour by shadowing any old helpers
+  // (No-op stubs to avoid accidental cross-posting from earlier code)
+  window.emitAuto1m = function(){};           // disable old 1s spammer
+  window.emitAuto5m = function(){};           // keep disabled; we use new per-table emitters
+  // setSummaryWindowAndOpen remains untouched; summary buttons will simply open/focus any UI you already have
+})();
+</script>
