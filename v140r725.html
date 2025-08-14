@@ -273,10 +273,9 @@
 <body>
 <div class="summary-controls">
 <button id="summary60Btn" onclick="openSummaryPopup(60)">Summary 60m</button>
-    <button id="summary15Btn" onclick="openSummaryPopup(15)">Summary 15m</button>
-    <button id="summary5Btn" onclick="openSummaryPopup(5)">Summary 5m</button>
-    <button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
-
+<button id="summary15Btn" onclick="openSummaryPopup(15)">Summary 15m</button>
+<button id="summary5Btn" onclick="openSummaryPopup(5)">Summary 5m</button>
+<button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
 </div>
 <h1>v1.3.3 (r704)</h1>
 <div class="controls">
@@ -293,7 +292,7 @@
 <button onclick="editSelected()">Edit Selected</button>
 <button onclick="exportCSV()">Export CSV</button>
 <button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
-<input id="openLogInput" type="file" accept=".csv,text/csv" style="display:none" />
+<input accept=".csv,text/csv" id="openLogInput" style="display:none" type="file"/>
 <button onclick="openScoreModal()">Manual Score Entry</button>
 <button onclick="openEmotionModal()">Emotion Wheel</button>
 </div>
@@ -367,10 +366,9 @@
 </div>
 <div style="display: flex; align-items: flex-start; gap: 20px;">
 <div class="score-columns" id="scoreColumns"></div>
-
 <!-- Note Button Rows (grouped by colour) -->
 <div id="noteButtonRows" style="display:flex; flex-direction:column; gap:6px; margin:8px 0;">
-  <!-- Rows will be populated by JS -->
+<!-- Rows will be populated by JS -->
 </div>
 <div id="noteButtons"></div>
 <div id="extraNoteButtons"></div>
@@ -389,19 +387,13 @@
 <th data-col="QTY">QTY</th>
 <th data-col="ROA">ROA</th>
 <th data-col="Rush">Rush</th>
-<th data-col="Rush">Rush</th>
 <th data-col="Mood">Mood</th>
-<th data-col="Mood">Mood</th>
-<th data-col="Social">Social</th>
 <th data-col="Social">Social</th>
 <th data-col="Energy">Energy</th>
-<th data-col="Energy">Energy </th>
 <th data-col="Focus">Focus</th>
-<th data-col="Focus">Focus</th>
-<th data-col="Anxiety">Anxiety</th>
 <th data-col="Anxiety">Anxiety</th>
 <th data-col="Impair">Impair</th>
-<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
+<th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
 <th data-col="Score">Score</th>
 <th data-col="Max">Max</th>
 <th data-col="Min">Min</th>
@@ -416,55 +408,47 @@
 </thead>
 <tbody></tbody>
 </table>
-
 <div id="autoSummaryDock">
-  <div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
-  <table id="autoSummaryTable">
-    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
-    <tbody></tbody>
-  </table>
+<div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
+<table id="autoSummaryTable">
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<tbody></tbody>
+</table>
 </div>
 <!-- Additional Summary Docks (separate targets) -->
 <div id="summary5Dock" style="margin-top:20px;">
-  <div id="summary5Title">Summary 5m (rolling)</div>
-  
+<div id="summary5Title">Summary 5m (rolling)</div>
 <div id="backfillRow" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
-  <strong>Manual Backfill:</strong>
-  <button id="backfillBtn" class="ctrl-btn" style="margin-left:10px;">Run Backfill</button>
+<strong>Manual Backfill:</strong>
+<button class="ctrl-btn" id="backfillBtn" style="margin-left:10px;">Run Backfill</button>
 </div>
 <table id="summary5Table" style="width:100%; border-collapse:collapse; background:#fff;">
-    <thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
-    <tbody></tbody>
-  </table>
+<thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
+<tbody></tbody>
+</table>
 </div>
-
 <div id="summary15Dock" style="margin-top:20px;">
-  <div id="summary15Title">Summary 15m (rolling)</div>
-  
+<div id="summary15Title">Summary 15m (rolling)</div>
 <div id="backfill15Row" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
-  <strong>Manual Backfill:</strong>
-  <button id="backfill15Btn" class="ctrl-btn" style="margin-left:10px;">Run Backfill</button>
+<strong>Manual Backfill:</strong>
+<button class="ctrl-btn" id="backfill15Btn" style="margin-left:10px;">Run Backfill</button>
 </div>
 <table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
-    <thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
-    <tbody></tbody>
-  </table>
+<thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
+<tbody></tbody>
+</table>
 </div>
-
 <div id="summary60Dock" style="margin-top:20px;">
-  <div id="summary60Title">Summary 60m (rolling)</div>
-  
+<div id="summary60Title">Summary 60m (rolling)</div>
 <div id="backfill60Row" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
-  <strong>Manual Backfill:</strong>
-  <button id="backfill60Btn" class="ctrl-btn" style="margin-left:10px;">Run Backfill</button>
+<strong>Manual Backfill:</strong>
+<button class="ctrl-btn" id="backfill60Btn" style="margin-left:10px;">Run Backfill</button>
 </div>
 <table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
-    <thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
-    <tbody></tbody>
-  </table>
+<thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
+<tbody></tbody>
+</table>
 </div>
-
-
 <script>
 
 // === UI Column Visibility & Shading Config ===
@@ -560,6 +544,7 @@ function applyRowShading(tr) {
             "4.5": '+',
             "6": 'Ultra',
             "0.5": '+',
+            "1.5": '+',
             "-0.5": '-'
 , "11.5": "+", "-10.5": "-", "-111.5": "-" },
         mood: {
@@ -576,6 +561,7 @@ function applyRowShading(tr) {
             "6": 'Euphoric',
             "0.5": '+',
             "-0.5": '-',
+            "1.5": '+',
 //            "-1": '-',
 //            "-0.5": '-'
 //            "0": 'No Change',
@@ -619,6 +605,7 @@ function applyRowShading(tr) {
             "4.5": '+',
             "6": 'Disinhibited',
             "0.5": '+',
+            "1.5": '+',
             "-0.5": '-'
 , "11.5": "+", "-10.5": "-", "-111.5": "-" },
         energy: {
@@ -636,15 +623,16 @@ function applyRowShading(tr) {
 //            "6": 'Manic',
             "0": 'Tired/Flat',
             "1": 'Normal/Low',
-            "2": 'Moderate',
+            "2": 'Increase',
             "3": 'Clear',
             "4": 'Energetic',
             "5": 'Hyperactive',
-            "2.5": '+',
+            "2.5": 'Mid',
             "3.5": 'High',
             "4.5": '+',
             "6": 'Manic',
             "0.5": '+',
+            "1.5": '+',
             "-0.5": '-'
 , "11.5": "+", "-10.5": "-", "-111.5": "-" },
         focus: {
@@ -669,6 +657,7 @@ function applyRowShading(tr) {
             "4.5": 'Obsessive',
             "6": 'Wired',
             "0.5": '+',
+            "1.5": '+',
             "-0.5": '-'
 , "11.5": "+", "-10.5": "-", "-111.5": "-" },
         anxiety: {
@@ -682,16 +671,17 @@ function applyRowShading(tr) {
 //            "4": 'Extra',
 //            "5": 'Impacting',
             "0": 'None',
-            "1": 'Some',
-            "2": 'Excess',
+            "1": 'Minimal',
+            "2": 'Some',
             "3": 'Affecting',
             "4": 'Adverse',
             "5": 'Severe',
-            "2.5": 'Worry',
+            "2.5": 'Worrying',
             "3.5": '+',
             "4.5": '+',
-            "6": 'Panic',
+            "6": 'Nightmare',
             "0.5": '+',
+            "1.5": 'Mental',
             "-0.5": '-'
 , "11.5": "+", "-10.5": "-", "-111.5": "-" },
         impair: {
@@ -718,6 +708,7 @@ function applyRowShading(tr) {
             "4.5": '+',
             "6": 'Dangerously',
             "0.5": '+',
+            "1.5": '+',
             "-0.5": '-'
 , "11.5": "+", "-10.5": "-", "-111.5": "-" },
         change: {
@@ -809,7 +800,7 @@ function applyRowShading(tr) {
             t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
             col.appendChild(t);
   //         [10, 9, 8, 7, 6, 5.5, 5, 4, 3.5, 3, 2, 1, 0.5, 0, -0.5, -1, -2, -3, -0.4, -0.3, -0.2, -0.1, 3.4, 3.3, 3.2, 3.1, 2.4, 2.3, 2.2, 2.1, 1.4, 1.3, 1.2, 1.1].forEach(v => {
-           [6, 5, 4.5, 4, 3.5, 3, 2.5, 2, 1, 0.5, 0, -0.5, -1].forEach(v => {
+           [6, 5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1, 0.5, 0, -0.5, -1].forEach(v => {
 
                 const b = document.createElement('button');
                 let customLabel = '';
@@ -818,7 +809,7 @@ if (v === -444) customLabel = '';
 if (v === -111) customLabel = '-';
 //else if (v === 6) customLabel = 'Extra/Prominent';
 else if (v === 9) customLabel = '';
-else if (v === 0.1) customLabel = 'Maybe/Unsure';
+else if (v === 0.1) customLabel = 'Unsure';
 else if (v === 0.01) customLabel = '+';
 else if (v === -0.01) customLabel = '-';
 else if (v === -0.1) customLabel = '';
@@ -1632,15 +1623,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
-
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
-
-
-
-
-
-
-
 <script>
 // === Summary Core (revised to read ONLY from main table) ===
 
@@ -2003,7 +1986,7 @@ function toggleAutoSummary(){
       const C = M ? computeCompositeFromMeans(M) : null;
       const d = new Date();
       if (M) {
-        appendSummaryRowToTable('autoSummaryTable', d, M, C, {bold:false, labelSuffix:' 5m Now'});
+        appendSummaryRowToTable('autoSummaryTable', d, M, C, {bold:false, labelSuffix:' 1m Now'});
       } else { /* skip empty auto-summary row */ }
     })();
     // schedule boundary-aligned loop
@@ -2055,12 +2038,12 @@ function ensureSummaryPopup(){
   controls.appendChild(exportBtn);
   
   const instant5Btn = document.createElement("button");
-  instant5Btn.textContent = "5m Now";
+  instant5Btn.textContent = "1m Now";
   instant5Btn.onclick = ()=>appendInstantSummaryToPopup(5);
   controls.appendChild(instant5Btn);
 
   const instant15Btn = document.createElement("button");
-  instant15Btn.textContent = "15m Now";
+  instant15Btn.textContent = "11m Now";
   instant15Btn.onclick = ()=>appendInstantSummaryToPopup(15);
   controls.appendChild(instant15Btn);
 
@@ -2144,10 +2127,7 @@ function exportPopupCSV(){
 window.createSummaryPopupTable = createSummaryPopupTable;
 window.toggleAutoSummary = toggleAutoSummary;
 </script>
-
-
-<button id="backfillBtn" class="ctrl-btn">Backfill</button>
-
+<button class="ctrl-btn" id="backfillBtn">Backfill</button>
 <script>
 // Group note buttons by colour into separate rows (no colour/style changes)
 (function(){
@@ -2294,8 +2274,6 @@ window.toggleAutoSummary = toggleAutoSummary;
 
 })();
 </script>
-
-
 <script>
 // === Summary (5m/15m/60m) recompute with Drug/Qty/Notes/Last columns ===
 
@@ -2564,17 +2542,16 @@ function recalcSummary(windowMinutes, tableId){
 
 })();
 </script>
-
 <!-- Summary Popup Modal -->
 <div id="summaryPopupModal" style="display:none; position:fixed; inset:5% 5% auto 5%; background:#fff; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:10000; padding:12px; overflow:auto; max-height:90vh;">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-    <h3 id="summaryPopupTitle" style="margin:0;">Summary</h3>
-    <button id="summaryPopupCloseBtn" style="background:#007aff; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">Close</button>
-  </div>
-  <table id="summaryPopupTable" style="width:100%; border-collapse:collapse; background:#fff;">
-    <thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
-    <tbody></tbody>
-  </table>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+<h3 id="summaryPopupTitle" style="margin:0;">Summary</h3>
+<button id="summaryPopupCloseBtn" style="background:#007aff; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">Close</button>
+</div>
+<table id="summaryPopupTable" style="width:100%; border-collapse:collapse; background:#fff;">
+<thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
+<tbody></tbody>
+</table>
 </div>
 <script>
 (function(){
@@ -2775,8 +2752,8 @@ function buildEmotionButtons() {
     const now = Date.now();
     const plan = [
       {min:1,   table:'autoSummaryTable', label:' 1m Now',  key:'t1',  pkey:'p1'},
-      {min:5,   table:'summary5Table',    label:' 5m Now',  key:'t5',  pkey:'p5'},
-      {min:15,  table:'summary15Table',   label:' 15m Now', key:'t15', pkey:'p15'},
+      {min:5,   table:'summary5Table',    label:' 1m Now',  key:'t5',  pkey:'p5'},
+      {min:15,  table:'summary15Table',   label:' 11m Now', key:'t15', pkey:'p15'},
       {min:60,  table:'summary60Table',   label:' 60m Now', key:'t60', pkey:'p60'}
     ];
 
@@ -2892,8 +2869,6 @@ function buildEmotionButtons() {
 
 })();
 </script>
-
-
 <script>
 // ===== Summary Utilities + Backfill + Popups (self-contained, safe to re-define if absent) =====
 (function(){
@@ -3258,12 +3233,32 @@ window.openSummaryPopup = function(minutes){
 
 })();
 </script>
+<script>
 
+(function(){
+  function _wire(id, minutes, tableId){
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (el.dataset && el.dataset._wired) return;
+    if (el.dataset) el.dataset._wired = "1";
+    el.addEventListener('click', function(){
+      try {
+        if (typeof backfillWindow === 'function'){
+          backfillWindow(minutes, tableId);
+        } else {
+          console.warn('backfillWindow() not available yet');
+        }
+      } catch (e) { console.error(e); }
+    });
+  }
+  window.addEventListener('DOMContentLoaded', function(){
+    _wire('backfillBtn', 5, 'summary5Table');
+    _wire('backfill15Btn', 15, 'summary15Table');
+    _wire('backfill60Btn', 60, 'summary60Table');
+  });
+})();
+</script>
 </body>
-
-
-
-
 </html>
 <!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
 <script>
