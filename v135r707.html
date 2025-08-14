@@ -1,0 +1,2175 @@
+
+
+
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>v1.33 (r704)</title>
+<style>
+
+#logTable {
+  display: block;
+  max-height: calc(15 * 42px); /* ~40px per row incl. padding/border // Michael Anthony Ralph / Special Technology Services, August 2025
+ */
+
+  overflow-y: auto;
+}
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #f9f9f9;
+        color: #000;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        color: #007aff;
+    }
+
+    .controls {
+        margin-bottom: 20px;
+    }
+
+    .controls button, .controls label {
+        margin-right: 10px;
+    }
+
+    input, select, textarea {
+        background: #fff;
+        color: #000;
+        border: 1px solid #ccc;
+        padding: 6px 10px;
+        border-radius: 6px;
+        margin: 4px;
+        font-size: 10px;
+    }
+
+    .score-columns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .score-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 5px;
+    }
+
+    .score-column button {
+        width: 120px;
+        height: 30px;
+        margin: 1px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #fff;
+    }
+
+    .selected-score {
+        background-color: #007aff !important;
+        color: #fff !important;
+        font-weight: bold;
+        border: 2px solid #000;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        margin-top: 20px;
+    }
+
+    table, th, td {
+        border: 1px solid #ccc;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        font-size: 10px;
+    }
+    
+    #extraNoteButtons {
+        display: grid;
+        grid-template-columns: repeat(8, 80px);
+        gap: 2px;
+        margin-top: 10px;
+    }
+
+    .note-btn {
+        width: 80px;
+        height: 20px;
+        font-size: 9px;
+        padding: 0;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #f2f2f2;
+        color: #000;
+        transition: box-shadow 0.1s;
+        margin: 0;
+    }
+
+    .note-btn.selected-score {
+        box-shadow: 0 0 0 2px #000;
+        color: #fff;
+    }
+
+    .note-btn[data-category="gold"] {
+        background: gold;
+        color: #000;
+    }
+
+    .note-btn[data-category="dose"] {
+        background: #444;
+        color: #fff;
+    }
+
+    .note-btn[data-category="blue"] {
+        background: #007aff;
+        color: #fff;
+    }
+
+    .note-btn[data-category="red"] {
+        background: red;
+        color: #fff;
+    }
+
+    .note-btn[data-category="green"] {
+        background: green;
+        color: #fff;
+    }
+
+    .note-btn[data-category="orange"] {
+        background: orange;
+        color: #000;
+    }
+
+    .note-btn[data-category="yellow"] {
+        background: #ffeb3b;
+        color: #000;
+    }
+
+    #scoreModal {
+        display: none;
+        position: fixed;
+        top: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        padding: 20px;
+        border: 2px solid #007aff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+
+    #scoreModal input {
+        width: 60px;
+    }
+    
+  .note-btn[data-category="purple"] {
+    background-color: rebeccapurple;
+    color: #fff;
+  }
+
+/* Auto-summary Button */
+    #autoSummaryToggleBtn{ /* fixed removed */ }
+    
+/* Horizontal layout for summary buttons at top-right */
+.summary-controls{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  padding:8px 10px;
+}
+.summary-controls button{
+  width:auto; /* allow natural width */
+  white-space:nowrap;
+}
+
+</style>
+<!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+<style>
+#autoSummaryDock{
+  margin-top: 20px;
+}
+#autoSummaryTable{
+  width:100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+#autoSummaryTable th, #autoSummaryTable td{
+  border:1px solid #ccc;
+  padding:10px;
+  text-align:center;
+  font-size:10px;
+}
+#autoSummaryTitle{
+  font-weight:600;
+  margin:6px 0;
+}
+</style>
+<style>
+
+/* ==== Summary Controls Layout Override (spread horizontally) ==== */
+.summary-controls{
+  position: fixed;
+  top: 10px;
+  left: 20px;
+  right: 20px;           /* span across screen */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; /* spread across full width */
+  gap: 16px;
+  z-index: 9999;
+  pointer-events: auto;
+}
+.summary-controls button{
+  position: static !important; /* cancel fixed on individual buttons */
+  top: auto !important;
+  right: auto !important;
+  width: auto;
+  white-space: nowrap;
+  background: #007aff;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.summary-controls #autoSummaryToggleBtn{
+  background: #008CBA; /* keep distinct colour for Auto */
+}
+
+/* Explicitly override any earlier fixed rules on these IDs */
+#summary5Btn, #summary15Btn, #summary60Btn, #autoSummaryToggleBtn{
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+}
+
+</style>
+</head>
+<body>
+<div class="summary-controls">
+<button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
+    <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
+    <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
+    <button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
+
+</div>
+<h1>v1.3.3 (r704)</h1>
+<div class="controls">
+<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
+<button onclick="newTrip()">New Log</button>
+<button onclick="resetTimer()">Reset Timer</button>
+<button onclick="pauseTimer()">Pause Timer</button>
+<label>
+<input id="redoseCheckbox" type="checkbox"/>
+             Redose
+        </label>
+<button id="addBtn" onclick="addEntry()">Add Entry</button>
+<button onclick="deleteSelected()">Delete Selected</button>
+<button onclick="editSelected()">Edit Selected</button>
+<button onclick="exportCSV()">Export CSV</button>
+<button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
+<input id="openLogInput" type="file" accept=".csv,text/csv" style="display:none" />
+<button onclick="openScoreModal()">Manual Score Entry</button>
+<button onclick="openEmotionModal()">Emotion Wheel</button>
+</div>
+<div>
+<label>
+            Phase: 
+            <input id="eventInput" maxlength="50" size="50" type="text"/>
+</label>
+<br/>
+<label>
+            Scale: 
+            <input id="scaleInput" maxlength="50" size="30" type="text"/>
+</label>
+<br/>
+<label>
+            Add:
+                  
+            <select id="drugSelect">
+<option value="">--Select--</option>
+<option value="x-PiHP">x-PiHP</option>
+<option value="PYRO">PYRO</option>
+<option value="Cathinone">Cathinone</option>
+<option value="Unknown">Unknown</option>
+<option value="Food">Food</option>
+<option value="Drink">Drink</option>
+<option value="Sleep">Sleep</option>
+<option value="Exercise">Exercise</option>
+<option value="NN-DMC">NN-DMC</option>
+<option value="MD-PiHP">MD-PiHP</option>
+<option value="2ME-PiHP">2ME-PiHP</option>
+<option value="A-PiHP">A-PiHP</option>
+<option value="3F-PiHP">3F-PiHP</option>
+<option value="Meth">Meth</option>
+<option value="MDMA">MDMA</option>
+<option value="3-MMC">3-MMC</option>
+<option value="Dust">Dust</option>
+<option value="Speed">Speed</option>
+<option value="Cocaine">Cocaine</option>
+<option value="Crack">Crack</option>
+<option value="Vodka">Vodka</option>
+<option value="Weed">Weed</option>
+<option value="Cone">Cone</option>
+<option value="Brownie">Brownie</option>
+<option value="Snowcone">TSnowconeHC</option>
+<option value="Edible">Edible</option>
+<option value="THC">THC</option>
+<option value="Alcohol">Alcohol</option>
+<option value="Benzodiazepine">Benzodiazepine</option>
+<option value="Diazepam">Diazepam</option>
+<option value="Alprazolam">Alprazolam</option>
+<option value="Bromazolam">Bromazolam</option>
+<option value="LSD">LSD</option>
+</select>
+</label>
+<label>
+            qty: 
+            <input id="qtyInput" size="6" type="number"/>
+</label>
+<label>
+            Detail: 
+            <input id="roaInput" size="10" type="text"/>
+</label>
+<br/>
+<label>Notes:</label>
+<br/>
+<textarea cols="50" id="notesInput" rows="3"></textarea>
+<br/>
+<div style="display: flex; gap: 10px;"><label>Last:</label>
+<br/>
+<textarea cols="50" id="customNotesInput" rows="3"></textarea></div>
+</div>
+<div style="display: flex; align-items: flex-start; gap: 20px;">
+<div class="score-columns" id="scoreColumns"></div>
+<div id="noteButtons"></div>
+<div id="extraNoteButtons"></div>
+</div>
+<div id="timer" style="margin-top: 10px;">Time: 00:00:00</div>
+<table id="logTable">
+<thead>
+<tr>
+<th data-col="Select">Select</th>
+<th data-col="Timestamp">Timestamp</th>
+<th data-col="Since">Since</th>
+<th data-col="Elapsed">Elapsed</th>
+<th data-col="Phase">Phase</th>
+<th data-col="Scale">Scale</th>
+<th data-col="Drug">Drug</th>
+<th data-col="QTY">QTY</th>
+<th data-col="ROA">ROA</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Mood">Mood</th>
+<th data-col="Mood">Mood</th>
+<th data-col="Social">Social</th>
+<th data-col="Social">Social</th>
+<th data-col="Energy">Energy</th>
+<th data-col="Energy">Energy </th>
+<th data-col="Focus">Focus</th>
+<th data-col="Focus">Focus</th>
+<th data-col="Anxiety">Anxiety</th>
+<th data-col="Anxiety">Anxiety</th>
+<th data-col="Impair">Impair</th>
+<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
+<th data-col="Score">Score</th>
+<th data-col="Max">Max</th>
+<th data-col="Min">Min</th>
+<th data-col="VL">VL</th>
+<th data-col="sM">sM</th>
+<th data-col="sB">sB</th>
+<th data-col="sF">sF</th>
+<th data-col="Last">Last</th>
+<th data-col="Notes">Notes</th>
+<th data-col="Weighted">Weighted</th><th data-col="5Max">5Max</th><th data-col="GS">GS</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div id="autoSummaryDock">
+  <div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
+  <table id="autoSummaryTable">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<!-- Additional Summary Docks (separate targets) -->
+<div id="summary5Dock" style="margin-top:20px;">
+  <div id="summary5Title">Summary 5m (rolling)</div>
+  <table id="summary5Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="summary15Dock" style="margin-top:20px;">
+  <div id="summary15Title">Summary 15m (rolling)</div>
+  <table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="summary60Dock" style="margin-top:20px;">
+  <div id="summary60Title">Summary 60m (rolling)</div>
+  <table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+
+<script>
+
+// === UI Column Visibility & Shading Config ===
+const HIDE_IN_UI = ['VL','sM','sB','sF','GS','change','Deg','D2','Oth','O2'];
+const NO_SHADE = new Set(['change','Change','Deg']);
+
+// Shading caps (max value that maps to full opacity)
+const SHADE_CAP = {
+  'Score': 25,
+  'Max': 25,
+  'Min': 10,
+  'Weighted': 100,
+  '5Max': 10
+};
+
+const GREEN_SET = new Set(['Rush','Mood','Social','Score','Weighted','5Max','Max']);
+const GOLD_SET  = new Set(['Energy','Focus']);
+const RED_SET   = new Set(['Anxiety','Impair','Min']);
+
+function applyUiColumnVisibility() {
+  const id = 'uiHideCols';
+  if (document.getElementById(id)) return;
+  const style = document.createElement('style');
+  style.id = id;
+  style.textContent = HIDE_IN_UI
+    .map(c => `th[data-col="${c}"], td[data-col="${c}"]{display:none !important;}`)
+    .join('');
+  document.head.appendChild(style);
+
+  // Ensure no background on no-shade set
+  const id2 = 'noShadeOverride';
+  if (!document.getElementById(id2)) {
+    const s = document.createElement('style');
+    s.id = id2;
+    s.textContent = `
+      th[data-col="change"], td[data-col="change"],
+      th[data-col="Change"],  td[data-col="Change"],
+      th[data-col="Deg"], td[data-col="Deg"] { background: transparent !important; }
+    `;
+    document.head.appendChild(s);
+  }
+}
+
+// Map each cell to its column name using the header texts
+function tagRowCells(tr) {
+  const header = document.querySelectorAll('#logTable thead th');
+  Array.from(tr.children).forEach((td, idx) => {
+    const name = header[idx] ? header[idx].textContent.trim() : '';
+    if (name) td.setAttribute('data-col', name);
+  });
+}
+
+function cellBgFor(colName, value) {
+  if (NO_SHADE.has(colName)) return '';
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '';
+  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 5;
+  const opacity = Math.min(Math.max(num, 0), cap) / cap;
+  if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
+  if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
+  if (RED_SET.has(colName))   return `rgba(255,0,0,${opacity})`;
+  return '';
+}
+
+function applyRowShading(tr) {
+  Array.from(tr.children).forEach(td => {
+    const col = td.getAttribute('data-col') || '';
+    const bg = cellBgFor(col, td.textContent.trim());
+    if (bg) td.style.backgroundColor = bg;
+    else td.style.background = '';
+  });
+}
+
+    const labelMappings = {
+        rush: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'None',
+//            "1": 'Low',
+//            "2": 'Some',
+//            "3": 'Clear',
+//            "4": 'Strong',
+//            "5": 'Intense',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        mood: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'No Change',
+//            "1": 'Ignorable',
+//            "2": 'OK',
+//            "2.5": '',
+//            "3": 'Clear',
+//            "4": 'Obvious',
+//            "5": 'Super',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        social: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'Flat',
+//            "1": 'Think',
+//            "2": 'Want',
+//            "3": 'Urge/Desire',
+//            "4": 'Social',
+//            "5": 'Outgoing',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        energy: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'Normal',
+//            "1": 'Slight',
+//            "2": 'Increased',
+//            "2.5": '',
+//            "3": 'Clear/Push',
+//            "4": 'Energetic',
+//            "4.5": '',
+//            "5": 'Hyper',
+//            "6": 'Manic',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        focus: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'No',
+//            "1": 'Alert',
+//            "2": 'Vigilant',
+//            "3": 'Increased',
+//            "4": 'Focused',
+//            "5": 'Obsessive',
+//            "6": 'Wired',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        anxiety: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'No/None',
+//            "1": 'Normal',
+//            "2": 'Excessive',
+//            "3": 'Clear/Feel',
+//            "4": 'Extra',
+//            "5": 'Impacting',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        impair: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'None',
+//            "1": 'Minimal',
+//            "2": 'Low',
+//            "2.5": '',
+//            "3": 'Visibly',
+//            "4": 'Impaired',
+//            "4.5": '',
+//            "5": 'Behaviour',
+//            "6": 'AdverseImpact',
+            "0": 'No/None',
+            "0.5": 'Minimal',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Moderate',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "5": 'Very High',
+            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        change: {
+            "-1": 'Aware Of',
+            "-2": 'Bad Choices',
+            "0": 'No Change',
+            "1": 'Maybe',
+            "2": 'Required Thinking',
+            "2.5": 'Some',
+            "3": 'Clear',
+            "3.5": 'Prominent',
+            "4": 'Obvious',
+            "5": 'Controlling',
+            "6": 'Autopilot/Hindsight',
+            "8": 'Dominant',
+            "9": 'High',
+            "10": 'Certain'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        degree: {
+//            "0": 'None',
+//            "1": 'Minimal',
+//            "2": 'Low/Ignore',
+//            "3": 'Low/Clear',
+//            "4": 'Mid/Ignore',
+//            "5": 'Mid/Clear',
+//            "6": 'High/Maskable',
+//            "7": 'High/Obvious',
+//            "8": 'Very High',
+//            "9": 'Extreme',
+            "10": 'Maximum'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        other: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'Zero',
+//            "0": 'Hungry',
+//            "1": 'Eat',
+//            "2": 'Thirsty',
+//            "3": 'Drink',
+//            "4": 'Tired',
+//            "5": 'Slept',
+//            "6": 'Sleeping',
+//            "7": 'Headache',
+//            "8": 'Nausea',
+            "9": 'False',
+            "10": 'True'
+             }
+    };
+['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
+
+    function getLabels(metric, values) {
+        if (!Array.isArray(values))
+            values = [values];
+        return Array.from(new Set(values))
+        .sort((a, b) => b - a)
+        .map(v => labelMappings[metric][v] || '')
+        .filter(Boolean);
+    }
+
+    function getSum(arr) {
+        return Array.isArray(arr) && arr.length
+        ? arr.reduce((a, b) => a + b, 0)
+        : 0;
+    }
+
+    function fmt2(x){ const n = Number.parseFloat(x); return Number.isFinite(n) ? n.toFixed(2) : (x ?? ""); }
+
+    const metrics = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair','change','degree','other'];
+    let selections = {},
+        logData = [],
+        timerInterval,
+        startTime,
+        doseTime,
+        editIndex = null;
+
+    function initSelections() {
+        metrics.forEach(m => selections[m] = []);
+    }
+
+    function buildButtons() {
+        // Score buttons
+        const sc = document.getElementById('scoreColumns');
+        sc.innerHTML = '';
+        metrics.forEach(f => {
+            const col = document.createElement('div');
+            col.className = 'score-column';
+            const t = document.createElement('strong');
+            t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
+            col.appendChild(t);
+  //         [10, 9, 8, 7, 6, 5.5, 5, 4, 3.5, 3, 2, 1, 0.5, 0, -0.5, -1, -2, -3, -0.4, -0.3, -0.2, -0.1, 3.4, 3.3, 3.2, 3.1, 2.4, 2.3, 2.2, 2.1, 1.4, 1.3, 1.2, 1.1].forEach(v => {
+           [6, 5, 4 ,3.5, 3, 2.5, 2, 1, 0.5, 0, -0.5, -1].forEach(v => {
+
+                const b = document.createElement('button');
+                let customLabel = '';
+if (v === -222) customLabel = '';
+if (v === -444) customLabel = '';
+if (v === -111) customLabel = '-';
+//else if (v === 6) customLabel = 'Extra/Prominent';
+else if (v === 9) customLabel = '';
+else if (v === 0.1) customLabel = 'Maybe/Unsure';
+else if (v === 0.01) customLabel = '+';
+else if (v === -0.01) customLabel = '-';
+else if (v === -0.1) customLabel = '';
+else if (v === 0.2) customLabel = 'Ignorable';
+else if (v === -0.2) customLabel = '';
+else if (v === 0.3) customLabel = 'Required Thinking';
+else if (v === -0.3) customLabel = '';
+else if (v === 0.4) customLabel = 'Some';
+else if (v === -0.4) customLabel = '';
+else if (v === 0.6) customLabel = 'Clear';
+else if (v === -0.6) customLabel = '';
+else if (v === 0.7) customLabel = 'Obvious';
+else if (v === -0.7) customLabel = '';
+else if (v === 0.8) customLabel = 'Controlling';
+else if (v === -0.8) customLabel = '';
+else if (v === -0.5) customLabel = '-';
+else if (v === -1) customLabel = '--';
+else if (v === 7) customLabel = '';
+else if (v === 8) customLabel = '';
+else if (v === 9) customLabel = '';
+else if (v === 10) customLabel = '';
+else if (v === 9) customLabel = '';
+else if (v === 9) customLabel = '';
+//else if (v === 10) customLabel = 'Maximum';
+//else if (v === 6) customLabel = 'Extra/Prominent';
+else customLabel = labelMappings[f]?.[v] ?? '';
+b.innerText = `${v}: ${customLabel}`;
+                b.onclick = () => {
+                    const i = selections[f].indexOf(v);
+                    if (i < 0) {
+                        selections[f].push(v);
+                        b.classList.add('selected-score');
+                    }
+                    else {
+                        selections[f].splice(i, 1);
+                        b.classList.remove('selected-score');
+                    }
+                };
+                col.appendChild(b);
+            });
+            sc.appendChild(col);
+        
+});
+
+        // Original notes
+        const noteCont = document.getElementById('noteButtons');
+        noteCont.innerHTML = '';
+        const palette = {
+            CONTEXT: 'other',
+            PRE: 'time',
+            POST: 'time',
+            ONSET: 'time',
+            After: 'time',
+            Before: 'time',
+            Estimate: 'time',
+            RUSH: 'effect',
+            Good: 'positive',
+            Bad: 'negative',
+            Anxiety: 'emotional',
+            Craving: 'emotional',
+            Joy: 'positive',
+            Physical: 'physical',
+            Visual: 'effect',
+            Audio: 'effect',
+            Cognitive: 'mental',
+            Social: 'effect',
+            Paranoia: 'emotional',
+            Peaceful: 'positive',
+            Insight: 'mental',
+            Sleep: 'other',
+            Alert: 'effect',
+            Fatigue: 'physical',
+            Euphoria: 'positive',
+            Pain: 'physical',
+            Discomfort: 'physical',
+            Calm: 'positive',
+            Tension: 'emotional',
+            Fun: 'positive',
+            Confusion: 'mental'
+        };
+        (function(){const h=document.createElement("h4");h.textContent="Gold";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Extra notes (gold)
+        const extraCont = document.getElementById('extraNoteButtons');
+        extraCont.innerHTML = '';
+        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over,', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'UnsureIfUsable', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
+        extra.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'gold');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                }
+                else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        (function(){const h=document.createElement("h4");h.textContent="Dose";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Dark grey dose buttons
+        const darkLabels = ["Note", "Context", "Associate", "Change", "Review", "Weighed", "Yes", "No", "Maybe", "Certain", "Half", ">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<30mg"];
+        darkLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'dose');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                }
+                else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        (function(){const h=document.createElement("h4");h.textContent="Blue";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Bright blue custom buttons
+        const blueLabels = ['VisibleVapour', 'InvisibleVapour', 'Billowing', 'WarmAir', 'Plumes', 'Burned', 'WarmAir', 'ThickVapour', 'DarkVapour', 'Smoke', 'NiceSmell', 'NiceTaste', 'BadSensation', 'Invisible', 'Dark', 'Warm',
+        'Smoke', 'Vapour', 'BurnedSmell', 'HalfBurned'];
+        blueLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'blue');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        (function(){const h=document.createElement("h4");h.textContent="Red";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Bright red custom buttons
+        const redLabels = ['Mental', 'FocusLocked', 'Locked', 'Computer', 'MusicOn', 'MusicOff', 'GoodSong', 'Visceral', 'Physical', 'BloodPressure', 'BodyTemp', 'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
+        redLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'red');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        (function(){const h=document.createElement("h4");h.textContent="Green";document.getElementById("extraNoteButtons").appendChild(h);})();
+const greenLabels =  ["ThroatSuction", "Suck", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
+        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "TwoHits", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Destroyed", "BurnedRemains",
+        "HeatedOnce", "AlreadyHeated", "NotYetHeated"];
+        greenLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'green');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        (function(){const h=document.createElement("h4");h.textContent="Orange";document.getElementById("extraNoteButtons").appendChild(h);})();
+const orangeLabels =  ['Lighter', 'Candle', 'Jet', 'Blowtorch', 'Vape', 'Hotrail', 'Cone', 'Snowcone', 'Bong', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Broken', 'Loose', 'Liquid', 'Sludge', 'PropyleneGlycol', 'Melted', 'Vapourised', 'SomeColour', 'ColourChange', 'Loose', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed', 'AwareBad', 'BadChoices', 'DoseToDetriment'];
+        orangeLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'orange');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        (function(){const h=document.createElement("h4");h.textContent="Yellow";document.getElementById("extraNoteButtons").appendChild(h);})();
+const yellowLabels =  JSON.parse('["Positive", "Negative", "Flat", "BadSideEffCD"]');
+// Purple category labels
+yellowLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.textContent = lbl;
+            b.setAttribute('data-category', 'yellow');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+
+
+    // ─── APPEND PURPLE LABELS ───────────────────────────────────────────────
+    (function(){const h=document.createElement("h4");h.textContent="Purple";document.getElementById("extraNoteButtons").appendChild(h);})();
+const purpleLabels =  [
+      '5_Secs', '15sLate','Deep','Shallow','Hold','Long','Short','Slow','Rapid','OneBreath','Multiple','Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone', 'BuildingAlone'
+    ];
+    const purpleContainer = document.querySelector('#extraNoteButtons');
+    purpleLabels.forEach(label => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = label;
+      btn.dataset.category = 'purple';
+      btn.classList.add('note-btn');
+      btn.addEventListener('click', () => {
+        const notes = document.querySelector('#notesInput');
+        const toks = notes.value.split(/\s+/).filter(Boolean);
+        const i = toks.indexOf(label);
+        if (i >= 0) { toks.splice(i, 1); } else { toks.push(label); }
+        notes.value = toks.join(' ');
+      });
+      purpleContainer.appendChild(btn);
+    });
+    // ──────────────────────────────────────────────────────────────────────────
+    }
+
+    function resetTimer() {
+        startTime = doseTime = new Date();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            document.getElementById('timer').innerText = 'Trip Time: ' + getElapsed(startTime);
+        }, 1000);
+    }
+    function pauseTimer() {
+        clearInterval(timerInterval);
+    }
+    function newTrip() {
+        logData = [];
+        localStorage.removeItem('tripLog');
+        renderTable();
+        clearInterval(timerInterval);
+        document.getElementById('timer').innerText = 'Time: 00:00:00';
+        startTime = doseTime = null;
+    }
+    function getElapsed(start) {
+        if (!start)
+            return "00:00:00";
+        let d = Math.floor((new Date() - start) / 1000),
+            h = String(Math.floor(d / 3600)).padStart(2, '0'),
+            m = String(Math.floor((d % 3600) / 60)).padStart(2, '0'),
+            s = String(d % 60).padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+    function addEntry() {
+if (!startTime)
+            resetTimer();
+        // [disabled duplicate summary timer]
+
+        const now = new Date(),
+            ts = now.toLocaleString('en-AU', {
+                hour12: false
+            });
+        if (document.getElementById('redoseCheckbox').checked && document.getElementById('drugSelect').value)
+            doseTime = new Date();
+        const entry = {
+   			 _ts: Date.now(),
+   			 timestamp: ts,
+            sincedose: getElapsed(doseTime),
+            elapsed: getElapsed(startTime),
+            info: document.getElementById('eventInput').value,
+            scale: document.getElementById('scaleInput').value,
+            drug: document.getElementById('drugSelect').value,
+            qty: document.getElementById('qtyInput').value,
+            roa: document.getElementById('roaInput').value,
+            notes: document.getElementById('notesInput').value,
+            customNotes: document.getElementById('customNotesInput').value
+        };
+        metrics.forEach(f => {
+            entry[f] = selections[f].length ? Array.from(new Set(selections[f])).sort((a, b) => b - a) : [];
+            entry[f + 'Label'] = getLabels(f, entry[f]).join(', ');
+            entry[f + 'Sum'] = getSum(entry[f]);
+        });
+        entry.score = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum + entry.focusSum - entry.anxietySum - entry.impairSum;
+        entry.max = ['rush', 'mood', 'social', 'energy', 'focus'].reduce((a, f) => a + (entry[f + 'Sum'] || 0), 0);
+        entry.min = entry.anxietySum + entry.impairSum;
+        entry.maxPercent = +(entry.max / 50 * 100).toFixed(1);
+        entry.minPercent = +(entry.min / 20 * 100).toFixed(1);
+        entry.min = entry.anxietySum + entry.impairSum;
+        let val = 0;
+        ['rush', 'mood', 'social', 'energy', 'focus'].forEach(m => entry[m].some(v => v >= 3) && val++);
+        ['anxiety', 'impair'].forEach(m => entry[m].some(v => v >= 3) && val--);
+        entry.valence = val;
+        entry.scaleMood = entry.notes.split(/\s+/).includes('Good') ? 3 : 0;
+        entry.scaleBad = entry.notes.split(/\s+/).includes('Bad') ? 3 : 0;
+        entry.scaleFocus = entry.notes.split(/\s+/).includes('Wired') ? 7 : 0;
+entry.weighted = (
+    (entry.rushSum || 0) * 6 +
+    (entry.socialSum || 0) * 4 +
+    (entry.moodSum || 0) * 4 +
+    (entry.energySum || 0) * 3 +
+    (entry.focusSum || 0) * 3
+);
+entry.goodSum = 0;
+        logData.push(entry);
+        localStorage.setItem('tripLog', JSON.stringify(logData));
+        renderTable();
+        ['eventInput', 'scaleInput', 'drugSelect', 'qtyInput', 'roaInput', 'notesInput', 'customNotesInput'].forEach(id => document.getElementById(id).value = '');
+        initSelections();
+        buildButtons();
+        document.getElementById('addBtn').innerText = 'Add Entry';
+    }
+    
+function renderTable() {
+        const tb = document.querySelector('#logTable tbody');
+        tb.innerHTML = '';
+        logData.forEach((r, i) => {
+            const tr = document.createElement('tr');
+            let h = `<td><input type="checkbox" name="rowSelect" data-index="${i}"></td>`;
+            ['timestamp', 'sincedose', 'elapsed', 'info', 'scale', 'drug', 'qty', 'roa'].forEach(k => h += `<td>${r[k] || ''}</td>`);
+            metrics.forEach(f => {
+                h += `<td data-field="${f}Sum" data-value="${r[f + 'Sum']}">${fmt2(r[f + 'Sum'])}</td>`;
+                h += `<td data-label-for="${f}Sum" data-value="${r[f + 'Sum']}">${r[f + 'Label']}</td>`;
+            });
+        h += `<td data-col="Score" class="score-cell">${fmt2(r.score)}</td>` +
+     `<td data-col="Max" class="max-cell">${fmt2(r.max || 0)}</td>` +
+     `<td data-col="Min" class="min-cell">${fmt2(r.min || 0)}</td>` +
+     `<td data-col="VL">${fmt2(r.valence)}</td>` +
+     `<td data-col="sM">${fmt2(r.scaleMood || 0)}</td>` +
+     `<td data-col="sB">${fmt2(r.scaleBad || 0)}</td>` +
+     `<td data-col="sF">${fmt2(r.scaleFocus || 0)}</td>` +
+     `<td data-col="Last">${r.customNotes || ""}</td>` +
+     `<td data-col="Notes">${r.notes || ""}</td>` +
+     `<td data-col="Weighted">${fmt2(r.weighted || 0)}</td>` +
+     `<td data-col="5Max">${(r.weighted / 10).toFixed(2)}</td>` +
+     `<td data-col="GS">${fmt2(r.goodSum || 0)}</td>`;
+            
+            tr.innerHTML = h;
+            tr.setAttribute('data-ts', String(r._ts || 0));
+            tagRowCells(tr);
+            // Set tooltip percentages for Max/Min without affecting shading text
+            (function(){
+              const maxCell = tr.querySelector('td[data-col="Max"]');
+              if (maxCell && r.maxPercent != null) maxCell.title = String(r.maxPercent) + '%';
+              const minCell = tr.querySelector('td[data-col="Min"]');
+              if (minCell && r.minPercent != null) minCell.title = String(r.minPercent) + '%';
+            })();
+            applyRowShading(tr);
+            applyUiColumnVisibility();
+            tb.appendChild(tr);
+        });
+    }
+    function deleteSelected() {
+        const toDel = Array.from(document.querySelectorAll('input[name="rowSelect"]:checked')).map(cb => +cb.dataset.index);
+        logData = logData.filter((_, i) => !toDel.includes(i));
+        localStorage.setItem('tripLog', JSON.stringify(logData));
+        renderTable();
+    }
+    function editSelected() {
+        const sel = document.querySelector('input[name="rowSelect"]:checked');
+        if (!sel)
+            return alert('Select one row');
+        editIndex = +sel.dataset.index;
+        const r = logData[editIndex];
+        document.getElementById('eventInput').value = r.info;
+        document.getElementById('scaleInput').value = r.scale;
+        document.getElementById('drugSelect').value = r.drug;
+        document.getElementById('qtyInput').value = r.qty;
+        document.getElementById('roaInput').value = r.roa;
+        document.getElementById('notesInput').value = r.notes;
+        document.getElementById('customNotesInput').value = r.customNotes;
+        document.getElementById('addBtn').innerText = 'Save Changes';
+        initSelections();
+        buildButtons();
+        metrics.forEach((f, idx) => r[f].forEach(v => {
+            const btn = document.querySelectorAll('.score-column')[idx].querySelector(`button:nth-child(${8 - v})`);
+            btn && btn.classList.add('selected-score');
+        }));
+    }
+    function exportCSV() {
+        const h = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
+        metrics.forEach(f => h.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
+        h.push("Score","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum");
+        const rows = [h.join(",")];
+        logData.forEach(r => {
+            const L = [r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa];
+            metrics.forEach(f => L.push((+r[f + "Sum"]||0).toFixed(2), r[f + "Label"]));
+            L.push((+r.score||0).toFixed(2), (+r.max||0).toFixed(2), (+r.min||0).toFixed(2), r.maxPercent || 0, r.minPercent || 0, (+r.valence||0).toFixed(2), (+r.scaleMood||0).toFixed(2), (+r.scaleBad||0).toFixed(2), (+r.scaleFocus||0).toFixed(2), r.customNotes || '', r.notes || '', (+r.weighted || 0).toFixed(2), (r.weighted / 10).toFixed(2), (+r.goodSum||0).toFixed(2));
+            rows.push(L.map(x => `"${(x + "").replace(/"/g, '""')}"`).join(","))
+        });
+        const blob = new Blob([rows.join("\n")], {
+                type: "text/csv"
+            }),
+            url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "log.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    // Manual Score Entry Modal functions
+    function openScoreModal() {
+        document.getElementById('scoreModal').style.display = 'block';
+    }
+    function closeScoreModal() {
+        document.getElementById('scoreModal').style.display = 'none';
+        document.querySelectorAll('#scoreModal input').forEach(inp => inp.value = '');
+    }
+    function applyManualScores() {
+        const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
+        fields.forEach(f => {
+            const val = parseInt(document.getElementById('manual' + f.charAt(0).toUpperCase() + f.slice(1)).value, 10);
+            if (!isNaN(val) && val >= 0 && val <= 10) {
+                if (!selections[f])
+                    selections[f] = [];
+                if (!selections[f].includes(val))
+                    selections[f].push(val);
+            }
+        });
+        buildButtons();
+        closeScoreModal();
+    }
+    window.onload = () => {
+        initSelections();
+        buildButtons();
+        try {
+            logData = JSON.parse(localStorage.getItem("tripLog")) || [];
+        } catch {}
+        renderTable();
+    };
+    
+// === Open Existing Log (CSV) ===
+// Paranoid-safe: local File API only. No network. 
+
+function openExistingLog(){
+  // Confirm if table has data
+  try{
+    const hasRows = Array.isArray(logData) && logData.length > 0;
+    if (hasRows && !confirm("Append imported file to the current log? (OK = append, Cancel = abort)")) return;
+  }catch(e){}
+  const inp = document.getElementById('openLogInput');
+  if (!inp) return alert("File input missing.");
+  inp.value = "";
+  inp.onchange = handleFileSelected;
+  inp.click();
+}
+
+function handleFileSelected(ev){
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = String(reader.result || "");
+      const parsed = parseCSV(text);
+      if (!parsed || !parsed.header || !parsed.rows || parsed.rows.length === 0){
+        alert("CSV appears empty.");
+        return;
+      }
+      const map = mapSchema(parsed.header);
+      if (!map.valid){
+        alert("Unsupported CSV: export from this app required.\nMissing: " + map.missing.join(", "));
+        return;
+      }
+      const imported = rowsToLogData(parsed.rows, map);
+      if (!imported.length){
+        alert("No rows could be imported.");
+        return;
+      }
+      // Append + Dedupe + Sort + Persist
+logData = mergeAppendDedupeSort(logData, imported);
+try { localStorage.setItem('tripLog', JSON.stringify(logData)); } catch(e){}
+renderTable();
+// If auto summary is active, clear and emit an immediate row
+      try {
+        const tbody = document.querySelector('#autoSummaryTable tbody'); if (tbody) tbody.innerHTML='';
+        if (window.autoSummaryActive){
+          const endMs = Date.now();
+          const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+          const C = M ? computeCompositeFromMeans(M) : null;
+          const d = new Date();
+          if (M) appendSummaryRowToTable('autoSummaryTable', d, M, C, {labelSuffix: ' 5m Now'});
+        }
+      } catch(e){ console.warn(e); }
+      // Status line
+      showStatus(`Loaded ${imported.length} rows from ${file.name}`);
+    } catch(err){
+      console.error(err);
+      alert("Failed to import CSV: " + err.message);
+    }
+  };
+  reader.onerror = () => alert("Failed to read file.");
+  reader.readAsText(file);
+}
+
+// Minimal RFC4180 CSV parser (handles quotes and escaped quotes)
+function parseCSV(text){
+  const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n");
+  const rows = [];
+  for (let i=0;i<lines.length;i++){
+    const line = lines[i];
+    if (line === "") continue;
+    rows.push(parseCSVLine(line));
+  }
+  if (!rows.length) return {header:[], rows:[]};
+  const header = rows.shift();
+  return {header, rows};
+}
+function parseCSVLine(line){
+  const out = [];
+  let cur = "";
+  let inQ = false;
+  for (let i=0;i<line.length;i++){
+    const ch = line[i];
+    if (inQ){
+      if (ch === '"'){
+        if (i+1 < line.length && line[i+1] === '"'){ cur += '"'; i++; }
+        else { inQ = false; }
+      } else {
+        cur += ch;
+      }
+    } else {
+      if (ch === '"'){ inQ = true; }
+      else if (ch === ','){ out.push(cur); cur = ""; }
+      else { cur += ch; }
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+// Case-insensitive header lookup
+function findHeader(header, names){
+  const idx = header.findIndex(h => names.some(n => (h||"").trim().toLowerCase() === n.trim().toLowerCase()));
+  return idx >= 0 ? idx : -1;
+}
+
+// Schema mapping for app-exported CSV
+function mapSchema(header){
+  const need = {
+    ts: ["Timestamp"],
+    since: ["Since Dose","Since"],
+    elapsed: ["Elapsed"],
+    info: ["Info"],
+    scale: ["Scale"],
+    drug: ["Drug"],
+    qty: ["Qty","QTY"],
+    roa: ["ROA","Detail"],
+    score: ["Score"],
+    max: ["Max"],
+    min: ["Min"],
+    maxp: ["Max %","Max%","Max Percent"],
+    minp: ["Min %","Min%","Min Percent"],
+    valence: ["Valence","VL"],
+    sM: ["scaleMood","sM"],
+    sB: ["scaleBad","sB"],
+    sF: ["scaleFocus","sF"],
+    last: ["Custom Notes","Last"],
+    notes: ["Notes"],
+    weighted: ["Weighted"],
+    score5: ["Score5","5Max"],
+    goodSum: ["Good Sum","GS"],
+    rushSum: ["Rush Sum"],
+    rushLabel: ["Rush Label"],
+    moodSum: ["Mood Sum"],
+    moodLabel: ["Mood Label"],
+    socialSum: ["Social Sum"],
+    socialLabel: ["Social Label"],
+    energySum: ["Energy Sum"],
+    energyLabel: ["Energy Label"],
+    focusSum: ["Focus Sum"],
+    focusLabel: ["Focus Label"],
+    anxietySum: ["Anxiety Sum"],
+    anxietyLabel: ["Anxiety Label"],
+    impairSum: ["Impair Sum"],
+    impairLabel: ["Impair Label"]
+  };
+  const map = {};
+  const missing = [];
+  Object.keys(need).forEach(k => {
+    const idx = findHeader(header, need[k]);
+    if (idx === -1) missing.push(need[k][0]);
+    map[k] = idx;
+  });
+  // Only hard-require the columns that this app always exports
+  const hard = ["ts","since","elapsed","info","scale","drug","qty","roa","score","max","min","last","notes","weighted","score5"];
+  const valid = hard.every(k => map[k] !== -1);
+  return {map, missing, valid, header};
+}
+
+// Parse AU datetime like "13/08/2025, 16:57:12" or "13/08/2025 16:57:12"
+function parseAUDatetime(s){
+  if (!s) return null;
+  const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})\s*$/);
+  if (!m) return null;
+  const [_, d, mo, y, h, mi, se] = m.map(x => parseInt(x,10));
+  const dt = new Date(y, mo-1, d, h, mi, se); // treated as local
+  return dt.getTime();
+}
+
+// Build internal rows from CSV rows
+function rowsToLogData(rows, mapped){
+  const H = mapped.map;
+  const out = [];
+  for (const r of rows){
+    const val = (idx) => (idx>=0 && idx<r.length) ? r[idx] : "";
+    const entry = {
+      _ts: parseAUDatetime(val(H.ts)) || Date.now(),
+      timestamp: val(H.ts),
+      sincedose: val(H.since),
+      elapsed: val(H.elapsed),
+      info: val(H.info),
+      scale: val(H.scale),
+      drug: val(H.drug),
+      qty: val(H.qty),
+      roa: val(H.roa),
+      notes: val(H.notes),
+      customNotes: val(H.last)
+    };
+    // metric sums + labels
+    const metricPairs = [
+      ["rush","rushSum","rushLabel"],
+      ["mood","moodSum","moodLabel"],
+      ["social","socialSum","socialLabel"],
+      ["energy","energySum","energyLabel"],
+      ["focus","focusSum","focusLabel"],
+      ["anxiety","anxietySum","anxietyLabel"],
+      ["impair","impairSum","impairLabel"],
+    ];
+    metricPairs.forEach(([name, sumKey, labelKey])=>{
+      const sumIdx = H[sumKey], labIdx = H[labelKey];
+      const sum = parseFloat(val(sumIdx)) || 0;
+      entry[name] = []; // original discrete selections not preserved in CSV
+      entry[name + "Sum"] = sum;
+      entry[name + "Label"] = val(labIdx) || "";
+    });
+    // Derived / composites (recompute)
+    entry.score = (+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum) - (+entry.anxietySum + +entry.impairSum);
+    entry.max = (+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum);
+    entry.min = (+entry.anxietySum + +entry.impairSum);
+    entry.maxPercent = Math.round((entry.max / 50) * 1000)/10;
+    entry.minPercent = Math.round((entry.min / 20) * 1000)/10;
+    entry.valence = 0; // cannot safely reconstruct; leave 0
+    entry.scaleMood = 0;
+    entry.scaleBad = 0;
+    entry.scaleFocus = 0;
+    entry.weighted = (+entry.rushSum*6) + (+entry.socialSum*4) + (+entry.moodSum*4) + (+entry.energySum*3) + (+entry.focusSum*3);
+    entry.goodSum = 0;
+    out.push(entry);
+  }
+  return out;
+}
+
+
+// Merge + Dedupe + Sort helper (append-only import)
+function mergeAppendDedupeSort(existing, incoming){
+  const left  = Array.isArray(existing) ? existing : [];
+  const right = Array.isArray(incoming) ? incoming : [];
+  
+  // Drop blank/empty rows from the right side before merging
+  const filteredRight = right.filter(isNonEmptyLogRow);
+  const all = left.concat(filteredRight);
+
+  const seen = new Set();
+  const out = [];
+  for (const r of all){
+    const key = JSON.stringify([
+      r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa,
+      r.notes, r.customNotes,
+      r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum, r.anxietySum, r.impairSum,
+      r.score, r.max, r.min, r.weighted, r.maxPercent, r.minPercent
+    ]);
+    if (!seen.has(key)){ seen.add(key); out.push(r); }
+  }
+  out.sort((a,b)=> (a && a._ts ? a._ts : 0) - (b && b._ts ? b._ts : 0));
+  return out;
+}
+
+// Helper: determine if a row (log entry) is effectively empty/blank (all key numbers 0/NaN/absent)
+function isNonEmptyLogRow(r){
+  if (!r) return false;
+  const numericVals = [
+    r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum,
+    r.anxietySum, r.impairSum, r.score, r.max, r.min, r.weighted,
+    r.maxPercent, r.minPercent
+  ].map(v => Number(v));
+  return numericVals.some(v => Number.isFinite(v) && v !== 0);
+}
+
+// Helper: determine if a summary payload (means + composites) has any non-zero signal
+function isNonEmptySummary(M, C){
+  if (!M || typeof M!=="object") return false;
+  const mv = [M.rush, M.mood, M.social, M.energy, M.focus, M.anxiety, M.impair]
+            .map(v=>Number(v));
+  const hasMeans = mv.some(v => Number.isFinite(v) && v !== 0);
+  const cv = C && typeof C==="object"
+    ? [C.score, C.max, C.min, C.weighted, C.fiveMax].map(v=>Number(v))
+    : [];
+  const hasComp = cv.some(v => Number.isFinite(v) && v !== 0);
+  return hasMeans || hasComp;
+}
+
+// Status line / toast
+function showStatus(msg){
+  let el = document.getElementById("statusLine");
+  if (!el){
+    el = document.createElement("div");
+    el.id = "statusLine";
+    Object.assign(el.style, {position:"fixed", top:"46px", right:"20px", background:"#007aff", color:"#fff", padding:"6px 10px", borderRadius:"6px", zIndex:"9999"});
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.remove(); }, 5000);
+}
+
+</script>
+<!-- Manual Score Entry Modal -->
+<div id="scoreModal">
+<h3>Manual Score Entry</h3>
+<label>
+            Rush: 
+            <input id="manualRush" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Mood: 
+            <input id="manualMood" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Social: 
+            <input id="manualSocial" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Energy: 
+            <input id="manualEnergy" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Focus: 
+            <input id="manualFocus" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Anxiety: 
+            <input id="manualAnxiety" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Impair: 
+            <input id="manualImpair" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<br/>
+<button onclick="applyManualScores()">Apply</button>
+<button onclick="closeScoreModal()">Cancel</button>
+</div>
+<!-- Emotion Wheel Modal -->
+<div id="emotionModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%);
+     background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000; max-height:80%; overflow:auto;">
+<h3>Select Emotions</h3>
+<img alt="Emotion Wheel" src="emotion_wheel.jpg" style="width:100%; max-width:500px; margin-bottom:10px; border:1px solid #ccc;"/>
+<div id="emotionButtons" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; justify-content:center;"></div>
+<br/>
+<button onclick="closeEmotionModal()">Close</button>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.score-column button').forEach(btn => {
+        const val = btn.textContent.trim().split(':')[0];
+        if (["0", "1", "2", "3", "4", "5"].includes(val)) {
+            btn.style.height = '40px';
+        }
+    });
+});
+</script>
+
+<!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+
+
+
+
+
+
+
+<script>
+// === Summary Core (revised to read ONLY from main table) ===
+
+let SUMMARY_WINDOW_MINUTES = 5;
+function setSummaryWindowAndOpen(mins){ SUMMARY_WINDOW_MINUTES = mins; createSummaryPopupTable(); }
+
+
+// Columns for popup + CSV
+const SUMMARY_COLUMNS = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+
+// Timers/state
+let auto1mIntervalId = null;
+let lastAuto1mKey = null;
+let auto5mIntervalId = null;
+let lastAuto5mKey = null;
+let autoSummaryActive = false;
+
+// Utility: minute key & label
+function minuteKey(d){
+  return d.getFullYear()
+    + String(d.getMonth()+1).padStart(2,"0")
+    + String(d.getDate()).padStart(2,"0")
+    + String(d.getHours()).padStart(2,"0")
+    + String(d.getMinutes()).padStart(2,"0");
+}
+function formatMinuteLabel(d){
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mm = String(d.getMinutes()).padStart(2,"0");
+  return `${hh}:${mm} Average`;
+}
+
+// === Snapshot strictly from the MAIN TABLE DOM ===
+// Never read from popup or auto-dock.
+function snapshotFromMainTable(){
+  const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+  return rows.map(tr => {
+    const ts = +(tr.getAttribute('data-ts')||0);
+    const get = (field) => {
+      const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+      if (!td) return 0;
+      const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+      return Number.isFinite(v) ? v : 0;
+    };
+    const pack = {
+      _ts: ts,
+      rush: get('rush'),
+      mood: get('mood'),
+      social: get('social'),
+      energy: get('energy'),
+      focus: get('focus'),
+      anxiety: get('anxiety'),
+      impair: get('impair')
+    };
+    return pack;
+  }).filter(o => o._ts>0);
+}
+
+// Means over window [startMs, endMs)
+function computeMeansForWindow(startMs, endMs){
+  const snap = snapshotFromMainTable();
+  const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+  if (!sel.length) return null;
+  const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+  const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+  sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+  const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
+  return means;
+}
+
+// Rolling means of last N minutes ending at endMs
+function computeRollingMeans(endMs, minutes){
+  return computeMeansForWindow(endMs - minutes*60*1000, endMs);
+}
+
+// Composite scores from means
+function computeCompositeFromMeans(M){
+  const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+  const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
+  const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
+  const weighted = (M.rush + M.mood + M.social + 1.5*M.energy + 1.5*M.focus) - (M.anxiety + M.impair);
+  const fiveMax  = ((score/5)+5);
+  return {score, max, min, weighted, fiveMax};
+}
+
+// Append a row to a table by id ('summaryPopupTable' or 'autoSummaryTable')
+function appendSummaryRowToTable(tableId, d, M, C, opts){
+  
+  // Skip if summary is empty/blank
+  if (!isNonEmptySummary(M, C)) { return; }
+const table = document.getElementById(tableId);
+  if (!table) return;
+  const tbody = table.querySelector('tbody'); if (!tbody) return;
+  const suffix = (opts && opts.labelSuffix) ? opts.labelSuffix : "";
+  const row = [
+    formatMinuteLabel(d) + suffix,
+    M?.rush, M?.mood, M?.social, M?.energy, M?.focus, M?.anxiety, M?.impair,
+    C?.score, C?.max, C?.min, C?.weighted, C?.fiveMax
+  ];
+  const tr = document.createElement("tr");
+  tr.innerHTML = row.map((v,i)=>{
+    const name = SUMMARY_COLUMNS[i];
+    if (i===0) return `<td>${v??''}</td>`;
+    const num = Number(v);
+    const isNum = Number.isFinite(num);
+    const bg = isNum && typeof cellBgFor==='function' ? cellBgFor(name, num) : '';
+    const val = isNum ? num.toFixed(2) : (v ?? '');
+    return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+  }).join("");
+  // Tooltips for Max/Min (percent of 10)
+  const cells = tr.children;
+  const idxMax = SUMMARY_COLUMNS.indexOf('Max');
+  const idxMin = SUMMARY_COLUMNS.indexOf('Min');
+  if (idxMax>-1 && cells[idxMax]) {
+    const v = parseFloat(cells[idxMax].textContent); if (!Number.isNaN(v)) cells[idxMax].title = `${Math.round((v/10)*100)}%`;
+  }
+  if (idxMin>-1 && cells[idxMin]) {
+    const v = parseFloat(cells[idxMin].textContent); if (!Number.isNaN(v)) cells[idxMin].title = `${Math.round((v/10)*100)}%`;
+  }
+  tbody.appendChild(tr);
+}
+
+// Emit 1-minute rolling average (used by Auto)
+function emitAuto1m(){
+  const now = new Date();
+  const prev = new Date(now.getTime() - 60*1000); prev.setSeconds(0,0);
+  const key = minuteKey(prev);
+  if (lastAuto1mKey === key) return;
+  lastAuto1mKey = key;
+  const endMs = prev.getTime() + 60*1000;
+  const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+  const C = M ? computeCompositeFromMeans(M) : null;
+  if (M) {
+    appendSummaryRowToTable('autoSummaryTable', prev, M, C, {bold:false, labelSuffix:' 5m Avg'});
+    // If popup exists, mirror there as well (still isolated from its own data)
+    if (document.getElementById('summaryPopupTable')) {
+      appendSummaryRowToTable('summaryPopupTable', prev, M, C, {bold:false, labelSuffix:' 5m Avg'});
+    }
+  } else { /* skip empty immediate emit */ }
+}
+
+// Emit 5-minute rolling average at each 5-minute boundary (popup)
+function emitAuto5m(){
+//  ensureSummaryPopup();
+//  const now = new Date();
+//  const mm = now.getMinutes() - (now.getMinutes()%5);
+//  const boundary = new Date(now); boundary.setMinutes(mm,0,0);
+//  const key = minuteKey(boundary);
+//  if (lastAuto5mKey === key) return;
+//  lastAuto5mKey = key;
+//  const endMs = boundary.getTime() + 60*1000;
+//  const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+//  const C = M ? computeCompositeFromMeans(M) : null;
+//  if (M) {
+//    appendSummaryRowToTable('summaryPopupTable', boundary, M, C, {bold:false, labelSuffix:' 5m Avg'});
+//  } else {
+//    appendSummaryRowToTable('summaryPopupTable', boundary, {}, {}, {bold:false, labelSuffix:' 5m Avg '});
+//  }
+}
+
+// Toggle Auto (1-minute rolling stream) — sync both buttons and emit immediately
+function toggleAutoSummary(){
+  autoSummaryActive = !autoSummaryActive;
+  const btn1 = document.getElementById('autoSummaryBtn');       // popup button
+  const btn2 = document.getElementById('autoSummaryToggleBtn'); // fixed header button
+  if (autoSummaryActive){
+    if (btn1) btn1.textContent = 'Auto (On)';
+    if (btn2) btn2.textContent = 'Auto (On)';
+    // emit immediate row
+    (function immediateEmit(){
+      const endMs = Date.now();
+      const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+      const C = M ? computeCompositeFromMeans(M) : null;
+      const d = new Date();
+      if (M) {
+        appendSummaryRowToTable('autoSummaryTable', d, M, C, {bold:false, labelSuffix:' 5m Now'});
+        if (document.getElementById('summaryPopupTable')) appendSummaryRowToTable('summaryPopupTable', d, M, C, {bold:false, labelSuffix:' 5m Now'});
+      } else { /* skip empty auto-summary row */ }
+    })();
+    // schedule boundary-aligned loop
+    if (auto1mIntervalId) clearInterval(auto1mIntervalId);
+    const now = new Date();
+    const msToNext = (60 - now.getSeconds())*1000 - now.getMilliseconds();
+    setTimeout(()=>{
+      emitAuto1m();
+      auto1mIntervalId = setInterval(emitAuto1m, 1000);
+    }, Math.max(0, msToNext));
+  } else {
+    if (btn1) btn1.textContent = 'Auto (Off)';
+    if (btn2) btn2.textContent = 'Auto';
+    if (auto1mIntervalId){ clearInterval(auto1mIntervalId); auto1mIntervalId=null; }
+  }
+}
+
+// Popup builder (id=summaryPopup, #summaryPopupTable) — unchanged shell
+function ensureSummaryPopup(){
+  let popup = document.getElementById("summaryPopup");
+  if (popup) return popup;
+  popup = document.createElement("div");
+  popup.id = "summaryPopup";
+  Object.assign(popup.style, {
+    position:"fixed", top:"70px", right:"20px", background:"#fff", border:"1px solid #ccc",
+    borderRadius:"8px", boxShadow:"0 4px 16px rgba(0,0,0,0.2)", maxHeight:"70vh", overflow:"auto",
+    zIndex:"9999", padding:"10px"
+  });
+
+  const head = document.createElement("div");
+  Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
+  head.innerHTML = `<strong>Summary</strong>`;
+  const controls = document.createElement("div");
+
+  const exportBtn = document.createElement("button");
+  exportBtn.textContent = "Export CSV";
+  exportBtn.onclick = exportPopupCSV;
+
+  const autoBtn = document.createElement("button");
+  autoBtn.id = "autoSummaryBtn";
+  autoBtn.textContent = autoSummaryActive ? "Auto (On)" : "Auto (Off)";
+  autoBtn.onclick = toggleAutoSummary;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "×";
+  closeBtn.style.marginLeft = "8px";
+  closeBtn.onclick = ()=>popup.remove();
+
+  controls.appendChild(exportBtn);
+  
+  const instant5Btn = document.createElement("button");
+  instant5Btn.textContent = "5m Now";
+  instant5Btn.onclick = ()=>appendInstantSummaryToPopup(5);
+  controls.appendChild(instant5Btn);
+
+  const instant15Btn = document.createElement("button");
+  instant15Btn.textContent = "15m Now";
+  instant15Btn.onclick = ()=>appendInstantSummaryToPopup(15);
+  controls.appendChild(instant15Btn);
+
+  controls.appendChild(autoBtn);
+  controls.appendChild(closeBtn);
+  head.appendChild(controls);
+  popup.appendChild(head);
+
+  const table = document.createElement("table");
+  table.id = "summaryPopupTable";
+  table.style.borderCollapse="collapse";
+  table.style.width="100%";
+  const thead = document.createElement("thead");
+  thead.innerHTML = `<tr>${SUMMARY_COLUMNS.map(c=>`<th>${c}</th>`).join("")}</tr>`;
+  table.appendChild(thead);
+  table.appendChild(document.createElement("tbody"));
+  popup.appendChild(table);
+  document.body.appendChild(popup);
+  return popup;
+}
+
+// Create/open popup, dense backfill based on MAIN TABLE data, then start 5m cadence
+function createSummaryPopupTable(){
+  ensureSummaryPopup();
+  // Backfill: find min and max _ts from main table
+  const snap = snapshotFromMainTable();
+  if (snap.length){
+    const minTs = Math.min(...snap.map(x=>x._ts));
+    const now = Date.now();
+    // Build completed 5-min boundaries between minTs and now
+    const start = new Date(minTs); start.setSeconds(0,0);
+    start.setMinutes(start.getMinutes() - (start.getMinutes()%5), 0, 0);
+    for (let t = start.getTime(); t <= now; t += 5*60000){
+      const endMs = t + 60000; // 1 minute after boundary for window end
+      const d = new Date(t);
+      const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
+      if (M){
+        appendSummaryRowToTable('summaryPopupTable', d, M, computeCompositeFromMeans(M), {labelSuffix:'   '});
+      } else {
+        appendSummaryRowToTable('summaryPopupTable', d, {}, {}, {labelSuffix:'   '});
+      }
+    }
+    // Also append a "now" row
+    const Mnow = computeRollingMeans(Date.now(), SUMMARY_WINDOW_MINUTES);
+    const dnow = new Date();
+    if (Mnow){
+      appendSummaryRowToTable('summaryPopupTable', dnow, Mnow, computeCompositeFromMeans(Mnow), {bold:false, labelSuffix:'   '});
+    } else {
+      appendSummaryRowToTable('summaryPopupTable', dnow, {}, {}, {bold:false, labelSuffix:' (5m)'});
+    }
+  }
+  // Start cadence
+  emitAuto5m();
+  startAuto5mTimer();
+}
+
+// Start 5-minute timer (popup flow)
+function startAuto5mTimer(){
+  if (auto5mIntervalId) return;
+  const now = new Date();
+  const mod = now.getMinutes()%5;
+  const msToNext = ((5 - mod) % 5)*60000 + (59-now.getSeconds())*1000 + (1000-now.getMilliseconds());
+  setTimeout(()=>{
+    emitAuto5m();
+    auto5mIntervalId = setInterval(emitAuto5m, 300000);
+  }, Math.max(0, msToNext));
+}
+
+// Append one immediate summary row for a given window into the popup
+function appendInstantSummaryToPopup(minutes){
+  ensureSummaryPopup();
+  const now = Date.now();
+  const M = computeRollingMeans(now, minutes);
+  const d = new Date();
+  if (M){
+    appendSummaryRowToTable('summaryPopupTable', d, M, computeCompositeFromMeans(M), {labelSuffix: ` ${minutes}m Now`});
+  } else {
+    appendSummaryRowToTable('summaryPopupTable', d, {}, {}, {labelSuffix: ` ${minutes}m Now`});
+  }
+}
+
+// CSV export (popup)
+function exportPopupCSV(){
+  const table = document.getElementById("summaryPopupTable"); if (!table) return;
+  const rows = [SUMMARY_COLUMNS.join(",")];
+  table.querySelectorAll("tbody tr").forEach(tr=>{
+    const vals = Array.from(tr.children).slice(0, SUMMARY_COLUMNS.length).map(td=>{
+      const t = td.textContent.trim();
+      return /[",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
+    });
+    rows.push(vals.join(","));
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n")], {type:"text/csv;charset=utf-8"}));
+  a.download = "summary.csv"; document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+}
+window.createSummaryPopupTable = createSummaryPopupTable;
+window.toggleAutoSummary = toggleAutoSummary;
+</script>
+
+
+</body>
+<script>
+function openEmotionModal() {
+    document.getElementById('emotionModal').style.display = 'block';
+    buildEmotionButtons();
+}
+function closeEmotionModal() {
+    document.getElementById('emotionModal').style.display = 'none';
+}
+function buildEmotionButtons() {
+    const container = document.getElementById("emotionButtons");
+    if (container.childNodes.length > 0) return; // Avoid rebuilding
+    const emotions = [
+        "Joy","Happy","Cheerful","Content","Proud","Optimistic","Excited","Energetic","Affectionate","Compassionate","Peaceful","Relieved","Satisfied","Love",
+        "Fear","Scared","Frightened","Helpless","Panic","Insecure","Worried","Nervous","Horrified","Terrified","Hysterical","Anxious","Overwhelmed",
+        "Anger","Annoyed","Agitated","Frustrated","Mad","Rage","Hostile","Hateful","Jealous","Bitter","Irritated","Exasperated",
+        "Sadness","Depressed","Lonely","Isolated","Ashamed","Guilty","Disappointed","Sorrow","Grief","Despair","Hurt","Powerless","Neglected",
+        "Surprise","Amazed","Startled","Stunned","Confused","Shocked","Speechless","Awestruck","Overcome","Perplexed","Disillusioned"
+    ];
+    emotions.forEach(word => {
+        const btn = document.createElement('button');
+        btn.textContent = word;
+        btn.className = 'note-btn';
+        btn.style.minWidth = '80px';
+        btn.onclick = () => {
+            const notes = document.getElementById('notesInput');
+            if (!notes.value.includes(word)) {
+                notes.value = (notes.value + ' ' + word).trim();
+            }
+        };
+        container.appendChild(btn);
+    });
+}
+</script>
+
+
+
+</html>
+<!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
+<script>
+(function(){
+  // Ensure globals exist from earlier script
+  window.autoSummaryActive = !!window.autoSummaryActive;
+
+  // Local state for four cadences
+  let int1 = null, int5 = null, int15 = null, int60 = null;
+  let last1 = null, last5 = null, last15 = null, last60 = null;
+
+  // Helper: compute minute key "YYYYMMDDHHmm"
+  function minuteKey(d){
+    return d.getFullYear()
+      + String(d.getMonth()+1).padStart(2,"0")
+      + String(d.getDate()).padStart(2,"0")
+      + String(d.getHours()).padStart(2,"0")
+      + String(d.getMinutes()).padStart(2,"0");
+  }
+  // Label "HH:MM Average"
+  function formatMinuteLabel(d){
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    return `${hh}:${mm} Average`;
+  }
+
+  // Read-only snapshot from main table (same invariant as existing code)
+  function snapshotFromMainTable(){
+    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(tr => {
+      const ts = +(tr.getAttribute('data-ts')||0);
+      const get = (field) => {
+        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+        if (!td) return 0;
+        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
+      };
+      const pack = {
+        _ts: ts,
+        rush: get('rush'),
+        mood: get('mood'),
+        social: get('social'),
+        energy: get('energy'),
+        focus: get('focus'),
+        anxiety: get('anxiety'),
+        impair: get('impair')
+      };
+      return pack;
+    }).filter(o => o._ts>0);
+  }
+
+  function computeMeansForWindow(startMs, endMs){
+    const snap = snapshotFromMainTable();
+    const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+    if (!sel.length) return null;
+    const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+    const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
+    return means;
+  }
+  function computeRollingMeans(endMs, minutes){
+    return computeMeansForWindow(endMs - minutes*60*1000, endMs);
+  }
+  function computeCompositeFromMeans(M){
+    const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+    const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
+    const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
+    const weighted = (M.rush + M.mood + M.social + 1.5*M.energy + 1.5*M.focus) - (M.anxiety + M.impair);
+    const fiveMax  = ((score/5)+5);
+    return {score, max, min, weighted, fiveMax};
+  }
+
+  function appendSummaryRowToTable(tableId, d, M, C, labelSuffix){
+    if (!M) return;
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody'); if (!tbody) return;
+    const row = [
+      (formatMinuteLabel(d) + (labelSuffix?(" "+labelSuffix):"")),
+      M.rush, M.mood, M.social, M.energy, M.focus, M.anxiety, M.impair,
+      C.score, C.max, C.min, C.weighted, C.fiveMax
+    ];
+    const tr = document.createElement("tr");
+    const cols = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    tr.innerHTML = row.map((v,i)=>{
+      if (i===0) return `<td>${v??''}</td>`;
+      const num = Number(v);
+      const isNum = Number.isFinite(num);
+      // reuse global cellBgFor if present
+      const name = cols[i];
+      const bg = isNum && typeof window.cellBgFor==='function' ? window.cellBgFor(name, num) : '';
+      const val = isNum ? num.toFixed(2) : (v ?? '');
+      return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+    }).join("");
+    tbody.appendChild(tr);
+  }
+
+  // Boundary alignment helpers
+  function msToNextMinute(d){ const t = new Date(d); t.setSeconds(0,0); return 60000 - (d - t); }
+  function msToNextMultipleMinutes(d, m){
+    const t = new Date(d);
+    const curMin = t.getMinutes();
+    const next = curMin + (m - (curMin % m || 0));
+    t.setMinutes(next, 0, 0);
+    return t.getTime() - d.getTime();
+  }
+  function msToTopOfHour(d){
+    const t = new Date(d); t.setMinutes(60,0,0);
+    return t.getTime() - d.getTime();
+  }
+
+  // Emitters for 1/5/15/60 with de-dup keys
+  function emitCadence(periodMin, tableId, lastKeyRef){
+    const now = new Date();
+    const end = new Date(now); end.setSeconds(0,0);
+    const key = end.getFullYear()
+      + String(end.getMonth()+1).padStart(2,"0")
+      + String(end.getDate()).padStart(2,"0")
+      + String(end.getHours()).padStart(2,"0")
+      + String(end.getMinutes()).padStart(2,"0");
+    if (lastKeyRef.key === key) return;
+    lastKeyRef.key = key;
+    const M = computeRollingMeans(end.getTime(), periodMin);
+    if (!M) return;
+    const C = computeCompositeFromMeans(M);
+    appendSummaryRowToTable(tableId, end, M, C, `${periodMin}m Avg`);
+  }
+
+  // Clear all timers
+  function clearAll(){
+    [int1,int5,int15,int60].forEach(x => { if (x) { clearInterval(x); } });
+    int1=int5=int15=int60=null;
+    last1=last5=last15=last60=null;
+  }
+
+  // Public toggle override
+  window.toggleAutoSummary = function(){
+    const btn = document.getElementById('autoSummaryToggleBtn');
+    const wasActive = !!window.autoSummaryActive;
+    if (wasActive){
+      clearAll();
+      window.autoSummaryActive = false;
+      if (btn) btn.textContent = 'Auto';
+      return;
+    }
+    // Turning ON
+    clearAll();
+    window.autoSummaryActive = true;
+    if (btn) btn.textContent = 'Auto (On)';
+    // Update titles to reflect 1m rolling
+    const t = document.getElementById('autoSummaryTitle');
+    if (t) t.textContent = 'Auto Summary (1m rolling)';
+    // Ensure tables exist
+    ['autoSummaryTable','summary5Table','summary15Table','summary60Table'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el){
+        const tb = el.querySelector('tbody');
+        if (tb) tb.innerHTML=''; // clear on (re)start
+      }
+    });
+    // Schedule boundary-aligned timers
+    const now = new Date();
+    // 1 minute cadence -> autoSummaryTable
+    last1 = {key:null};
+    setTimeout(()=>{
+      emitCadence(1, 'autoSummaryTable', last1);
+      int1 = setInterval(()=>emitCadence(1, 'autoSummaryTable', last1), 60000);
+    }, msToNextMinute(now));
+    // 5 minute cadence -> summary5Table
+    last5 = {key:null};
+    setTimeout(()=>{
+      emitCadence(5, 'summary5Table', last5);
+      int5 = setInterval(()=>emitCadence(5, 'summary5Table', last5), 300000);
+    }, msToNextMultipleMinutes(now, 5));
+    // 15 minute cadence -> summary15Table
+    last15 = {key:null};
+    setTimeout(()=>{
+      emitCadence(15, 'summary15Table', last15);
+      int15 = setInterval(()=>emitCadence(15, 'summary15Table', last15), 900000);
+    }, msToNextMultipleMinutes(now, 15));
+    // 60 minute cadence -> summary60Table
+    last60 = {key:null};
+    setTimeout(()=>{
+      emitCadence(60, 'summary60Table', last60);
+      int60 = setInterval(()=>emitCadence(60, 'summary60Table', last60), 3600000);
+    }, msToTopOfHour(now));
+  };
+
+  // Remove any immediate "Now" or mirroring behaviour by shadowing any old helpers
+  // (No-op stubs to avoid accidental cross-posting from earlier code)
+  window.emitAuto1m = function(){};           // disable old 1s spammer
+  window.emitAuto5m = function(){};           // keep disabled; we use new per-table emitters
+  // setSummaryWindowAndOpen remains untouched; summary buttons will simply open/focus any UI you already have
+})();
+</script>
