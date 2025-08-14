@@ -1,0 +1,3525 @@
+/* ==========================================================================
+   Patch: 'Number one' only — keep docked 1m/5m/15m/60m cadences; remove popup auto/backfill.
+   Timestamp (Sydney, UTC+10): 20250814162516
+   Changes:
+   - Removed popup mirror appends from auto 1m path.
+   - Removed call and definition of startAuto5mTimer().
+   - Replaced emitAuto5m() with a no-op stub.
+   Result: Only the boundary-aligned docked tables (Auto 1m, 5m, 15m, 60m) emit. Popup doesn't auto-fill.
+   ========================================================================== */
+
+
+
+
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>v1.33 (r704)</title>
+<style>
+
+#logTable {
+  display: block;
+  max-height: calc(15 * 42px); /* ~40px per row incl. padding/border // Michael Anthony Ralph / Special Technology Services, August 2025
+ */
+
+  overflow-y: auto;
+}
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #f9f9f9;
+        color: #000;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        color: #007aff;
+    }
+
+    .controls {
+        margin-bottom: 20px;
+    }
+
+    .controls button, .controls label {
+        margin-right: 10px;
+    }
+
+    input, select, textarea {
+        background: #fff;
+        color: #000;
+        border: 1px solid #ccc;
+        padding: 6px 10px;
+        border-radius: 6px;
+        margin: 4px;
+        font-size: 10px;
+    }
+
+    .score-columns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .score-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 5px;
+    }
+
+    .score-column button {
+        width: 120px;
+        height: 30px;
+        margin: 1px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #fff;
+    }
+
+    .selected-score {
+        background-color: #007aff !important;
+        color: #fff !important;
+        font-weight: bold;
+        border: 2px solid #000;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        margin-top: 20px;
+    }
+
+    table, th, td {
+        border: 1px solid #ccc;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        font-size: 10px;
+    }
+    
+    #extraNoteButtons {
+        display: grid;
+        grid-template-columns: repeat(8, 80px);
+        gap: 2px;
+        margin-top: 10px;
+    }
+
+    .note-btn {
+        width: 80px;
+        height: 20px;
+        font-size: 9px;
+        padding: 0;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #f2f2f2;
+        color: #000;
+        transition: box-shadow 0.1s;
+        margin: 0;
+    }
+
+    .note-btn.selected-score {
+        box-shadow: 0 0 0 2px #000;
+        color: #fff;
+    }
+
+    .note-btn[data-category="gold"] {
+        background: gold;
+        color: #000;
+    }
+
+    .note-btn[data-category="dose"] {
+        background: #444;
+        color: #fff;
+    }
+
+    .note-btn[data-category="blue"] {
+        background: #007aff;
+        color: #fff;
+    }
+
+    .note-btn[data-category="red"] {
+        background: red;
+        color: #fff;
+    }
+
+    .note-btn[data-category="green"] {
+        background: green;
+        color: #fff;
+    }
+
+    .note-btn[data-category="orange"] {
+        background: orange;
+        color: #000;
+    }
+
+    .note-btn[data-category="yellow"] {
+        background: #ffeb3b;
+        color: #000;
+    }
+
+    #scoreModal {
+        display: none;
+        position: fixed;
+        top: 15%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        padding: 20px;
+        border: 2px solid #007aff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+
+    #scoreModal input {
+        width: 60px;
+    }
+    
+  .note-btn[data-category="purple"] {
+    background-color: rebeccapurple;
+    color: #fff;
+  }
+
+/* Auto-summary Button */
+    #autoSummaryToggleBtn{ /* fixed removed */ }
+    
+/* Horizontal layout for summary buttons at top-right */
+.summary-controls{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  padding:8px 10px;
+}
+.summary-controls button{
+  width:auto; /* allow natural width */
+  white-space:nowrap;
+}
+
+</style>
+<!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+<style>
+#autoSummaryDock{
+  margin-top: 20px;
+}
+#autoSummaryTable{
+  width:100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+#autoSummaryTable th, #autoSummaryTable td{
+  border:1px solid #ccc;
+  padding:10px;
+  text-align:center;
+  font-size:10px;
+}
+#autoSummaryTitle{
+  font-weight:600;
+  margin:6px 0;
+}
+</style>
+<style>
+
+/* ==== Summary Controls Layout Override (spread horizontally) ==== */
+.summary-controls{
+  position: fixed;
+  top: 10px;
+  left: 20px;
+  right: 20px;           /* span across screen */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; /* spread across full width */
+  gap: 16px;
+  z-index: 9999;
+  pointer-events: auto;
+}
+.summary-controls button{
+  position: static !important; /* cancel fixed on individual buttons */
+  top: auto !important;
+  right: auto !important;
+  width: auto;
+  white-space: nowrap;
+  background: #007aff;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.summary-controls #autoSummaryToggleBtn{
+  background: #008CBA; /* keep distinct colour for Auto */
+}
+
+/* Explicitly override any earlier fixed rules on these IDs */
+#summary5Btn, #summary15Btn, #summary60Btn, #autoSummaryToggleBtn{
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+}
+
+</style>
+</head>
+<body>
+<div class="summary-controls">
+<button id="summary60Btn" onclick="openSummaryPopup(60)">Summary 60m</button>
+    <button id="summary15Btn" onclick="openSummaryPopup(15)">Summary 15m</button>
+    <button id="summary5Btn" onclick="openSummaryPopup(5)">Summary 5m</button>
+    <button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
+
+</div>
+<h1>v1.3.3 (r704)</h1>
+<div class="controls">
+<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
+<button onclick="newTrip()">New Log</button>
+<button onclick="resetTimer()">Reset Timer</button>
+<button onclick="pauseTimer()">Pause Timer</button>
+<label>
+<input id="redoseCheckbox" type="checkbox"/>
+             Redose
+        </label>
+<button id="addBtn" onclick="addEntry()">Add Entry</button>
+<button onclick="deleteSelected()">Delete Selected</button>
+<button onclick="editSelected()">Edit Selected</button>
+<button onclick="exportCSV()">Export CSV</button>
+<button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
+<input id="openLogInput" type="file" accept=".csv,text/csv" style="display:none" />
+<button onclick="openScoreModal()">Manual Score Entry</button>
+<button onclick="openEmotionModal()">Emotion Wheel</button>
+</div>
+<div>
+<label>
+            Phase: 
+            <input id="eventInput" maxlength="50" size="50" type="text"/>
+</label>
+<br/>
+<label>
+            Scale: 
+            <input id="scaleInput" maxlength="50" size="30" type="text"/>
+</label>
+<br/>
+<label>
+            Add:
+                  
+            <select id="drugSelect">
+<option value="">--Select--</option>
+<option value="x-PiHP">x-PiHP</option>
+<option value="PYRO">PYRO</option>
+<option value="Cathinone">Cathinone</option>
+<option value="Unknown">Unknown</option>
+<option value="Food">Food</option>
+<option value="Drink">Drink</option>
+<option value="Sleep">Sleep</option>
+<option value="Exercise">Exercise</option>
+<option value="NN-DMC">NN-DMC</option>
+<option value="MD-PiHP">MD-PiHP</option>
+<option value="2ME-PiHP">2ME-PiHP</option>
+<option value="A-PiHP">A-PiHP</option>
+<option value="3F-PiHP">3F-PiHP</option>
+<option value="Meth">Meth</option>
+<option value="MDMA">MDMA</option>
+<option value="3-MMC">3-MMC</option>
+<option value="Dust">Dust</option>
+<option value="Speed">Speed</option>
+<option value="Cocaine">Cocaine</option>
+<option value="Crack">Crack</option>
+<option value="Vodka">Vodka</option>
+<option value="Weed">Weed</option>
+<option value="Cone">Cone</option>
+<option value="Brownie">Brownie</option>
+<option value="Snowcone">TSnowconeHC</option>
+<option value="Edible">Edible</option>
+<option value="THC">THC</option>
+<option value="Alcohol">Alcohol</option>
+<option value="Benzodiazepine">Benzodiazepine</option>
+<option value="Diazepam">Diazepam</option>
+<option value="Alprazolam">Alprazolam</option>
+<option value="Bromazolam">Bromazolam</option>
+<option value="LSD">LSD</option>
+</select>
+</label>
+<label>
+            qty: 
+            <input id="qtyInput" size="6" type="number"/>
+</label>
+<label>
+            Detail: 
+            <input id="roaInput" size="10" type="text"/>
+</label>
+<br/>
+<label>Notes:</label>
+<br/>
+<textarea cols="50" id="notesInput" rows="3"></textarea>
+<br/>
+<div style="display: flex; gap: 10px;"><label>Last:</label>
+<br/>
+<textarea cols="50" id="customNotesInput" rows="3"></textarea></div>
+</div>
+<div style="display: flex; align-items: flex-start; gap: 20px;">
+<div class="score-columns" id="scoreColumns"></div>
+
+<!-- Note Button Rows (grouped by colour) -->
+<div id="noteButtonRows" style="display:flex; flex-direction:column; gap:6px; margin:8px 0;">
+  <!-- Rows will be populated by JS -->
+</div>
+<div id="noteButtons"></div>
+<div id="extraNoteButtons"></div>
+</div>
+<div id="timer" style="margin-top: 10px;">Time: 00:00:00</div>
+<table id="logTable">
+<thead>
+<tr>
+<th data-col="Select">Select</th>
+<th data-col="Timestamp">Timestamp</th>
+<th data-col="Since">Since</th>
+<th data-col="Elapsed">Elapsed</th>
+<th data-col="Phase">Phase</th>
+<th data-col="Scale">Scale</th>
+<th data-col="Drug">Drug</th>
+<th data-col="QTY">QTY</th>
+<th data-col="ROA">ROA</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Mood">Mood</th>
+<th data-col="Mood">Mood</th>
+<th data-col="Social">Social</th>
+<th data-col="Social">Social</th>
+<th data-col="Energy">Energy</th>
+<th data-col="Energy">Energy </th>
+<th data-col="Focus">Focus</th>
+<th data-col="Focus">Focus</th>
+<th data-col="Anxiety">Anxiety</th>
+<th data-col="Anxiety">Anxiety</th>
+<th data-col="Impair">Impair</th>
+<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
+<th data-col="Score">Score</th>
+<th data-col="Max">Max</th>
+<th data-col="Min">Min</th>
+<th data-col="VL">VL</th>
+<th data-col="sM">sM</th>
+<th data-col="sB">sB</th>
+<th data-col="sF">sF</th>
+<th data-col="Last">Last</th>
+<th data-col="Notes">Notes</th>
+<th data-col="Weighted">Weighted</th><th data-col="5Max">5Max</th><th data-col="GS">GS</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div id="autoSummaryDock">
+  <div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
+  <table id="autoSummaryTable">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<!-- Additional Summary Docks (separate targets) -->
+<div id="summary5Dock" style="margin-top:20px;">
+  <div id="summary5Title">Summary 5m (rolling)</div>
+  
+<div id="backfillRow" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
+  <strong>Manual Backfill:</strong>
+  <button id="backfillBtn" class="ctrl-btn" style="margin-left:10px;">Run Backfill</button>
+</div>
+<table id="summary5Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="summary15Dock" style="margin-top:20px;">
+  <div id="summary15Title">Summary 15m (rolling)</div>
+  
+<div id="backfill15Row" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
+  <strong>Manual Backfill:</strong>
+  <button id="backfill15Btn" class="ctrl-btn" style="margin-left:10px;">Run Backfill</button>
+</div>
+<table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="summary60Dock" style="margin-top:20px;">
+  <div id="summary60Title">Summary 60m (rolling)</div>
+  
+<div id="backfill60Row" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
+  <strong>Manual Backfill:</strong>
+  <button id="backfill60Btn" class="ctrl-btn" style="margin-left:10px;">Run Backfill</button>
+</div>
+<table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+
+<script>
+
+// === UI Column Visibility & Shading Config ===
+const HIDE_IN_UI = ['VL','sM','sB','sF','GS','change','Change', 'Deg','D2','Oth','O2'];
+const NO_SHADE = new Set(['change','Change','Deg']);
+
+// Shading caps (max value that maps to full opacity)
+const SHADE_CAP = {
+  'Score': 25,
+  'Max': 25,
+  'Min': 10,
+  'Weighted': 100,
+  '5Max': 10
+};
+
+const GREEN_SET = new Set(['Rush','Mood','Social','Score','Weighted','5Max','Max']);
+const GOLD_SET  = new Set(['Energy','Focus']);
+const RED_SET   = new Set(['Anxiety','Impair','Min']);
+
+function applyUiColumnVisibility() {
+  const id = 'uiHideCols';
+  if (document.getElementById(id)) return;
+  const style = document.createElement('style');
+  style.id = id;
+  style.textContent = HIDE_IN_UI
+    .map(c => `th[data-col="${c}"], td[data-col="${c}"]{display:none !important;}`)
+    .join('');
+  document.head.appendChild(style);
+
+  // Ensure no background on no-shade set
+  const id2 = 'noShadeOverride';
+  if (!document.getElementById(id2)) {
+    const s = document.createElement('style');
+    s.id = id2;
+    s.textContent = `
+      th[data-col="change"], td[data-col="change"],
+      th[data-col="Change"],  td[data-col="Change"],
+      th[data-col="Deg"], td[data-col="Deg"] { background: transparent !important; }
+    `;
+    document.head.appendChild(s);
+  }
+}
+
+// Map each cell to its column name using the header texts
+function tagRowCells(tr) {
+  const header = document.querySelectorAll('#logTable thead th');
+  Array.from(tr.children).forEach((td, idx) => {
+    const name = header[idx] ? header[idx].textContent.trim() : '';
+    if (name) td.setAttribute('data-col', name);
+  });
+}
+
+function cellBgFor(colName, value) {
+  if (NO_SHADE.has(colName)) return '';
+  const num = Number(value);
+  if (!Number.isFinite(num)) return '';
+  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 5;
+  const opacity = Math.min(Math.max(num, 0), cap) / cap;
+  if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
+  if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
+  if (RED_SET.has(colName))   return `rgba(255,0,0,${opacity})`;
+  return '';
+}
+
+function applyRowShading(tr) {
+  Array.from(tr.children).forEach(td => {
+    const col = td.getAttribute('data-col') || '';
+    const bg = cellBgFor(col, td.textContent.trim());
+    if (bg) td.style.backgroundColor = bg;
+    else td.style.background = '';
+  });
+}
+
+    const labelMappings = {
+        rush: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-'
+//            "0": 'None',
+//            "1": 'Low',
+//            "2": 'Some',
+//            "3": 'Clear',
+//            "4": 'Strong',
+//            "5": 'Intense',
+            "0": 'No',
+            "1": 'Low',
+            "2": 'Moderate',
+            "3": 'Strong',
+            "4": 'Intense',
+            "5": 'Extreme',
+            "2.5": '+',
+            "3.5": '+',
+            "4.5": '+',
+            "6": 'Ultra',
+            "0.5": '+',
+            "-0.5": '-'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        mood: {
+//            "-2": '-',
+            "0": 'None',
+            "1": 'Subtle',
+            "2": 'Some',
+            "3": 'Clear',
+            "4": 'Obvious',
+            "5": 'Dominating',
+            "2.5": 'Improved',
+            "3.5": 'Prominent',
+            "4.5": 'Very Good',
+            "6": 'Euphoric',
+            "0.5": '+',
+            "-0.5": '-',
+//            "-1": '-',
+//            "-0.5": '-'
+//            "0": 'No Change',
+//            "1": 'Ignorable',
+//            "2": 'OK',
+//            "2.5": '',
+//            "3": 'Clear',
+//            "4": 'Obvious',
+//            "5": 'Super',
+////            "0": 'No/None',
+////            "0.5": '+',
+////            "-0.5": '-'
+////            "0.5": 'Very Low',
+////            "1": 'Low',
+////            "2": 'Low-Medium',
+////            "3": 'Medium',
+////            "3.5": 'Medium-High',
+////            "4": 'High',
+////            "5": 'Very High',
+////            "6": 'Extremely High',
+            "0.01": '+'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        social: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-'
+//            "0": 'Flat',
+//            "1": 'Think',
+//            "2": 'Want',
+//            "3": 'Urge/Desire',
+//            "4": 'Social',
+//            "5": 'Outgoing',
+            "0": 'No',
+            "1": 'Possible',
+            "2": 'Forced',
+            "3": 'Moderate',
+            "4": 'Social',
+            "5": 'Outgoing',
+            "2.5": '+',
+            "3.5": '+',
+            "4.5": '+',
+            "6": 'Disinhibited',
+            "0.5": '+',
+            "-0.5": '-'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        energy: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-'
+//            "0": 'Normal',
+//            "1": 'Slight',
+//            "2": 'Increased',
+//            "2.5": '',
+//            "3": 'Clear/Push',
+//            "4": 'Energetic',
+//            "4.5": '',
+//            "5": 'Hyper',
+//            "6": 'Manic',
+            "0": 'Tired/Flat',
+            "1": 'Normal/Low',
+            "2": 'Moderate',
+            "3": 'Clear',
+            "4": 'Energetic',
+            "5": 'Hyperactive',
+            "2.5": '+',
+            "3.5": 'High',
+            "4.5": '+',
+            "6": 'Manic',
+            "0.5": '+',
+            "-0.5": '-'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        focus: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-'
+//            "0": 'No',
+//            "1": 'Alert',
+//            "2": 'Vigilant',
+//            "3": 'Increased',
+//            "4": 'Focused',
+//            "5": 'Obsessive',
+//            "6": 'Wired',
+            "0": 'None',
+            "1": 'Very Low',
+            "2": 'Low',
+            "3": 'Medium',
+            "4": 'Significant',
+            "5": 'Laser',
+            "2.5": '+',
+            "3.5": 'Focused',
+            "4.5": 'Obsessive',
+            "6": 'Wired',
+            "0.5": '+',
+            "-0.5": '-'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        anxiety: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-'
+//            "0": 'No/None',
+//            "1": 'Normal',
+//            "2": 'Excessive',
+//            "3": 'Clear/Feel',
+//            "4": 'Extra',
+//            "5": 'Impacting',
+            "0": 'None',
+            "1": 'Some',
+            "2": 'Excess',
+            "3": 'Affecting',
+            "4": 'Adverse',
+            "5": 'Severe',
+            "2.5": 'Worry',
+            "3.5": '+',
+            "4.5": '+',
+            "6": 'Panic',
+            "0.5": '+',
+            "-0.5": '-'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        impair: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-'
+//            "0": 'None',
+//            "1": 'Minimal',
+//            "2": 'Low',
+//            "2.5": '',
+//            "3": 'Visibly',
+//            "4": 'Impaired',
+//            "4.5": '',
+//            "5": 'Behaviour',
+//            "6": 'AdverseImpact',
+            "0": 'None',
+            "1": 'Mental',
+            "2": 'Ignorable',
+            "3": 'Significant',
+            "4": 'Impacting',
+            "5": 'Severe',
+            "2.5": 'Adverse',
+            "3.5": 'Obvious',
+            "4.5": '+',
+            "6": 'Dangerously',
+            "0.5": '+',
+            "-0.5": '-'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        change: {
+            "-1": 'Aware Of',
+            "-2": 'Bad Choices',
+            "0": 'No Change',
+            "1": 'Maybe',
+            "2": 'Required Thinking',
+            "2.5": 'Some',
+            "3": 'Clear',
+            "3.5": 'Prominent',
+            "4": 'Obvious',
+            "5": 'Controlling',
+            "6": 'Autopilot/Hindsight',
+            "8": 'Dominant',
+            "9": 'High',
+            "10": 'Certain'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        degree: {
+//            "0": 'None',
+//            "1": 'Minimal',
+//            "2": 'Low/Ignore',
+//            "3": 'Low/Clear',
+//            "4": 'Mid/Ignore',
+//            "5": 'Mid/Clear',
+//            "6": 'High/Maskable',
+//            "7": 'High/Obvious',
+//            "8": 'Very High',
+//            "9": 'Extreme',
+            "10": 'Maximum'
+, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+        other: {
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-'
+//            "0": 'Zero',
+//            "0": 'Hungry',
+//            "1": 'Eat',
+//            "2": 'Thirsty',
+//            "3": 'Drink',
+//            "4": 'Tired',
+//            "5": 'Slept',
+//            "6": 'Sleeping',
+//            "7": 'Headache',
+//            "8": 'Nausea',
+            "9": 'False',
+            "10": 'True'
+             }
+    };
+['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
+
+    function getLabels(metric, values) {
+        if (!Array.isArray(values))
+            values = [values];
+        return Array.from(new Set(values))
+        .sort((a, b) => b - a)
+        .map(v => labelMappings[metric][v] || '')
+        .filter(Boolean);
+    }
+
+    function getSum(arr) {
+        return Array.isArray(arr) && arr.length
+        ? arr.reduce((a, b) => a + b, 0)
+        : 0;
+    }
+
+    function fmt2(x){ const n = Number.parseFloat(x); return Number.isFinite(n) ? n.toFixed(2) : (x ?? ""); }
+
+    const metrics = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair','change','degree','other'];
+    let selections = {},
+        logData = [],
+        timerInterval,
+        startTime,
+        doseTime,
+        editIndex = null;
+
+    function initSelections() {
+        metrics.forEach(m => selections[m] = []);
+    }
+
+    function buildButtons() {
+        // Score buttons
+        const sc = document.getElementById('scoreColumns');
+        sc.innerHTML = '';
+        metrics.forEach(f => {
+            const col = document.createElement('div');
+            col.className = 'score-column';
+            const t = document.createElement('strong');
+            t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
+            col.appendChild(t);
+  //         [10, 9, 8, 7, 6, 5.5, 5, 4, 3.5, 3, 2, 1, 0.5, 0, -0.5, -1, -2, -3, -0.4, -0.3, -0.2, -0.1, 3.4, 3.3, 3.2, 3.1, 2.4, 2.3, 2.2, 2.1, 1.4, 1.3, 1.2, 1.1].forEach(v => {
+           [6, 5, 4.5, 4, 3.5, 3, 2.5, 2, 1, 0.5, 0, -0.5, -1].forEach(v => {
+
+                const b = document.createElement('button');
+                let customLabel = '';
+if (v === -222) customLabel = '';
+if (v === -444) customLabel = '';
+if (v === -111) customLabel = '-';
+//else if (v === 6) customLabel = 'Extra/Prominent';
+else if (v === 9) customLabel = '';
+else if (v === 0.1) customLabel = 'Maybe/Unsure';
+else if (v === 0.01) customLabel = '+';
+else if (v === -0.01) customLabel = '-';
+else if (v === -0.1) customLabel = '';
+else if (v === 0.2) customLabel = 'Ignorable';
+else if (v === -0.2) customLabel = '';
+else if (v === 0.3) customLabel = 'Required Thinking';
+else if (v === -0.3) customLabel = '';
+else if (v === 0.4) customLabel = 'Some';
+else if (v === -0.4) customLabel = '';
+else if (v === 0.6) customLabel = 'Clear';
+else if (v === -0.6) customLabel = '';
+else if (v === 0.7) customLabel = 'Obvious';
+else if (v === -0.7) customLabel = '';
+else if (v === 0.8) customLabel = 'Controlling';
+else if (v === -0.8) customLabel = '';
+//else if (v === 10) customLabel = 'Maximum';
+//else if (v === 6) customLabel = 'Extra/Prominent';
+else customLabel = labelMappings[f]?.[v] ?? '';
+b.innerText = `${v}: ${customLabel}`;
+                b.onclick = () => {
+                    const i = selections[f].indexOf(v);
+                    if (i < 0) {
+                        selections[f].push(v);
+                        b.classList.add('selected-score');
+                    }
+                    else {
+                        selections[f].splice(i, 1);
+                        b.classList.remove('selected-score');
+                    }
+                };
+                col.appendChild(b);
+            });
+            sc.appendChild(col);
+        
+});
+
+        // Original notes
+        const noteCont = document.getElementById('noteButtons');
+        noteCont.innerHTML = '';
+        const palette = {
+            CONTEXT: 'other',
+            PRE: 'time',
+            POST: 'time',
+            ONSET: 'time',
+            After: 'time',
+            Before: 'time',
+            Estimate: 'time',
+            RUSH: 'effect',
+            Good: 'positive',
+            Bad: 'negative',
+            Anxiety: 'emotional',
+            Craving: 'emotional',
+            Joy: 'positive',
+            Physical: 'physical',
+            Visual: 'effect',
+            Audio: 'effect',
+            Cognitive: 'mental',
+            Social: 'effect',
+            Paranoia: 'emotional',
+            Peaceful: 'positive',
+            Insight: 'mental',
+            Sleep: 'other',
+            Alert: 'effect',
+            Fatigue: 'physical',
+            Euphoria: 'positive',
+            Pain: 'physical',
+            Discomfort: 'physical',
+            Calm: 'positive',
+            Tension: 'emotional',
+            Fun: 'positive',
+            Confusion: 'mental'
+        };
+        (function(){const h=document.createElement("h4");h.textContent="Gold";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Extra notes (gold)
+        const extraCont = document.getElementById('extraNoteButtons');
+        extraCont.innerHTML = '';
+        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over,', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'UnsureIfUsable', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
+        extra.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'gold');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                }
+                else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        (function(){const h=document.createElement("h4");h.textContent="Dose";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Dark grey dose buttons
+        const darkLabels = ["Note", "Context", "Associate", "Change", "Review", "Weighed", "Yes", "No", "Maybe", "Certain", "Half", ">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<30mg"];
+        darkLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'dose');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                }
+                else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        (function(){const h=document.createElement("h4");h.textContent="Blue";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Bright blue custom buttons
+        const blueLabels = ['VisibleVapour', 'InvisibleVapour', 'Billowing', 'WarmAir', 'Plumes', 'Burned', 'WarmAir', 'ThickVapour', 'DarkVapour', 'Smoke', 'NiceSmell', 'NiceTaste', 'BadSensation', 'Invisible', 'Dark', 'Warm',
+        'Smoke', 'Vapour', 'BurnedSmell', 'HalfBurned'];
+        blueLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'blue');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+        (function(){const h=document.createElement("h4");h.textContent="Red";document.getElementById("extraNoteButtons").appendChild(h);})();
+// Bright red custom buttons
+        const redLabels = ['Mental', 'FocusLocked', 'Locked', 'Computer', 'MusicOn', 'MusicOff', 'GoodSong', 'Visceral', 'Physical', 'BloodPressure', 'BodyTemp', 'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
+        redLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'red');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        (function(){const h=document.createElement("h4");h.textContent="Green";document.getElementById("extraNoteButtons").appendChild(h);})();
+const greenLabels =  ["ThroatSuction", "Suck", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
+        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "TwoHits", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Destroyed", "BurnedRemains",
+        "HeatedOnce", "AlreadyHeated", "NotYetHeated"];
+        greenLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'green');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        (function(){const h=document.createElement("h4");h.textContent="Orange";document.getElementById("extraNoteButtons").appendChild(h);})();
+const orangeLabels =  ['Lighter', 'Candle', 'Jet', 'Blowtorch', 'Vape', 'Hotrail', 'Cone', 'Snowcone', 'Bong', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Broken', 'Loose', 'Liquid', 'Sludge', 'PropyleneGlycol', 'Melted', 'Vapourised', 'SomeColour', 'ColourChange', 'Loose', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed', 'AwareBad', 'BadChoices', 'DoseToDetriment'];
+        orangeLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.innerText = lbl;
+            b.setAttribute('data-category', 'orange');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+        (function(){const h=document.createElement("h4");h.textContent="Yellow";document.getElementById("extraNoteButtons").appendChild(h);})();
+const yellowLabels =  JSON.parse('["Positive", "Negative", "Flat", "BadSideEffCD"]');
+// Purple category labels
+yellowLabels.forEach(lbl => {
+            const b = document.createElement('button');
+            b.className = 'note-btn';
+            b.textContent = lbl;
+            b.setAttribute('data-category', 'yellow');
+            b.onclick = () => {
+                const ta = document.getElementById('notesInput');
+                const toks = ta.value.split(/\s+/).filter(Boolean);
+                const i = toks.indexOf(lbl);
+                if (i >= 0) {
+                    toks.splice(i, 1);
+                    b.classList.remove('selected-score');
+                } else {
+                    toks.push(lbl);
+                    b.classList.add('selected-score');
+                }
+                ta.value = toks.join(' ');
+            };
+            extraCont.appendChild(b);
+        });
+
+
+
+    // ─── APPEND PURPLE LABELS ───────────────────────────────────────────────
+    (function(){const h=document.createElement("h4");h.textContent="Purple";document.getElementById("extraNoteButtons").appendChild(h);})();
+const purpleLabels =  [
+      '5_Secs', '15sLate','Deep','Shallow','Hold','Long','Short','Slow','Rapid','OneBreath','Multiple','Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone', 'BuildingAlone'
+    ];
+    const purpleContainer = document.querySelector('#extraNoteButtons');
+    purpleLabels.forEach(label => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = label;
+      btn.dataset.category = 'purple';
+      btn.classList.add('note-btn');
+      btn.addEventListener('click', () => {
+        const notes = document.querySelector('#notesInput');
+        const toks = notes.value.split(/\s+/).filter(Boolean);
+        const i = toks.indexOf(label);
+        if (i >= 0) { toks.splice(i, 1); } else { toks.push(label); }
+        notes.value = toks.join(' ');
+      });
+      purpleContainer.appendChild(btn);
+    });
+    // ──────────────────────────────────────────────────────────────────────────
+    }
+
+    function resetTimer() {
+        startTime = doseTime = new Date();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            document.getElementById('timer').innerText = 'Trip Time: ' + getElapsed(startTime);
+        }, 1000);
+    }
+    function pauseTimer() {
+        clearInterval(timerInterval);
+    }
+    function newTrip() {
+        logData = [];
+        localStorage.removeItem('tripLog');
+        renderTable();
+        clearInterval(timerInterval);
+        document.getElementById('timer').innerText = 'Time: 00:00:00';
+        startTime = doseTime = null;
+    }
+    function getElapsed(start) {
+        if (!start)
+            return "00:00:00";
+        let d = Math.floor((new Date() - start) / 1000),
+            h = String(Math.floor(d / 3600)).padStart(2, '0'),
+            m = String(Math.floor((d % 3600) / 60)).padStart(2, '0'),
+            s = String(d % 60).padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+    function addEntry() {
+if (!startTime)
+            resetTimer();
+        // [disabled duplicate summary timer]
+
+        const now = new Date(),
+            ts = now.toLocaleString('en-AU', {
+                hour12: false
+            });
+        if (document.getElementById('redoseCheckbox').checked && document.getElementById('drugSelect').value)
+            doseTime = new Date();
+        const entry = {
+   			 _ts: Date.now(),
+   			 timestamp: ts,
+            sincedose: getElapsed(doseTime),
+            elapsed: getElapsed(startTime),
+            info: document.getElementById('eventInput').value,
+            scale: document.getElementById('scaleInput').value,
+            drug: document.getElementById('drugSelect').value,
+            qty: document.getElementById('qtyInput').value,
+            roa: document.getElementById('roaInput').value,
+            notes: document.getElementById('notesInput').value,
+            customNotes: document.getElementById('customNotesInput').value
+        };
+        metrics.forEach(f => {
+            entry[f] = selections[f].length ? Array.from(new Set(selections[f])).sort((a, b) => b - a) : [];
+            entry[f + 'Label'] = getLabels(f, entry[f]).join(', ');
+            entry[f + 'Sum'] = getSum(entry[f]);
+        });
+        entry.score = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum + entry.focusSum - entry.anxietySum - entry.impairSum;
+        entry.max = ['rush', 'mood', 'social', 'energy', 'focus'].reduce((a, f) => a + (entry[f + 'Sum'] || 0), 0);
+        entry.min = entry.anxietySum + entry.impairSum;
+        entry.maxPercent = +(entry.max / 50 * 100).toFixed(1);
+        entry.minPercent = +(entry.min / 20 * 100).toFixed(1);
+        entry.min = entry.anxietySum + entry.impairSum;
+        let val = 0;
+        ['rush', 'mood', 'social', 'energy', 'focus'].forEach(m => entry[m].some(v => v >= 3) && val++);
+        ['anxiety', 'impair'].forEach(m => entry[m].some(v => v >= 3) && val--);
+        entry.valence = val;
+        entry.scaleMood = entry.notes.split(/\s+/).includes('Good') ? 3 : 0;
+        entry.scaleBad = entry.notes.split(/\s+/).includes('Bad') ? 3 : 0;
+        entry.scaleFocus = entry.notes.split(/\s+/).includes('Wired') ? 7 : 0;
+entry.weighted = (+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*5) + (+entry.impairSum*10);
+entry.goodSum = 0;
+        logData.push(entry);
+        localStorage.setItem('tripLog', JSON.stringify(logData));
+        renderTable();
+        ['eventInput', 'scaleInput', 'drugSelect', 'qtyInput', 'roaInput', 'notesInput', 'customNotesInput'].forEach(id => document.getElementById(id).value = '');
+        initSelections();
+        buildButtons();
+        document.getElementById('addBtn').innerText = 'Add Entry';
+    }
+    
+function renderTable() {
+        const tb = document.querySelector('#logTable tbody');
+        tb.innerHTML = '';
+        logData.forEach((r, i) => {
+            const tr = document.createElement('tr');
+            let h = `<td><input type="checkbox" name="rowSelect" data-index="${i}"></td>`;
+            ['timestamp', 'sincedose', 'elapsed', 'info', 'scale', 'drug', 'qty', 'roa'].forEach(k => h += `<td>${r[k] || ''}</td>`);
+            metrics.forEach(f => {
+                h += `<td data-field="${f}Sum" data-value="${r[f + 'Sum']}">${fmt2(r[f + 'Sum'])}</td>`;
+                h += `<td data-label-for="${f}Sum" data-value="${r[f + 'Sum']}">${r[f + 'Label']}</td>`;
+            });
+        h += `<td data-col="Score" class="score-cell">${fmt2(r.score)}</td>` +
+     `<td data-col="Max" class="max-cell">${fmt2(r.max || 0)}</td>` +
+     `<td data-col="Min" class="min-cell">${fmt2(r.min || 0)}</td>` +
+     `<td data-col="VL">${fmt2(r.valence)}</td>` +
+     `<td data-col="sM">${fmt2(r.scaleMood || 0)}</td>` +
+     `<td data-col="sB">${fmt2(r.scaleBad || 0)}</td>` +
+     `<td data-col="sF">${fmt2(r.scaleFocus || 0)}</td>` +
+     `<td data-col="Last">${r.customNotes || ""}</td>` +
+     `<td data-col="Notes">${r.notes || ""}</td>` +
+     `<td data-col="Weighted">${fmt2(r.weighted || 0)}</td>` +
+     `<td data-col="5Max">${(r.weighted / 10).toFixed(2)}</td>` +
+     `<td data-col="GS">${fmt2(r.goodSum || 0)}</td>`;
+            
+            tr.innerHTML = h;
+            tr.setAttribute('data-ts', String(r._ts || 0));
+            tagRowCells(tr);
+            // Set tooltip percentages for Max/Min without affecting shading text
+            (function(){
+              const maxCell = tr.querySelector('td[data-col="Max"]');
+              if (maxCell && r.maxPercent != null) maxCell.title = String(r.maxPercent) + '%';
+              const minCell = tr.querySelector('td[data-col="Min"]');
+              if (minCell && r.minPercent != null) minCell.title = String(r.minPercent) + '%';
+            })();
+            applyRowShading(tr);
+            applyUiColumnVisibility();
+            tb.appendChild(tr);
+        });
+    }
+    function deleteSelected() {
+        const toDel = Array.from(document.querySelectorAll('input[name="rowSelect"]:checked')).map(cb => +cb.dataset.index);
+        logData = logData.filter((_, i) => !toDel.includes(i));
+        localStorage.setItem('tripLog', JSON.stringify(logData));
+        renderTable();
+    }
+    function editSelected() {
+        const sel = document.querySelector('input[name="rowSelect"]:checked');
+        if (!sel)
+            return alert('Select one row');
+        editIndex = +sel.dataset.index;
+        const r = logData[editIndex];
+        document.getElementById('eventInput').value = r.info;
+        document.getElementById('scaleInput').value = r.scale;
+        document.getElementById('drugSelect').value = r.drug;
+        document.getElementById('qtyInput').value = r.qty;
+        document.getElementById('roaInput').value = r.roa;
+        document.getElementById('notesInput').value = r.notes;
+        document.getElementById('customNotesInput').value = r.customNotes;
+        document.getElementById('addBtn').innerText = 'Save Changes';
+        initSelections();
+        buildButtons();
+        metrics.forEach((f, idx) => r[f].forEach(v => {
+            const btn = document.querySelectorAll('.score-column')[idx].querySelector(`button:nth-child(${8 - v})`);
+            btn && btn.classList.add('selected-score');
+        }));
+    }
+    function exportCSV() {
+        const h = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
+        metrics.forEach(f => h.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
+        h.push("Score","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum");
+        const rows = [h.join(",")];
+        logData.forEach(r => {
+            const L = [r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa];
+            metrics.forEach(f => L.push((+r[f + "Sum"]||0).toFixed(2), r[f + "Label"]));
+            L.push((+r.score||0).toFixed(2), (+r.max||0).toFixed(2), (+r.min||0).toFixed(2), r.maxPercent || 0, r.minPercent || 0, (+r.valence||0).toFixed(2), (+r.scaleMood||0).toFixed(2), (+r.scaleBad||0).toFixed(2), (+r.scaleFocus||0).toFixed(2), r.customNotes || '', r.notes || '', (+r.weighted || 0).toFixed(2), (r.weighted / 10).toFixed(2), (+r.goodSum||0).toFixed(2));
+            rows.push(L.map(x => `"${(x + "").replace(/"/g, '""')}"`).join(","))
+        });
+        const blob = new Blob([rows.join("\n")], {
+                type: "text/csv"
+            }),
+            url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "log.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    // Manual Score Entry Modal functions
+    function openScoreModal() {
+        document.getElementById('scoreModal').style.display = 'block';
+    }
+    function closeScoreModal() {
+        document.getElementById('scoreModal').style.display = 'none';
+        document.querySelectorAll('#scoreModal input').forEach(inp => inp.value = '');
+    }
+    function applyManualScores() {
+        const fields = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair'];
+        fields.forEach(f => {
+            const val = parseInt(document.getElementById('manual' + f.charAt(0).toUpperCase() + f.slice(1)).value, 10);
+            if (!isNaN(val) && val >= 0 && val <= 10) {
+                if (!selections[f])
+                    selections[f] = [];
+                if (!selections[f].includes(val))
+                    selections[f].push(val);
+            }
+        });
+        buildButtons();
+        closeScoreModal();
+    }
+    window.onload = () => {
+        initSelections();
+        buildButtons();
+        try {
+            logData = JSON.parse(localStorage.getItem("tripLog")) || [];
+        } catch {}
+        renderTable();
+    };
+    
+// === Open Existing Log (CSV) ===
+// Paranoid-safe: local File API only. No network. 
+
+function openExistingLog(){
+  // Confirm if table has data
+  try{
+    const hasRows = Array.isArray(logData) && logData.length > 0;
+    if (hasRows && !confirm("Append imported file to the current log? (OK = append, Cancel = abort)")) return;
+  }catch(e){}
+  const inp = document.getElementById('openLogInput');
+  if (!inp) return alert("File input missing.");
+  inp.value = "";
+  inp.onchange = handleFileSelected;
+  inp.click();
+}
+
+function handleFileSelected(ev){
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const text = String(reader.result || "");
+      const parsed = parseCSV(text);
+      if (!parsed || !parsed.header || !parsed.rows || parsed.rows.length === 0){
+        alert("CSV appears empty.");
+        return;
+      }
+      const map = mapSchema(parsed.header);
+      if (!map.valid){
+        alert("Unsupported CSV: export from this app required.\nMissing: " + map.missing.join(", "));
+        return;
+      }
+      const imported = rowsToLogData(parsed.rows, map);
+      if (!imported.length){
+        alert("No rows could be imported.");
+        return;
+      }
+      // Append + Dedupe + Sort + Persist
+logData = mergeAppendDedupeSort(logData, imported);
+try { localStorage.setItem('tripLog', JSON.stringify(logData)); } catch(e){}
+renderTable();
+// If auto summary is active, clear and emit an immediate row
+      try {
+        const tbody = document.querySelector('#autoSummaryTable tbody'); if (tbody) tbody.innerHTML='';
+        if (window.autoSummaryActive){
+          const endMs = Date.now();
+          const M = computeRollingMeans(endMs, 1);
+          const C = M ? computeCompositeFromMeans(M) : null;
+          const d = new Date();
+          if (M) appendSummaryRowToTable('autoSummaryTable', d, M, C, {labelSuffix: ' 1m Now'});
+        }
+      } catch(e){ console.warn(e); }
+      // Status line
+      showStatus(`Loaded ${imported.length} rows from ${file.name}`);
+    } catch(err){
+      console.error(err);
+      alert("Failed to import CSV: " + err.message);
+    }
+  };
+  reader.onerror = () => alert("Failed to read file.");
+  reader.readAsText(file);
+}
+
+// Minimal RFC4180 CSV parser (handles quotes and escaped quotes)
+function parseCSV(text){
+  const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n");
+  const rows = [];
+  for (let i=0;i<lines.length;i++){
+    const line = lines[i];
+    if (line === "") continue;
+    rows.push(parseCSVLine(line));
+  }
+  if (!rows.length) return {header:[], rows:[]};
+  const header = rows.shift();
+  return {header, rows};
+}
+function parseCSVLine(line){
+  const out = [];
+  let cur = "";
+  let inQ = false;
+  for (let i=0;i<line.length;i++){
+    const ch = line[i];
+    if (inQ){
+      if (ch === '"'){
+        if (i+1 < line.length && line[i+1] === '"'){ cur += '"'; i++; }
+        else { inQ = false; }
+      } else {
+        cur += ch;
+      }
+    } else {
+      if (ch === '"'){ inQ = true; }
+      else if (ch === ','){ out.push(cur); cur = ""; }
+      else { cur += ch; }
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+// Case-insensitive header lookup
+function findHeader(header, names){
+  const idx = header.findIndex(h => names.some(n => (h||"").trim().toLowerCase() === n.trim().toLowerCase()));
+  return idx >= 0 ? idx : -1;
+}
+
+// Schema mapping for app-exported CSV
+function mapSchema(header){
+  const need = {
+    ts: ["Timestamp"],
+    since: ["Since Dose","Since"],
+    elapsed: ["Elapsed"],
+    info: ["Info"],
+    scale: ["Scale"],
+    drug: ["Drug"],
+    qty: ["Qty","QTY"],
+    roa: ["ROA","Detail"],
+    score: ["Score"],
+    max: ["Max"],
+    min: ["Min"],
+    maxp: ["Max %","Max%","Max Percent"],
+    minp: ["Min %","Min%","Min Percent"],
+    valence: ["Valence","VL"],
+    sM: ["scaleMood","sM"],
+    sB: ["scaleBad","sB"],
+    sF: ["scaleFocus","sF"],
+    last: ["Custom Notes","Last"],
+    notes: ["Notes"],
+    weighted: ["Weighted"],
+    score5: ["Score5","5Max"],
+    goodSum: ["Good Sum","GS"],
+    rushSum: ["Rush Sum"],
+    rushLabel: ["Rush Label"],
+    moodSum: ["Mood Sum"],
+    moodLabel: ["Mood Label"],
+    socialSum: ["Social Sum"],
+    socialLabel: ["Social Label"],
+    energySum: ["Energy Sum"],
+    energyLabel: ["Energy Label"],
+    focusSum: ["Focus Sum"],
+    focusLabel: ["Focus Label"],
+    anxietySum: ["Anxiety Sum"],
+    anxietyLabel: ["Anxiety Label"],
+    impairSum: ["Impair Sum"],
+    impairLabel: ["Impair Label"]
+  };
+  const map = {};
+  const missing = [];
+  Object.keys(need).forEach(k => {
+    const idx = findHeader(header, need[k]);
+    if (idx === -1) missing.push(need[k][0]);
+    map[k] = idx;
+  });
+  // Only hard-require the columns that this app always exports
+  const hard = ["ts","since","elapsed","info","scale","drug","qty","roa","score","max","min","last","notes","weighted","score5"];
+  const valid = hard.every(k => map[k] !== -1);
+  return {map, missing, valid, header};
+}
+
+// Parse AU datetime like "13/08/2025, 16:57:12" or "13/08/2025 16:57:12"
+function parseAUDatetime(s){
+  if (!s) return null;
+  const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})\s*$/);
+  if (!m) return null;
+  const [_, d, mo, y, h, mi, se] = m.map(x => parseInt(x,10));
+  const dt = new Date(y, mo-1, d, h, mi, se); // treated as local
+  return dt.getTime();
+}
+
+// Build internal rows from CSV rows
+function rowsToLogData(rows, mapped){
+  const H = mapped.map;
+  const out = [];
+  for (const r of rows){
+    const val = (idx) => (idx>=0 && idx<r.length) ? r[idx] : "";
+    const entry = {
+      _ts: parseAUDatetime(val(H.ts)) || Date.now(),
+      timestamp: val(H.ts),
+      sincedose: val(H.since),
+      elapsed: val(H.elapsed),
+      info: val(H.info),
+      scale: val(H.scale),
+      drug: val(H.drug),
+      qty: val(H.qty),
+      roa: val(H.roa),
+      notes: val(H.notes),
+      customNotes: val(H.last)
+    };
+    // metric sums + labels
+    const metricPairs = [
+      ["rush","rushSum","rushLabel"],
+      ["mood","moodSum","moodLabel"],
+      ["social","socialSum","socialLabel"],
+      ["energy","energySum","energyLabel"],
+      ["focus","focusSum","focusLabel"],
+      ["anxiety","anxietySum","anxietyLabel"],
+      ["impair","impairSum","impairLabel"],
+    ];
+    metricPairs.forEach(([name, sumKey, labelKey])=>{
+      const sumIdx = H[sumKey], labIdx = H[labelKey];
+      const sum = parseFloat(val(sumIdx)) || 0;
+      entry[name] = []; // original discrete selections not preserved in CSV
+      entry[name + "Sum"] = sum;
+      entry[name + "Label"] = val(labIdx) || "";
+    });
+    // Derived / composites (recompute)
+    entry.score = (+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum) - (+entry.anxietySum + +entry.impairSum);
+    entry.max = (+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum);
+    entry.min = (+entry.anxietySum + +entry.impairSum);
+    entry.maxPercent = Math.round((entry.max / 50) * 1000)/10;
+    entry.minPercent = Math.round((entry.min / 20) * 1000)/10;
+    entry.valence = 0; // cannot safely reconstruct; leave 0
+    entry.scaleMood = 0;
+    entry.scaleBad = 0;
+    entry.scaleFocus = 0;
+    entry.weighted = (+entry.rushSum*6) + (+entry.socialSum*4) + (+entry.moodSum*4) + (+entry.energySum*3) + (+entry.focusSum*3);
+    entry.goodSum = 0;
+    out.push(entry);
+  }
+  return out;
+}
+
+
+// Merge + Dedupe + Sort helper (append-only import)
+function mergeAppendDedupeSort(existing, incoming){
+  const left  = Array.isArray(existing) ? existing : [];
+  const right = Array.isArray(incoming) ? incoming : [];
+  
+  // Drop blank/empty rows from the right side before merging
+  const filteredRight = right.filter(isNonEmptyLogRow);
+  const all = left.concat(filteredRight);
+
+  const seen = new Set();
+  const out = [];
+  for (const r of all){
+    const key = JSON.stringify([
+      r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa,
+      r.notes, r.customNotes,
+      r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum, r.anxietySum, r.impairSum,
+      r.score, r.max, r.min, r.weighted, r.maxPercent, r.minPercent
+    ]);
+    if (!seen.has(key)){ seen.add(key); out.push(r); }
+  }
+  out.sort((a,b)=> (a && a._ts ? a._ts : 0) - (b && b._ts ? b._ts : 0));
+  return out;
+}
+
+// Helper: determine if a row (log entry) is effectively empty/blank (all key numbers 0/NaN/absent)
+function isNonEmptyLogRow(r){
+  if (!r) return false;
+  const numericVals = [
+    r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum,
+    r.anxietySum, r.impairSum, r.score, r.max, r.min, r.weighted,
+    r.maxPercent, r.minPercent
+  ].map(v => Number(v));
+  return numericVals.some(v => Number.isFinite(v) && v !== 0);
+}
+
+// Helper: determine if a summary payload (means + composites) has any non-zero signal
+function isNonEmptySummary(M, C){
+  if (!M || typeof M!=="object") return false;
+  const mv = [M.rush, M.mood, M.social, M.energy, M.focus, M.anxiety, M.impair]
+            .map(v=>Number(v));
+  const hasMeans = mv.some(v => Number.isFinite(v) && v !== 0);
+  const cv = C && typeof C==="object"
+    ? [C.score, C.max, C.min, C.weighted, C.fiveMax].map(v=>Number(v))
+    : [];
+  const hasComp = cv.some(v => Number.isFinite(v) && v !== 0);
+  return hasMeans || hasComp;
+}
+
+// Status line / toast
+function showStatus(msg){
+  let el = document.getElementById("statusLine");
+  if (!el){
+    el = document.createElement("div");
+    el.id = "statusLine";
+    Object.assign(el.style, {position:"fixed", top:"46px", right:"20px", background:"#007aff", color:"#fff", padding:"6px 10px", borderRadius:"6px", zIndex:"9999"});
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.remove(); }, 5000);
+}
+
+</script>
+<!-- Manual Score Entry Modal -->
+<div id="scoreModal">
+<h3>Manual Score Entry</h3>
+<label>
+            Rush: 
+            <input id="manualRush" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Mood: 
+            <input id="manualMood" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Social: 
+            <input id="manualSocial" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Energy: 
+            <input id="manualEnergy" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Focus: 
+            <input id="manualFocus" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Anxiety: 
+            <input id="manualAnxiety" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<label>
+            Impair: 
+            <input id="manualImpair" max="10" min="-10" type="number"/>
+</label>
+<br/>
+<br/>
+<button onclick="applyManualScores()">Apply</button>
+<button onclick="closeScoreModal()">Cancel</button>
+</div>
+<!-- Emotion Wheel Modal -->
+<div id="emotionModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%);
+     background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000; max-height:80%; overflow:auto;">
+<h3>Select Emotions</h3>
+<img alt="Emotion Wheel" src="emotion_wheel.jpg" style="width:100%; max-width:500px; margin-bottom:10px; border:1px solid #ccc;"/>
+<div id="emotionButtons" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; justify-content:center;"></div>
+<br/>
+<button onclick="closeEmotionModal()">Close</button>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.score-column button').forEach(btn => {
+        const val = btn.textContent.trim().split(':')[0];
+        if (["0", "1", "2", "3", "4", "5"].includes(val)) {
+            btn.style.height = '40px';
+        }
+    });
+});
+</script>
+
+<!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+
+
+
+
+
+
+
+<script>
+// === Summary Core (revised to read ONLY from main table) ===
+
+let SUMMARY_WINDOW_MINUTES = 5;
+
+function setSummaryWindowAndOpen(mins){
+  try{
+    const map = {5: 'summary5Dock', 15: 'summary15Dock', 60: 'summary60Dock'};
+    const id = map[mins];
+    if (id){
+      const el = document.getElementById(id);
+      if (el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+      // Do not backfill 1m; only 5/15/60 are user-triggered (5m also has a manual button already).
+      // If a table body exists and is empty, try to trigger any available recompute without touching 1m.
+      try{
+        if (typeof recalcSummary === 'function'){
+          if (mins === 5) recalcSummary(5, 'summary5Table');
+          else if (mins === 15) recalcSummary(15, 'summary15Table');
+          else if (mins === 60) recalcSummary(60, 'summary60Table');
+        }
+      }catch(e){ console.warn(e); }
+    }
+  }catch(e){ console.error(e); }
+}
+// Columns for popup + CSV
+const SUMMARY_COLUMNS = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+
+// Timers/state
+let auto1mIntervalId = null;
+let lastAuto1mKey = null;
+let auto5mIntervalId = null;
+let lastAuto5mKey = null;
+let autoSummaryActive = false;
+
+// Utility: minute key & label
+function minuteKey(d){
+  return d.getFullYear()
+    + String(d.getMonth()+1).padStart(2,"0")
+    + String(d.getDate()).padStart(2,"0")
+    + String(d.getHours()).padStart(2,"0")
+    + String(d.getMinutes()).padStart(2,"0");
+}
+function formatMinuteLabel(d){
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mm = String(d.getMinutes()).padStart(2,"0");
+  return `${hh}:${mm} Average`;
+}
+
+// === Snapshot strictly from the MAIN TABLE DOM ===
+// Never read from popup or auto-dock.
+function snapshotFromMainTable(){
+  const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+  return rows.map(tr => {
+    const ts = +(tr.getAttribute('data-ts')||0);
+    const get = (field) => {
+      const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+      if (!td) return 0;
+      const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+      return Number.isFinite(v) ? v : 0;
+    };
+    const pack = {
+      _ts: ts,
+      rush: get('rush'),
+      mood: get('mood'),
+      social: get('social'),
+      energy: get('energy'),
+      focus: get('focus'),
+      anxiety: get('anxiety'),
+      impair: get('impair')
+    };
+    return pack;
+  }).filter(o => o._ts>0);
+}
+
+// --- Full snapshot including drug/qty/notes/last for window aggregates ---
+function snapshotFullFromMainTable(){
+  const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+  return rows.map(tr => {
+    const ts = +(tr.getAttribute('data-ts')||0);
+    const txt = (sel) => {
+      const td = tr.querySelector(sel);
+      return td ? (td.textContent||'').trim() : '';
+    };
+    // Find column by header data-col tag
+    const getByCol = (colName) => {
+      const td = tr.querySelector(`td[data-col="${colName}"]`);
+      return td ? (td.textContent||'').trim() : '';
+    };
+    const qtyTxt = getByCol('QTY') || getByCol('Qty');
+    return {
+      _ts: ts,
+      drug: getByCol('Drug'),
+      qty: Number.parseFloat(qtyTxt) || 0,
+      notes: getByCol('Notes'),
+      last: getByCol('Last')
+    };
+  }).filter(o => o._ts>0);
+}
+
+// Compute aggregates for [startMs, endMs)
+function computeWindowAggregates(startMs, endMs){
+  const snap = snapshotFullFromMainTable();
+  const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+  if (!sel.length) return {drugList:'', qtySum:0, notesWords:'', lastWords:''};
+  const seenDrug = new Set();
+  const drugListArr = [];
+  let qtySum = 0;
+  const notesSeen = new Set(); const notesOut = [];
+  const lastSeen = new Set();  const lastOut  = [];
+  sel.sort((a,b)=>a._ts-b._ts).forEach(e=>{
+    // drug list (unique, preserve first-seen order)
+    const d = (e.drug||'').trim();
+    if (d && !seenDrug.has(d)){ seenDrug.add(d); drugListArr.push(d); }
+    // qty
+    qtySum += Number.isFinite(e.qty) ? e.qty : 0;
+    // notes words
+    const toksN = String(e.notes||'').split(/\s+/).filter(Boolean);
+    toksN.forEach(w=>{ if (!notesSeen.has(w)){ notesSeen.add(w); notesOut.push(w); } });
+    // last words
+    const toksL = String(e.last||'').split(/\s+/).filter(Boolean);
+    toksL.forEach(w=>{ if (!lastSeen.has(w)){ lastSeen.add(w); lastOut.push(w); } });
+  });
+  return {
+    drugList: drugListArr.join(' '),
+    qtySum: +qtySum.toFixed(2),
+    notesWords: notesOut.join(' '),
+    lastWords:  lastOut.join(' ')
+  };
+}
+
+// Means over window [startMs, endMs)
+function computeMeansForWindow(startMs, endMs){
+  const snap = snapshotFromMainTable();
+  const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+  if (!sel.length) return null;
+  const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+  const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+  sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+  const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
+  return means;
+}
+
+// Rolling means of last N minutes ending at endMs
+function computeRollingMeans(endMs, minutes){
+  return computeMeansForWindow(endMs - minutes*60*1000, endMs);
+}
+
+// Composite scores from means
+function computeCompositeFromMeans(M){
+  const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+  const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
+  const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
+  const weighted = (3*M.rush + 2*M.mood + 2*M.social + 1.5*M.energy + 1.5*M.focus) - (4*M.anxiety - 6*M.impair);
+  const fiveMax  = ((score/5)+5);
+  return {score, max, min, weighted, fiveMax};
+}
+
+// === Backfill controls (manual; also mirrors to any popups) ==================
+(function(){
+  function getEarliestSnapshotMs(){
+    if (typeof snapshotFromMainTable !== 'function') return null;
+    const snap = snapshotFromMainTable();
+    if (!snap || !snap.length) return null;
+    let minTs = snap[0]._ts || 0;
+    for (let i=1;i<snap.length;i++){ const t = snap[i]._ts||0; if (t && t < minTs) minTs = t; }
+    return minTs || null;
+  }
+  function hasRowWithLabel(tableId, label){
+    const table = document.getElementById(tableId); if (!table) return false;
+    const tbody = table.querySelector('tbody'); if (!tbody) return false;
+    const firstCol = Array.from(tbody.querySelectorAll('tr > td:first-child')).map(td => (td.textContent||'').trim());
+    return firstCol.some(t => t.startsWith(label));
+  }
+  function alignToBoundary(ms, stepMin){
+    const d = new Date(ms);
+    d.setSeconds(0,0);
+    if (stepMin===60){ d.setMinutes(0,0,0); }
+    else if (stepMin===15 || stepMin===5){
+      const m = d.getMinutes();
+      d.setMinutes(m - (m % stepMin), 0, 0);
+    }
+    return d.getTime();
+  }
+  function getPopupTables(){
+    const arr = [];
+    // Known id
+    const t = document.getElementById('summaryPopupTable'); if (t) arr.push(t);
+    // Generic selector (any future popups)
+    document.querySelectorAll('table[data-role="summary-popup"]').forEach(x=>arr.push(x));
+    return arr;
+  }
+  function appendToAllPopups(boundary, M, C, stepMin){
+    const tables = getPopupTables();
+    if (!tables.length) return;
+    try { if (typeof ensureSummaryPopup === 'function') ensureSummaryPopup(); } catch(e){}
+    tables.forEach(tbl => {
+      // Force id reference for appendSummaryRowToTable by temporarily giving an id if missing
+      let id = tbl.id;
+      if (!id){
+        id = 'summaryPopupTable_' + stepMin + '_' + (boundary.getTime());
+        tbl.id = id;
+        tbl.setAttribute('data-role','summary-popup');
+      }
+      appendSummaryRowToTable(id, boundary, M, C, {bold:false, labelSuffix: ` ${stepMin}m Avg`});
+    });
+    // Re-apply any popup filter if present
+    try { if (typeof applyPopupFilter === 'function') applyPopupFilter(); } catch(e){}
+  }
+  function backfillWindow(stepMin, tableId){
+    const start0 = getEarliestSnapshotMs(); if (start0==null) return 0;
+    const nowMs = Date.now();
+    const stepMs = stepMin*60*1000;
+    let t = alignToBoundary(start0, stepMin);
+    let added = 0;
+    while (t <= nowMs){
+      const boundary = new Date(t);
+      const endMs   = boundary.getTime() + 60*1000;
+      const M = typeof computeRollingMeans==='function' ? computeRollingMeans(endMs, stepMin) : null;
+      const C = M ? (typeof computeCompositeFromMeans==='function' ? computeCompositeFromMeans(M) : null) : null;
+      const label = typeof formatMinuteLabel==='function' ? formatMinuteLabel(boundary) : '';
+      if (M){
+        if (!hasRowWithLabel(tableId, label)){
+          (function(){
+        let extra = null;
+        if (tableId === 'summary5Table' && stepMin === 5){
+          const startMs = boundary.getTime() - (5*60*1000);
+          const endMs   = boundary.getTime() + (1*60*1000);
+          const agg = computeWindowAggregates(startMs, endMs);
+          extra = {__inject5m:true, cols:[ String(agg.drugList||''), String(agg.qtySum||0), String(agg.notesWords||''), String(agg.lastWords||'') ]};
+        }
+        appendSummaryRowToTable(tableId, boundary, M, C, {bold:false, labelSuffix:'', extra: extra});
+      })();
+          added++;
+        }
+        // Mirror into all popups
+        appendToAllPopups(boundary, M, C, stepMin);
+      }
+      t += stepMs;
+    }
+    return added;
+  }
+  function backfillAll(){
+    try { if (typeof ensureSummaryPopup === 'function') ensureSummaryPopup(); } catch(e){}
+    const added5  = backfillWindow(5,  'summary5Table');
+    const added15 = backfillWindow(15, 'summary15Table');
+    const added60 = backfillWindow(60, 'summary60Table');
+    try { console.log(`[Backfill] added rows — 5m:${added5}  15m:${added15}  60m:${added60}`); } catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('backfillBtn');
+    if (btn){ btn.addEventListener('click', backfillAll); }
+  });
+})();
+// ============================================================================
+
+
+// === Backfill controls (manual only) =========================================
+(function(){
+  // Helper: earliest timestamp from main table snapshot
+  function getEarliestSnapshotMs(){
+    const snap = snapshotFromMainTable();
+    if (!snap || !snap.length) return null;
+    let minTs = snap[0]._ts;
+    for (let i=1;i<snap.length;i++){ if (snap[i]._ts < minTs) minTs = snap[i]._ts; }
+    return minTs;
+  }
+  function hasRowWithLabel(tableId, label){
+    const table = document.getElementById(tableId); if (!table) return false;
+    const tbody = table.querySelector('tbody'); if (!tbody) return false;
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    return rows.some(tr => (tr.children && tr.children[0] && (tr.children[0].textContent||"").trim().startsWith(label)));
+  }
+  function alignToBoundary(ms, stepMin){
+    const d = new Date(ms);
+    d.setSeconds(0,0);
+    if (stepMin===5 || stepMin===15 || stepMin===60){
+      if (stepMin===60){
+        d.setMinutes(0,0,0);
+      } else {
+        const m = d.getMinutes();
+        const aligned = m - (m % stepMin);
+        d.setMinutes(aligned,0,0);
+      }
+    }
+    return d.getTime();
+  }
+  function backfillWindow(stepMin, tableId){
+    const startMs0 = getEarliestSnapshotMs();
+    if (startMs0==null) return 0;
+    const nowMs = Date.now();
+    const stepMs = stepMin*60*1000;
+    let t = alignToBoundary(startMs0, stepMin);
+    let added = 0;
+    while (t <= nowMs){
+      const boundary = new Date(t);
+      const endMs   = boundary.getTime() + 60*1000; // window ends at the end of that minute label
+      const M = computeRollingMeans(endMs, stepMin);
+      const C = M ? computeCompositeFromMeans(M) : null;
+      const label = formatMinuteLabel(boundary);
+      if (M && !hasRowWithLabel(tableId, label)){
+        appendSummaryRowToTable(tableId, boundary, M, C, {bold:false, labelSuffix:''});
+        added++;
+      }
+      t += stepMs;
+    }
+    return added;
+  }
+  function backfillAll(){
+    const added5  = backfillWindow(5,  'summary5Table');
+    const added15 = backfillWindow(15, 'summary15Table');
+    const added60 = backfillWindow(60, 'summary60Table');
+    console.log(`[Backfill] added rows — 5m:${added5}  15m:${added15}  60m:${added60}`);
+    // Optional: toast could be added; for now console-only per user's request
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('backfillBtn');
+    if (btn){ btn.addEventListener('click', backfillAll); }
+  });
+})();
+// ============================================================================
+
+
+// Append a row to a table by id ('summaryPopupTable' or 'autoSummaryTable')
+
+function appendSummaryRowToTable(tableId, d, M, C, opts){
+  // Skip if summary is empty/blank
+  if (!isNonEmptySummary(M, C)) { return; }
+  
+function emitAuto1m(){
+  const now = new Date();
+  const prev = new Date(now.getTime() - 60*1000); prev.setSeconds(0,0);
+  const key = minuteKey(prev);
+  if (lastAuto1mKey === key) return;
+  lastAuto1mKey = key;
+  const endMs = prev.getTime() + 60*1000;
+  const M = computeRollingMeans(endMs, 1);
+  const C = M ? computeCompositeFromMeans(M) : null;
+  if (M) {
+    appendSummaryRowToTable('autoSummaryTable', prev, M, C, {bold:false, labelSuffix:' 1m Avg'});
+    // If popup exists, mirror there as well (still isolated from its own data)
+    if (document.getElementById('summaryPopupTable')) {
+    }
+  } else { /* skip empty immediate emit */ }
+}
+
+// Emit 5-minute rolling average at each 5-minute boundary (popup)
+function emitAuto5m(){ /* [number1-only] no-op */ }
+// Toggle Auto (1-minute rolling stream) — sync both buttons and emit immediately
+function toggleAutoSummary(){
+  autoSummaryActive = !autoSummaryActive;
+  const btn1 = document.getElementById('autoSummaryBtn');       // popup button
+  const btn2 = document.getElementById('autoSummaryToggleBtn'); // fixed header button
+  if (autoSummaryActive){
+    if (btn1) btn1.textContent = 'Auto (On)';
+    if (btn2) btn2.textContent = 'Auto (On)';
+    // emit immediate row
+    (function immediateEmit(){
+      const endMs = Date.now();
+      const M = computeRollingMeans(endMs, 1);
+      const C = M ? computeCompositeFromMeans(M) : null;
+      const d = new Date();
+      if (M) {
+        appendSummaryRowToTable('autoSummaryTable', d, M, C, {bold:false, labelSuffix:' 5m Now'});
+      } else { /* skip empty auto-summary row */ }
+    })();
+    // schedule boundary-aligned loop
+    if (auto1mIntervalId) clearInterval(auto1mIntervalId);
+    const now = new Date();
+    const msToNext = (60 - now.getSeconds())*1000 - now.getMilliseconds();
+    setTimeout(()=>{
+      emitAuto1m();
+      auto1mIntervalId = setInterval(emitAuto1m, 1000);
+    }, Math.max(0, msToNext));
+  } else {
+    if (btn1) btn1.textContent = 'Auto (Off)';
+    if (btn2) btn2.textContent = 'Auto';
+    if (auto1mIntervalId){ clearInterval(auto1mIntervalId); auto1mIntervalId=null; }
+  }
+}
+
+// Popup builder (id=summaryPopup, #summaryPopupTable) — unchanged shell
+function ensureSummaryPopup(){
+  let popup = document.getElementById("summaryPopup");
+  if (popup) return popup;
+  popup = document.createElement("div");
+  popup.id = "summaryPopup";
+  Object.assign(popup.style, {
+    position:"fixed", top:"70px", right:"20px", background:"#fff", border:"1px solid #ccc",
+    borderRadius:"8px", boxShadow:"0 4px 16px rgba(0,0,0,0.2)", maxHeight:"70vh", overflow:"auto",
+    zIndex:"9999", padding:"10px"
+  });
+
+  const head = document.createElement("div");
+  Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
+  head.innerHTML = `<strong>Summary</strong>`;
+  const controls = document.createElement("div");
+
+  const exportBtn = document.createElement("button");
+  exportBtn.textContent = "Export CSV";
+  exportBtn.onclick = exportPopupCSV;
+
+  const autoBtn = document.createElement("button");
+  autoBtn.id = "autoSummaryBtn";
+  autoBtn.textContent = autoSummaryActive ? "Auto (On)" : "Auto (Off)";
+  autoBtn.onclick = toggleAutoSummary;
+
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "×";
+  closeBtn.style.marginLeft = "8px";
+  closeBtn.onclick = ()=>popup.remove();
+
+  controls.appendChild(exportBtn);
+  
+  const instant5Btn = document.createElement("button");
+  instant5Btn.textContent = "5m Now";
+  instant5Btn.onclick = ()=>appendInstantSummaryToPopup(5);
+  controls.appendChild(instant5Btn);
+
+  const instant15Btn = document.createElement("button");
+  instant15Btn.textContent = "15m Now";
+  instant15Btn.onclick = ()=>appendInstantSummaryToPopup(15);
+  controls.appendChild(instant15Btn);
+
+  controls.appendChild(autoBtn);
+  controls.appendChild(closeBtn);
+  head.appendChild(controls);
+  popup.appendChild(head);
+
+  const table = document.createElement("table");
+  table.id = "summaryPopupTable";
+  table.style.borderCollapse="collapse";
+  table.style.width="100%";
+  const thead = document.createElement("thead");
+  thead.innerHTML = `<tr>${SUMMARY_COLUMNS.map(c=>`<th>${c}</th>`).join("")}</tr>`;
+  table.appendChild(thead);
+  table.appendChild(document.createElement("tbody"));
+  popup.appendChild(table);
+  document.body.appendChild(popup);
+  return popup;
+}
+
+// Create/open popup, dense backfill based on MAIN TABLE data, then start 5m cadence
+function createSummaryPopupTable(){
+  ensureSummaryPopup();
+  // Backfill: find min and max _ts from main table
+  const snap = snapshotFromMainTable();
+  if (snap.length){
+    const minTs = Math.min(...snap.map(x=>x._ts));
+    const now = Date.now();
+    // Build completed 5-min boundaries between minTs and now
+    const start = new Date(minTs); start.setSeconds(0,0);
+    start.setMinutes(start.getMinutes() - (start.getMinutes()%5), 0, 0);
+    for (let t = start.getTime(); t <= now; t += 5*60000){
+      const endMs = t + 60000; // 1 minute after boundary for window end
+      const d = new Date(t);
+      const M = computeRollingMeans(endMs, 1);
+      if (M){
+      } else {
+      }
+    }
+    // Also append a "now" row
+    const Mnow = computeRollingMeans(Date.now(), SUMMARY_WINDOW_MINUTES);
+    const dnow = new Date();
+    if (Mnow){
+    } else {
+    }
+  }
+  // Start cadence (disabled legacy popup emitter)
+  // emitAuto5m();
+  // startAuto5mTimer(); // intentionally disabled
+}
+
+// Start 5-minute timer (popup flow)
+// [removed:number1-only] startAuto5mTimer() definition removed
+// Append one immediate summary row for a given window into the popup
+function appendInstantSummaryToPopup(minutes){
+  ensureSummaryPopup();
+  const now = Date.now();
+  const M = computeRollingMeans(now, minutes);
+  const d = new Date();
+  if (M){
+  } else {
+  }
+}
+
+// CSV export (popup)
+function exportPopupCSV(){
+  const table = document.getElementById("summaryPopupTable"); if (!table) return;
+  const rows = [SUMMARY_COLUMNS.join(",")];
+  table.querySelectorAll("tbody tr").forEach(tr=>{
+    const vals = Array.from(tr.children).slice(0, SUMMARY_COLUMNS.length).map(td=>{
+      const t = td.textContent.trim();
+      return /[",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
+    });
+    rows.push(vals.join(","));
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([rows.join("\n")], {type:"text/csv;charset=utf-8"}));
+  a.download = "summary.csv"; document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+}
+window.createSummaryPopupTable = createSummaryPopupTable;
+window.toggleAutoSummary = toggleAutoSummary;
+</script>
+
+
+<button id="backfillBtn" class="ctrl-btn">Backfill</button>
+
+<script>
+// Group note buttons by colour into separate rows (no colour/style changes)
+(function(){
+  function detectColour(btn){
+    // Prefer data-category if present
+    const dcat = btn.getAttribute('data-category');
+    if (dcat) return dcat.trim().toLowerCase();
+    // Try class pattern note-btn--{colour}
+    const cls = btn.className||'';
+    const m = cls.match(/note-btn--([a-z]+)/);
+    if (m) return m[1].toLowerCase();
+    // Fallback: look at inline style background-color to cluster; hash the value
+    const bg = btn.style && btn.style.backgroundColor ? btn.style.backgroundColor.trim() : '';
+    return bg || 'default';
+  }
+
+  function ensureRow(container, key, label){
+    let row = container.querySelector(`[data-row="${key}"]`);
+    if (!row){
+      row = document.createElement('div');
+      row.setAttribute('data-row', key);
+      row.style.display = 'flex';
+      row.style.flexWrap = 'wrap';
+      row.style.gap = '6px';
+      row.style.alignItems = 'center';
+      row.style.padding = '2px 0';
+
+      // Heading (keep neutral styling per user request)
+      const h = document.createElement('div');
+      h.textContent = label;
+      h.style.minWidth = '90px';
+      h.style.fontWeight = '600';
+      h.style.marginRight = '8px';
+      row.appendChild(h);
+
+      container.appendChild(row);
+    }
+    return row;
+  }
+
+  function titleCase(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const container = document.getElementById('noteButtonRows');
+    if (!container) return;
+
+    // Collect existing note buttons wherever they currently are
+    const btns = Array.from(document.querySelectorAll('.note-btn'));
+    if (!btns.length) return;
+
+    // Preferred order if present amongst buttons
+    const orderPref = ['red','orange','yellow','gold','green','blue','purple','pink','grey','gray','black','white','default'];
+
+    // Build a map colour -> buttons
+    const buckets = new Map();
+    btns.forEach(btn=>{
+      const key = detectColour(btn);
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(btn);
+    });
+
+    // Sort keys by preferred order, then by name
+    const keys = Array.from(buckets.keys());
+    keys.sort((a,b)=>{
+      const ia = orderPref.indexOf(a), ib = orderPref.indexOf(b);
+      if (ia!==-1 || ib!==-1){
+        return (ia===-1?999:ia) - (ib===-1?999:ib);
+      }
+      return a.localeCompare(b);
+    });
+
+    // Move buttons into their colour rows (preserve existing button styles/handlers)
+    keys.forEach(k=>{
+      const row = ensureRow(container, k, titleCase(k));
+      buckets.get(k).forEach(btn=>{
+        // Ensure width/spacing remains tidy but do not alter colours
+        btn.style.margin = '0';
+        row.appendChild(btn);
+      });
+    });
+  });
+
+  // Rebuild from existing summary table rows (no main log required)
+  function runBackfillFromTable(minutes, tableId){
+    try{
+      const table = document.getElementById(tableId);
+      if (!table) return alert("Target table not found.");
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return alert("Target table body not found.");
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
+      // Parse times from first cell
+      function parseAU(s){
+        try{
+          if (typeof parseAUDatetime === "function"){
+            const ms = parseAUDatetime(s);
+            if (Number.isFinite(ms)) return ms;
+          }
+          // Fallback simple parse (may fail on AU format)
+          // attempt DD/MM/YYYY HH:MM:SS
+          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
+          if (m){
+            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
+            return new Date(y, mo-1, d, h, mi, se).getTime();
+          }
+        }catch(e){}
+        return NaN;
+      }
+      const points = [];
+      rows.forEach(tr=>{
+        const tc = tr.querySelector('td,th');
+        if (!tc) return;
+        const ms = parseAU(tc.textContent || "");
+        if (Number.isFinite(ms)){
+          // capture the numeric cells as strings to re-insert
+          const cells = Array.from(tr.children).map(td => td.textContent || "");
+          points.push({ms, cells});
+        }
+      });
+      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
+      // Determine anchor and step
+      const step = minutes*60*1000;
+      const anchor = Math.min.apply(null, points.map(p=>p.ms));
+      // Bucket by boundary index to dedupe to one per boundary
+      const byIdx = new Map();
+      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
+        const idx = Math.floor((p.ms - anchor)/step);
+        byIdx.set(idx, p); // last wins (latest within that bucket)
+      });
+      // Rewrite table with aligned, deduped rows
+      tbody.innerHTML = "";
+      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
+        const p = byIdx.get(idx);
+        const tr = document.createElement("tr");
+        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+        tbody.appendChild(tr);
+      });
+      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
+    }catch(e){
+      console.warn("Rebuild from table failed", e);
+      alert("Rebuild failed: " + e.message);
+    }
+  }
+
+})();
+</script>
+
+
+<script>
+// === Summary (5m/15m/60m) recompute with Drug/Qty/Notes/Last columns ===
+
+// Parse AU datetime like "13/08/2025, 16:57:12" or "13/08/2025 16:57:12"
+function _parseAUDT(s){
+  if (!s) return null;
+  const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})\s*$/);
+  if (!m) return null;
+  const d = new Date(parseInt(m[3],10), parseInt(m[2],10)-1, parseInt(m[1],10),
+                     parseInt(m[4],10), parseInt(m[5],10), parseInt(m[6],10));
+  return d.getTime();
+}
+
+// Extract rows from main #logTable tbody as structured objects
+function _readLogRows(){
+  const tb = document.querySelector('#logTable tbody');
+  if (!tb) return [];
+  const rows = [];
+  const ths = Array.from(document.querySelectorAll('#logTable thead th')).map(th => th.textContent.trim());
+  Array.from(tb.querySelectorAll('tr')).forEach(tr => {
+    const tds = Array.from(tr.children).map(td => td.textContent.trim());
+    // Map known columns by header names
+    const get = (name) => {
+      const idx = ths.indexOf(name);
+      return idx >= 0 ? tds[idx] : "";
+    };
+    const tsStr = get('Timestamp');
+    const ts = _parseAUDT(tsStr);
+    rows.push({
+      ts, tsStr,
+      drug: get('Drug'),
+      qty: parseFloat(get('QTY') || "0") || 0,
+      notes: get('Notes') || "",
+      last: get('Last') || "",
+      rush: parseFloat(get('Rush') || "0") || 0,
+      mood: parseFloat(get('Mood') || "0") || 0,
+      social: parseFloat(get('Social') || "0") || 0,
+      energy: parseFloat(get('Energy') || "0") || 0,
+      focus: parseFloat(get('Focus') || "0") || 0,
+      anxiety: parseFloat(get('Anxiety') || "0") || 0,
+      impair: parseFloat(get('Impair') || "0") || 0
+    });
+  });
+  // drop any rows without a timestamp
+  return rows.filter(r => Number.isFinite(r.ts));
+}
+
+// Unique list helper preserving order
+function _uniqPreservingOrder(list){
+  const out = [];
+  const seen = new Set();
+  for (const x of list){
+    const key = String(x);
+    if (!seen.has(key)){
+      seen.add(key);
+      out.push(x);
+    }
+  }
+  return out;
+}
+
+// Tokenise text to words by whitespace
+function _tokeniseWords(s){
+  return String(s || "").split(/\s+/).filter(Boolean);
+}
+
+// Aggregate within [startMs, endMs] inclusive
+function _aggregateWindow(rows, startMs, endMs){
+  const inWindow = rows.filter(r => r.ts >= startMs && r.ts <= endMs);
+  if (!inWindow.length){
+    return null;
+  }
+  // Metric means
+  const fields = ['rush','mood','social','energy','focus','anxiety','impair'];
+  const sums = Object.fromEntries(fields.map(f => [f, 0]));
+  inWindow.forEach(r => fields.forEach(f => sums[f] += r[f]));
+  const means = Object.fromEntries(fields.map(f => [f, sums[f] / inWindow.length]));
+  // Drug distinct list (by occurrence order)
+  const drugs = _uniqPreservingOrder(inWindow.map(r => r.drug).filter(Boolean)).join(' ');
+  // Qty sum
+  const qtySum = inWindow.reduce((a,r)=> a + (r.qty||0), 0);
+  // Notes words (unique, order-preserved as first seen)
+  const notesWords = _uniqPreservingOrder(inWindow.flatMap(r => _tokeniseWords(r.notes))).join(' ');
+  // Last words (unique, order-preserved)
+  const lastWords  = _uniqPreservingOrder(inWindow.flatMap(r => _tokeniseWords(r.last))).join(' ');
+  // Composites (mirror main table approach where appropriate)
+  const score = (means.rush + means.mood + means.social + means.energy + means.focus) - (means.anxiety + means.impair);
+  const max   = (means.rush + means.mood + means.social + means.energy + means.focus);
+  const min   = (means.anxiety + means.impair);
+  const weighted = (means.rush*6) + (means.mood*4) + (means.social*4) + (means.energy*3) + (means.focus*3) - (means.anxiety*5) + (means.impair*10);
+  const fiveMax = weighted / 10;
+  return {means, drugs, qtySum, notesWords, lastWords, score, max, min, weighted, fiveMax};
+}
+
+// Format date label HH:MM and suffix "Average"
+function _minuteLabel(ms){
+  const d = new Date(ms);
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  return `${hh}:${mm}\nAverage`;
+}
+
+// Recalculate summary for a given window and write to tableId.
+// Notes and Last are placed at FAR RIGHT per user instruction.
+function recalcSummary(windowMinutes, tableId){
+  try{
+    const rows = _readLogRows();
+    const tb = document.querySelector(`#${tableId} tbody`);
+    if (!tb) return;
+    tb.innerHTML = "";
+    if (!rows.length) return;
+
+    // Determine minute boundaries from min..max timestamp
+    const minTs = Math.min(...rows.map(r => r.ts));
+    const maxTs = Math.max(...rows.map(r => r.ts));
+    const minuteMs = 60*1000;
+    // Align to minute
+    const start = Math.floor(minTs / minuteMs) * minuteMs;
+    const end   = Math.floor(maxTs / minuteMs) * minuteMs;
+    
+    const stepMs = windowMinutes * minuteMs;
+    // Align first emission to the first minute boundary (inclusive), then step by window size
+    for (let t = start; t <= end; t += stepMs){
+      const startWin = t - (windowMinutes*minuteMs) + minuteMs; // include current boundary minute
+      const endWin   = t; // inclusive
+      const A = _aggregateWindow(rows, startWin, endWin);
+      if (!A) continue;
+      const tr = document.createElement('tr');
+      const f2 = (x)=> Number.isFinite(x) ? x.toFixed(2) : "0.00";
+      tr.innerHTML =
+        `<td>${_minuteLabel(t)}</td>` +
+        `<td>${A.drugs}</td>` +
+        `<td>${f2(A.qtySum)}</td>` +
+        `<td>${f2(A.means.rush)}</td>` +
+        `<td>${f2(A.means.mood)}</td>` +
+        `<td>${f2(A.means.social)}</td>` +
+        `<td>${f2(A.means.energy)}</td>` +
+        `<td>${f2(A.means.focus)}</td>` +
+        `<td>${f2(A.means.anxiety)}</td>` +
+        `<td>${f2(A.means.impair)}</td>` +
+        `<td>${f2(A.score)}</td>` +
+        `<td>${f2(A.max)}</td>` +
+        `<td>${f2(A.min)}</td>` +
+        `<td>${f2(A.weighted)}</td>` +
+        `<td>${f2(A.fiveMax)}</td>` +
+        `<td>${A.notesWords}</td>` +
+        `<td>${A.lastWords}</td>`;
+      tb.appendChild(tr);
+    }
+    </td>` +
+        `<td>${A.drugs}</td>` +
+        `<td>${f2(A.qtySum)}</td>` +
+        `<td>${f2(A.means.rush)}</td>` +
+        `<td>${f2(A.means.mood)}</td>` +
+        `<td>${f2(A.means.social)}</td>` +
+        `<td>${f2(A.means.energy)}</td>` +
+        `<td>${f2(A.means.focus)}</td>` +
+        `<td>${f2(A.means.anxiety)}</td>` +
+        `<td>${f2(A.means.impair)}</td>` +
+        `<td>${f2(A.score)}</td>` +
+        `<td>${f2(A.max)}</td>` +
+        `<td>${f2(A.min)}</td>` +
+        `<td>${f2(A.weighted)}</td>` +
+        `<td>${f2(A.fiveMax)}</td>` +
+        `<td>${A.notesWords}</td>` +
+        `<td>${A.lastWords}</td>`;
+      tb.appendChild(tr);
+    }
+  }catch(e){
+    console.error("recalcSummary error", e);
+  }
+}
+
+// Wire backfill button and auto-recalc on changes
+(function(){
+  const backfillBtn = document.getElementById('backfillBtn');
+  if (backfillBtn){
+    backfillBtn.addEventListener('click', ()=> recalcSummary(5, 'summary5Table'));
+  }
+  const backfill15Btn = document.getElementById('backfill15Btn');
+  if (backfill15Btn){
+    backfill15Btn.addEventListener('click', ()=> recalcSummary(15, 'summary15Table'));
+  }
+  const backfill60Btn = document.getElementById('backfill60Btn');
+  if (backfill60Btn){
+    backfill60Btn.addEventListener('click', ()=> recalcSummary(60, 'summary60Table'));
+  }
+  // Auto recompute summaries when log table changes
+  const logBody = document.querySelector('#logTable tbody');
+  if (logBody){
+    const obs = new MutationObserver(()=>{
+      recalcSummary(5, 'summary5Table');
+      recalcSummary(15,'summary15Table');
+      recalcSummary(60,'summary60Table');
+    });
+    obs.observe(logBody, {childList:true, subtree:false});
+  }
+  // Initial compute on load
+  window.addEventListener('load', ()=>{
+    recalcSummary(5, 'summary5Table');
+    recalcSummary(15,'summary15Table');
+    recalcSummary(60,'summary60Table');
+  });
+
+  // Rebuild from existing summary table rows (no main log required)
+  function runBackfillFromTable(minutes, tableId){
+    try{
+      const table = document.getElementById(tableId);
+      if (!table) return alert("Target table not found.");
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return alert("Target table body not found.");
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
+      // Parse times from first cell
+      function parseAU(s){
+        try{
+          if (typeof parseAUDatetime === "function"){
+            const ms = parseAUDatetime(s);
+            if (Number.isFinite(ms)) return ms;
+          }
+          // Fallback simple parse (may fail on AU format)
+          // attempt DD/MM/YYYY HH:MM:SS
+          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
+          if (m){
+            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
+            return new Date(y, mo-1, d, h, mi, se).getTime();
+          }
+        }catch(e){}
+        return NaN;
+      }
+      const points = [];
+      rows.forEach(tr=>{
+        const tc = tr.querySelector('td,th');
+        if (!tc) return;
+        const ms = parseAU(tc.textContent || "");
+        if (Number.isFinite(ms)){
+          // capture the numeric cells as strings to re-insert
+          const cells = Array.from(tr.children).map(td => td.textContent || "");
+          points.push({ms, cells});
+        }
+      });
+      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
+      // Determine anchor and step
+      const step = minutes*60*1000;
+      const anchor = Math.min.apply(null, points.map(p=>p.ms));
+      // Bucket by boundary index to dedupe to one per boundary
+      const byIdx = new Map();
+      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
+        const idx = Math.floor((p.ms - anchor)/step);
+        byIdx.set(idx, p); // last wins (latest within that bucket)
+      });
+      // Rewrite table with aligned, deduped rows
+      tbody.innerHTML = "";
+      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
+        const p = byIdx.get(idx);
+        const tr = document.createElement("tr");
+        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+        tbody.appendChild(tr);
+      });
+      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
+    }catch(e){
+      console.warn("Rebuild from table failed", e);
+      alert("Rebuild failed: " + e.message);
+    }
+  }
+
+})();
+</script>
+
+<!-- Summary Popup Modal -->
+<div id="summaryPopupModal" style="display:none; position:fixed; inset:5% 5% auto 5%; background:#fff; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:10000; padding:12px; overflow:auto; max-height:90vh;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <h3 id="summaryPopupTitle" style="margin:0;">Summary</h3>
+    <button id="summaryPopupCloseBtn" style="background:#007aff; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">Close</button>
+  </div>
+  <table id="summaryPopupTable" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<script>
+(function(){
+  function show(el){ el.style.display='block'; }
+  function hide(el){ el.style.display='none'; }
+  window.openSummaryPopup = function(mins){
+    try{
+      const modal = document.getElementById('summaryPopupModal');
+      const title = document.getElementById('summaryPopupTitle');
+      const tb = document.querySelector('#summaryPopupTable tbody');
+      if (!modal || !title || !tb) return;
+      title.textContent = `Summary ${mins}m (popup)`;
+      tb.innerHTML = '';
+      // Rebuild popup table with unified logic
+      if (typeof recalcSummary === 'function'){
+        recalcSummary(mins, 'summaryPopupTable');
+      }
+      show(modal);
+    }catch(e){ console.error(e); }
+  };
+  const closeBtn = document.getElementById('summaryPopupCloseBtn');
+  if (closeBtn){
+    closeBtn.addEventListener('click', ()=>{
+      const modal = document.getElementById('summaryPopupModal');
+      if (modal) modal.style.display='none';
+    });
+  }
+
+  // Rebuild from existing summary table rows (no main log required)
+  function runBackfillFromTable(minutes, tableId){
+    try{
+      const table = document.getElementById(tableId);
+      if (!table) return alert("Target table not found.");
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return alert("Target table body not found.");
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
+      // Parse times from first cell
+      function parseAU(s){
+        try{
+          if (typeof parseAUDatetime === "function"){
+            const ms = parseAUDatetime(s);
+            if (Number.isFinite(ms)) return ms;
+          }
+          // Fallback simple parse (may fail on AU format)
+          // attempt DD/MM/YYYY HH:MM:SS
+          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
+          if (m){
+            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
+            return new Date(y, mo-1, d, h, mi, se).getTime();
+          }
+        }catch(e){}
+        return NaN;
+      }
+      const points = [];
+      rows.forEach(tr=>{
+        const tc = tr.querySelector('td,th');
+        if (!tc) return;
+        const ms = parseAU(tc.textContent || "");
+        if (Number.isFinite(ms)){
+          // capture the numeric cells as strings to re-insert
+          const cells = Array.from(tr.children).map(td => td.textContent || "");
+          points.push({ms, cells});
+        }
+      });
+      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
+      // Determine anchor and step
+      const step = minutes*60*1000;
+      const anchor = Math.min.apply(null, points.map(p=>p.ms));
+      // Bucket by boundary index to dedupe to one per boundary
+      const byIdx = new Map();
+      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
+        const idx = Math.floor((p.ms - anchor)/step);
+        byIdx.set(idx, p); // last wins (latest within that bucket)
+      });
+      // Rewrite table with aligned, deduped rows
+      tbody.innerHTML = "";
+      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
+        const p = byIdx.get(idx);
+        const tr = document.createElement("tr");
+        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+        tbody.appendChild(tr);
+      });
+      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
+    }catch(e){
+      console.warn("Rebuild from table failed", e);
+      alert("Rebuild failed: " + e.message);
+    }
+  }
+
+})();
+</script>
+<script>
+function openEmotionModal() {
+    document.getElementById('emotionModal').style.display = 'block';
+    buildEmotionButtons();
+}
+function closeEmotionModal() {
+    document.getElementById('emotionModal').style.display = 'none';
+}
+function buildEmotionButtons() {
+    const container = document.getElementById("emotionButtons");
+    if (container.childNodes.length > 0) return; // Avoid rebuilding
+    const emotions = [
+        "Joy","Happy","Cheerful","Content","Proud","Optimistic","Excited","Energetic","Affectionate","Compassionate","Peaceful","Relieved","Satisfied","Love",
+        "Fear","Scared","Frightened","Helpless","Panic","Insecure","Worried","Nervous","Horrified","Terrified","Hysterical","Anxious","Overwhelmed",
+        "Anger","Annoyed","Agitated","Frustrated","Mad","Rage","Hostile","Hateful","Jealous","Bitter","Irritated","Exasperated",
+        "Sadness","Depressed","Lonely","Isolated","Ashamed","Guilty","Disappointed","Sorrow","Grief","Despair","Hurt","Powerless","Neglected",
+        "Surprise","Amazed","Startled","Stunned","Confused","Shocked","Speechless","Awestruck","Overcome","Perplexed","Disillusioned"
+    ];
+    emotions.forEach(word => {
+        const btn = document.createElement('button');
+        btn.textContent = word;
+        btn.className = 'note-btn';
+        btn.style.minWidth = '80px';
+        btn.onclick = () => {
+            const notes = document.getElementById('notesInput');
+            if (!notes.value.includes(word)) {
+                notes.value = (notes.value + ' ' + word).trim();
+            }
+        };
+        container.appendChild(btn);
+    });
+}
+</script>
+<script>
+// ===== Aligned Auto Summary Scheduler (1m/5m/15m/60m) =====
+// This patch keeps popup summaries untouched and only emits rows into the docked tables.
+// Alignment: boundary-aligned since the first log entry (inclusive).
+// State
+(function(){
+  // global-ish state
+  window.autoSummaryActive = !!window.autoSummaryActive;
+  window._autoAnchors = window._autoAnchors || { anchorMs: null };
+  window._autoTimers = window._autoTimers || { t1:null, t5:null, t15:null, t60:null, p1:null, p5:null, p15:null, p60:null };
+  window._autoLastEmit = window._autoLastEmit || { 1: null, 5: null, 15: null, 60: null };
+
+  // Utility: get earliest log entry timestamp (ms), else now
+  function earliestLogMs(){
+    try{
+      if (Array.isArray(window.logData) && window.logData.length){
+        const ms = window.logData.map(r => Number(r && r._ts || 0)).filter(Number.isFinite);
+        if (ms.length) return Math.min.apply(null, ms);
+      }
+    }catch(e){}
+    return Date.now();
+  }
+
+  // Utility: ceil to next boundary given anchor
+  function nextBoundaryMs(nowMs, anchorMs, minutes){
+    const step = minutes * 60 * 1000;
+    if (!Number.isFinite(anchorMs) || step <= 0) return nowMs + step;
+    const elapsed = nowMs - anchorMs;
+    const k = Math.ceil(elapsed / step);
+    return anchorMs + k * step;
+  }
+
+  // Compute the rolling means and composite; functions expected elsewhere in file.
+  // Guard if absent.
+  function _computeAndAppend(intervalMin, tableId, labelSuffix){
+    try{
+      const endMs = Date.now();
+      if (typeof computeRollingMeans !== "function") return;
+      const M = computeRollingMeans(endMs, intervalMin);
+      const C = (typeof computeCompositeFromMeans === "function") ? computeCompositeFromMeans(M) : null;
+      if (!M || !isNonEmptySummary(M, C)) return;
+      const d = new Date();
+      if (typeof appendSummaryRowToTable === "function"){
+        appendSummaryRowToTable(tableId, d, M, C, {labelSuffix});
+      } else {
+        // Minimal fallback: directly append a row if helper is missing
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        if (!tbody) return;
+        const tr = document.createElement("tr");
+        const pad = (n)=> (Number.isFinite(n) ? Number(n).toFixed(2) : "");
+        const when = d.toLocaleString('en-AU',{hour12:false});
+        const cells = [when, "", "", pad(M.rush), pad(M.mood), pad(M.social), pad(M.energy), pad(M.focus), pad(M.anxiety), pad(M.impair),
+                       pad(C && C.score), pad(C && C.max), pad(C && C.min), pad(C && C.weighted), pad(C && C.fiveMax), "", ""];
+        tr.innerHTML = cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+        tbody.appendChild(tr);
+      }
+    }catch(e){ console.warn("auto emit error", e); }
+  }
+
+  // Clear timers
+  function clearAllTimers(){
+    const T = window._autoTimers;
+    ['t1','t5','t15','t60','p1','p5','p15','p60'].forEach(k=>{
+      if (T[k]) { clearTimeout(T[k]); clearInterval(T[k]); T[k] = null; }
+    });
+  }
+
+  // Start aligned timers for all intervals
+  function startAlignedTimers(){
+    const A = window._autoAnchors;
+    if (!Number.isFinite(A.anchorMs)) A.anchorMs = earliestLogMs();
+
+    const now = Date.now();
+    const plan = [
+      {min:1,   table:'autoSummaryTable', label:' 1m Now',  key:'t1',  pkey:'p1'},
+      {min:5,   table:'summary5Table',    label:' 5m Now',  key:'t5',  pkey:'p5'},
+      {min:15,  table:'summary15Table',   label:' 15m Now', key:'t15', pkey:'p15'},
+      {min:60,  table:'summary60Table',   label:' 60m Now', key:'t60', pkey:'p60'}
+    ];
+
+    plan.forEach(({min, table, label, key, pkey})=>{
+      const nextMs = nextBoundaryMs(now, A.anchorMs, min);
+      const delay = Math.max(0, nextMs - now);
+      // phase at boundary once, then regular interval
+      window._autoTimers[pkey] = setTimeout(()=>{
+        // prevent duplicate emission if page was idle:
+        const last = window._autoLastEmit[min];
+        if (!last || last < nextMs){ _computeAndAppend(min, table, label); window._autoLastEmit[min] = nextMs; }
+        window._autoTimers[key] = setInterval(()=>{
+          const t = Date.now();
+          const expected = Math.floor((t - A.anchorMs)/(min*60*1000))*(min*60*1000) + A.anchorMs;
+          if (!window.autoSummaryActive) return;
+          if (!window._autoLastEmit[min] || window._autoLastEmit[min] < expected){
+            _computeAndAppend(min, table, label);
+            window._autoLastEmit[min] = expected;
+          }
+        }, min * 60 * 1000);
+      }, delay);
+    });
+  }
+
+  // Public toggle; preserve existing identifier if present
+  window.toggleAutoSummary = function(){
+    window.autoSummaryActive = !window.autoSummaryActive;
+    const btn = document.getElementById('autoSummaryToggleBtn');
+    if (btn){ btn.textContent = window.autoSummaryActive ? 'Auto (On)' : 'Auto'; }
+    if (!window.autoSummaryActive){
+      clearAllTimers();
+      return;
+    }
+    clearAllTimers();
+    // set anchor by earliest log row to ensure "since first entry inclusive"
+    window._autoAnchors.anchorMs = earliestLogMs();
+    // Optional: on toggle-on, flush a "now" row for 1m only (consistent with current UX)
+    try {
+      _computeAndAppend(1, 'autoSummaryTable', ' 1m Now');
+      const now = Date.now();
+      window._autoLastEmit[1] = now - (now % (60*1000));
+    } catch(e){}
+    startAlignedTimers();
+  };
+
+  // Ensure status text matches active state on load
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = document.getElementById('autoSummaryToggleBtn');
+    if (btn){ btn.textContent = window.autoSummaryActive ? 'Auto (On)' : 'Auto'; }
+  });
+
+  // Rebuild from existing summary table rows (no main log required)
+  function runBackfillFromTable(minutes, tableId){
+    try{
+      const table = document.getElementById(tableId);
+      if (!table) return alert("Target table not found.");
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return alert("Target table body not found.");
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
+      // Parse times from first cell
+      function parseAU(s){
+        try{
+          if (typeof parseAUDatetime === "function"){
+            const ms = parseAUDatetime(s);
+            if (Number.isFinite(ms)) return ms;
+          }
+          // Fallback simple parse (may fail on AU format)
+          // attempt DD/MM/YYYY HH:MM:SS
+          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
+          if (m){
+            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
+            return new Date(y, mo-1, d, h, mi, se).getTime();
+          }
+        }catch(e){}
+        return NaN;
+      }
+      const points = [];
+      rows.forEach(tr=>{
+        const tc = tr.querySelector('td,th');
+        if (!tc) return;
+        const ms = parseAU(tc.textContent || "");
+        if (Number.isFinite(ms)){
+          // capture the numeric cells as strings to re-insert
+          const cells = Array.from(tr.children).map(td => td.textContent || "");
+          points.push({ms, cells});
+        }
+      });
+      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
+      // Determine anchor and step
+      const step = minutes*60*1000;
+      const anchor = Math.min.apply(null, points.map(p=>p.ms));
+      // Bucket by boundary index to dedupe to one per boundary
+      const byIdx = new Map();
+      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
+        const idx = Math.floor((p.ms - anchor)/step);
+        byIdx.set(idx, p); // last wins (latest within that bucket)
+      });
+      // Rewrite table with aligned, deduped rows
+      tbody.innerHTML = "";
+      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
+        const p = byIdx.get(idx);
+        const tr = document.createElement("tr");
+        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+        tbody.appendChild(tr);
+      });
+      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
+    }catch(e){
+      console.warn("Rebuild from table failed", e);
+      alert("Rebuild failed: " + e.message);
+    }
+  }
+
+})();
+</script>
+
+
+<script>
+// ===== Summary Utilities + Backfill + Popups (self-contained, safe to re-define if absent) =====
+(function(){
+  // Guard re-entry
+  if (window.__summary_utils_patched__) return;
+  window.__summary_utils_patched__ = true;
+
+  // ------------ Helpers ------------
+  function toAUDateTime(d){
+    try{ return d.toLocaleString('en-AU', {hour12:false}); }catch(e){ return new Date().toISOString(); }
+  }
+  function pad2(n){ return Number.isFinite(n) ? Number(n).toFixed(2) : ""; }
+  function lastNonEmptyLogInWindow(startMs, endMs){
+    if (!Array.isArray(window.logData)) return null;
+    let best = null;
+    for (const r of window.logData){
+      const t = Number(r && r._ts || NaN);
+      if (!Number.isFinite(t)) continue;
+      if (t > endMs || t < startMs) continue;
+      if (!best || t > best._ts) best = r;
+    }
+    return best;
+  }
+
+  // ------------ Compute Means ------------
+  if (typeof window.computeRollingMeans !== "function"){
+    window.computeRollingMeans = function(endMs, minutes){
+      try{
+        const win = minutes * 60 * 1000;
+        const startMs = endMs - win;
+        const acc = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0, n:0};
+        if (Array.isArray(window.logData)){
+          for (const r of window.logData){
+            const t = Number(r && r._ts || NaN);
+            if (!Number.isFinite(t)) continue;
+            if (t <= endMs && t > startMs){
+              acc.rush += Number(r.rushSum||0);
+              acc.mood += Number(r.moodSum||0);
+              acc.social += Number(r.socialSum||0);
+              acc.energy += Number(r.energySum||0);
+              acc.focus += Number(r.focusSum||0);
+              acc.anxiety += Number(r.anxietySum||0);
+              acc.impair += Number(r.impairSum||0);
+              acc.n++;
+            }
+          }
+        }
+        if (!acc.n) return {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0, n:0, startMs, endMs};
+        const out = {
+          rush: acc.rush/acc.n,
+          mood: acc.mood/acc.n,
+          social: acc.social/acc.n,
+          energy: acc.energy/acc.n,
+          focus: acc.focus/acc.n,
+          anxiety: acc.anxiety/acc.n,
+          impair: acc.impair/acc.n,
+          n: acc.n,
+          startMs, endMs
+        };
+        return out;
+      }catch(e){ console.warn(e); return null; }
+    };
+  }
+
+  if (typeof window.computeCompositeFromMeans !== "function"){
+    window.computeCompositeFromMeans = function(M){
+      if (!M) return null;
+      const score = (M.rush + M.mood + M.social + M.energy + M.focus) - (M.anxiety + M.impair);
+      const max = (M.rush + M.mood + M.social + M.energy + M.focus);
+      const min = (M.anxiety + M.impair);
+      const weighted = (M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*5) + (M.impair*10);
+      const fiveMax = weighted/10;
+      return {score, max, min, weighted, fiveMax};
+    };
+  }
+
+  if (typeof window.appendSummaryRowToTable !== "function"){
+    window.appendSummaryRowToTable = function(tableId, d, M, C, opts){
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      if (!tbody) return;
+      const tr = document.createElement("tr");
+      const when = toAUDateTime(d);
+      // try get a drug/qty/notes snapshot from window
+      const winStart = (M && M.startMs) || (d.getTime() - 60*1000);
+      const winEnd   = (M && M.endMs)   || d.getTime();
+      const last = lastNonEmptyLogInWindow(winStart, winEnd) || {};
+      // Tables have schema:
+      // Auto 1m: Time, Rush..Impair, Score, Max, Min, Weighted, 5Max
+      // 5/15/60: Time, Drug, Qty, Rush..Impair, Score, Max, Min, Weighted, 5Max, Notes, Last
+      if (tableId === 'autoSummaryTable'){
+        const cells = [when, pad2(M.rush), pad2(M.mood), pad2(M.social), pad2(M.energy), pad2(M.focus),
+                       pad2(M.anxiety), pad2(M.impair),
+                       pad2(C && C.score), pad2(C && C.max), pad2(C && C.min), pad2(C && C.weighted), pad2(C && C.fiveMax)];
+        tr.innerHTML = cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+      } else {
+        const cells = [when, (last.drug||""), (last.qty||""),
+                       pad2(M.rush), pad2(M.mood), pad2(M.social), pad2(M.energy), pad2(M.focus),
+                       pad2(M.anxiety), pad2(M.impair),
+                       pad2(C && C.score), pad2(C && C.max), pad2(C && C.min), pad2(C && C.weighted), pad2(C && C.fiveMax),
+                       (last.notes||""), (last.customNotes||"")];
+        tr.innerHTML = cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+      }
+      tbody.appendChild(tr);
+    };
+  }
+
+  // ------------ Backfill ------------
+  
+  // Ensure logData is available: if empty, harvest from the visible main table
+  function ensureLogDataFromUi(){
+    try{
+      if (Array.isArray(window.logData) && window.logData.length) return true;
+      const tb = document.querySelector('#logTable tbody');
+      if (!tb) return false;
+      const rows = Array.from(tb.querySelectorAll('tr'));
+      if (!rows.length) return false;
+      const header = Array.from(document.querySelectorAll('#logTable thead th')).map(th => (th.textContent||'').trim());
+      const colIdx = {};
+      function idxOf(name){ const i = header.findIndex(h => h === name); return i>=0?i:-1; }
+      // Map required columns
+      colIdx.Timestamp = idxOf('Timestamp');
+      colIdx['Rush Sum'] = idxOf('Rush');        // first Rush numeric
+      colIdx['Mood Sum'] = header.findIndex((h,i)=> h==='Mood' and i>colIdx['Rush Sum']); // placeholder, we'll robustly parse below
+      // Instead of relying on duplicate names, we'll parse by data-col attributes where possible:
+      function getByCol(tr, colName){
+        const td = tr.querySelector(`td[data-col="${colName}"]`);
+        if (td) return td.textContent.trim();
+        // fallback: approximate index if header unique
+        const i = header.findIndex(h => h === colName);
+        if (i>=0 && i < tr.children.length) return tr.children[i].textContent.trim();
+        return "";
+      }
+      const out = [];
+      rows.forEach(tr=>{
+        const tsTxt = getByCol(tr, 'Timestamp');
+        // parse AU date
+        let _ts = NaN;
+        try{
+          if (typeof parseAUDatetime === "function"){
+            _ts = parseAUDatetime(tsTxt);
+          }
+        }catch(e){}
+        if (!Number.isFinite(_ts)){
+          const m = String(tsTxt).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
+          if (m){
+            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
+            _ts = new Date(y, mo-1, d, h, mi, se).getTime();
+          } else {
+            _ts = Date.now();
+          }
+        }
+        function num(col){ const v = getByCol(tr, col); const n = parseFloat(v); return Number.isFinite(n)?n:0; }
+        const entry = {
+          _ts,
+          timestamp: tsTxt,
+          sincedose: getByCol(tr,'Since'),
+          elapsed: getByCol(tr,'Elapsed'),
+          info: getByCol(tr,'Phase'),
+          scale: getByCol(tr,'Scale'),
+          drug: getByCol(tr,'Drug'),
+          qty: getByCol(tr,'QTY'),
+          roa: getByCol(tr,'ROA'),
+          notes: getByCol(tr,'Notes'),
+          customNotes: getByCol(tr,'Last'),
+          rushSum: num('Rush'),
+          moodSum: num('Mood'),
+          socialSum: num('Social'),
+          energySum: num('Energy'),
+          focusSum: num('Focus'),
+          anxietySum: num('Anxiety'),
+          impairSum: num('Impair')
+        };
+        entry.score = (entry.rushSum+entry.moodSum+entry.socialSum+entry.energySum+entry.focusSum) - (entry.anxietySum+entry.impairSum);
+        entry.max = (entry.rushSum+entry.moodSum+entry.socialSum+entry.energySum+entry.focusSum);
+        entry.min = (entry.anxietySum+entry.impairSum);
+        entry.maxPercent = Math.round((entry.max/50)*1000)/10;
+        entry.minPercent = Math.round((entry.min/20)*1000)/10;
+        entry.weighted = (entry.rushSum*6)+(entry.moodSum*4)+(entry.socialSum*4)+(entry.energySum*3)+(entry.focusSum*3)-(entry.anxietySum*5)+(entry.impairSum*10);
+        out.push(entry);
+      });
+      if (out.length){
+        window.logData = out;
+        try{ localStorage.setItem('tripLog', JSON.stringify(window.logData)); }catch(e){}
+        return true;
+      }
+    }catch(e){ console.warn('ensureLogDataFromUi error', e); }
+    return false;
+  }
+
+function runBackfillFor(minutes, tableId){ try{ const rows = Array.isArray(window.logData) ? window.logData : []; if (!rows.length) { ensureLogDataFromUi(); }
+      if (!rows.length) return alert("No log data to backfill.");
+      const anchor = Number(rows[0] && rows[0]._ts || rows.reduce((a,r)=>Math.min(a, r._ts||Infinity), Infinity));
+      if (!Number.isFinite(anchor)) return alert("Cannot determine anchor (first entry time).");
+      const now = Date.now();
+      const step = minutes*60*1000;
+      // clear table first
+      const tbody = document.querySelector(`#${tableId} tbody`);
+      if (tbody) tbody.innerHTML = "";
+      for (let t = anchor; t <= now; t += step){
+        const M = computeRollingMeans(t, minutes);
+        const C = computeCompositeFromMeans(M);
+        if (!M || !isNonEmptySummary(M, C)) continue;
+        appendSummaryRowToTable(tableId, new Date(t), M, C, {labelSuffix:` ${minutes}m`});
+      }
+    }catch(e){ console.warn("Backfill error", e); alert("Backfill failed: " + e.message); }
+  }
+
+  // Bind buttons (if present)
+  function bindBackfillButtons(){
+    const map = [
+      {id:'backfillBtn',    min:5,  table:'summary5Table'},
+      {id:'backfill15Btn',  min:15, table:'summary15Table'},
+      {id:'backfill60Btn',  min:60, table:'summary60Table'}
+    ];
+    map.forEach(({id,min,table})=>{
+      const el = document.getElementById(id);
+      if (el && !el.__bf_bound__){
+        el.addEventListener('click', ()=> runBackfillFor(min, table));
+        el.__bf_bound__ = true;
+      }
+    });
+  }
+
+  // ------------ Popups ------------
+  // Create a lightweight popup modal (re-uses existing #scoreModal styles if desired)
+  function ensurePopup(){
+    let m = document.getElementById('summaryPopup');
+    if (m) return m;
+    m = document.createElement('div');
+    m.id = 'summaryPopup';
+    Object.assign(m.style, {
+      position:'fixed', top:'12%', left:'50%', transform:'translateX(-50%)',
+      background:'#fff', border:'2px solid #007aff', borderRadius:'8px',
+      boxShadow:'0 4px 8px rgba(0,0,0,0.2)', padding:'16px', zIndex:10001,
+      maxHeight:'70%', overflow:'auto', minWidth:'320px'
+    });
+    m.innerHTML = '<h3 id="summaryPopupTitle" style="margin-top:0"></h3><div id="summaryPopupBody"></div><div style="text-align:right;margin-top:8px;"><button id="summaryPopupClose">Close</button></div>';
+    document.body.appendChild(m);
+    m.querySelector('#summaryPopupClose').addEventListener('click', ()=>{ m.style.display='none'; });
+    return m;
+  }
+
+  
+
+window.openSummaryPopup = function(minutes){
+  try{
+    const m = ensurePopup();
+    const title = m.querySelector('#summaryPopupTitle');
+    const body  = m.querySelector('#summaryPopupBody');
+    title.textContent = `Summary ${minutes}m (rolling window)`;
+
+    const endMs = Date.now();
+    const M = computeRollingMeans(endMs, minutes);
+    const C = computeCompositeFromMeans(M);
+
+    const makeRow = (k,v)=> `<tr><th style="text-align:left;padding-right:8px;">${k}</th><td>${pad2(v)}</td></tr>`;
+    const tableHtml = `
+      <table style="border-collapse:collapse;width:100%;">
+        <tbody>
+          ${makeRow('Rush', M && M.rush)}
+          ${makeRow('Mood', M && M.mood)}
+          ${makeRow('Social', M && M.social)}
+          ${makeRow('Energy', M && M.energy)}
+          ${makeRow('Focus', M && M.focus)}
+          ${makeRow('Anxiety', M && M.anxiety)}
+          ${makeRow('Impair', M && M.impair)}
+          ${makeRow('Score', C && C.score)}
+          ${makeRow('Max', C && C.max)}
+          ${makeRow('Min', C && C.min)}
+          ${makeRow('Weighted', C && C.weighted)}
+          ${makeRow('5Max', C && C.fiveMax)}
+          <tr><th style="text-align:left;">Window</th><td>${new Date(M.startMs).toLocaleString('en-AU',{hour12:false})} → ${new Date(M.endMs).toLocaleString('en-AU',{hour12:false})}</td></tr>
+        </tbody>
+      </table>`;
+
+    const tableId = minutes===1 ? 'autoSummaryTable' : (minutes===5 ? 'summary5Table' : (minutes===15 ? 'summary15Table' : 'summary60Table'));
+    const buttonsHtml = `
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+        <button id="popupBackfillFromLog"   title="Backfill using main log (aligned from first entry)">Backfill ${minutes}m (from log)</button>
+        <button id="popupBackfillFromTable" title="Rebuild by aligning existing rows in this summary table">Rebuild ${minutes}m (from table)</button>
+      </div>`;
+
+    body.innerHTML = tableHtml + buttonsHtml;
+    const bfLog = document.getElementById('popupBackfillFromLog');
+    if (bfLog){ bfLog.onclick = ()=> { ensureLogDataFromUi(); runBackfillFor(minutes, tableId); }; }
+    const bfTbl = document.getElementById('popupBackfillFromTable');
+    if (bfTbl){ bfTbl.onclick = ()=> runBackfillFromTable(minutes, tableId); }
+    m.style.display = 'block';
+  }catch(e){
+    alert('Failed to open summary: ' + e.message);
+  }
+};
+
+
+
+  // On DOM ready, wire backfill and ensure popup buttons call openSummaryPopup (they already do in HTML)
+  document.addEventListener('DOMContentLoaded', ()=>{
+    bindBackfillButtons();
+  });
+
+  // Rebuild from existing summary table rows (no main log required)
+  function runBackfillFromTable(minutes, tableId){
+    try{
+      const table = document.getElementById(tableId);
+      if (!table) return alert("Target table not found.");
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return alert("Target table body not found.");
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
+      // Parse times from first cell
+      function parseAU(s){
+        try{
+          if (typeof parseAUDatetime === "function"){
+            const ms = parseAUDatetime(s);
+            if (Number.isFinite(ms)) return ms;
+          }
+          // Fallback simple parse (may fail on AU format)
+          // attempt DD/MM/YYYY HH:MM:SS
+          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
+          if (m){
+            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
+            return new Date(y, mo-1, d, h, mi, se).getTime();
+          }
+        }catch(e){}
+        return NaN;
+      }
+      const points = [];
+      rows.forEach(tr=>{
+        const tc = tr.querySelector('td,th');
+        if (!tc) return;
+        const ms = parseAU(tc.textContent || "");
+        if (Number.isFinite(ms)){
+          // capture the numeric cells as strings to re-insert
+          const cells = Array.from(tr.children).map(td => td.textContent || "");
+          points.push({ms, cells});
+        }
+      });
+      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
+      // Determine anchor and step
+      const step = minutes*60*1000;
+      const anchor = Math.min.apply(null, points.map(p=>p.ms));
+      // Bucket by boundary index to dedupe to one per boundary
+      const byIdx = new Map();
+      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
+        const idx = Math.floor((p.ms - anchor)/step);
+        byIdx.set(idx, p); // last wins (latest within that bucket)
+      });
+      // Rewrite table with aligned, deduped rows
+      tbody.innerHTML = "";
+      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
+        const p = byIdx.get(idx);
+        const tr = document.createElement("tr");
+        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+        tbody.appendChild(tr);
+      });
+      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
+    }catch(e){
+      console.warn("Rebuild from table failed", e);
+      alert("Rebuild failed: " + e.message);
+    }
+  }
+
+})();
+</script>
+
+</body>
+
+
+
+
+</html>
+<!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
+<script>
+(function(){
+  // Ensure globals exist from earlier script
+  window.autoSummaryActive = !!window.autoSummaryActive;
+
+  // Local state for four cadences
+  let int1 = null, int5 = null, int15 = null, int60 = null;
+  let last1 = null, last5 = null, last15 = null, last60 = null;
+
+  // Helper: compute minute key "YYYYMMDDHHmm"
+  function minuteKey(d){
+    return d.getFullYear()
+      + String(d.getMonth()+1).padStart(2,"0")
+      + String(d.getDate()).padStart(2,"0")
+      + String(d.getHours()).padStart(2,"0")
+      + String(d.getMinutes()).padStart(2,"0");
+  }
+  // Label "HH:MM Average"
+  function formatMinuteLabel(d){
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    return `${hh}:${mm} Average`;
+  }
+
+  // Read-only snapshot from main table (same invariant as existing code)
+  function snapshotFromMainTable(){
+    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(tr => {
+      const ts = +(tr.getAttribute('data-ts')||0);
+      const get = (field) => {
+        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+        if (!td) return 0;
+        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
+      };
+      const pack = {
+        _ts: ts,
+        rush: get('rush'),
+        mood: get('mood'),
+        social: get('social'),
+        energy: get('energy'),
+        focus: get('focus'),
+        anxiety: get('anxiety'),
+        impair: get('impair')
+      };
+      return pack;
+    }).filter(o => o._ts>0);
+  }
+
+  function computeMeansForWindow(startMs, endMs){
+    const snap = snapshotFromMainTable();
+    const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+    if (!sel.length) return null;
+    const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+    const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
+    return means;
+  }
+  function computeRollingMeans(endMs, minutes){
+    return computeMeansForWindow(endMs - minutes*60*1000, endMs);
+  }
+  function computeCompositeFromMeans(M){
+    const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+    const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
+    const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
+    const weighted = (3*M.rush + 2*M.mood + 2*M.social + 1.5*M.energy + 1.5*M.focus) - (4*M.anxiety - 6*M.impair);
+    const fiveMax  = ((score/5)+5);
+    return {score, max, min, weighted, fiveMax};
+  }
+
+  function appendSummaryRowToTable(tableId, d, M, C, labelSuffix){
+    if (!M) return;
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    const tbody = table.querySelector('tbody'); if (!tbody) return;
+    const row = [
+      (formatMinuteLabel(d) + (labelSuffix?(" "+labelSuffix):"")),
+      M.rush, M.mood, M.social, M.energy, M.focus, M.anxiety, M.impair,
+      C.score, C.max, C.min, C.weighted, C.fiveMax
+    ];
+    const tr = document.createElement("tr");
+    const cols = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    tr.innerHTML = row.map((v,i)=>{
+      if (i===0) return `<td>${v??''}</td>`;
+      const num = Number(v);
+      const isNum = Number.isFinite(num);
+      // reuse global cellBgFor if present
+      const name = cols[i];
+      const bg = isNum && typeof window.cellBgFor==='function' ? window.cellBgFor(name, num) : '';
+      const val = isNum ? num.toFixed(2) : (v ?? '');
+      return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+    }).join("");
+    tbody.appendChild(tr);
+  }
+
+  // Boundary alignment helpers
+  function msToNextMinute(d){ const t = new Date(d); t.setSeconds(0,0); return 60000 - (d - t); }
+  function msToNextMultipleMinutes(d, m){
+    const t = new Date(d);
+    const curMin = t.getMinutes();
+    const next = curMin + (m - (curMin % m || 0));
+    t.setMinutes(next, 0, 0);
+    return t.getTime() - d.getTime();
+  }
+  function msToTopOfHour(d){
+    const t = new Date(d); t.setMinutes(60,0,0);
+    return t.getTime() - d.getTime();
+  }
+
+  // Emitters for 1/5/15/60 with de-dup keys
+  function emitCadence(periodMin, tableId, lastKeyRef){
+    const now = new Date();
+    const end = new Date(now); end.setSeconds(0,0);
+    const key = end.getFullYear()
+      + String(end.getMonth()+1).padStart(2,"0")
+      + String(end.getDate()).padStart(2,"0")
+      + String(end.getHours()).padStart(2,"0")
+      + String(end.getMinutes()).padStart(2,"0");
+    if (lastKeyRef.key === key) return;
+    lastKeyRef.key = key;
+    const M = computeRollingMeans(end.getTime(), periodMin);
+    if (!M) return;
+    const C = computeCompositeFromMeans(M);
+    appendSummaryRowToTable(tableId, end, M, C, `${periodMin}m Avg`);
+  }
+
+  // Clear all timers
+  function clearAll(){
+    [int1,int5,int15,int60].forEach(x => { if (x) { clearInterval(x); } });
+    int1=int5=int15=int60=null;
+    last1=last5=last15=last60=null;
+  }
+
+  // Public toggle override
+  window.toggleAutoSummary = function(){
+    const btn = document.getElementById('autoSummaryToggleBtn');
+    const wasActive = !!window.autoSummaryActive;
+    if (wasActive){
+      clearAll();
+      window.autoSummaryActive = false;
+      if (btn) btn.textContent = 'Auto';
+      return;
+    }
+    // Turning ON
+    clearAll();
+    window.autoSummaryActive = true;
+    if (btn) btn.textContent = 'Auto (On)';
+    // Update titles to reflect 1m rolling
+    const t = document.getElementById('autoSummaryTitle');
+    if (t) t.textContent = 'Auto Summary (1m rolling)';
+    // Ensure tables exist
+    ['autoSummaryTable','summary5Table','summary15Table','summary60Table'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el){
+        const tb = el.querySelector('tbody');
+        if (tb) tb.innerHTML=''; // clear on (re)start
+      }
+    });
+    // Schedule boundary-aligned timers
+    const now = new Date();
+    // 1 minute cadence -> autoSummaryTable
+    last1 = {key:null};
+    setTimeout(()=>{
+      emitCadence(1, 'autoSummaryTable', last1);
+      int1 = setInterval(()=>emitCadence(1, 'autoSummaryTable', last1), 60000);
+    }, msToNextMinute(now));
+    // 5 minute cadence -> summary5Table
+    last5 = {key:null};
+    setTimeout(()=>{
+      emitCadence(5, 'summary5Table', last5);
+      int5 = setInterval(()=>emitCadence(5, 'summary5Table', last5), 300000);
+    }, msToNextMultipleMinutes(now, 5));
+    // 15 minute cadence -> summary15Table
+    last15 = {key:null};
+    setTimeout(()=>{
+      emitCadence(15, 'summary15Table', last15);
+      int15 = setInterval(()=>emitCadence(15, 'summary15Table', last15), 900000);
+    }, msToNextMultipleMinutes(now, 15));
+    // 60 minute cadence -> summary60Table
+    last60 = {key:null};
+    setTimeout(()=>{
+      emitCadence(60, 'summary60Table', last60);
+      int60 = setInterval(()=>emitCadence(60, 'summary60Table', last60), 3600000);
+    }, msToTopOfHour(now));
+  };
+
+  // Remove any immediate "Now" or mirroring behaviour by shadowing any old helpers
+  // (No-op stubs to avoid accidental cross-posting from earlier code)
+  window.emitAuto1m = function(){};           // disable old 1s spammer
+  window.emitAuto5m = function(){};           // keep disabled; we use new per-table emitters
+  // setSummaryWindowAndOpen remains untouched; summary buttons will simply open/focus any UI you already have
+
+  // Rebuild from existing summary table rows (no main log required)
+  function runBackfillFromTable(minutes, tableId){
+    try{
+      const table = document.getElementById(tableId);
+      if (!table) return alert("Target table not found.");
+      const tbody = table.querySelector('tbody');
+      if (!tbody) return alert("Target table body not found.");
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
+      // Parse times from first cell
+      function parseAU(s){
+        try{
+          if (typeof parseAUDatetime === "function"){
+            const ms = parseAUDatetime(s);
+            if (Number.isFinite(ms)) return ms;
+          }
+          // Fallback simple parse (may fail on AU format)
+          // attempt DD/MM/YYYY HH:MM:SS
+          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
+          if (m){
+            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
+            return new Date(y, mo-1, d, h, mi, se).getTime();
+          }
+        }catch(e){}
+        return NaN;
+      }
+      const points = [];
+      rows.forEach(tr=>{
+        const tc = tr.querySelector('td,th');
+        if (!tc) return;
+        const ms = parseAU(tc.textContent || "");
+        if (Number.isFinite(ms)){
+          // capture the numeric cells as strings to re-insert
+          const cells = Array.from(tr.children).map(td => td.textContent || "");
+          points.push({ms, cells});
+        }
+      });
+      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
+      // Determine anchor and step
+      const step = minutes*60*1000;
+      const anchor = Math.min.apply(null, points.map(p=>p.ms));
+      // Bucket by boundary index to dedupe to one per boundary
+      const byIdx = new Map();
+      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
+        const idx = Math.floor((p.ms - anchor)/step);
+        byIdx.set(idx, p); // last wins (latest within that bucket)
+      });
+      // Rewrite table with aligned, deduped rows
+      tbody.innerHTML = "";
+      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
+        const p = byIdx.get(idx);
+        const tr = document.createElement("tr");
+        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+        tbody.appendChild(tr);
+      });
+      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
+    }catch(e){
+      console.warn("Rebuild from table failed", e);
+      alert("Rebuild failed: " + e.message);
+    }
+  }
+
+})();
+</script>
