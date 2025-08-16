@@ -1,25 +1,10 @@
-/* ==========================================================================
-   Patch: 'Number one' only — keep docked 1m/5m/15m/60m cadences; remove popup auto/backfill.
-   Timestamp (Sydney, UTC+10): 20250814162516
-   Changes:
-   - Removed popup mirror appends from auto 1m path.
-   - Removed call and definition of startAuto5mTimer().
-   - Replaced emitAuto5m() with a no-op stub.
-   Result: Only the boundary-aligned docked tables (Auto 1m, 5m, 15m, 60m) emit. Popup doesn't auto-fill.
-   ========================================================================== */
-
-
-
-
-
-
 
 <!DOCTYPE html>
 
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>v1.33 (r704)</title>
+<title>r779</title>
 <style>
 
 #logTable {
@@ -56,7 +41,7 @@
         padding: 6px 10px;
         border-radius: 6px;
         margin: 4px;
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .score-columns {
@@ -103,7 +88,7 @@
     th, td {
         padding: 10px;
         text-align: center;
-        font-size: 10px;
+        font-size: 11px;
     }
     
     #extraNoteButtons {
@@ -115,8 +100,8 @@
 
     .note-btn {
         width: 80px;
-        height: 20px;
-        font-size: 9px;
+        height: 25px;
+        font-size: 11px;
         padding: 0;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -221,7 +206,7 @@
   border:1px solid #ccc;
   padding:10px;
   text-align:center;
-  font-size:10px;
+  font-size:12px;
 }
 #autoSummaryTitle{
   font-weight:600;
@@ -272,14 +257,21 @@
 </head>
 <body>
 <div class="summary-controls">
-<button id="summary60Btn" onclick="openSummaryPopup(60)">Summary 60m</button>
-<button id="summary15Btn" onclick="openSummaryPopup(15)">Summary 15m</button>
-<button id="summary5Btn" onclick="openSummaryPopup(5)">Summary 5m</button>
-<button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
+<button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
+    <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
+    <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
+    <button id="slidingAvgBtn" onclick="openSlidingAverage()">Sliding Average</button>
+    <button id="autoSliderABtn" onclick="openAutoSliderA()">Auto Slider A</button>
+    <button id="autoSliderBBtn" onclick="openAutoSliderB()">Auto Slider B</button>
+            <button id="significant5mBtn" onclick="openSignificant5m()">Summary Significant 5m</button>
+    <button id="statAnalysisBtn" onclick="openStatAnalysis()">Statistical Analysis</button>
+        <button id="statAnalysisHourBtn" onclick="openStatAnalysisHourly()">Statistical Analysis (60m)</button>
+    <button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
+
 </div>
-<h1>v1.3.3 (r704)</h1>
+<h1>r779</h1>
 <div class="controls">
-<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
+<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:12px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
 <button onclick="resetTimer()">Reset Timer</button>
 <button onclick="pauseTimer()">Pause Timer</button>
@@ -292,7 +284,7 @@
 <button onclick="editSelected()">Edit Selected</button>
 <button onclick="exportCSV()">Export CSV</button>
 <button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
-<input accept=".csv,text/csv" id="openLogInput" style="display:none" type="file"/>
+<input id="openLogInput" type="file" accept=".csv,text/csv" style="display:none" />
 <button onclick="openScoreModal()">Manual Score Entry</button>
 <button onclick="openEmotionModal()">Emotion Wheel</button>
 </div>
@@ -312,7 +304,16 @@
                   
             <select id="drugSelect">
 <option value="">--Select--</option>
+<option value="MD-PiHP">MD-PiHP</option>
+<option value="MD-PiHP Added">MD-PiHP Added</option>
+<option value="MD-PiHP Hit">MD-PiHP Hit</option>
+<option value="MD-PiHP Redose">MD-PiHP Redose</option>
 <option value="x-PiHP">x-PiHP</option>
+<option value="2ME-PiHP">2ME-PiHP</option>
+<option value="A-PiHP">A-PiHP</option>
+<option value="3F-PiHP">3F-PiHP</option>
+<option value="A-PHP">A-PHP</option>
+<option value="A-PVP">A-PVP</option>
 <option value="PYRO">PYRO</option>
 <option value="Cathinone">Cathinone</option>
 <option value="Unknown">Unknown</option>
@@ -321,13 +322,12 @@
 <option value="Sleep">Sleep</option>
 <option value="Exercise">Exercise</option>
 <option value="NN-DMC">NN-DMC</option>
-<option value="MD-PiHP">MD-PiHP</option>
-<option value="2ME-PiHP">2ME-PiHP</option>
-<option value="A-PiHP">A-PiHP</option>
-<option value="3F-PiHP">3F-PiHP</option>
 <option value="Meth">Meth</option>
 <option value="MDMA">MDMA</option>
+<option value="2-MMC">2-MMC</option>
 <option value="3-MMC">3-MMC</option>
+<option value="4-MMC">4-MMC</option>
+<option value="Mephedrone">Mephedrone</option>
 <option value="Dust">Dust</option>
 <option value="Speed">Speed</option>
 <option value="Cocaine">Cocaine</option>
@@ -345,6 +345,9 @@
 <option value="Alprazolam">Alprazolam</option>
 <option value="Bromazolam">Bromazolam</option>
 <option value="LSD">LSD</option>
+<option value="Food">Food</option>
+<option value="Drink">Drink</option>
+<option value="Sleep">Sleep</option>
 </select>
 </label>
 <label>
@@ -366,9 +369,10 @@
 </div>
 <div style="display: flex; align-items: flex-start; gap: 20px;">
 <div class="score-columns" id="scoreColumns"></div>
+
 <!-- Note Button Rows (grouped by colour) -->
 <div id="noteButtonRows" style="display:flex; flex-direction:column; gap:6px; margin:8px 0;">
-<!-- Rows will be populated by JS -->
+  <!-- Rows will be populated by JS -->
 </div>
 <div id="noteButtons"></div>
 <div id="extraNoteButtons"></div>
@@ -387,13 +391,19 @@
 <th data-col="QTY">QTY</th>
 <th data-col="ROA">ROA</th>
 <th data-col="Rush">Rush</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Mood">Mood</th>
 <th data-col="Mood">Mood</th>
 <th data-col="Social">Social</th>
+<th data-col="Social">Social</th>
 <th data-col="Energy">Energy</th>
+<th data-col="Energy">Energy </th>
+<th data-col="Focus">Focus</th>
 <th data-col="Focus">Focus</th>
 <th data-col="Anxiety">Anxiety</th>
+<th data-col="Anxiety">Anxiety</th>
 <th data-col="Impair">Impair</th>
-<th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
+<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
 <th data-col="Score">Score</th>
 <th data-col="Max">Max</th>
 <th data-col="Min">Min</th>
@@ -408,51 +418,49 @@
 </thead>
 <tbody></tbody>
 </table>
+
 <div id="autoSummaryDock">
-<div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
-<table id="autoSummaryTable">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
-<tbody></tbody>
-</table>
+  <div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
+  <table id="autoSummaryTable">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
 </div>
 <!-- Additional Summary Docks (separate targets) -->
 <div id="summary5Dock" style="margin-top:20px;">
-<div id="summary5Title">Summary 5m (rolling)</div>
+  <div id="summary5Title">Summary 5m (rolling)</div>
+  
 <div id="backfillRow" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
-<strong>Manual Backfill:</strong>
-<button class="ctrl-btn" id="backfillBtn" style="margin-left:10px;">Run Backfill</button>
+  <strong>Manual Backfill:</strong>
+  <button id="backfillBtn" class="ctrl-btn" style="margin-left:10px;">Run Backfill</button>
 </div>
 <table id="summary5Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
-<tbody></tbody>
-</table>
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
 </div>
+
 <div id="summary15Dock" style="margin-top:20px;">
-<div id="summary15Title">Summary 15m (rolling)</div>
-<div id="backfill15Row" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
-<strong>Manual Backfill:</strong>
-<button class="ctrl-btn" id="backfill15Btn" style="margin-left:10px;">Run Backfill</button>
+  <div id="summary15Title">Summary 15m (rolling)</div>
+  <table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
 </div>
-<table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
-<tbody></tbody>
-</table>
-</div>
+
 <div id="summary60Dock" style="margin-top:20px;">
-<div id="summary60Title">Summary 60m (rolling)</div>
-<div id="backfill60Row" style="margin:10px 0; padding:8px; border:1px solid #ccc; background:#f9f9f9;">
-<strong>Manual Backfill:</strong>
-<button class="ctrl-btn" id="backfill60Btn" style="margin-left:10px;">Run Backfill</button>
+  <div id="summary60Title">Summary 60m (rolling)</div>
+  <table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+    <tbody></tbody>
+  </table>
 </div>
-<table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
-<tbody></tbody>
-</table>
-</div>
+
+
 <script>
 
 // === UI Column Visibility & Shading Config ===
-const HIDE_IN_UI = ['VL','sM','sB','sF','GS','change','Change', 'Deg','D2','Oth','O2'];
+const HIDE_IN_UI = ['VL','sM','sB','sF','GS','change','Deg','Oth','5Max'];
 const NO_SHADE = new Set(['change','Change','Deg']);
 
 // Shading caps (max value that maps to full opacity)
@@ -516,246 +524,146 @@ function cellBgFor(colName, value) {
 function applyRowShading(tr) {
   Array.from(tr.children).forEach(td => {
     const col = td.getAttribute('data-col') || '';
-    const bg = cellBgFor(col, td.textContent.trim());
+    // Prefer numeric machine value for shading so label columns match their paired sums
+    const raw = td.getAttribute('data-value');
+    const val = (raw != null && raw !== '') ? raw : td.textContent.trim();
+    const bg = cellBgFor(col, val);
     if (bg) td.style.backgroundColor = bg;
     else td.style.background = '';
   });
 }
-
     const labelMappings = {
         rush: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-'
-//            "0": 'None',
-//            "1": 'Low',
-//            "2": 'Some',
-//            "3": 'Clear',
-//            "4": 'Strong',
-//            "5": 'Intense',
-            "0": 'No',
-            "1": 'Low',
-            "2": 'Moderate',
-            "3": 'Strong',
-            "4": 'Intense',
-            "5": 'Extreme',
-            "2.5": '+',
-            "3.5": '+',
-            "4.5": '+',
-            "6": 'Ultra',
-            "0.5": '+',
-            "1.5": '+',
-            "-0.5": '-'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Low",
+            "1.5": "Low-Medium",
+            "2": "Medium",
+            "3": "Strong",
+            "4": "Intense",
+            "5": "Extreme",
+            "6": "Ultra Extreme"
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         mood: {
-//            "-2": '-',
-            "0": 'None',
-            "1": 'Subtle',
-            "2": 'Some',
-            "3": 'Clear',
-            "4": 'Obvious',
-            "5": 'Dominating',
-            "2.5": 'Improved',
-            "3.5": 'Prominent',
-            "4.5": 'Very Good',
-            "6": 'Euphoric',
-            "0.5": '+',
-            "-0.5": '-',
-            "1.5": '+',
-//            "-1": '-',
-//            "-0.5": '-'
-//            "0": 'No Change',
-//            "1": 'Ignorable',
-//            "2": 'OK',
-//            "2.5": '',
-//            "3": 'Clear',
-//            "4": 'Obvious',
-//            "5": 'Super',
-////            "0": 'No/None',
-////            "0.5": '+',
-////            "-0.5": '-'
-////            "0.5": 'Very Low',
-////            "1": 'Low',
-////            "2": 'Low-Medium',
-////            "3": 'Medium',
-////            "3.5": 'Medium-High',
-////            "4": 'High',
-////            "5": 'Very High',
-////            "6": 'Extremely High',
-            "0.01": '+'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Very Low",
+            "1.5": "Low",
+            "2": "Some",
+            "3": "Medium",
+            "4": "High",
+            "5": "Very High",
+            "6": "Very/Euphoric"
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         social: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-'
-//            "0": 'Flat',
-//            "1": 'Think',
-//            "2": 'Want',
-//            "3": 'Urge/Desire',
-//            "4": 'Social',
-//            "5": 'Outgoing',
-            "0": 'No',
-            "1": 'Possible',
-            "2": 'Forced',
-            "3": 'Moderate',
-            "4": 'Social',
-            "5": 'Outgoing',
-            "2.5": '+',
-            "3.5": '+',
-            "4.5": '+',
-            "6": 'Disinhibited',
-            "0.5": '+',
-            "1.5": '+',
-            "-0.5": '-'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Very Low",
+            "1.5": "Low",
+            "2": "Some",
+            "3": "Medium",
+            "4": "High",
+            "5": "Very /Outgoing",
+            "6": "Very/Disinhibited"
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         energy: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-'
-//            "0": 'Normal',
-//            "1": 'Slight',
-//            "2": 'Increased',
-//            "2.5": '',
-//            "3": 'Clear/Push',
-//            "4": 'Energetic',
-//            "4.5": '',
-//            "5": 'Hyper',
-//            "6": 'Manic',
-            "0": 'Tired/Flat',
-            "1": 'Normal/Low',
-            "2": 'Increase',
-            "3": 'Clear',
-            "4": 'Energetic',
-            "5": 'Hyperactive',
-            "2.5": 'Mid',
-            "3.5": 'High',
-            "4.5": '+',
-            "6": 'Manic',
-            "0.5": '+',
-            "1.5": '+',
-            "-0.5": '-'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Normal",
+            "1.5": "Low",
+            "2": "Moderate",
+            "3": "High",
+            "4": "Very High",
+            "5": "Very/Manic",
+            "6": "Ultra/Hyper"
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         focus: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-'
-//            "0": 'No',
-//            "1": 'Alert',
-//            "2": 'Vigilant',
-//            "3": 'Increased',
-//            "4": 'Focused',
-//            "5": 'Obsessive',
-//            "6": 'Wired',
-            "0": 'None',
-            "1": 'Very Low',
-            "2": 'Low',
-            "3": 'Medium',
-            "4": 'Significant',
-            "5": 'Laser',
-            "2.5": '+',
-            "3.5": 'Focused',
-            "4.5": 'Obsessive',
-            "6": 'Wired',
-            "0.5": '+',
-            "1.5": '+',
-            "-0.5": '-'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Normal",
+            "1.5": "Low",
+            "2": "Moderate",
+            "3": "High",
+            "4": "Very Strong",
+            "5": "Very/Laser",
+            "6": "Ultra/Wired"
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         anxiety: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-'
-//            "0": 'No/None',
-//            "1": 'Normal',
-//            "2": 'Excessive',
-//            "3": 'Clear/Feel',
-//            "4": 'Extra',
-//            "5": 'Impacting',
-            "0": 'None',
-            "1": 'Minimal',
-            "2": 'Some',
-            "3": 'Affecting',
-            "4": 'Adverse',
-            "5": 'Severe',
-            "2.5": 'Worrying',
-            "3.5": '+',
-            "4.5": '+',
-            "6": 'Nightmare',
-            "0.5": '+',
-            "1.5": 'Mental',
-            "-0.5": '-'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Low",
+            "1.5": "Ignorable",
+            "2": "Some",
+            "3": "Mid/Anxious",
+            "4": "High/Adverse",
+            "5": "Very/Severe",
+            "6": "Ultra Severe"
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         impair: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-'
-//            "0": 'None',
-//            "1": 'Minimal',
-//            "2": 'Low',
-//            "2.5": '',
-//            "3": 'Visibly',
-//            "4": 'Impaired',
-//            "4.5": '',
-//            "5": 'Behaviour',
-//            "6": 'AdverseImpact',
-            "0": 'None',
-            "1": 'Mental',
-            "2": 'Ignorable',
-            "3": 'Significant',
-            "4": 'Impacting',
-            "5": 'Severe',
-            "2.5": 'Adverse',
-            "3.5": 'Obvious',
-            "4.5": '+',
-            "6": 'Dangerously',
-            "0.5": '+',
-            "1.5": '+',
-            "-0.5": '-'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Very Low",
+            "1.5": "Low",
+            "2": "Some/Ignore",
+            "3": "Mid/Impacted",
+            "4": "High/Serious",
+            "5": "Very/Severe",
+            "6": "Ultra Severe"
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         change: {
-            "-1": 'Aware Of',
-            "-2": 'Bad Choices',
-            "0": 'No Change',
-            "1": 'Maybe',
-            "2": 'Required Thinking',
-            "2.5": 'Some',
-            "3": 'Clear',
-            "3.5": 'Prominent',
-            "4": 'Obvious',
-            "5": 'Controlling',
-            "6": 'Autopilot/Hindsight',
-            "8": 'Dominant',
-            "9": 'High',
-            "10": 'Certain'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "0": 'Last Dose',
+            "1": 'Burned',
+            "1.5": 'Tremors/Shakes',
+            "2": 'Lip/Mouth Open',
+            "2.5": 'Sealed Sucked',
+            "3": 'Shallow Breath',
+            "3.5": 'Plan',
+            "4": 'Repeated Fast',
+            "4.5": 'Deep/Held',
+            "5": 'Carefully Followed',
+            "5.5": 'Slowly Rocked',
+            "6": 'Rapidly Rolled',
+            "0.5": 'Heatbeat Note'
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         degree: {
-//            "0": 'None',
-//            "1": 'Minimal',
-//            "2": 'Low/Ignore',
-//            "3": 'Low/Clear',
-//            "4": 'Mid/Ignore',
-//            "5": 'Mid/Clear',
-//            "6": 'High/Maskable',
-//            "7": 'High/Obvious',
-//            "8": 'Very High',
-//            "9": 'Extreme',
-            "10": 'Maximum'
-, "11.5": "+", "-10.5": "-", "-111.5": "-" },
+            "0.6": 'Technique',
+            "0.4": 'Drug',
+            "-1.5": 'Results',
+            "0": 'No/None',
+            "-0.5": 'Effects',
+            "-1": '>5mg <10mg',
+            "-1": '>5mg <15mg',
+            "1": 'Add Drug',
+            "2": 'Hit/Continue',
+            "2.5": 'Redose',
+            "3.5": 'Wired',
+            "3": 'Half Burned',
+            "4": 'Melted',
+            "5.5": 'Nice Smell/Taste',
+            "5": 'Rush',
+            "6": 'Plumes',
+            "0.5": '+'
+, "12.5": "+", "13.5": "+", "-111.5": "-" },
         other: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-'
-//            "0": 'Zero',
-//            "0": 'Hungry',
-//            "1": 'Eat',
-//            "2": 'Thirsty',
-//            "3": 'Drink',
-//            "4": 'Tired',
-//            "5": 'Slept',
-//            "6": 'Sleeping',
-//            "7": 'Headache',
-//            "8": 'Nausea',
-            "9": 'False',
-            "10": 'True'
+            "0": 'Side Effect',
+            "0.5": 'Unsure',
+            "1": 'Ignorable',
+            "2": 'Tremors',
+            "2.5": 'Sweating',
+            "3.5": 'Mid-High',
+            "3": 'Heartbeat',
+            "3.5": 'Rush',
+            "4": 'Manic',
+            "4.5": 'Down',
+            "5": 'Up',
+            "6": 'Positive'
              }
     };
 ['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
@@ -799,8 +707,7 @@ function applyRowShading(tr) {
             const t = document.createElement('strong');
             t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
             col.appendChild(t);
-  //         [10, 9, 8, 7, 6, 5.5, 5, 4, 3.5, 3, 2, 1, 0.5, 0, -0.5, -1, -2, -3, -0.4, -0.3, -0.2, -0.1, 3.4, 3.3, 3.2, 3.1, 2.4, 2.3, 2.2, 2.1, 1.4, 1.3, 1.2, 1.1].forEach(v => {
-           [6, 5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1, 0.5, 0, -0.5, -1].forEach(v => {
+           [6,5,'--------------------',4,3,2,'--------------------',1.5,1,0,'--------------------',0.5,-0.5,-1].forEach(v => {
 
                 const b = document.createElement('button');
                 let customLabel = '';
@@ -808,8 +715,7 @@ if (v === -222) customLabel = '';
 if (v === -444) customLabel = '';
 if (v === -111) customLabel = '-';
 //else if (v === 6) customLabel = 'Extra/Prominent';
-else if (v === 9) customLabel = '';
-else if (v === 0.1) customLabel = 'Unsure';
+else if (v === 0.1) customLabel = 'Maybe/Unsure';
 else if (v === 0.01) customLabel = '+';
 else if (v === -0.01) customLabel = '-';
 else if (v === -0.1) customLabel = '';
@@ -817,14 +723,20 @@ else if (v === 0.2) customLabel = 'Ignorable';
 else if (v === -0.2) customLabel = '';
 else if (v === 0.3) customLabel = 'Required Thinking';
 else if (v === -0.3) customLabel = '';
-else if (v === 0.4) customLabel = 'Some';
 else if (v === -0.4) customLabel = '';
-else if (v === 0.6) customLabel = 'Clear';
 else if (v === -0.6) customLabel = '';
 else if (v === 0.7) customLabel = 'Obvious';
 else if (v === -0.7) customLabel = '';
 else if (v === 0.8) customLabel = 'Controlling';
 else if (v === -0.8) customLabel = '';
+else if (v === 0.25) customLabel = 'more';
+else if (v === -0.25) customLabel = 'less';
+else if (v === -0.5) customLabel = '-';
+else if (v === 0.5) customLabel = '+';
+else if (v === 12) customLabel = 'RUSH';
+else if (v === -1) customLabel = '-';
+else if (v === -2) customLabel = '-';
+
 //else if (v === 10) customLabel = 'Maximum';
 //else if (v === 6) customLabel = 'Extra/Prominent';
 else customLabel = labelMappings[f]?.[v] ?? '';
@@ -886,7 +798,7 @@ b.innerText = `${v}: ${customLabel}`;
 // Extra notes (gold)
         const extraCont = document.getElementById('extraNoteButtons');
         extraCont.innerHTML = '';
-        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over,', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'UnsureIfUsable', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
+        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'Unsure', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
         extra.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -911,7 +823,7 @@ b.innerText = `${v}: ${customLabel}`;
 
         (function(){const h=document.createElement("h4");h.textContent="Dose";document.getElementById("extraNoteButtons").appendChild(h);})();
 // Dark grey dose buttons
-        const darkLabels = ["Note", "Context", "Associate", "Change", "Review", "Weighed", "Yes", "No", "Maybe", "Certain", "Half", ">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<30mg"];
+        const darkLabels = [">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<25mg", "<30mg", "<40mg"];
         darkLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -961,7 +873,7 @@ b.innerText = `${v}: ${customLabel}`;
 
         (function(){const h=document.createElement("h4");h.textContent="Red";document.getElementById("extraNoteButtons").appendChild(h);})();
 // Bright red custom buttons
-        const redLabels = ['Mental', 'FocusLocked', 'Locked', 'Computer', 'MusicOn', 'MusicOff', 'GoodSong', 'Visceral', 'Physical', 'BloodPressure', 'BodyTemp', 'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
+        const redLabels = ['Mental', 'FocusLocked', 'MusicOn', 'MusicOff', 'GoodSong', 'Physical', 'BloodPressure',  'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
         redLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -983,9 +895,9 @@ b.innerText = `${v}: ${customLabel}`;
             extraCont.appendChild(b);
         });
         (function(){const h=document.createElement("h4");h.textContent="Green";document.getElementById("extraNoteButtons").appendChild(h);})();
-const greenLabels =  ["ThroatSuction", "Suck", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
-        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "TwoHits", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Destroyed", "BurnedRemains",
-        "HeatedOnce", "AlreadyHeated", "NotYetHeated"];
+const greenLabels =  ["ThroatSuction", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
+        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "RuleOf3", "555sHold", "DensePackedCone", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Remains",
+        "HeatedOnce", "AlreadyHeated"];
         greenLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -1007,7 +919,7 @@ const greenLabels =  ["ThroatSuction", "Suck", "MouthOpen", "TopLip", "Sucked", 
             extraCont.appendChild(b);
         });
         (function(){const h=document.createElement("h4");h.textContent="Orange";document.getElementById("extraNoteButtons").appendChild(h);})();
-const orangeLabels =  ['Lighter', 'Candle', 'Jet', 'Blowtorch', 'Vape', 'Hotrail', 'Cone', 'Snowcone', 'Bong', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Broken', 'Loose', 'Liquid', 'Sludge', 'PropyleneGlycol', 'Melted', 'Vapourised', 'SomeColour', 'ColourChange', 'Loose', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed', 'AwareBad', 'BadChoices', 'DoseToDetriment'];
+const orangeLabels =  ['Lighter', 'Candle', 'Blowtorch', 'Vape', 'Cone', 'Snowcone', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Loose', 'Liquid', 'Sludge', 'PG', 'LiquidWeighted', 'Melted', 'SomeColour', 'ColourChange', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed','DoseToDetriment'];
         orangeLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -1057,7 +969,7 @@ yellowLabels.forEach(lbl => {
     // ─── APPEND PURPLE LABELS ───────────────────────────────────────────────
     (function(){const h=document.createElement("h4");h.textContent="Purple";document.getElementById("extraNoteButtons").appendChild(h);})();
 const purpleLabels =  [
-      '5_Secs', '15sLate','Deep','Shallow','Hold','Long','Short','Slow','Rapid','OneBreath','Multiple','Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone', 'BuildingAlone'
+      '[Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone'
     ];
     const purpleContainer = document.querySelector('#extraNoteButtons');
     purpleLabels.forEach(label => {
@@ -1147,7 +1059,10 @@ if (!startTime)
         entry.scaleMood = entry.notes.split(/\s+/).includes('Good') ? 3 : 0;
         entry.scaleBad = entry.notes.split(/\s+/).includes('Bad') ? 3 : 0;
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Wired') ? 7 : 0;
-entry.weighted = (+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*5) + (+entry.impairSum*10);
+        entry.scaleFocus = entry.notes.split(/\s+/).includes('Plumes') ? 10 : 0;
+        entry.scaleFocus = entry.notes.split(/\s+/).includes('Billowing') ? 10 : 0;
+        entry.scaleFocus = entry.notes.split(/\s+/).includes('Rush') ? 10 : 0;
+entry.weighted = (+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*4) + (+entry.impairSum*6);
 entry.goodSum = 0;
         logData.push(entry);
         localStorage.setItem('tripLog', JSON.stringify(logData));
@@ -1232,7 +1147,7 @@ function renderTable() {
         logData.forEach(r => {
             const L = [r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa];
             metrics.forEach(f => L.push((+r[f + "Sum"]||0).toFixed(2), r[f + "Label"]));
-            L.push((+r.score||0).toFixed(2), (+r.max||0).toFixed(2), (+r.min||0).toFixed(2), r.maxPercent || 0, r.minPercent || 0, (+r.valence||0).toFixed(2), (+r.scaleMood||0).toFixed(2), (+r.scaleBad||0).toFixed(2), (+r.scaleFocus||0).toFixed(2), r.customNotes || '', r.notes || '', (+r.weighted || 0).toFixed(2), (r.weighted / 10).toFixed(2), (+r.goodSum||0).toFixed(2));
+            L.push((+r.score||0).toFixed(2), (+r.max||0).toFixed(2), (+r.min||0).toFixed(2), r.maxPercent || 0, r.minPercent || 0, (+r.valence||0).toFixed(2), (+r.scaleMood||0).toFixed(2), (+r.scaleBad||0).toFixed(2), (+r.scaleFocus||0).toFixed(2), r.customNotes || '', r.notes || '', (+r.weighted || 0).toFixed(2), (r.score / 10).toFixed(2), (+r.goodSum||0).toFixed(2));
             rows.push(L.map(x => `"${(x + "").replace(/"/g, '""')}"`).join(","))
         });
         const blob = new Blob([rows.join("\n")], {
@@ -1323,10 +1238,10 @@ renderTable();
         const tbody = document.querySelector('#autoSummaryTable tbody'); if (tbody) tbody.innerHTML='';
         if (window.autoSummaryActive){
           const endMs = Date.now();
-          const M = computeRollingMeans(endMs, 1);
+          const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
           const C = M ? computeCompositeFromMeans(M) : null;
           const d = new Date();
-          if (M) appendSummaryRowToTable('autoSummaryTable', d, M, C, {labelSuffix: ' 1m Now'});
+          if (M) appendSummaryRowToTable('autoSummaryTable', d, M, C, {labelSuffix: ' 5m Now'});
         }
       } catch(e){ console.warn(e); }
       // Status line
@@ -1623,31 +1538,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+
+
+
+
+
+
+
 <script>
 // === Summary Core (revised to read ONLY from main table) ===
 
 let SUMMARY_WINDOW_MINUTES = 5;
+function setSummaryWindowAndOpen(mins){ SUMMARY_WINDOW_MINUTES = mins; createSummaryPopupTable(); }
 
-function setSummaryWindowAndOpen(mins){
-  try{
-    const map = {5: 'summary5Dock', 15: 'summary15Dock', 60: 'summary60Dock'};
-    const id = map[mins];
-    if (id){
-      const el = document.getElementById(id);
-      if (el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
-      // Do not backfill 1m; only 5/15/60 are user-triggered (5m also has a manual button already).
-      // If a table body exists and is empty, try to trigger any available recompute without touching 1m.
-      try{
-        if (typeof recalcSummary === 'function'){
-          if (mins === 5) recalcSummary(5, 'summary5Table');
-          else if (mins === 15) recalcSummary(15, 'summary15Table');
-          else if (mins === 60) recalcSummary(60, 'summary60Table');
-        }
-      }catch(e){ console.warn(e); }
-    }
-  }catch(e){ console.error(e); }
-}
+
 // Columns for popup + CSV
 const SUMMARY_COLUMNS = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
 
@@ -1696,62 +1602,6 @@ function snapshotFromMainTable(){
     };
     return pack;
   }).filter(o => o._ts>0);
-}
-
-// --- Full snapshot including drug/qty/notes/last for window aggregates ---
-function snapshotFullFromMainTable(){
-  const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
-  return rows.map(tr => {
-    const ts = +(tr.getAttribute('data-ts')||0);
-    const txt = (sel) => {
-      const td = tr.querySelector(sel);
-      return td ? (td.textContent||'').trim() : '';
-    };
-    // Find column by header data-col tag
-    const getByCol = (colName) => {
-      const td = tr.querySelector(`td[data-col="${colName}"]`);
-      return td ? (td.textContent||'').trim() : '';
-    };
-    const qtyTxt = getByCol('QTY') || getByCol('Qty');
-    return {
-      _ts: ts,
-      drug: getByCol('Drug'),
-      qty: Number.parseFloat(qtyTxt) || 0,
-      notes: getByCol('Notes'),
-      last: getByCol('Last')
-    };
-  }).filter(o => o._ts>0);
-}
-
-// Compute aggregates for [startMs, endMs)
-function computeWindowAggregates(startMs, endMs){
-  const snap = snapshotFullFromMainTable();
-  const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
-  if (!sel.length) return {drugList:'', qtySum:0, notesWords:'', lastWords:''};
-  const seenDrug = new Set();
-  const drugListArr = [];
-  let qtySum = 0;
-  const notesSeen = new Set(); const notesOut = [];
-  const lastSeen = new Set();  const lastOut  = [];
-  sel.sort((a,b)=>a._ts-b._ts).forEach(e=>{
-    // drug list (unique, preserve first-seen order)
-    const d = (e.drug||'').trim();
-    if (d && !seenDrug.has(d)){ seenDrug.add(d); drugListArr.push(d); }
-    // qty
-    qtySum += Number.isFinite(e.qty) ? e.qty : 0;
-    // notes words
-    const toksN = String(e.notes||'').split(/\s+/).filter(Boolean);
-    toksN.forEach(w=>{ if (!notesSeen.has(w)){ notesSeen.add(w); notesOut.push(w); } });
-    // last words
-    const toksL = String(e.last||'').split(/\s+/).filter(Boolean);
-    toksL.forEach(w=>{ if (!lastSeen.has(w)){ lastSeen.add(w); lastOut.push(w); } });
-  });
-  return {
-    drugList: drugListArr.join(' '),
-    qtySum: +qtySum.toFixed(2),
-    notesWords: notesOut.join(' '),
-    lastWords:  lastOut.join(' ')
-  };
 }
 
 // Means over window [startMs, endMs)
@@ -1846,16 +1696,7 @@ function computeCompositeFromMeans(M){
       const label = typeof formatMinuteLabel==='function' ? formatMinuteLabel(boundary) : '';
       if (M){
         if (!hasRowWithLabel(tableId, label)){
-          (function(){
-        let extra = null;
-        if (tableId === 'summary5Table' && stepMin === 5){
-          const startMs = boundary.getTime() - (5*60*1000);
-          const endMs   = boundary.getTime() + (1*60*1000);
-          const agg = computeWindowAggregates(startMs, endMs);
-          extra = {__inject5m:true, cols:[ String(agg.drugList||''), String(agg.qtySum||0), String(agg.notesWords||''), String(agg.lastWords||'') ]};
-        }
-        appendSummaryRowToTable(tableId, boundary, M, C, {bold:false, labelSuffix:'', extra: extra});
-      })();
+          appendSummaryRowToTable(tableId, boundary, M, C, {bold:false, labelSuffix:''});
           added++;
         }
         // Mirror into all popups
@@ -1947,11 +1788,43 @@ function computeCompositeFromMeans(M){
 
 
 // Append a row to a table by id ('summaryPopupTable' or 'autoSummaryTable')
-
 function appendSummaryRowToTable(tableId, d, M, C, opts){
+  
   // Skip if summary is empty/blank
   if (!isNonEmptySummary(M, C)) { return; }
-  
+const table = document.getElementById(tableId);
+  if (!table) return;
+  const tbody = table.querySelector('tbody'); if (!tbody) return;
+  const suffix = (opts && opts.labelSuffix) ? opts.labelSuffix : "";
+  const row = [
+    formatMinuteLabel(d) + suffix,
+    M?.rush, M?.mood, M?.social, M?.energy, M?.focus, M?.anxiety, M?.impair,
+    C?.score, C?.max, C?.min, C?.weighted, C?.fiveMax
+  ];
+  const tr = document.createElement("tr");
+  tr.innerHTML = row.map((v,i)=>{
+    const name = SUMMARY_COLUMNS[i];
+    if (i===0) return `<td>${v??''}</td>`;
+    const num = Number(v);
+    const isNum = Number.isFinite(num);
+    const bg = isNum && typeof cellBgFor==='function' ? cellBgFor(name, num) : '';
+    const val = isNum ? num.toFixed(2) : (v ?? '');
+    return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+  }).join("");
+  // Tooltips for Max/Min (percent of 10)
+  const cells = tr.children;
+  const idxMax = SUMMARY_COLUMNS.indexOf('Max');
+  const idxMin = SUMMARY_COLUMNS.indexOf('Min');
+  if (idxMax>-1 && cells[idxMax]) {
+    const v = parseFloat(cells[idxMax].textContent); if (!Number.isNaN(v)) cells[idxMax].title = `${Math.round((v/10)*100)}%`;
+  }
+  if (idxMin>-1 && cells[idxMin]) {
+    const v = parseFloat(cells[idxMin].textContent); if (!Number.isNaN(v)) cells[idxMin].title = `${Math.round((v/10)*100)}%`;
+  }
+  tbody.appendChild(tr);
+}
+
+// Emit 1-minute rolling average (used by Auto)
 function emitAuto1m(){
   const now = new Date();
   const prev = new Date(now.getTime() - 60*1000); prev.setSeconds(0,0);
@@ -1959,10 +1832,10 @@ function emitAuto1m(){
   if (lastAuto1mKey === key) return;
   lastAuto1mKey = key;
   const endMs = prev.getTime() + 60*1000;
-  const M = computeRollingMeans(endMs, 1);
+  const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
   const C = M ? computeCompositeFromMeans(M) : null;
   if (M) {
-    appendSummaryRowToTable('autoSummaryTable', prev, M, C, {bold:false, labelSuffix:' 1m Avg'});
+    appendSummaryRowToTable('autoSummaryTable', prev, M, C, {bold:false, labelSuffix:' 5m Avg'});
     // If popup exists, mirror there as well (still isolated from its own data)
     if (document.getElementById('summaryPopupTable')) {
     }
@@ -1982,11 +1855,11 @@ function toggleAutoSummary(){
     // emit immediate row
     (function immediateEmit(){
       const endMs = Date.now();
-      const M = computeRollingMeans(endMs, 1);
+      const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
       const C = M ? computeCompositeFromMeans(M) : null;
       const d = new Date();
       if (M) {
-        appendSummaryRowToTable('autoSummaryTable', d, M, C, {bold:false, labelSuffix:' 1m Now'});
+        appendSummaryRowToTable('autoSummaryTable', d, M, C, {bold:false, labelSuffix:' 5m Now'});
       } else { /* skip empty auto-summary row */ }
     })();
     // schedule boundary-aligned loop
@@ -2038,12 +1911,12 @@ function ensureSummaryPopup(){
   controls.appendChild(exportBtn);
   
   const instant5Btn = document.createElement("button");
-  instant5Btn.textContent = "1m Now";
+  instant5Btn.textContent = "5m Now";
   instant5Btn.onclick = ()=>appendInstantSummaryToPopup(5);
   controls.appendChild(instant5Btn);
 
   const instant15Btn = document.createElement("button");
-  instant15Btn.textContent = "11m Now";
+  instant15Btn.textContent = "15m Now";
   instant15Btn.onclick = ()=>appendInstantSummaryToPopup(15);
   controls.appendChild(instant15Btn);
 
@@ -2079,7 +1952,7 @@ function createSummaryPopupTable(){
     for (let t = start.getTime(); t <= now; t += 5*60000){
       const endMs = t + 60000; // 1 minute after boundary for window end
       const d = new Date(t);
-      const M = computeRollingMeans(endMs, 1);
+      const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
       if (M){
       } else {
       }
@@ -2091,9 +1964,9 @@ function createSummaryPopupTable(){
     } else {
     }
   }
-  // Start cadence (disabled legacy popup emitter)
-  // emitAuto5m();
-  // startAuto5mTimer(); // intentionally disabled
+  // Start cadence
+  emitAuto5m();
+// [removed:number1-only] startAuto5mTimer() call removed
 }
 
 // Start 5-minute timer (popup flow)
@@ -2127,7 +2000,10 @@ function exportPopupCSV(){
 window.createSummaryPopupTable = createSummaryPopupTable;
 window.toggleAutoSummary = toggleAutoSummary;
 </script>
-<button class="ctrl-btn" id="backfillBtn">Backfill</button>
+
+
+<button id="backfillBtn" class="ctrl-btn">Backfill</button>
+
 <script>
 // Group note buttons by colour into separate rows (no colour/style changes)
 (function(){
@@ -2209,441 +2085,1061 @@ window.toggleAutoSummary = toggleAutoSummary;
       });
     });
   });
-
-  // Rebuild from existing summary table rows (no main log required)
-  function runBackfillFromTable(minutes, tableId){
-    try{
-      const table = document.getElementById(tableId);
-      if (!table) return alert("Target table not found.");
-      const tbody = table.querySelector('tbody');
-      if (!tbody) return alert("Target table body not found.");
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
-      // Parse times from first cell
-      function parseAU(s){
-        try{
-          if (typeof parseAUDatetime === "function"){
-            const ms = parseAUDatetime(s);
-            if (Number.isFinite(ms)) return ms;
-          }
-          // Fallback simple parse (may fail on AU format)
-          // attempt DD/MM/YYYY HH:MM:SS
-          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
-          if (m){
-            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
-            return new Date(y, mo-1, d, h, mi, se).getTime();
-          }
-        }catch(e){}
-        return NaN;
-      }
-      const points = [];
-      rows.forEach(tr=>{
-        const tc = tr.querySelector('td,th');
-        if (!tc) return;
-        const ms = parseAU(tc.textContent || "");
-        if (Number.isFinite(ms)){
-          // capture the numeric cells as strings to re-insert
-          const cells = Array.from(tr.children).map(td => td.textContent || "");
-          points.push({ms, cells});
-        }
-      });
-      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
-      // Determine anchor and step
-      const step = minutes*60*1000;
-      const anchor = Math.min.apply(null, points.map(p=>p.ms));
-      // Bucket by boundary index to dedupe to one per boundary
-      const byIdx = new Map();
-      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
-        const idx = Math.floor((p.ms - anchor)/step);
-        byIdx.set(idx, p); // last wins (latest within that bucket)
-      });
-      // Rewrite table with aligned, deduped rows
-      tbody.innerHTML = "";
-      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
-        const p = byIdx.get(idx);
-        const tr = document.createElement("tr");
-        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
-        tbody.appendChild(tr);
-      });
-      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
-    }catch(e){
-      console.warn("Rebuild from table failed", e);
-      alert("Rebuild failed: " + e.message);
-    }
-  }
-
 })();
 </script>
+
+
 <script>
-// === Summary (5m/15m/60m) recompute with Drug/Qty/Notes/Last columns ===
+// === Statistical Analysis (5m) — popup + table, cloned from 5m Summary with extra columns ===
+// Columns: base SUMMARY_COLUMNS + Notes, Drug, QtySum (new; only for this summary)
+(function(){
+  // Fallbacks if base helpers are not in scope
+  const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
+    ? SUMMARY_COLUMNS.slice()
+    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+  const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum"]);
 
-// Parse AU datetime like "13/08/2025, 16:57:12" or "13/08/2025 16:57:12"
-function _parseAUDT(s){
-  if (!s) return null;
-  const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})\s*$/);
-  if (!m) return null;
-  const d = new Date(parseInt(m[3],10), parseInt(m[2],10)-1, parseInt(m[1],10),
-                     parseInt(m[4],10), parseInt(m[5],10), parseInt(m[6],10));
-  return d.getTime();
-}
+  function ensureStatAnalysisPopup(){
+    let popup = document.getElementById("statAnalysisPopup");
+    if (popup) return popup;
+    popup = document.createElement("div");
+    popup.id = "statAnalysisPopup";
+    Object.assign(popup.style, {
+      position:"fixed", top:"70px", right:"20px", background:"#fff", border:"1px solid #ccc",
+      borderRadius:"8px", boxShadow:"0 4px 16px rgba(0,0,0,0.2)", maxHeight:"70vh", overflow:"auto",
+      zIndex:"10000", padding:"10px"
+    });
+    const head = document.createElement("div");
+    Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
+    head.innerHTML = `<strong>Statistical Analysis (5m)</strong>`;
+    const controls = document.createElement("div");
+    const exportBtn = document.createElement("button");
+    exportBtn.textContent = "Export CSV";
+    exportBtn.onclick = exportStatCSV;
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "×";
+    closeBtn.style.marginLeft = "8px";
+    closeBtn.onclick = ()=>popup.remove();
+    controls.appendChild(exportBtn);
+    controls.appendChild(closeBtn);
+    head.appendChild(controls);
+    popup.appendChild(head);
 
-// Extract rows from main #logTable tbody as structured objects
-function _readLogRows(){
-  const tb = document.querySelector('#logTable tbody');
-  if (!tb) return [];
-  const rows = [];
-  const ths = Array.from(document.querySelectorAll('#logTable thead th')).map(th => th.textContent.trim());
-  Array.from(tb.querySelectorAll('tr')).forEach(tr => {
-    const tds = Array.from(tr.children).map(td => td.textContent.trim());
-    // Map known columns by header names
-    const get = (name) => {
-      const idx = ths.indexOf(name);
-      return idx >= 0 ? tds[idx] : "";
+    const table = document.createElement("table");
+    table.id = "statAnalysisTable";
+    table.style.borderCollapse="collapse";
+    table.style.width="100%";
+    const thead = document.createElement("thead");
+    thead.innerHTML = `<tr>${STAT_COLUMNS.map(c=>`<th>${c}</th>`).join("")}</tr>`;
+    table.appendChild(thead);
+    table.appendChild(document.createElement("tbody"));
+    popup.appendChild(table);
+
+    document.body.appendChild(popup);
+    return popup;
+  }
+
+  function openStatAnalysis(){
+    ensureStatAnalysisPopup();
+    createStatAnalysisPopupTable();
+  }
+  window.openStatAnalysis = openStatAnalysis;
+
+  // Helpers copied/compatible with existing utilities
+  function minuteKey(d){
+    return d.getFullYear()
+      + String(d.getMonth()+1).padStart(2,"0")
+      + String(d.getDate()).padStart(2,"0")
+      + String(d.getHours()).padStart(2,"0")
+      + String(d.getMinutes()).padStart(2,"0");
+  }
+  function formatMinuteLabel(d){
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    return `${hh}:${mm} Average`;
+  }
+  // Read-only snapshot of main table rows with extra fields (Notes/Drug/Qty)
+  
+function snapshotWithExtras(){
+    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(tr => {
+      const ts = +(tr.getAttribute('data-ts')||0);
+
+      // Case-insensitive value getter by data-col name(s)
+      const getValCI = (names) => {
+        const want = Array.isArray(names) ? names.map(n=>String(n).toLowerCase()) : [String(names).toLowerCase()];
+        const tds = tr.querySelectorAll('td[data-col]');
+        for (const td of tds){
+          const col = (td.getAttribute('data-col')||'').trim().toLowerCase();
+          if (want.includes(col)) return td.textContent.trim();
+        }
+        
+  try { window.snapshotWithExtras = snapshotWithExtras; } catch(e){}
+return "";
+      };
+
+      // Numeric extractor from a cell (handles "10 mg", "-2.5", etc.)
+      const numFrom = (names) => {
+        const raw = getValCI(names);
+        const m = (raw||"").match(/-?\d+(\.\d+)?/);
+        return m ? parseFloat(m[0]) : NaN;
+      };
+
+      const getSum = (field) => {
+        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+        if (!td) return 0;
+        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
+      };
+
+      return {
+        _ts: ts,
+        rush: getSum('rush'), mood: getSum('mood'), social: getSum('social'),
+        energy: getSum('energy'), focus: getSum('focus'), anxiety: getSum('anxiety'), impair: getSum('impair'),
+        // extras (case-insensitive header matching)
+        Notes: getValCI(["Notes","Note"]),
+        Drug: getValCI(["Drug"]),
+        Qty: numFrom(["Qty","QTY","Quantity"])
+      };
+    }).filter(o => o._ts>0);
+  }
+
+
+  function computeMeansForWindow(startMs, endMs){
+    const snap = snapshotWithExtras();
+    const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+    if (!sel.length) return null;
+    const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+    const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
+    return {means, sel};
+  }
+  function computeCompositeFromMeans(M){
+    if (!M) return null;
+    const m = M.means || M;
+    const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
+    const max = Math.max(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
+    const min = Math.min(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
+    const weighted = ((m.rush*6)+(m.mood*4)+(m.social*4)+(m.energy*3)+(m.focus*3)) - ((m.anxiety*4)-(m.impair*6));
+    const fiveMax = [m.rush,m.mood,m.social,m.energy,m.focus].sort((a,b)=>b-a).slice(0,5).reduce((a,b)=>a+b,0);
+    return {score, max, min, weighted, fiveMax};
+  }
+
+  function aggregateExtras(sel){
+    // Notes: tokenise and include all tokens (including duplicates)
+    const tokenize = (s) => {
+      if (!s) return [];
+      // If a custom tokeniser exists, prefer it
+      if (typeof window.tokenizeNotes === 'function') {
+        try { return window.tokenizeNotes(s) || []; } catch(e){}
+      }
+      return (s.match(/[A-Za-z0-9_]+/g) || []).map(x=>x);
     };
-    const tsStr = get('Timestamp');
-    const ts = _parseAUDT(tsStr);
-    rows.push({
-      ts, tsStr,
-      drug: get('Drug'),
-      qty: parseFloat(get('QTY') || "0") || 0,
-      notes: get('Notes') || "",
-      last: get('Last') || "",
-      rush: parseFloat(get('Rush') || "0") || 0,
-      mood: parseFloat(get('Mood') || "0") || 0,
-      social: parseFloat(get('Social') || "0") || 0,
-      energy: parseFloat(get('Energy') || "0") || 0,
-      focus: parseFloat(get('Focus') || "0") || 0,
-      anxiety: parseFloat(get('Anxiety') || "0") || 0,
-      impair: parseFloat(get('Impair') || "0") || 0
+    const notesTokens = [];
+    const drugs = [];
+    let qtySum = 0;
+    sel.forEach(e => {
+      tokenize(e.Notes).forEach(tok => notesTokens.push(tok));
+      if (e.Drug) drugs.push(e.Drug);
+      if (Number.isFinite(e.Qty)) qtySum += e.Qty;
     });
-  });
-  // drop any rows without a timestamp
-  return rows.filter(r => Number.isFinite(r.ts));
-}
+    return {
+      Notes: notesTokens.join(", "),
+      Drug: drugs.join(", "),
+      QtySum: Number.isFinite(qtySum) ? +qtySum : 0
+    };
+  }
 
-// Unique list helper preserving order
-function _uniqPreservingOrder(list){
-  const out = [];
-  const seen = new Set();
-  for (const x of list){
-    const key = String(x);
-    if (!seen.has(key)){
-      seen.add(key);
-      out.push(x);
+  function appendStatRowToTable(tableId, d, M, C, extras){
+    if (!M || !C) return;
+    const table = document.getElementById(tableId); if (!table) return;
+    const tbody = table.querySelector('tbody'); if (!tbody) return;
+    const row = [
+      formatMinuteLabel(d) + " 5m Avg",
+      M.means.rush, M.means.mood, M.means.social, M.means.energy, M.means.focus, M.means.anxiety, M.means.impair,
+      C.score, C.max, C.min, C.weighted, C.fiveMax,
+      extras.Notes, extras.Drug, extras.QtySum
+    ];
+    const tr = document.createElement("tr");
+    tr.innerHTML = row.map((v,i)=>{
+      const name = STAT_COLUMNS[i];
+      if (i===0) return `<td>${v??''}</td>`;
+      const num = Number(v);
+      const isNum = Number.isFinite(num);
+      const bg = isNum && typeof cellBgFor==='function' ? cellBgFor(name, num) : '';
+      const val = isNum ? num.toFixed(2) : (v ?? '');
+      return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+    }).join("");
+    tbody.appendChild(tr);
+  }
+
+  function backfillStatAnalysis(){
+    const snap = snapshotWithExtras();
+    if (!snap.length) return 0;
+    const minTs = Math.min(...snap.map(x=>x._ts));
+    const now = Date.now();
+    const start = new Date(minTs); start.setSeconds(0,0);
+    start.setMinutes(start.getMinutes() - (start.getMinutes()%5), 0, 0);
+    let added = 0;
+    for (let t = start.getTime(); t <= now; t += 5*60000){
+      const endMs = t + 5*60000;
+      const d = new Date(t);
+      const M = computeMeansForWindow(t, endMs);
+      if (!M) continue;
+      const C = computeCompositeFromMeans(M);
+      const extras = aggregateExtras(M.sel);
+      appendStatRowToTable('statAnalysisTable', d, M, C, extras);
+      added++;
     }
+    return added;
   }
-  return out;
-}
 
-// Tokenise text to words by whitespace
-function _tokeniseWords(s){
-  return String(s || "").split(/\s+/).filter(Boolean);
-}
-
-// Aggregate within [startMs, endMs] inclusive
-function _aggregateWindow(rows, startMs, endMs){
-  const inWindow = rows.filter(r => r.ts >= startMs && r.ts <= endMs);
-  if (!inWindow.length){
-    return null;
-  }
-  // Metric means
-  const fields = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const sums = Object.fromEntries(fields.map(f => [f, 0]));
-  inWindow.forEach(r => fields.forEach(f => sums[f] += r[f]));
-  const means = Object.fromEntries(fields.map(f => [f, sums[f] / inWindow.length]));
-  // Drug distinct list (by occurrence order)
-  const drugs = _uniqPreservingOrder(inWindow.map(r => r.drug).filter(Boolean)).join(' ');
-  // Qty sum
-  const qtySum = inWindow.reduce((a,r)=> a + (r.qty||0), 0);
-  // Notes words (unique, order-preserved as first seen)
-  const notesWords = _uniqPreservingOrder(inWindow.flatMap(r => _tokeniseWords(r.notes))).join(' ');
-  // Last words (unique, order-preserved)
-  const lastWords  = _uniqPreservingOrder(inWindow.flatMap(r => _tokeniseWords(r.last))).join(' ');
-  // Composites (mirror main table approach where appropriate)
-  const score = (means.rush + means.mood + means.social + means.energy + means.focus) - (means.anxiety + means.impair);
-  const max   = (means.rush + means.mood + means.social + means.energy + means.focus);
-  const min   = (means.anxiety + means.impair);
-  const weighted = (means.rush*6) + (means.mood*4) + (means.social*4) + (means.energy*3) + (means.focus*3) - (means.anxiety*5) + (means.impair*10);
-  const fiveMax = weighted / 10;
-  return {means, drugs, qtySum, notesWords, lastWords, score, max, min, weighted, fiveMax};
-}
-
-// Format date label HH:MM and suffix "Average"
-function _minuteLabel(ms){
-  const d = new Date(ms);
-  const hh = String(d.getHours()).padStart(2,'0');
-  const mm = String(d.getMinutes()).padStart(2,'0');
-  return `${hh}:${mm}\nAverage`;
-}
-
-// Recalculate summary for a given window and write to tableId.
-// Notes and Last are placed at FAR RIGHT per user instruction.
-function recalcSummary(windowMinutes, tableId){
-  try{
-    const rows = _readLogRows();
-    const tb = document.querySelector(`#${tableId} tbody`);
-    if (!tb) return;
-    tb.innerHTML = "";
-    if (!rows.length) return;
-
-    // Determine minute boundaries from min..max timestamp
-    const minTs = Math.min(...rows.map(r => r.ts));
-    const maxTs = Math.max(...rows.map(r => r.ts));
-    const minuteMs = 60*1000;
-    // Align to minute
-    const start = Math.floor(minTs / minuteMs) * minuteMs;
-    const end   = Math.floor(maxTs / minuteMs) * minuteMs;
-    
-    const stepMs = windowMinutes * minuteMs;
-    // Align first emission to the first minute boundary (inclusive), then step by window size
-    for (let t = start; t <= end; t += stepMs){
-      const startWin = t - (windowMinutes*minuteMs) + minuteMs; // include current boundary minute
-      const endWin   = t; // inclusive
-      const A = _aggregateWindow(rows, startWin, endWin);
-      if (!A) continue;
-      const tr = document.createElement('tr');
-      const f2 = (x)=> Number.isFinite(x) ? x.toFixed(2) : "0.00";
-      tr.innerHTML =
-        `<td>${_minuteLabel(t)}</td>` +
-        `<td>${A.drugs}</td>` +
-        `<td>${f2(A.qtySum)}</td>` +
-        `<td>${f2(A.means.rush)}</td>` +
-        `<td>${f2(A.means.mood)}</td>` +
-        `<td>${f2(A.means.social)}</td>` +
-        `<td>${f2(A.means.energy)}</td>` +
-        `<td>${f2(A.means.focus)}</td>` +
-        `<td>${f2(A.means.anxiety)}</td>` +
-        `<td>${f2(A.means.impair)}</td>` +
-        `<td>${f2(A.score)}</td>` +
-        `<td>${f2(A.max)}</td>` +
-        `<td>${f2(A.min)}</td>` +
-        `<td>${f2(A.weighted)}</td>` +
-        `<td>${f2(A.fiveMax)}</td>` +
-        `<td>${A.notesWords}</td>` +
-        `<td>${A.lastWords}</td>`;
-      tb.appendChild(tr);
+  function createStatAnalysisPopupTable(){
+    ensureStatAnalysisPopup();
+    const tbody = document.querySelector('#statAnalysisTable tbody'); if (tbody) tbody.innerHTML='';
+    backfillStatAnalysis();
+    // Start cadence on 5m boundaries
+    if (window._stat5mTimer) { clearInterval(window._stat5mTimer); window._stat5mTimer = null; }
+    const schedule = ()=>{
+      const now = new Date();
+      const msToNext = (5 - (now.getMinutes()%5))*60000 - now.getSeconds()*1000 - now.getMilliseconds();
+      setTimeout(()=>{
+        appendLatestStatRow();
+        window._stat5mTimer = setInterval(appendLatestStatRow, 5*60000);
+      }, Math.max(0, msToNext));
+    };
+    function appendLatestStatRow(){
+      const end = new Date(); end.setSeconds(0,0);
+      const startMs = end.getTime() - 5*60000;
+      const M = computeMeansForWindow(startMs, end.getTime());
+      if (!M) return;
+      const C = computeCompositeFromMeans(M);
+      const extras = aggregateExtras(M.sel);
+      appendStatRowToTable('statAnalysisTable', end, M, C, extras);
     }
-    </td>` +
-        `<td>${A.drugs}</td>` +
-        `<td>${f2(A.qtySum)}</td>` +
-        `<td>${f2(A.means.rush)}</td>` +
-        `<td>${f2(A.means.mood)}</td>` +
-        `<td>${f2(A.means.social)}</td>` +
-        `<td>${f2(A.means.energy)}</td>` +
-        `<td>${f2(A.means.focus)}</td>` +
-        `<td>${f2(A.means.anxiety)}</td>` +
-        `<td>${f2(A.means.impair)}</td>` +
-        `<td>${f2(A.score)}</td>` +
-        `<td>${f2(A.max)}</td>` +
-        `<td>${f2(A.min)}</td>` +
-        `<td>${f2(A.weighted)}</td>` +
-        `<td>${f2(A.fiveMax)}</td>` +
-        `<td>${A.notesWords}</td>` +
-        `<td>${A.lastWords}</td>`;
-      tb.appendChild(tr);
-    }
-  }catch(e){
-    console.error("recalcSummary error", e);
+    schedule();
   }
-}
 
-// Wire backfill button and auto-recalc on changes
-(function(){
-  const backfillBtn = document.getElementById('backfillBtn');
-  if (backfillBtn){
-    backfillBtn.addEventListener('click', ()=> recalcSummary(5, 'summary5Table'));
-  }
-  const backfill15Btn = document.getElementById('backfill15Btn');
-  if (backfill15Btn){
-    backfill15Btn.addEventListener('click', ()=> recalcSummary(15, 'summary15Table'));
-  }
-  const backfill60Btn = document.getElementById('backfill60Btn');
-  if (backfill60Btn){
-    backfill60Btn.addEventListener('click', ()=> recalcSummary(60, 'summary60Table'));
-  }
-  // Auto recompute summaries when log table changes
-  const logBody = document.querySelector('#logTable tbody');
-  if (logBody){
-    const obs = new MutationObserver(()=>{
-      recalcSummary(5, 'summary5Table');
-      recalcSummary(15,'summary15Table');
-      recalcSummary(60,'summary60Table');
+  function exportStatCSV(){
+    const table = document.getElementById("statAnalysisTable"); if (!table) return;
+    const rows = [STAT_COLUMNS.join(",")];
+    table.querySelectorAll("tbody tr").forEach(tr=>{
+      const vals = Array.from(tr.children).slice(0, STAT_COLUMNS.length).map(td=>{
+        const t = td.textContent.trim();
+        return /[",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
+      });
+      rows.push(vals.join(","));
     });
-    obs.observe(logBody, {childList:true, subtree:false});
+    const csv = rows.join("\\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "statistical_analysis_5m.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
-  // Initial compute on load
-  window.addEventListener('load', ()=>{
-    recalcSummary(5, 'summary5Table');
-    recalcSummary(15,'summary15Table');
-    recalcSummary(60,'summary60Table');
-  });
-
-  // Rebuild from existing summary table rows (no main log required)
-  function runBackfillFromTable(minutes, tableId){
-    try{
-      const table = document.getElementById(tableId);
-      if (!table) return alert("Target table not found.");
-      const tbody = table.querySelector('tbody');
-      if (!tbody) return alert("Target table body not found.");
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
-      // Parse times from first cell
-      function parseAU(s){
-        try{
-          if (typeof parseAUDatetime === "function"){
-            const ms = parseAUDatetime(s);
-            if (Number.isFinite(ms)) return ms;
-          }
-          // Fallback simple parse (may fail on AU format)
-          // attempt DD/MM/YYYY HH:MM:SS
-          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
-          if (m){
-            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
-            return new Date(y, mo-1, d, h, mi, se).getTime();
-          }
-        }catch(e){}
-        return NaN;
-      }
-      const points = [];
-      rows.forEach(tr=>{
-        const tc = tr.querySelector('td,th');
-        if (!tc) return;
-        const ms = parseAU(tc.textContent || "");
-        if (Number.isFinite(ms)){
-          // capture the numeric cells as strings to re-insert
-          const cells = Array.from(tr.children).map(td => td.textContent || "");
-          points.push({ms, cells});
-        }
-      });
-      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
-      // Determine anchor and step
-      const step = minutes*60*1000;
-      const anchor = Math.min.apply(null, points.map(p=>p.ms));
-      // Bucket by boundary index to dedupe to one per boundary
-      const byIdx = new Map();
-      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
-        const idx = Math.floor((p.ms - anchor)/step);
-        byIdx.set(idx, p); // last wins (latest within that bucket)
-      });
-      // Rewrite table with aligned, deduped rows
-      tbody.innerHTML = "";
-      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
-        const p = byIdx.get(idx);
-        const tr = document.createElement("tr");
-        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
-        tbody.appendChild(tr);
-      });
-      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
-    }catch(e){
-      console.warn("Rebuild from table failed", e);
-      alert("Rebuild failed: " + e.message);
-    }
-  }
-
 })();
 </script>
-<!-- Summary Popup Modal -->
-<div id="summaryPopupModal" style="display:none; position:fixed; inset:5% 5% auto 5%; background:#fff; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:10000; padding:12px; overflow:auto; max-height:90vh;">
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-<h3 id="summaryPopupTitle" style="margin:0;">Summary</h3>
-<button id="summaryPopupCloseBtn" style="background:#007aff; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">Close</button>
-</div>
-<table id="summaryPopupTable" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Drug</th><th>Qty</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th><th>Notes</th><th>Last</th></tr></thead>
-<tbody></tbody>
-</table>
+
+
+<script>
+// === Statistical Analysis (60m) — popup + table, cloned from 5m Statistical Analysis with hourly bins ===
+(function(){
+  const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
+    ? SUMMARY_COLUMNS.slice()
+    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+  const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum"]);
+
+  function ensureStatAnalysisHourPopup(){
+    let popup = document.getElementById("statAnalysisHourPopup");
+    if (popup) return popup;
+    popup = document.createElement("div");
+    popup.id = "statAnalysisHourPopup";
+    Object.assign(popup.style, {
+      position:"fixed", top:"70px", left:"20px", background:"#fff", border:"1px solid #ccc",
+      borderRadius:"8px", boxShadow:"0 4px 16px rgba(0,0,0,0.2)", maxHeight:"70vh", overflow:"auto",
+      zIndex:"10000", padding:"10px"
+    });
+    const head = document.createElement("div");
+    Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
+    head.innerHTML = `<strong>Statistical Analysis (60m)</strong>`;
+    const controls = document.createElement("div");
+    const exportBtn = document.createElement("button");
+    exportBtn.textContent = "Export CSV";
+    exportBtn.onclick = exportStatHourCSV;
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "×";
+    closeBtn.style.marginLeft = "8px";
+    closeBtn.onclick = ()=>popup.remove();
+    controls.appendChild(exportBtn);
+    controls.appendChild(closeBtn);
+    head.appendChild(controls);
+    popup.appendChild(head);
+
+    const table = document.createElement("table");
+    table.id = "statAnalysisHourTable";
+    table.style.borderCollapse="collapse";
+    table.style.width="100%";
+    const thead = document.createElement("thead");
+    thead.innerHTML = `<tr>${STAT_COLUMNS.map(c=>`<th>${c}</th>`).join("")}</tr>`;
+    table.appendChild(thead);
+    table.appendChild(document.createElement("tbody"));
+    popup.appendChild(table);
+
+    document.body.appendChild(popup);
+    return popup;
+  }
+
+  function openStatAnalysisHourly(){
+    ensureStatAnalysisHourPopup();
+    createStatAnalysisHourPopupTable();
+  }
+  window.openStatAnalysisHourly = openStatAnalysisHourly;
+  // Local snapshot for hourly analysis (no external dependency)
+  function snapshotWithExtrasHour(){
+    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(tr => {
+      const ts = +(tr.getAttribute('data-ts')||0);
+      // Case-insensitive value getter by data-col name(s)
+      const getValCI = (names) => {
+        const want = Array.isArray(names) ? names.map(n=>String(n).toLowerCase()) : [String(names).toLowerCase()];
+        const tds = tr.querySelectorAll('td[data-col]');
+        for (const td of tds){
+          const col = (td.getAttribute('data-col')||'').trim().toLowerCase();
+          if (want.includes(col)) return td.textContent.trim();
+        }
+        return "";
+      };
+      const numFrom = (names) => {
+        const raw = getValCI(names);
+        const m = (raw||"").match(/-?\d+(\.\d+)?/);
+        return m ? parseFloat(m[0]) : NaN;
+      };
+      const getSum = (field) => {
+        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+        if (!td) return 0;
+        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
+      };
+      return {
+        _ts: ts,
+        rush: getSum('rush'), mood: getSum('mood'), social: getSum('social'),
+        energy: getSum('energy'), focus: getSum('focus'), anxiety: getSum('anxiety'), impair: getSum('impair'),
+        Notes: getValCI(["Notes","Note"]),
+        Drug: getValCI(["Drug"]),
+        Qty: numFrom(["Qty","QTY","Quantity"])
+      };
+    }).filter(o => o._ts>0);
+  }
+
+
+  function formatHourLabel(d){
+    const hh = String(d.getHours()).padStart(2,"0");
+    return `${hh}:00 Average`;
+  }
+
+  function minuteKey(d){
+    return d.getFullYear()
+      + String(d.getMonth()+1).padStart(2,"0")
+      + String(d.getDate()).padStart(2,"0")
+      + String(d.getHours()).padStart(2,"0")
+      + String(d.getMinutes()).padStart(2,"0");
+  }
+
+  // We reuse snapshotWithExtras() from v2 patch; it is already global in this file.
+
+  function computeMeansForWindowHour(startMs, endMs){
+    const snap = snapshotWithExtrasHour();
+    const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+    if (!sel.length) return null;
+    const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+    const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
+    return {means, sel};
+  }
+  function computeCompositeFromMeansHour(M){
+    if (!M) return null;
+    const m = M.means || M;
+    const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
+    const max = Math.max(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
+    const min = Math.min(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
+    const weighted = ((m.rush*6)+(m.mood*4)+(m.social*4)+(m.energy*3)+(m.focus*3)) - ((m.anxiety*4)-(m.impair*6));
+    const fiveMax = [m.rush,m.mood,m.social,m.energy,m.focus].sort((a,b)=>b-a).slice(0,5).reduce((a,b)=>a+b,0);
+    return {score, max, min, weighted, fiveMax};
+  }
+
+  function aggregateExtrasHour(sel){
+    const tokenize = (s) => {
+      if (!s) return [];
+      if (typeof window.tokenizeNotes === 'function') {
+        try { return window.tokenizeNotes(s) || []; } catch(e){}
+      }
+      return (s.match(/[A-Za-z0-9_]+/g) || []).map(x=>x);
+    };
+    const notesTokens = [];
+    const drugs = [];
+    let qtySum = 0;
+    sel.forEach(e => {
+      tokenize(e.Notes).forEach(tok => notesTokens.push(tok));
+      if (e.Drug) drugs.push(e.Drug);
+      if (Number.isFinite(e.Qty)) qtySum += e.Qty;
+    });
+    return {
+      Notes: notesTokens.join(", "),
+      Drug: drugs.join(", "),
+      QtySum: Number.isFinite(qtySum) ? +qtySum : 0
+    };
+  }
+
+  function appendStatHourRowToTable(tableId, d, M, C, extras){
+    if (!M || !C) return;
+    const table = document.getElementById(tableId); if (!table) return;
+    const tbody = table.querySelector('tbody'); if (!tbody) return;
+    const row = [
+      formatHourLabel(d) + " 60m Avg",
+      M.means.rush, M.means.mood, M.means.social, M.means.energy, M.means.focus, M.means.anxiety, M.means.impair,
+      C.score, C.max, C.min, C.weighted, C.fiveMax,
+      extras.Notes, extras.Drug, extras.QtySum
+    ];
+    const tr = document.createElement("tr");
+    tr.innerHTML = row.map((v,i)=>{
+      const name = STAT_COLUMNS[i];
+      if (i===0) return `<td>${v??''}</td>`;
+      const num = Number(v);
+      const isNum = Number.isFinite(num);
+      const bg = isNum && typeof cellBgFor==='function' ? cellBgFor(name, num) : '';
+      const val = isNum ? num.toFixed(2) : (v ?? '');
+      return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+    }).join("");
+    tbody.appendChild(tr);
+  }
+
+  function backfillStatAnalysisHour(){
+    const snap = snapshotWithExtrasHour();
+    if (!snap.length) return 0;
+    const minTs = Math.min(...snap.map(x=>x._ts));
+    const now = Date.now();
+    // Align start to top of the hour
+    const start = new Date(minTs); start.setSeconds(0,0); start.setMinutes(0,0);
+    let added = 0;
+    for (let t = start.getTime(); t <= now; t += 60*60000){
+      const endMs = t + 60*60000;
+      const d = new Date(t);
+      const M = computeMeansForWindowHour(t, endMs);
+      if (!M) continue;
+      const C = computeCompositeFromMeansHour(M);
+      const extras = aggregateExtrasHour(M.sel);
+      appendStatHourRowToTable('statAnalysisHourTable', d, M, C, extras);
+      added++;
+    }
+    return added;
+  }
+
+  function createStatAnalysisHourPopupTable(){
+    ensureStatAnalysisHourPopup();
+    const tbody = document.querySelector('#statAnalysisHourTable tbody'); if (tbody) tbody.innerHTML='';
+    backfillStatAnalysisHour();
+    // Start cadence at top-of-hour
+    if (window._stat60mTimer) { clearInterval(window._stat60mTimer); window._stat60mTimer = null; }
+    const schedule = ()=>{
+      const now = new Date();
+      const msToNext = (60 - now.getMinutes())*60000 - now.getSeconds()*1000 - now.getMilliseconds();
+      setTimeout(()=>{
+        appendLatestHourRow();
+        window._stat60mTimer = setInterval(appendLatestHourRow, 60*60000);
+      }, Math.max(0, msToNext));
+    };
+    function appendLatestHourRow(){
+      const end = new Date(); end.setSeconds(0,0); end.setMinutes(0,0); // top of hour
+      const startMs = end.getTime() - 60*60000;
+      const M = computeMeansForWindowHour(startMs, end.getTime());
+      if (!M) return;
+      const C = computeCompositeFromMeansHour(M);
+      const extras = aggregateExtrasHour(M.sel);
+      appendStatHourRowToTable('statAnalysisHourTable', end, M, C, extras);
+    }
+    schedule();
+  }
+
+  function exportStatHourCSV(){
+    const table = document.getElementById("statAnalysisHourTable"); if (!table) return;
+    const rows = [STAT_COLUMNS.join(",")];
+    table.querySelectorAll("tbody tr").forEach(tr=>{
+      const vals = Array.from(tr.children).slice(0, STAT_COLUMNS.length).map(td=>{
+        const t = td.textContent.trim();
+        return /[\",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
+      });
+      rows.push(vals.join(","));
+    });
+    const csv = rows.join("\\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "statistical_analysis_60m.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+})();
+</script>
+
+
+<script>
+// === Summary Significant 5m — 5-minute bins; numeric = MAX, labels = MEDIAN ===
+(function(){
+  const NUM_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
+  const LABEL_MAP = {
+    rush:   ['Rush Label','RushLabel','rush label','rushlabel'],
+    mood:   ['Mood Label','MoodLabel','mood label','moodlabel'],
+    social: ['Social Label','SocialLabel','social label','sociallabel'],
+    energy: ['Energy Label','EnergyLabel','energy label','energylabel'],
+    focus:  ['Focus Label','FocusLabel','focus label','focuslabel'],
+    anxiety:['Anxiety Label','AnxietyLabel','anxiety label','anxietylabel'],
+    impair: ['Impair Label','ImpairLabel','impair label','impairlabel'],
+  };
+
+  const COLS = [
+    'Time',
+    'Rush','Rush Label',
+    'Mood','Mood Label',
+    'Social','Social Label',
+    'Energy','Energy Label',
+    'Focus','Focus Label',
+    'Anxiety','Anxiety Label',
+    'Impair','Impair Label'
+  ];
+
+  function ensureSignificant5mPopup(){
+    let popup = document.getElementById("significant5mPopup");
+    if (popup) return popup;
+    popup = document.createElement("div");
+    popup.id = "significant5mPopup";
+    Object.assign(popup.style, {
+      position:"fixed", top:"70px", right:"20px", background:"#fff", border:"1px solid #ccc",
+      borderRadius:"8px", boxShadow:"0 4px 16px rgba(0,0,0,0.2)", maxHeight:"70vh", overflow:"auto",
+      zIndex:"10000", padding:"10px"
+    });
+    const head = document.createElement("div");
+    Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
+    head.innerHTML = `<strong>Summary Significant 5m</strong>`;
+    const controls = document.createElement("div");
+    const exportBtn = document.createElement("button");
+    exportBtn.textContent = "Export CSV";
+    exportBtn.onclick = exportSignificant5mCSV;
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "×";
+    closeBtn.style.marginLeft = "8px";
+    closeBtn.onclick = ()=>popup.remove();
+    controls.appendChild(exportBtn);
+    controls.appendChild(closeBtn);
+    head.appendChild(controls);
+    popup.appendChild(head);
+
+    const table = document.createElement("table");
+    table.id = "significant5mTable";
+    table.style.borderCollapse="collapse";
+    table.style.width="100%";
+    const thead = document.createElement("thead");
+    thead.innerHTML = `<tr>${COLS.map(c=>`<th>${c}</th>`).join("")}</tr>`;
+    table.appendChild(thead);
+    table.appendChild(document.createElement("tbody"));
+    popup.appendChild(table);
+
+    document.body.appendChild(popup);
+    return popup;
+  }
+
+  function openSignificant5m(){
+    ensureSignificant5mPopup();
+    createSignificant5mPopupTable();
+  }
+  window.openSignificant5m = openSignificant5m;
+
+  // Utilities (local; independent)
+  function minuteKey(d){
+    return d.getFullYear()
+      + String(d.getMonth()+1).padStart(2,"0")
+      + String(d.getDate()).padStart(2,"0")
+      + String(d.getHours()).padStart(2,"0")
+      + String(d.getMinutes()).padStart(2,"0");
+  }
+  function formatMinuteLabel(d){
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    return `${hh}:${mm} Significant`;
+  }
+  function snapshotForSignificant(){
+    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(tr => {
+      const ts = +(tr.getAttribute('data-ts')||0);
+      // Helpers
+      const getSum = (field) => {
+        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+        if (!td) return 0;
+        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
+      };
+      const getValCI = (names) => {
+        const want = (Array.isArray(names)?names:[names]).map(s=>String(s).toLowerCase());
+        const tds = tr.querySelectorAll('td[data-col]');
+        for (const td of tds){
+          const col = (td.getAttribute('data-col')||'').trim().toLowerCase();
+          if (want.includes(col)) return td.textContent.trim();
+        }
+        return "";
+      };
+      const pack = { _ts: ts };
+      // numeric
+      NUM_METRICS.forEach(f => pack[f] = getSum(f));
+      // labels
+      NUM_METRICS.forEach(f => pack[f+'Label'] = getValCI(LABEL_MAP[f]));
+      return pack;
+    }).filter(o => o._ts>0);
+  }
+
+  function computeMaxAndMedianLabels(startMs, endMs){
+    const snap = snapshotForSignificant();
+    const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+    if (!sel.length) return null;
+    const out = { max:{}, medianLabel:{} };
+    NUM_METRICS.forEach(f => {
+      // Max numeric
+      let mx = -Infinity;
+      sel.forEach(e => { const v = +e[f] || 0; if (v > mx) mx = v; });
+      out.max[f] = (mx === -Infinity ? 0 : mx);
+      // Median label by numeric rank
+      const pairs = sel.map(e => ({v: +e[f]||0, label: e[f+'Label']||''})).sort((a,b)=>a.v-b.v);
+      const mid = Math.floor((pairs.length-1)/2);
+      out.medianLabel[f] = (pairs[mid] && pairs[mid].label) ? pairs[mid].label : '';
+    });
+    return out;
+  }
+
+  function appendSignificantRow(tableId, d, R){
+    if (!R) return;
+    const table = document.getElementById(tableId); if (!table) return;
+    const tbody = table.querySelector('tbody'); if (!tbody) return;
+    const row = [
+      formatMinuteLabel(d),
+      R.max.rush,   R.medianLabel.rush,
+      R.max.mood,   R.medianLabel.mood,
+      R.max.social, R.medianLabel.social,
+      R.max.energy, R.medianLabel.energy,
+      R.max.focus,  R.medianLabel.focus,
+      R.max.anxiety,R.medianLabel.anxiety,
+      R.max.impair, R.medianLabel.impair
+    ];
+    const tr = document.createElement("tr");
+    tr.innerHTML = row.map((v,i)=>{
+      const name = COLS[i];
+      if (i===0) return `<td>${v??''}</td>`;
+      const num = Number(v);
+      const isNum = Number.isFinite(num);
+      const bg = isNum && typeof cellBgFor==='function' ? cellBgFor(name.replace(' Label',''), num) : '';
+      const val = isNum ? num.toFixed(2) : (v ?? '');
+      return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
+    }).join("");
+    tbody.appendChild(tr);
+  }
+
+  function backfillSignificant5m(){
+    const snap = snapshotForSignificant();
+    if (!snap.length) return 0;
+    const minTs = Math.min(...snap.map(x=>x._ts));
+    const now = Date.now();
+    const start = new Date(minTs); start.setSeconds(0,0);
+    start.setMinutes(start.getMinutes() - (start.getMinutes()%5), 0, 0);
+    let added = 0;
+    for (let t = start.getTime(); t <= now; t += 5*60000){
+      const endMs = t + 5*60000;
+      const d = new Date(t);
+      const R = computeMaxAndMedianLabels(t, endMs);
+      if (!R) continue;
+      appendSignificantRow('significant5mTable', d, R);
+      added++;
+    }
+    return added;
+  }
+
+  function createSignificant5mPopupTable(){
+    ensureSignificant5mPopup();
+    const tbody = document.querySelector('#significant5mTable tbody'); if (tbody) tbody.innerHTML='';
+    backfillSignificant5m();
+    // Cadence every 5 minutes aligned to boundary
+    if (window._significant5mTimer) { clearInterval(window._significant5mTimer); window._significant5mTimer = null; }
+    const schedule = ()=>{
+      const now = new Date();
+      const msToNext = (5 - (now.getMinutes()%5))*60000 - now.getSeconds()*1000 - now.getMilliseconds();
+      setTimeout(()=>{
+        appendLatest();
+        window._significant5mTimer = setInterval(appendLatest, 5*60000);
+      }, Math.max(0, msToNext));
+    };
+    function appendLatest(){
+      const end = new Date(); end.setSeconds(0,0);
+      const startMs = end.getTime() - 5*60000;
+      const R = computeMaxAndMedianLabels(startMs, end.getTime());
+      if (!R) return;
+      appendSignificantRow('significant5mTable', end, R);
+    }
+    schedule();
+  }
+
+  function exportSignificant5mCSV(){
+    const table = document.getElementById("significant5mTable"); if (!table) return;
+    const rows = [COLS.join(",")];
+    table.querySelectorAll("tbody tr").forEach(tr=>{
+      const vals = Array.from(tr.children).slice(0, COLS.length).map(td=>{
+        const t = td.textContent.trim();
+        return /[",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
+      });
+      rows.push(vals.join(","));
+    });
+    const csv = rows.join("\\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "summary_significant_5m.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+})();
+</script>
+
+
+<!-- Sliding Average Popup (3-row moving average) -->
+<style>
+#slidingAvgModal {
+  display:none; position:fixed; top:8%; left:50%; transform:translateX(-50%);
+  background:#fff; color:#000; padding:16px; border:2px solid #007aff;
+  border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:10001; max-height:80%;
+  overflow:auto; min-width: 70%;
+}
+#slidingAvgModal table{ width:100%; border-collapse:collapse; background:#fff; margin-top:10px; }
+#slidingAvgModal th, #slidingAvgModal td{ border:1px solid #ccc; padding:8px; text-align:center; font-size:12px; }
+#slidingAvgClose { background:#ccc; color:#000; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; float:right; }
+</style>
+<div id="slidingAvgModal">
+  <button id="slidingAvgClose" onclick="document.getElementById('slidingAvgModal').style.display='none'">Close</button>
+  <h3 style="margin:0 0 8px 0;">Sliding Average (3-row moving window)</h3>
+  <table id="slidingAvgTable">
+    <thead>
+      <tr>
+        <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 <script>
 (function(){
-  function show(el){ el.style.display='block'; }
-  function hide(el){ el.style.display='none'; }
-  window.openSummaryPopup = function(mins){
-    try{
-      const modal = document.getElementById('summaryPopupModal');
-      const title = document.getElementById('summaryPopupTitle');
-      const tb = document.querySelector('#summaryPopupTable tbody');
-      if (!modal || !title || !tb) return;
-      title.textContent = `Summary ${mins}m (popup)`;
-      tb.innerHTML = '';
-      // Rebuild popup table with unified logic
-      if (typeof recalcSummary === 'function'){
-        recalcSummary(mins, 'summaryPopupTable');
-      }
-      show(modal);
-    }catch(e){ console.error(e); }
-  };
-  const closeBtn = document.getElementById('summaryPopupCloseBtn');
-  if (closeBtn){
-    closeBtn.addEventListener('click', ()=>{
-      const modal = document.getElementById('summaryPopupModal');
-      if (modal) modal.style.display='none';
-    });
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function timeLabel(ms){
+    var d = new Date(ms||0);
+    return pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
   }
-
-  // Rebuild from existing summary table rows (no main log required)
-  function runBackfillFromTable(minutes, tableId){
-    try{
-      const table = document.getElementById(tableId);
-      if (!table) return alert("Target table not found.");
-      const tbody = table.querySelector('tbody');
-      if (!tbody) return alert("Target table body not found.");
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
-      // Parse times from first cell
-      function parseAU(s){
-        try{
-          if (typeof parseAUDatetime === "function"){
-            const ms = parseAUDatetime(s);
-            if (Number.isFinite(ms)) return ms;
-          }
-          // Fallback simple parse (may fail on AU format)
-          // attempt DD/MM/YYYY HH:MM:SS
-          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
-          if (m){
-            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
-            return new Date(y, mo-1, d, h, mi, se).getTime();
-          }
-        }catch(e){}
-        return NaN;
+  // Pulls metric sums + timestamps from MAIN table only (never from summaries)
+  function snapshotFromMainTableForSliding(){
+    var rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(function(tr){
+      var ts = +(tr.getAttribute('data-ts')||0);
+      function get(field){
+        var td = tr.querySelector('td[data-field="'+field+'Sum"]');
+        if(!td) return 0;
+        var v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
       }
-      const points = [];
-      rows.forEach(tr=>{
-        const tc = tr.querySelector('td,th');
-        if (!tc) return;
-        const ms = parseAU(tc.textContent || "");
-        if (Number.isFinite(ms)){
-          // capture the numeric cells as strings to re-insert
-          const cells = Array.from(tr.children).map(td => td.textContent || "");
-          points.push({ms, cells});
+      return {
+        _ts: ts,
+        rush: get('rush'),
+        mood: get('mood'),
+        social: get('social'),
+        energy: get('energy'),
+        focus: get('focus'),
+        anxiety: get('anxiety'),
+        impair: get('impair')
+      };
+    }).filter(function(o){ return o._ts>0; });
+  }
+  // Compute composites
+  function composites(M){
+    var score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+    var max   = (M.rush+M.mood+M.social+M.energy+M.focus);
+    var min   = (M.anxiety+M.impair);
+    var weighted = (M.rush*6)+(M.mood*4)+(M.social*4)+(M.energy*3)+(M.focus*3) - (M.anxiety*4) + (M.impair*6);
+    return {
+      score: +score,
+      max: +max,
+      min: +min,
+      weighted: +weighted,
+      fiveMax: +(weighted/10)
+    };
+  }
+  function fmt2(x){
+    var n = Number(x);
+    return Number.isFinite(n) ? n.toFixed(2) : "";
+  }
+  // Build sliding average rows
+  function buildSlidingAverages(){
+    var snap = snapshotFromMainTableForSliding();
+    var out = [];
+    for(var i=0;i<snap.length;i++){
+      var start = Math.max(0, i-2);
+      var cnt = i - start + 1;
+      var sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+      for(var j=start;j<=i;j++){
+        var r = snap[j];
+        sums.rush+=r.rush; sums.mood+=r.mood; sums.social+=r.social; sums.energy+=r.energy;
+        sums.focus+=r.focus; sums.anxiety+=r.anxiety; sums.impair+=r.impair;
+      }
+      var means = {
+        rush: sums.rush/cnt, mood: sums.mood/cnt, social: sums.social/cnt,
+        energy: sums.energy/cnt, focus: sums.focus/cnt, anxiety: sums.anxiety/cnt, impair: sums.impair/cnt
+      };
+      var comp = composites(means);
+      out.push({ ms: snap[i]._ts, means: means, comp: comp, n: cnt });
+    }
+    return out;
+  }
+  // Render table
+  window.openSlidingAverage = function(){
+    try {
+      var modal = document.getElementById('slidingAvgModal');
+      var tbody = document.querySelector('#slidingAvgTable tbody');
+      if(!tbody){ alert('Sliding Average table missing'); return; }
+      tbody.innerHTML = '';
+      var rows = buildSlidingAverages();
+      rows.forEach(function(row){
+        var tr = document.createElement('tr');
+        function td(col, val){
+          var cell = document.createElement('td');
+          cell.textContent = val;
+          cell.setAttribute('data-col', col);
+          return cell;
         }
-      });
-      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
-      // Determine anchor and step
-      const step = minutes*60*1000;
-      const anchor = Math.min.apply(null, points.map(p=>p.ms));
-      // Bucket by boundary index to dedupe to one per boundary
-      const byIdx = new Map();
-      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
-        const idx = Math.floor((p.ms - anchor)/step);
-        byIdx.set(idx, p); // last wins (latest within that bucket)
-      });
-      // Rewrite table with aligned, deduped rows
-      tbody.innerHTML = "";
-      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
-        const p = byIdx.get(idx);
-        const tr = document.createElement("tr");
-        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
+        tr.appendChild(td('Time', timeLabel(row.ms) + ' avg(' + row.n + ')'));
+        tr.appendChild(td('Rush', fmt2(row.means.rush)));
+        tr.appendChild(td('Mood', fmt2(row.means.mood)));
+        tr.appendChild(td('Social', fmt2(row.means.social)));
+        tr.appendChild(td('Energy', fmt2(row.means.energy)));
+        tr.appendChild(td('Focus', fmt2(row.means.focus)));
+        tr.appendChild(td('Anxiety', fmt2(row.means.anxiety)));
+        tr.appendChild(td('Impair', fmt2(row.means.impair)));
+        tr.appendChild(td('Score', fmt2(row.comp.score)));
+        tr.appendChild(td('Max', fmt2(row.comp.max)));
+        tr.appendChild(td('Min', fmt2(row.comp.min)));
+        tr.appendChild(td('Weighted', fmt2(row.comp.weighted)));
+        tr.appendChild(td('5Max', fmt2(row.comp.fiveMax)));
+        // Apply same colour rules as main table
+        try { if (typeof applyRowShading === 'function') applyRowShading(tr); } catch(e){}
+        // Respect hidden columns if any
+        try { if (typeof applyUiColumnVisibility === 'function') applyUiColumnVisibility(); } catch(e){}
         tbody.appendChild(tr);
       });
-      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
-    }catch(e){
-      console.warn("Rebuild from table failed", e);
-      alert("Rebuild failed: " + e.message);
+      modal.style.display = 'block';
+    } catch(e){
+      alert('Sliding Average failed: ' + e.message);
     }
-  }
-
+  };
 })();
 </script>
+
+
+<!-- Auto Slider A & B (auto-appending sliding averages) -->
+<style>
+#autoSliderAModal, #autoSliderBModal {
+  display:none; position:fixed; top:8%; left:50%; transform:translateX(-50%);
+  background:#fff; color:#000; padding:16px; border:2px solid #007aff;
+  border-radius:8px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:10002; max-height:80%;
+  overflow:auto; min-width: 72%;
+}
+#autoSliderAModal table, #autoSliderBModal table { width:100%; border-collapse:collapse; background:#fff; margin-top:10px; }
+#autoSliderAModal th, #autoSliderAModal td, #autoSliderBModal th, #autoSliderBModal td {
+  border:1px solid #ccc; padding:8px; text-align:center; font-size:12px;
+}
+.as-toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
+.as-toolbar button { background:#eee; color:#000; border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
+</style>
+
+<div id="autoSliderAModal">
+  <div class="as-toolbar">
+    <button onclick="exportAutoSliderCSV('A')">Export CSV</button>
+    <button onclick="clearAutoSlider('A')">Clear</button>
+    <button onclick="document.getElementById('autoSliderAModal').style.display='none'">Close</button>
+  </div>
+  <h3 style="margin:6px 0;">Auto Slider A (per-minute while Auto is ON)</h3>
+  <table id="autoSliderATable">
+    <thead><tr>
+      <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
+      <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="autoSliderBModal">
+  <div class="as-toolbar">
+    <button onclick="exportAutoSliderCSV('B')">Export CSV</button>
+    <button onclick="clearAutoSlider('B')">Clear</button>
+    <button onclick="document.getElementById('autoSliderBModal').style.display='none'">Close</button>
+  </div>
+  <h3 style="margin:6px 0;">Auto Slider B (on addEntry while Auto is ON)</h3>
+  <table id="autoSliderBTable">
+    <thead><tr>
+      <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
+      <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+(function(){
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function timeLabel(ms){ var d=new Date(ms||0); return d.getFullYear()
+      +'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
+  function fmt2(x){ var n=Number(x); return Number.isFinite(n)? n.toFixed(2):""; }
+
+  function snapshotFromMainTableForSliding(){
+    var rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(function(tr){
+      var ts = +(tr.getAttribute('data-ts')||0);
+      function get(field){
+        var td = tr.querySelector('td[data-field="'+field+'Sum"]');
+        if(!td) return 0;
+        var v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
+      }
+      return {_ts:ts,
+        rush:get('rush'), mood:get('mood'), social:get('social'), energy:get('energy'),
+        focus:get('focus'), anxiety:get('anxiety'), impair:get('impair')};
+    }).filter(function(o){ return o._ts>0; });
+  }
+  function composites(M){
+    var score=(M.rush+M.mood+M.social+M.energy+M.focus)-(M.anxiety+M.impair);
+    var max=(M.rush+M.mood+M.social+M.energy+M.focus);
+    var min=(M.anxiety+M.impair);
+    var weighted=(M.rush*6)+(M.mood*4)+(M.social*4)+(M.energy*3)+(M.focus*3) - (M.anxiety*4) + (M.impair*6);
+    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:+(weighted/10)};
+  }
+  function slidingMeanAtIndex(snap, i){
+    var start=Math.max(0,i-2), cnt=i-start+1;
+    var sums={rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    for(var j=start;j<=i;j++){ var r=snap[j];
+      sums.rush+=r.rush; sums.mood+=r.mood; sums.social+=r.social; sums.energy+=r.energy;
+      sums.focus+=r.focus; sums.anxiety+=r.anxiety; sums.impair+=r.impair; }
+    var means={rush:sums.rush/cnt, mood:sums.mood/cnt, social:sums.social/cnt, energy:sums.energy/cnt,
+               focus:sums.focus/cnt, anxiety:sums.anxiety/cnt, impair:sums.impair/cnt};
+    return {ms:snap[i]._ts, means:means, comp:composites(means), n:cnt};
+  }
+
+  var LS_KEY_A='autoSliderA_rows', LS_KEY_B='autoSliderB_rows';
+  function loadRows(w){ var k=w==='A'?LS_KEY_A:LS_KEY_B; try{ return JSON.parse(localStorage.getItem(k)||'[]'); }catch(e){ return []; } }
+  function saveRows(w,rows){ var k=w==='A'?LS_KEY_A:LS_KEY_B; try{ localStorage.setItem(k, JSON.stringify(rows)); }catch(e){} }
+
+  function appendRowToModalTable(which, row){
+    var tableId = which==='A' ? '#autoSliderATable tbody' : '#autoSliderBTable tbody';
+    var tbody = document.querySelector(tableId); if(!tbody) return;
+    var tr=document.createElement('tr');
+    function td(col,val){ var c=document.createElement('td'); c.textContent=val; c.setAttribute('data-col', col); return c; }
+    tr.appendChild(td('Time', timeLabel(row.ms)+' avg('+row.n+')'));
+    tr.appendChild(td('Rush', fmt2(row.means.rush)));
+    tr.appendChild(td('Mood', fmt2(row.means.mood)));
+    tr.appendChild(td('Social', fmt2(row.means.social)));
+    tr.appendChild(td('Energy', fmt2(row.means.energy)));
+    tr.appendChild(td('Focus', fmt2(row.means.focus)));
+    tr.appendChild(td('Anxiety', fmt2(row.means.anxiety)));
+    tr.appendChild(td('Impair', fmt2(row.means.impair)));
+    tr.appendChild(td('Score', fmt2(row.comp.score)));
+    tr.appendChild(td('Max', fmt2(row.comp.max)));
+    tr.appendChild(td('Min', fmt2(row.comp.min)));
+    tr.appendChild(td('Weighted', fmt2(row.comp.weighted)));
+    tr.appendChild(td('5Max', fmt2(row.comp.fiveMax)));
+    try{ if(typeof applyRowShading==='function') applyRowShading(tr); }catch(e){}
+    try{ if(typeof applyUiColumnVisibility==='function') applyUiColumnVisibility(); }catch(e){}
+    tbody.appendChild(tr);
+  }
+
+  window.exportAutoSliderCSV = function(which){
+    var rows = loadRows(which);
+    var header = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max","N"];
+    var lines = [header.join(",")];
+    rows.forEach(function(r){
+      var tt = timeLabel(r.ms);
+      lines.push([tt, r.means.rush, r.means.mood, r.means.social, r.means.energy, r.means.focus, r.means.anxiety, r.means.impair,
+                  r.comp.score, r.comp.max, r.comp.min, r.comp.weighted, r.comp.fiveMax, r.n]
+                 .map(function(x){ var s=String(Number.isFinite(+x)?(+x).toFixed(2):x); return '"'+s.replace(/"/g,'""')+'"'; }).join(","));
+    });
+    var blob = new Blob([lines.join("\n")], {type:"text/csv"});
+    var url = URL.createObjectURL(blob), a=document.createElement('a');
+    a.href=url; a.download = (which==='A'?'auto_slider_A':'auto_slider_B') + ".csv"; a.click(); URL.revokeObjectURL(url);
+  };
+  window.clearAutoSlider = function(which){
+    saveRows(which, []);
+    var sel = which==='A' ? '#autoSliderATable tbody' : '#autoSliderBTable tbody';
+    var tb = document.querySelector(sel); if (tb) tb.innerHTML='';
+  };
+
+  window.openAutoSliderA = function(){
+    var rows = loadRows('A');
+    var tb = document.querySelector('#autoSliderATable tbody'); if(tb){ tb.innerHTML=''; rows.forEach(function(r){ appendRowToModalTable('A', r); }); }
+    document.getElementById('autoSliderAModal').style.display='block';
+  };
+  window.openAutoSliderB = function(){
+    var rows = loadRows('B');
+    var tb = document.querySelector('#autoSliderBTable tbody'); if(tb){ tb.innerHTML=''; rows.forEach(function(r){ appendRowToModalTable('B', r); }); }
+    document.getElementById('autoSliderBModal').style.display='block';
+  };
+
+  var autoSliderATimer=null;
+  function emitAutoSliderA(){
+    var snap=snapshotFromMainTableForSliding(); if(!snap.length) return;
+    var row=slidingMeanAtIndex(snap, snap.length-1);
+    var rows=loadRows('A'); rows.push(row); saveRows('A', rows);
+    appendRowToModalTable('A', row);
+  }
+  function startAutoSliderA(){
+    if (autoSliderATimer) return;
+    var now=Date.now(), delay=60000-(now%60000);
+    autoSliderATimer=setTimeout(function kick(){ emitAutoSliderA(); autoSliderATimer=setInterval(emitAutoSliderA,60000); }, delay);
+  }
+  function stopAutoSliderA(){
+    if (autoSliderATimer && typeof autoSliderATimer==='number'){ clearTimeout(autoSliderATimer); }
+    if (autoSliderATimer && typeof autoSliderATimer==='object'){ clearInterval(autoSliderATimer); }
+    autoSliderATimer=null;
+  }
+
+  var _origAddEntry = window.addEntry;
+  window.addEntry = function(){
+    if (typeof _origAddEntry === 'function'){ _origAddEntry.apply(this, arguments); }
+    try {
+      if (window.autoSummaryActive){
+        var snap = snapshotFromMainTableForSliding();
+        if(snap.length){
+          var row = slidingMeanAtIndex(snap, snap.length-1);
+          var rows = loadRows('B'); rows.push(row); saveRows('B', rows);
+          appendRowToModalTable('B', row);
+        }
+      }
+    } catch(e){ console.warn('Auto Slider B hook failed:', e); }
+  };
+
+  var lastAuto=!!window.autoSummaryActive;
+  function pollAuto(){
+    var cur=!!window.autoSummaryActive;
+    if (cur!==lastAuto){
+      if (cur){ startAutoSliderA(); } else { stopAutoSliderA(); }
+      lastAuto=cur;
+    }
+  }
+  setInterval(pollAuto, 1000);
+  try{ if (window.autoSummaryActive) startAutoSliderA(); }catch(e){}
+  try{ ['A','B'].forEach(function(k){ var rows=loadRows(k); rows.forEach(function(r){ appendRowToModalTable(k, r); }); }); }catch(e){}
+})();
+</script>
+
+</body>
 <script>
 function openEmotionModal() {
     document.getElementById('emotionModal').style.display = 'block';
@@ -2677,588 +3173,9 @@ function buildEmotionButtons() {
     });
 }
 </script>
-<script>
-// ===== Aligned Auto Summary Scheduler (1m/5m/15m/60m) =====
-// This patch keeps popup summaries untouched and only emits rows into the docked tables.
-// Alignment: boundary-aligned since the first log entry (inclusive).
-// State
-(function(){
-  // global-ish state
-  window.autoSummaryActive = !!window.autoSummaryActive;
-  window._autoAnchors = window._autoAnchors || { anchorMs: null };
-  window._autoTimers = window._autoTimers || { t1:null, t5:null, t15:null, t60:null, p1:null, p5:null, p15:null, p60:null };
-  window._autoLastEmit = window._autoLastEmit || { 1: null, 5: null, 15: null, 60: null };
-
-  // Utility: get earliest log entry timestamp (ms), else now
-  function earliestLogMs(){
-    try{
-      if (Array.isArray(window.logData) && window.logData.length){
-        const ms = window.logData.map(r => Number(r && r._ts || 0)).filter(Number.isFinite);
-        if (ms.length) return Math.min.apply(null, ms);
-      }
-    }catch(e){}
-    return Date.now();
-  }
-
-  // Utility: ceil to next boundary given anchor
-  function nextBoundaryMs(nowMs, anchorMs, minutes){
-    const step = minutes * 60 * 1000;
-    if (!Number.isFinite(anchorMs) || step <= 0) return nowMs + step;
-    const elapsed = nowMs - anchorMs;
-    const k = Math.ceil(elapsed / step);
-    return anchorMs + k * step;
-  }
-
-  // Compute the rolling means and composite; functions expected elsewhere in file.
-  // Guard if absent.
-  function _computeAndAppend(intervalMin, tableId, labelSuffix){
-    try{
-      const endMs = Date.now();
-      if (typeof computeRollingMeans !== "function") return;
-      const M = computeRollingMeans(endMs, intervalMin);
-      const C = (typeof computeCompositeFromMeans === "function") ? computeCompositeFromMeans(M) : null;
-      if (!M || !isNonEmptySummary(M, C)) return;
-      const d = new Date();
-      if (typeof appendSummaryRowToTable === "function"){
-        appendSummaryRowToTable(tableId, d, M, C, {labelSuffix});
-      } else {
-        // Minimal fallback: directly append a row if helper is missing
-        const tbody = document.querySelector(`#${tableId} tbody`);
-        if (!tbody) return;
-        const tr = document.createElement("tr");
-        const pad = (n)=> (Number.isFinite(n) ? Number(n).toFixed(2) : "");
-        const when = d.toLocaleString('en-AU',{hour12:false});
-        const cells = [when, "", "", pad(M.rush), pad(M.mood), pad(M.social), pad(M.energy), pad(M.focus), pad(M.anxiety), pad(M.impair),
-                       pad(C && C.score), pad(C && C.max), pad(C && C.min), pad(C && C.weighted), pad(C && C.fiveMax), "", ""];
-        tr.innerHTML = cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
-        tbody.appendChild(tr);
-      }
-    }catch(e){ console.warn("auto emit error", e); }
-  }
-
-  // Clear timers
-  function clearAllTimers(){
-    const T = window._autoTimers;
-    ['t1','t5','t15','t60','p1','p5','p15','p60'].forEach(k=>{
-      if (T[k]) { clearTimeout(T[k]); clearInterval(T[k]); T[k] = null; }
-    });
-  }
-
-  // Start aligned timers for all intervals
-  function startAlignedTimers(){
-    const A = window._autoAnchors;
-    if (!Number.isFinite(A.anchorMs)) A.anchorMs = earliestLogMs();
-
-    const now = Date.now();
-    const plan = [
-      {min:1,   table:'autoSummaryTable', label:' 1m Now',  key:'t1',  pkey:'p1'},
-      {min:5,   table:'summary5Table',    label:' 1m Now',  key:'t5',  pkey:'p5'},
-      {min:15,  table:'summary15Table',   label:' 11m Now', key:'t15', pkey:'p15'},
-      {min:60,  table:'summary60Table',   label:' 60m Now', key:'t60', pkey:'p60'}
-    ];
-
-    plan.forEach(({min, table, label, key, pkey})=>{
-      const nextMs = nextBoundaryMs(now, A.anchorMs, min);
-      const delay = Math.max(0, nextMs - now);
-      // phase at boundary once, then regular interval
-      window._autoTimers[pkey] = setTimeout(()=>{
-        // prevent duplicate emission if page was idle:
-        const last = window._autoLastEmit[min];
-        if (!last || last < nextMs){ _computeAndAppend(min, table, label); window._autoLastEmit[min] = nextMs; }
-        window._autoTimers[key] = setInterval(()=>{
-          const t = Date.now();
-          const expected = Math.floor((t - A.anchorMs)/(min*60*1000))*(min*60*1000) + A.anchorMs;
-          if (!window.autoSummaryActive) return;
-          if (!window._autoLastEmit[min] || window._autoLastEmit[min] < expected){
-            _computeAndAppend(min, table, label);
-            window._autoLastEmit[min] = expected;
-          }
-        }, min * 60 * 1000);
-      }, delay);
-    });
-  }
-
-  // Public toggle; preserve existing identifier if present
-  window.toggleAutoSummary = function(){
-    window.autoSummaryActive = !window.autoSummaryActive;
-    const btn = document.getElementById('autoSummaryToggleBtn');
-    if (btn){ btn.textContent = window.autoSummaryActive ? 'Auto (On)' : 'Auto'; }
-    if (!window.autoSummaryActive){
-      clearAllTimers();
-      return;
-    }
-    clearAllTimers();
-    // set anchor by earliest log row to ensure "since first entry inclusive"
-    window._autoAnchors.anchorMs = earliestLogMs();
-    // Optional: on toggle-on, flush a "now" row for 1m only (consistent with current UX)
-    try {
-      _computeAndAppend(1, 'autoSummaryTable', ' 1m Now');
-      const now = Date.now();
-      window._autoLastEmit[1] = now - (now % (60*1000));
-    } catch(e){}
-    startAlignedTimers();
-  };
-
-  // Ensure status text matches active state on load
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const btn = document.getElementById('autoSummaryToggleBtn');
-    if (btn){ btn.textContent = window.autoSummaryActive ? 'Auto (On)' : 'Auto'; }
-  });
-
-  // Rebuild from existing summary table rows (no main log required)
-  function runBackfillFromTable(minutes, tableId){
-    try{
-      const table = document.getElementById(tableId);
-      if (!table) return alert("Target table not found.");
-      const tbody = table.querySelector('tbody');
-      if (!tbody) return alert("Target table body not found.");
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
-      // Parse times from first cell
-      function parseAU(s){
-        try{
-          if (typeof parseAUDatetime === "function"){
-            const ms = parseAUDatetime(s);
-            if (Number.isFinite(ms)) return ms;
-          }
-          // Fallback simple parse (may fail on AU format)
-          // attempt DD/MM/YYYY HH:MM:SS
-          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
-          if (m){
-            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
-            return new Date(y, mo-1, d, h, mi, se).getTime();
-          }
-        }catch(e){}
-        return NaN;
-      }
-      const points = [];
-      rows.forEach(tr=>{
-        const tc = tr.querySelector('td,th');
-        if (!tc) return;
-        const ms = parseAU(tc.textContent || "");
-        if (Number.isFinite(ms)){
-          // capture the numeric cells as strings to re-insert
-          const cells = Array.from(tr.children).map(td => td.textContent || "");
-          points.push({ms, cells});
-        }
-      });
-      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
-      // Determine anchor and step
-      const step = minutes*60*1000;
-      const anchor = Math.min.apply(null, points.map(p=>p.ms));
-      // Bucket by boundary index to dedupe to one per boundary
-      const byIdx = new Map();
-      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
-        const idx = Math.floor((p.ms - anchor)/step);
-        byIdx.set(idx, p); // last wins (latest within that bucket)
-      });
-      // Rewrite table with aligned, deduped rows
-      tbody.innerHTML = "";
-      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
-        const p = byIdx.get(idx);
-        const tr = document.createElement("tr");
-        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
-        tbody.appendChild(tr);
-      });
-      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
-    }catch(e){
-      console.warn("Rebuild from table failed", e);
-      alert("Rebuild failed: " + e.message);
-    }
-  }
-
-})();
-</script>
-<script>
-// ===== Summary Utilities + Backfill + Popups (self-contained, safe to re-define if absent) =====
-(function(){
-  // Guard re-entry
-  if (window.__summary_utils_patched__) return;
-  window.__summary_utils_patched__ = true;
-
-  // ------------ Helpers ------------
-  function toAUDateTime(d){
-    try{ return d.toLocaleString('en-AU', {hour12:false}); }catch(e){ return new Date().toISOString(); }
-  }
-  function pad2(n){ return Number.isFinite(n) ? Number(n).toFixed(2) : ""; }
-  function lastNonEmptyLogInWindow(startMs, endMs){
-    if (!Array.isArray(window.logData)) return null;
-    let best = null;
-    for (const r of window.logData){
-      const t = Number(r && r._ts || NaN);
-      if (!Number.isFinite(t)) continue;
-      if (t > endMs || t < startMs) continue;
-      if (!best || t > best._ts) best = r;
-    }
-    return best;
-  }
-
-  // ------------ Compute Means ------------
-  if (typeof window.computeRollingMeans !== "function"){
-    window.computeRollingMeans = function(endMs, minutes){
-      try{
-        const win = minutes * 60 * 1000;
-        const startMs = endMs - win;
-        const acc = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0, n:0};
-        if (Array.isArray(window.logData)){
-          for (const r of window.logData){
-            const t = Number(r && r._ts || NaN);
-            if (!Number.isFinite(t)) continue;
-            if (t <= endMs && t > startMs){
-              acc.rush += Number(r.rushSum||0);
-              acc.mood += Number(r.moodSum||0);
-              acc.social += Number(r.socialSum||0);
-              acc.energy += Number(r.energySum||0);
-              acc.focus += Number(r.focusSum||0);
-              acc.anxiety += Number(r.anxietySum||0);
-              acc.impair += Number(r.impairSum||0);
-              acc.n++;
-            }
-          }
-        }
-        if (!acc.n) return {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0, n:0, startMs, endMs};
-        const out = {
-          rush: acc.rush/acc.n,
-          mood: acc.mood/acc.n,
-          social: acc.social/acc.n,
-          energy: acc.energy/acc.n,
-          focus: acc.focus/acc.n,
-          anxiety: acc.anxiety/acc.n,
-          impair: acc.impair/acc.n,
-          n: acc.n,
-          startMs, endMs
-        };
-        return out;
-      }catch(e){ console.warn(e); return null; }
-    };
-  }
-
-  if (typeof window.computeCompositeFromMeans !== "function"){
-    window.computeCompositeFromMeans = function(M){
-      if (!M) return null;
-      const score = (M.rush + M.mood + M.social + M.energy + M.focus) - (M.anxiety + M.impair);
-      const max = (M.rush + M.mood + M.social + M.energy + M.focus);
-      const min = (M.anxiety + M.impair);
-      const weighted = (M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*5) + (M.impair*10);
-      const fiveMax = weighted/10;
-      return {score, max, min, weighted, fiveMax};
-    };
-  }
-
-  if (typeof window.appendSummaryRowToTable !== "function"){
-    window.appendSummaryRowToTable = function(tableId, d, M, C, opts){
-      const tbody = document.querySelector(`#${tableId} tbody`);
-      if (!tbody) return;
-      const tr = document.createElement("tr");
-      const when = toAUDateTime(d);
-      // try get a drug/qty/notes snapshot from window
-      const winStart = (M && M.startMs) || (d.getTime() - 60*1000);
-      const winEnd   = (M && M.endMs)   || d.getTime();
-      const last = lastNonEmptyLogInWindow(winStart, winEnd) || {};
-      // Tables have schema:
-      // Auto 1m: Time, Rush..Impair, Score, Max, Min, Weighted, 5Max
-      // 5/15/60: Time, Drug, Qty, Rush..Impair, Score, Max, Min, Weighted, 5Max, Notes, Last
-      if (tableId === 'autoSummaryTable'){
-        const cells = [when, pad2(M.rush), pad2(M.mood), pad2(M.social), pad2(M.energy), pad2(M.focus),
-                       pad2(M.anxiety), pad2(M.impair),
-                       pad2(C && C.score), pad2(C && C.max), pad2(C && C.min), pad2(C && C.weighted), pad2(C && C.fiveMax)];
-        tr.innerHTML = cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
-      } else {
-        const cells = [when, (last.drug||""), (last.qty||""),
-                       pad2(M.rush), pad2(M.mood), pad2(M.social), pad2(M.energy), pad2(M.focus),
-                       pad2(M.anxiety), pad2(M.impair),
-                       pad2(C && C.score), pad2(C && C.max), pad2(C && C.min), pad2(C && C.weighted), pad2(C && C.fiveMax),
-                       (last.notes||""), (last.customNotes||"")];
-        tr.innerHTML = cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
-      }
-      tbody.appendChild(tr);
-    };
-  }
-
-  // ------------ Backfill ------------
-  
-  // Ensure logData is available: if empty, harvest from the visible main table
-  function ensureLogDataFromUi(){
-    try{
-      if (Array.isArray(window.logData) && window.logData.length) return true;
-      const tb = document.querySelector('#logTable tbody');
-      if (!tb) return false;
-      const rows = Array.from(tb.querySelectorAll('tr'));
-      if (!rows.length) return false;
-      const header = Array.from(document.querySelectorAll('#logTable thead th')).map(th => (th.textContent||'').trim());
-      const colIdx = {};
-      function idxOf(name){ const i = header.findIndex(h => h === name); return i>=0?i:-1; }
-      // Map required columns
-      colIdx.Timestamp = idxOf('Timestamp');
-      colIdx['Rush Sum'] = idxOf('Rush');        // first Rush numeric
-      colIdx['Mood Sum'] = header.findIndex((h,i)=> h==='Mood' and i>colIdx['Rush Sum']); // placeholder, we'll robustly parse below
-      // Instead of relying on duplicate names, we'll parse by data-col attributes where possible:
-      function getByCol(tr, colName){
-        const td = tr.querySelector(`td[data-col="${colName}"]`);
-        if (td) return td.textContent.trim();
-        // fallback: approximate index if header unique
-        const i = header.findIndex(h => h === colName);
-        if (i>=0 && i < tr.children.length) return tr.children[i].textContent.trim();
-        return "";
-      }
-      const out = [];
-      rows.forEach(tr=>{
-        const tsTxt = getByCol(tr, 'Timestamp');
-        // parse AU date
-        let _ts = NaN;
-        try{
-          if (typeof parseAUDatetime === "function"){
-            _ts = parseAUDatetime(tsTxt);
-          }
-        }catch(e){}
-        if (!Number.isFinite(_ts)){
-          const m = String(tsTxt).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
-          if (m){
-            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
-            _ts = new Date(y, mo-1, d, h, mi, se).getTime();
-          } else {
-            _ts = Date.now();
-          }
-        }
-        function num(col){ const v = getByCol(tr, col); const n = parseFloat(v); return Number.isFinite(n)?n:0; }
-        const entry = {
-          _ts,
-          timestamp: tsTxt,
-          sincedose: getByCol(tr,'Since'),
-          elapsed: getByCol(tr,'Elapsed'),
-          info: getByCol(tr,'Phase'),
-          scale: getByCol(tr,'Scale'),
-          drug: getByCol(tr,'Drug'),
-          qty: getByCol(tr,'QTY'),
-          roa: getByCol(tr,'ROA'),
-          notes: getByCol(tr,'Notes'),
-          customNotes: getByCol(tr,'Last'),
-          rushSum: num('Rush'),
-          moodSum: num('Mood'),
-          socialSum: num('Social'),
-          energySum: num('Energy'),
-          focusSum: num('Focus'),
-          anxietySum: num('Anxiety'),
-          impairSum: num('Impair')
-        };
-        entry.score = (entry.rushSum+entry.moodSum+entry.socialSum+entry.energySum+entry.focusSum) - (entry.anxietySum+entry.impairSum);
-        entry.max = (entry.rushSum+entry.moodSum+entry.socialSum+entry.energySum+entry.focusSum);
-        entry.min = (entry.anxietySum+entry.impairSum);
-        entry.maxPercent = Math.round((entry.max/50)*1000)/10;
-        entry.minPercent = Math.round((entry.min/20)*1000)/10;
-        entry.weighted = (entry.rushSum*6)+(entry.moodSum*4)+(entry.socialSum*4)+(entry.energySum*3)+(entry.focusSum*3)-(entry.anxietySum*5)+(entry.impairSum*10);
-        out.push(entry);
-      });
-      if (out.length){
-        window.logData = out;
-        try{ localStorage.setItem('tripLog', JSON.stringify(window.logData)); }catch(e){}
-        return true;
-      }
-    }catch(e){ console.warn('ensureLogDataFromUi error', e); }
-    return false;
-  }
-
-function runBackfillFor(minutes, tableId){ try{ const rows = Array.isArray(window.logData) ? window.logData : []; if (!rows.length) { ensureLogDataFromUi(); }
-      if (!rows.length) return alert("No log data to backfill.");
-      const anchor = Number(rows[0] && rows[0]._ts || rows.reduce((a,r)=>Math.min(a, r._ts||Infinity), Infinity));
-      if (!Number.isFinite(anchor)) return alert("Cannot determine anchor (first entry time).");
-      const now = Date.now();
-      const step = minutes*60*1000;
-      // clear table first
-      const tbody = document.querySelector(`#${tableId} tbody`);
-      if (tbody) tbody.innerHTML = "";
-      for (let t = anchor; t <= now; t += step){
-        const M = computeRollingMeans(t, minutes);
-        const C = computeCompositeFromMeans(M);
-        if (!M || !isNonEmptySummary(M, C)) continue;
-        appendSummaryRowToTable(tableId, new Date(t), M, C, {labelSuffix:` ${minutes}m`});
-      }
-    }catch(e){ console.warn("Backfill error", e); alert("Backfill failed: " + e.message); }
-  }
-
-  // Bind buttons (if present)
-  function bindBackfillButtons(){
-    const map = [
-      {id:'backfillBtn',    min:5,  table:'summary5Table'},
-      {id:'backfill15Btn',  min:15, table:'summary15Table'},
-      {id:'backfill60Btn',  min:60, table:'summary60Table'}
-    ];
-    map.forEach(({id,min,table})=>{
-      const el = document.getElementById(id);
-      if (el && !el.__bf_bound__){
-        el.addEventListener('click', ()=> runBackfillFor(min, table));
-        el.__bf_bound__ = true;
-      }
-    });
-  }
-
-  // ------------ Popups ------------
-  // Create a lightweight popup modal (re-uses existing #scoreModal styles if desired)
-  function ensurePopup(){
-    let m = document.getElementById('summaryPopup');
-    if (m) return m;
-    m = document.createElement('div');
-    m.id = 'summaryPopup';
-    Object.assign(m.style, {
-      position:'fixed', top:'12%', left:'50%', transform:'translateX(-50%)',
-      background:'#fff', border:'2px solid #007aff', borderRadius:'8px',
-      boxShadow:'0 4px 8px rgba(0,0,0,0.2)', padding:'16px', zIndex:10001,
-      maxHeight:'70%', overflow:'auto', minWidth:'320px'
-    });
-    m.innerHTML = '<h3 id="summaryPopupTitle" style="margin-top:0"></h3><div id="summaryPopupBody"></div><div style="text-align:right;margin-top:8px;"><button id="summaryPopupClose">Close</button></div>';
-    document.body.appendChild(m);
-    m.querySelector('#summaryPopupClose').addEventListener('click', ()=>{ m.style.display='none'; });
-    return m;
-  }
-
-  
-
-window.openSummaryPopup = function(minutes){
-  try{
-    const m = ensurePopup();
-    const title = m.querySelector('#summaryPopupTitle');
-    const body  = m.querySelector('#summaryPopupBody');
-    title.textContent = `Summary ${minutes}m (rolling window)`;
-
-    const endMs = Date.now();
-    const M = computeRollingMeans(endMs, minutes);
-    const C = computeCompositeFromMeans(M);
-
-    const makeRow = (k,v)=> `<tr><th style="text-align:left;padding-right:8px;">${k}</th><td>${pad2(v)}</td></tr>`;
-    const tableHtml = `
-      <table style="border-collapse:collapse;width:100%;">
-        <tbody>
-          ${makeRow('Rush', M && M.rush)}
-          ${makeRow('Mood', M && M.mood)}
-          ${makeRow('Social', M && M.social)}
-          ${makeRow('Energy', M && M.energy)}
-          ${makeRow('Focus', M && M.focus)}
-          ${makeRow('Anxiety', M && M.anxiety)}
-          ${makeRow('Impair', M && M.impair)}
-          ${makeRow('Score', C && C.score)}
-          ${makeRow('Max', C && C.max)}
-          ${makeRow('Min', C && C.min)}
-          ${makeRow('Weighted', C && C.weighted)}
-          ${makeRow('5Max', C && C.fiveMax)}
-          <tr><th style="text-align:left;">Window</th><td>${new Date(M.startMs).toLocaleString('en-AU',{hour12:false})} → ${new Date(M.endMs).toLocaleString('en-AU',{hour12:false})}</td></tr>
-        </tbody>
-      </table>`;
-
-    const tableId = minutes===1 ? 'autoSummaryTable' : (minutes===5 ? 'summary5Table' : (minutes===15 ? 'summary15Table' : 'summary60Table'));
-    const buttonsHtml = `
-      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
-        <button id="popupBackfillFromLog"   title="Backfill using main log (aligned from first entry)">Backfill ${minutes}m (from log)</button>
-        <button id="popupBackfillFromTable" title="Rebuild by aligning existing rows in this summary table">Rebuild ${minutes}m (from table)</button>
-      </div>`;
-
-    body.innerHTML = tableHtml + buttonsHtml;
-    const bfLog = document.getElementById('popupBackfillFromLog');
-    if (bfLog){ bfLog.onclick = ()=> { ensureLogDataFromUi(); runBackfillFor(minutes, tableId); }; }
-    const bfTbl = document.getElementById('popupBackfillFromTable');
-    if (bfTbl){ bfTbl.onclick = ()=> runBackfillFromTable(minutes, tableId); }
-    m.style.display = 'block';
-  }catch(e){
-    alert('Failed to open summary: ' + e.message);
-  }
-};
 
 
 
-  // On DOM ready, wire backfill and ensure popup buttons call openSummaryPopup (they already do in HTML)
-  document.addEventListener('DOMContentLoaded', ()=>{
-    bindBackfillButtons();
-  });
-
-  // Rebuild from existing summary table rows (no main log required)
-  function runBackfillFromTable(minutes, tableId){
-    try{
-      const table = document.getElementById(tableId);
-      if (!table) return alert("Target table not found.");
-      const tbody = table.querySelector('tbody');
-      if (!tbody) return alert("Target table body not found.");
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
-      // Parse times from first cell
-      function parseAU(s){
-        try{
-          if (typeof parseAUDatetime === "function"){
-            const ms = parseAUDatetime(s);
-            if (Number.isFinite(ms)) return ms;
-          }
-          // Fallback simple parse (may fail on AU format)
-          // attempt DD/MM/YYYY HH:MM:SS
-          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
-          if (m){
-            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
-            return new Date(y, mo-1, d, h, mi, se).getTime();
-          }
-        }catch(e){}
-        return NaN;
-      }
-      const points = [];
-      rows.forEach(tr=>{
-        const tc = tr.querySelector('td,th');
-        if (!tc) return;
-        const ms = parseAU(tc.textContent || "");
-        if (Number.isFinite(ms)){
-          // capture the numeric cells as strings to re-insert
-          const cells = Array.from(tr.children).map(td => td.textContent || "");
-          points.push({ms, cells});
-        }
-      });
-      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
-      // Determine anchor and step
-      const step = minutes*60*1000;
-      const anchor = Math.min.apply(null, points.map(p=>p.ms));
-      // Bucket by boundary index to dedupe to one per boundary
-      const byIdx = new Map();
-      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
-        const idx = Math.floor((p.ms - anchor)/step);
-        byIdx.set(idx, p); // last wins (latest within that bucket)
-      });
-      // Rewrite table with aligned, deduped rows
-      tbody.innerHTML = "";
-      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
-        const p = byIdx.get(idx);
-        const tr = document.createElement("tr");
-        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
-        tbody.appendChild(tr);
-      });
-      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
-    }catch(e){
-      console.warn("Rebuild from table failed", e);
-      alert("Rebuild failed: " + e.message);
-    }
-  }
-
-})();
-</script>
-<script>
-
-(function(){
-  function _wire(id, minutes, tableId){
-    var el = document.getElementById(id);
-    if (!el) return;
-    if (el.dataset && el.dataset._wired) return;
-    if (el.dataset) el.dataset._wired = "1";
-    el.addEventListener('click', function(){
-      try {
-        if (typeof backfillWindow === 'function'){
-          backfillWindow(minutes, tableId);
-        } else {
-          console.warn('backfillWindow() not available yet');
-        }
-      } catch (e) { console.error(e); }
-    });
-  }
-  window.addEventListener('DOMContentLoaded', function(){
-    _wire('backfillBtn', 5, 'summary5Table');
-    _wire('backfill15Btn', 15, 'summary15Table');
-    _wire('backfill60Btn', 60, 'summary60Table');
-  });
-})();
-</script>
-</body>
 </html>
 <!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
 <script>
@@ -3327,7 +3244,7 @@ window.openSummaryPopup = function(minutes){
     const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
     const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
     const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
-    const weighted = (3*M.rush + 2*M.mood + 2*M.social + 1.5*M.energy + 1.5*M.focus) - (4*M.anxiety - 6*M.impair);
+    const weighted = (6*M.rush + 4*M.mood + 4*M.social + 3*M.energy + 3*M.focus) - (4*M.anxiety - 6*M.impair);
     const fiveMax  = ((score/5)+5);
     return {score, max, min, weighted, fiveMax};
   }
@@ -3453,68 +3370,5 @@ window.openSummaryPopup = function(minutes){
   window.emitAuto1m = function(){};           // disable old 1s spammer
   window.emitAuto5m = function(){};           // keep disabled; we use new per-table emitters
   // setSummaryWindowAndOpen remains untouched; summary buttons will simply open/focus any UI you already have
-
-  // Rebuild from existing summary table rows (no main log required)
-  function runBackfillFromTable(minutes, tableId){
-    try{
-      const table = document.getElementById(tableId);
-      if (!table) return alert("Target table not found.");
-      const tbody = table.querySelector('tbody');
-      if (!tbody) return alert("Target table body not found.");
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      if (!rows.length) return alert("No existing rows in this summary to rebuild from.");
-      // Parse times from first cell
-      function parseAU(s){
-        try{
-          if (typeof parseAUDatetime === "function"){
-            const ms = parseAUDatetime(s);
-            if (Number.isFinite(ms)) return ms;
-          }
-          // Fallback simple parse (may fail on AU format)
-          // attempt DD/MM/YYYY HH:MM:SS
-          const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})/);
-          if (m){
-            const [_, d, mo, y, h, mi, se] = m.map(x=>parseInt(x,10));
-            return new Date(y, mo-1, d, h, mi, se).getTime();
-          }
-        }catch(e){}
-        return NaN;
-      }
-      const points = [];
-      rows.forEach(tr=>{
-        const tc = tr.querySelector('td,th');
-        if (!tc) return;
-        const ms = parseAU(tc.textContent || "");
-        if (Number.isFinite(ms)){
-          // capture the numeric cells as strings to re-insert
-          const cells = Array.from(tr.children).map(td => td.textContent || "");
-          points.push({ms, cells});
-        }
-      });
-      if (!points.length) return alert("Could not parse any timestamps from existing rows.");
-      // Determine anchor and step
-      const step = minutes*60*1000;
-      const anchor = Math.min.apply(null, points.map(p=>p.ms));
-      // Bucket by boundary index to dedupe to one per boundary
-      const byIdx = new Map();
-      points.sort((a,b)=>a.ms-b.ms).forEach(p=>{
-        const idx = Math.floor((p.ms - anchor)/step);
-        byIdx.set(idx, p); // last wins (latest within that bucket)
-      });
-      // Rewrite table with aligned, deduped rows
-      tbody.innerHTML = "";
-      Array.from(byIdx.keys()).sort((a,b)=>a-b).forEach(idx=>{
-        const p = byIdx.get(idx);
-        const tr = document.createElement("tr");
-        tr.innerHTML = p.cells.map(v=>`<td>${v==null?"":v}</td>`).join("");
-        tbody.appendChild(tr);
-      });
-      alert(`Rebuilt ${byIdx.size} ${minutes}m rows from existing table.`);
-    }catch(e){
-      console.warn("Rebuild from table failed", e);
-      alert("Rebuild failed: " + e.message);
-    }
-  }
-
 })();
 </script>

@@ -41,7 +41,7 @@
         padding: 6px 10px;
         border-radius: 6px;
         margin: 4px;
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .score-columns {
@@ -59,8 +59,8 @@
     }
 
     .score-column button {
-        width: 130px;
-        height: 40px;
+        width: 120px;
+        height: 30px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -88,7 +88,7 @@
     th, td {
         padding: 10px;
         text-align: center;
-        font-size: 10px;
+        font-size: 11px;
     }
     
     #extraNoteButtons {
@@ -100,8 +100,8 @@
 
     .note-btn {
         width: 80px;
-        height: 20px;
-        font-size: 9px;
+        height: 25px;
+        font-size: 11px;
         padding: 0;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -206,7 +206,7 @@
   border:1px solid #ccc;
   padding:10px;
   text-align:center;
-  font-size:10px;
+  font-size:12px;
 }
 #autoSummaryTitle{
   font-weight:600;
@@ -271,7 +271,7 @@
 </div>
 <h1>r779</h1>
 <div class="controls">
-<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
+<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:12px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
 <button onclick="resetTimer()">Reset Timer</button>
 <button onclick="pauseTimer()">Pause Timer</button>
@@ -466,10 +466,10 @@ const NO_SHADE = new Set(['change','Change','Deg']);
 // Shading caps (max value that maps to full opacity)
 const SHADE_CAP = {
   'Score': 25,
-  'Max': 30,
-  'Min': 12,
+  'Max': 25,
+  'Min': 10,
   'Weighted': 100,
-  '5Max': 6
+  '5Max': 10
 };
 
 const GREEN_SET = new Set(['Rush','Mood','Social','Score','Weighted','5Max','Max']);
@@ -534,121 +534,91 @@ function applyRowShading(tr) {
 }
     const labelMappings = {
         rush: {
-            "0": 'No',
-            "1": 'Low',
-            "1.5": 'Low',
-            "2.5": 'Mid-High',
-            "3.5": 'Very High',
-            "2": 'Mid',
-            "3": 'High',
-            "4": 'Strong',
-            "4.5": 'Very Intense',
-            "5": 'Intense',
-            "6": 'Extreme',
-            "7": 'Overwhelming'
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Low",
+            "1.5": "Low-Medium",
+            "2": "Medium",
+            "3": "Strong",
+            "4": "Intense",
+            "5": "Extreme",
+            "6": "Ultra Extreme"
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         mood: {
-            "0": 'No/None',
-            "1": 'Very Low',
-            "1.5": 'Low',
-            "2": 'Low',
-            "2.5": 'Low-Mid',
-            "3": 'Mid',
-            "3.5": 'Mid-High',
-            "4": 'High',
-            "4.5": 'Outgoing',
-            "5": 'Very/Euphoric',
-            "6": 'Auto/High'
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Very Low",
+            "1.5": "Low",
+            "2": "Some",
+            "3": "Medium",
+            "4": "High",
+            "5": "Very High",
+            "6": "Very/Euphoric"
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         social: {
-            "0": 'No/None',
-            "1": 'Very Low',
-            "1.5": 'Low',
-            "2": 'Low',
-            "2.5": 'Mid',
-            "3": 'Mid',
-            "3.5": 'Mid-High',
-            "4": 'High',
-            "4.5": 'Outgoing',
-            "5": 'Very/Outgoing',
-            "6": 'Disinhibited'
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Very Low",
+            "1.5": "Low",
+            "2": "Some",
+            "3": "Medium",
+            "4": "High",
+            "5": "Very /Outgoing",
+            "6": "Very/Disinhibited"
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         energy: {
-            "0": 'None',
-            "1": 'Very Low',
-            "1.5": 'Lower',
-            "2": 'Some/Low',
-            "2.5": 'Low-Mid',
-            "3.5": 'Mid-High',
-            "3": 'Mid',
-            "4": 'High',
-            "4.5": 'Higher',
-            "5": 'Very High',
-            "6": 'Ultra/Overdrive'
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Normal",
+            "1.5": "Low",
+            "2": "Moderate",
+            "3": "High",
+            "4": "Very High",
+            "5": "Very/Manic",
+            "6": "Ultra/Hyper"
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         focus: {
-            "0": 'None',
-            "1": 'Very Low',
-            "1.5": 'Lower',
-            "2": 'Some/Low',
-            "2.5": 'Some-Mid',
-            "3.5": 'Mid-High',
-            "3": 'Mid',
-            "4": 'High',
-            "4.5": 'Higher',
-            "5": 'Very High',
-            "6": 'Ultra/Wired'
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Normal",
+            "1.5": "Low",
+            "2": "Moderate",
+            "3": "High",
+            "4": "Very Strong",
+            "5": "Very/Laser",
+            "6": "Ultra/Wired"
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         anxiety: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-',
-//            "0": 'No/None',
-//            "1": 'Normal',
-//            "2": 'Excessive',
-//            "3": 'Clear/Feel',
-//            "4": 'Extra',
-//            "5": 'Impacting',
-            "0": 'No/None',
-            "1": 'Very Low',
-            "2": 'Low',
-            "2.5": 'Low-Mid',
-            "3": 'Mid',
-            "3.5": 'Mid-High',
-            "4": 'High',
-            "4": 'Higher',
-            "5": 'Severe',
-            "6": 'Very Severe'
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Low",
+            "1.5": "Ignorable",
+            "2": "Some",
+            "3": "Mid/Anxious",
+            "4": "High/Adverse",
+            "5": "Very/Severe",
+            "6": "Ultra Severe"
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         impair: {
-//            "-2": '-',
-//            "-1": '-',
-//            "-0.5": '-',
-//            "0": 'None',
-//            "1": 'Minimal',
-//            "2": 'Low',
-//            "2.5": '',
-//            "3": 'Visibly',
-//            "4": 'Impaired',
-//            "4.5": '',
-//            "5": 'Behaviour',
-//            "6": 'AdverseImpact',
-            "0": 'No/None',
-            "1": 'Low',
-            "2": 'Some/Ignore',
-            "2.5": 'Some/Impair',
-            "3": 'Clear',
-            "3.5": 'High',
-            "4": 'Very High',
-            "4.5": 'Severe',
-            "5": 'Very Severe',
-            "6": 'Very Severe'
+            "-0.5": "-",
+            "0": "None",
+            "0.5": "+",
+            "1": "Very Low",
+            "1.5": "Low",
+            "2": "Some/Ignore",
+            "3": "Mid/Impacted",
+            "4": "High/Serious",
+            "5": "Very/Severe",
+            "6": "Ultra Severe"
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         change: {
-            "0.6": 'Last Row Action',
-            "0.4": 'Last Row Left',
-            "-1.5": 'Last Row Was',
-            "0": 'Destroyed',
+            "0": 'Last Dose',
             "1": 'Burned',
             "1.5": 'Tremors/Shakes',
             "2": 'Lip/Mouth Open',
@@ -663,17 +633,20 @@ function applyRowShading(tr) {
             "0.5": 'Heatbeat Note'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         degree: {
+            "0.6": 'Technique',
+            "0.4": 'Drug',
+            "-1.5": 'Results',
             "0": 'No/None',
-            "-0.5": '>0mg <5mg',
+            "-0.5": 'Effects',
             "-1": '>5mg <10mg',
             "-1": '>5mg <15mg',
             "1": 'Add Drug',
             "2": 'Hit/Continue',
             "2.5": 'Redose',
             "3.5": 'Wired',
-            "3": 'Nice/Burned',
+            "3": 'Half Burned',
             "4": 'Melted',
-            "5.5": 'Nice Vapour',
+            "5.5": 'Nice Smell/Taste',
             "5": 'Rush',
             "6": 'Plumes',
             "0.5": '+'
@@ -685,12 +658,12 @@ function applyRowShading(tr) {
             "2": 'Tremors',
             "2.5": 'Sweating',
             "3.5": 'Mid-High',
-            "3": 'Shakes',
+            "3": 'Heartbeat',
             "3.5": 'Rush',
             "4": 'Manic',
-            "4.5": 'Autopilot',
-            "5": 'Good',
-            "6": 'Noticed'
+            "4.5": 'Down',
+            "5": 'Up',
+            "6": 'Positive'
              }
     };
 ['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
@@ -734,7 +707,7 @@ function applyRowShading(tr) {
             const t = document.createElement('strong');
             t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
             col.appendChild(t);
-           [6,5,4.5,4,3.5,3,2.5,2,1,0,0.5,-0.5,0.6,0.4,-1.5].forEach(v => {
+           [6,5,'--------------------',4,3,2,'--------------------',1.5,1,0,'--------------------',0.5,-0.5,-1].forEach(v => {
 
                 const b = document.createElement('button');
                 let customLabel = '';
@@ -825,7 +798,7 @@ b.innerText = `${v}: ${customLabel}`;
 // Extra notes (gold)
         const extraCont = document.getElementById('extraNoteButtons');
         extraCont.innerHTML = '';
-        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'UnsureIfUsable', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
+        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'Unsure', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
         extra.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -850,7 +823,7 @@ b.innerText = `${v}: ${customLabel}`;
 
         (function(){const h=document.createElement("h4");h.textContent="Dose";document.getElementById("extraNoteButtons").appendChild(h);})();
 // Dark grey dose buttons
-        const darkLabels = ["AddDrug", "NothingAdded", "Eyeballed", "Weighed", "Loose", "Moving", "Leftovers", "Useful", "", "", "Context", "Associate", "Change", "Review", "Weighed", "Yes", "No", "Maybe", "Certain", "Half", ">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<25mg", "<30mg", "<40mg"];
+        const darkLabels = [">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<25mg", "<30mg", "<40mg"];
         darkLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -900,7 +873,7 @@ b.innerText = `${v}: ${customLabel}`;
 
         (function(){const h=document.createElement("h4");h.textContent="Red";document.getElementById("extraNoteButtons").appendChild(h);})();
 // Bright red custom buttons
-        const redLabels = ['Mental', 'FocusLocked', 'Locked', 'Computer', 'MusicOn', 'MusicOff', 'GoodSong', 'Visceral', 'Physical', 'BloodPressure', 'BodyTemp', 'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
+        const redLabels = ['Mental', 'FocusLocked', 'MusicOn', 'MusicOff', 'GoodSong', 'Physical', 'BloodPressure',  'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
         redLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -922,9 +895,9 @@ b.innerText = `${v}: ${customLabel}`;
             extraCont.appendChild(b);
         });
         (function(){const h=document.createElement("h4");h.textContent="Green";document.getElementById("extraNoteButtons").appendChild(h);})();
-const greenLabels =  ["ThroatSuction", "Suck", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
-        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "TwoHits", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Destroyed", "BurnedRemains",
-        "HeatedOnce", "AlreadyHeated", "NotYetHeated"];
+const greenLabels =  ["ThroatSuction", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
+        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "RuleOf3", "555sHold", "DensePackedCone", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Remains",
+        "HeatedOnce", "AlreadyHeated"];
         greenLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -946,7 +919,7 @@ const greenLabels =  ["ThroatSuction", "Suck", "MouthOpen", "TopLip", "Sucked", 
             extraCont.appendChild(b);
         });
         (function(){const h=document.createElement("h4");h.textContent="Orange";document.getElementById("extraNoteButtons").appendChild(h);})();
-const orangeLabels =  ['Lighter', 'Candle', 'Jet', 'Blowtorch', 'Vape', 'Hotrail', 'Cone', 'Snowcone', 'Bong', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Broken', 'Loose', 'Liquid', 'Sludge', 'PropyleneGlycol', 'Melted', 'Vapourised', 'SomeColour', 'ColourChange', 'Loose', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed', 'AwareBad', 'BadChoices', 'DoseToDetriment'];
+const orangeLabels =  ['Lighter', 'Candle', 'Blowtorch', 'Vape', 'Cone', 'Snowcone', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Loose', 'Liquid', 'Sludge', 'PG', 'LiquidWeighted', 'Melted', 'SomeColour', 'ColourChange', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed','DoseToDetriment'];
         orangeLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -996,7 +969,7 @@ yellowLabels.forEach(lbl => {
     // ─── APPEND PURPLE LABELS ───────────────────────────────────────────────
     (function(){const h=document.createElement("h4");h.textContent="Purple";document.getElementById("extraNoteButtons").appendChild(h);})();
 const purpleLabels =  [
-      '5_Secs', '15sLate','Deep','Shallow','Hold','Long','Short','Slow','Rapid','OneBreath','Multiple','Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone', 'BuildingAlone'
+      '[Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone'
     ];
     const purpleContainer = document.querySelector('#extraNoteButtons');
     purpleLabels.forEach(label => {
@@ -2844,7 +2817,7 @@ return "";
   overflow:auto; min-width: 70%;
 }
 #slidingAvgModal table{ width:100%; border-collapse:collapse; background:#fff; margin-top:10px; }
-#slidingAvgModal th, #slidingAvgModal td{ border:1px solid #ccc; padding:8px; text-align:center; font-size:10px; }
+#slidingAvgModal th, #slidingAvgModal td{ border:1px solid #ccc; padding:8px; text-align:center; font-size:12px; }
 #slidingAvgClose { background:#ccc; color:#000; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; float:right; }
 </style>
 <div id="slidingAvgModal">
@@ -2983,7 +2956,7 @@ return "";
 }
 #autoSliderAModal table, #autoSliderBModal table { width:100%; border-collapse:collapse; background:#fff; margin-top:10px; }
 #autoSliderAModal th, #autoSliderAModal td, #autoSliderBModal th, #autoSliderBModal td {
-  border:1px solid #ccc; padding:8px; text-align:center; font-size:10px;
+  border:1px solid #ccc; padding:8px; text-align:center; font-size:12px;
 }
 .as-toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
 .as-toolbar button { background:#eee; color:#000; border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
