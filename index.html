@@ -46,7 +46,7 @@
 
     .score-columns {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap:
         gap: 5px;
         margin-top: 10px;
     }
@@ -478,12 +478,12 @@
       </div>
     </div>
     <div id="doseReviewsMeta" style="font-size:12px; opacity:0.7; margin-bottom:8px;"></div>
-    <table id="doseReviewsTable" class="stat60-like" style="width:100%; border-collapse:collapse; background:#fff;">
+    <table id="doseReviewsTable" style="width:100%; border-collapse:collapse; background:#fff;">
       <thead>
         <tr>
           <th>Label</th>
           <th>Segment</th>
-          <th>Time</th><th>Drug</th><th>Qty</th><th>Tokens</th><th>Notes</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
+          <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
           <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
         </tr>
       </thead>
@@ -1343,7 +1343,7 @@ function renderTable() {
               const minCell = tr.querySelector('td[data-col="Min"]');
               if (minCell && r.minPercent != null) minCell.title = String(r.minPercent) + '%';
             })();
-            shadeDoseReviewsRow(tr);
+            applyRowShading(tr);
             applyUiColumnVisibility();
             tb.appendChild(tr);
         });
@@ -3168,7 +3168,7 @@ return "";
         tr.appendChild(td('Weighted', fmt2(row.comp.weighted)));
         tr.appendChild(td('5Max', fmt2(row.comp.fiveMax)));
         // Apply same colour rules as main table
-        try { if (typeof applyRowShading === 'function') shadeDoseReviewsRow(tr); } catch(e){}
+        try { if (typeof applyRowShading === 'function') applyRowShading(tr); } catch(e){}
         // Respect hidden columns if any
         try { if (typeof applyUiColumnVisibility === 'function') applyUiColumnVisibility(); } catch(e){}
         tbody.appendChild(tr);
@@ -3292,7 +3292,7 @@ return "";
     tr.appendChild(td('Min', fmt2(row.comp.min)));
     tr.appendChild(td('Weighted', fmt2(row.comp.weighted)));
     tr.appendChild(td('5Max', fmt2(row.comp.fiveMax)));
-    try{ if(typeof applyRowShading==='function') shadeDoseReviewsRow(tr); }catch(e){}
+    try{ if(typeof applyRowShading==='function') applyRowShading(tr); }catch(e){}
     try{ if(typeof applyUiColumnVisibility==='function') applyUiColumnVisibility(); }catch(e){}
     tbody.appendChild(tr);
   }
@@ -3613,7 +3613,7 @@ function buildEmotionButtons() {
 // ──────────────────────────────────────────────────────────────────────────────
 (function(){
   // Columns we will extract (must match data-col in main table rows)
-  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max","Qty","Tokens"]; const ALL_COLS = ["Time","Drug","Qty","Tokens","Notes","Since Dose", ...NUM_COLS];
+  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"]; const ALL_COLS = ["Time","Since Dose", ...NUM_COLS];
 
   // Attempt to find the main table reliably
   function getMainTable(){
@@ -3783,7 +3783,7 @@ function buildEmotionButtons() {
       const summaries = buildSummaryRowsFor(seg.rows);
       for (const s of summaries){
         const tr = document.createElement('tr');
-        let html = `<td data-col="Label" style="font-weight:600;">${s.Label}</td><td data-col="Segment">${seg.index}</td><td data-col="Time"></td>` + `<td data-col="Drug"></td><td data-col="Qty" data-value="${s["Qty"]??""}>${(s["Qty"]==null?"":(+s["Qty"]).toFixed(2))}</td><td data-col="Tokens" data-value="${s["Tokens"]??""}>${(s["Tokens"]==null?"":(+s["Tokens"]).toFixed(2))}</td><td data-col="Notes"></td>`;
+        let html = `<td data-col="Label" style="font-weight:600;">${s.Label}</td><td data-col="Segment">${seg.index}</td><td data-col="Time"></td>`;
         for (const k of NUM_COLS){
           const v = s[k];
           const vv = (v===null||v===undefined) ? "" : (+v).toFixed(2);
@@ -3791,7 +3791,7 @@ function buildEmotionButtons() {
         }
         tr.innerHTML = html;
         try { tagRowCells(tr); } catch(_){}
-        try { shadeDoseReviewsRow(tr); } catch(_){}
+        try { applyRowShading(tr); } catch(_){}
         try { applyUiColumnVisibility(); } catch(_){}
         tbody.appendChild(tr);
       }
@@ -3805,11 +3805,7 @@ function buildEmotionButtons() {
       for (const r of seg.rows){
         const tr = document.createElement('tr');
         const timeTxt = r.Time ? r.Time : "";
-        let html = `<td data-col="Label"></td><td data-col="Segment">${seg.index}</td><td data-col="Time">${timeTxt}</td>` +
-                   `<td data-col="Drug">${r["Drug"]??""}</td>` +
-                   `<td data-col="Qty" data-value="${r["Qty"]??''}">${(r["Qty"]==null?"":(+r["Qty"]).toFixed(2))}</td>` +
-                   `<td data-col="Tokens" data-value="${r["Tokens"]??''}">${(r["Tokens"]==null?"":(+r["Tokens"]).toFixed(2))}</td>` +
-                   `<td data-col="Notes">${r["Notes"]??""}</td>`;
+        let html = `<td data-col="Label"></td><td data-col="Segment">${seg.index}</td><td data-col="Time">${timeTxt}</td>`;
         for (const k of NUM_COLS){
           const v = r[k];
           const vv = (v===null||v===undefined) ? "" : (+v).toFixed(2);
@@ -3817,7 +3813,7 @@ function buildEmotionButtons() {
         }
         tr.innerHTML = html;
         try { tagRowCells(tr); } catch(_){}
-        try { shadeDoseReviewsRow(tr); } catch(_){}
+        try { applyRowShading(tr); } catch(_){}
         try { applyUiColumnVisibility(); } catch(_){}
         tbody.appendChild(tr);
       }
@@ -3874,18 +3870,7 @@ function buildEmotionButtons() {
   }
 
   function buildSummaryRowsFor(rows){
-    const cols = {}
-  function shadeDoseReviewsRow(tr){
-    try {
-      if (typeof applyRowShading60 === 'function') {
-        applyRowShading60(tr);
-        return;
-      }
-    } catch(_) {}
-    try { shadeDoseReviewsRow(tr); } catch(_) {}
-  }
-
-;
+    const cols = {};
     for (const k of NUM_COLS) cols[k] = [];
     for (const r of rows){
       for (const k of NUM_COLS){
