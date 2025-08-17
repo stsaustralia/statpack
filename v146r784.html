@@ -46,7 +46,7 @@
 
     .score-columns {
         display: flex;
-        flex-wrap:
+        flex-wrap: wrap;
         gap: 5px;
         margin-top: 10px;
     }
@@ -60,7 +60,7 @@
 
     .score-column button {
         width: 130px;
-        height: 30px;
+        height: 40px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -100,8 +100,8 @@
 
     .note-btn {
         width: 80px;
-        height: 25px;
-        font-size: 10px;
+        height: 20px;
+        font-size: 9px;
         padding: 0;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -206,7 +206,7 @@
   border:1px solid #ccc;
   padding:10px;
   text-align:center;
-  font-size:12px;
+  font-size:10px;
 }
 #autoSummaryTitle{
   font-weight:600;
@@ -261,8 +261,6 @@
     <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
     <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
     <button id="slidingAvgBtn" onclick="openSlidingAverage()">Sliding Average</button>
-    <button id="doseReviewsBtn" onclick="openDoseReviews()">Dose Reviews</button>
-
     <button id="autoSliderABtn" onclick="openAutoSliderA()">Auto Slider A</button>
     <button id="autoSliderBBtn" onclick="openAutoSliderB()">Auto Slider B</button>
             <button id="significant5mBtn" onclick="openSignificant5m()">Summary Significant 5m</button>
@@ -273,7 +271,7 @@
 </div>
 <h1>r779</h1>
 <div class="controls">
-<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:12px;">Append Mode</span>
+<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
 <button onclick="resetTimer()">Reset Timer</button>
 <button onclick="pauseTimer()">Pause Timer</button>
@@ -459,41 +457,6 @@
 </div>
 
 
-
-<!-- ──────────────────────────────────────────────────────────────────────────
-     Dose Reviews Modal
-     Mirrors currently visible rows from the MAIN table and adds 4 summary rows
-     (Average / Median / Minimum / Maximum) for numeric metrics.
-     ───────────────────────────────────────────────────────────────────────── -->
-<div id="doseReviewsModal" style="display:none; position:fixed; inset:0; z-index:9999;">
-  <div id="doseReviewsBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
-  <div id="doseReviewsCard" style="
-      position:relative; margin:4vh auto; width:min(1200px,94vw); max-height:92vh; overflow:auto;
-      background:#fff; border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px;">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
-      <div style="font-weight:700; font-size:20px;">Dose Reviews</div>
-      <div style="display:flex; gap:8px; align-items:center;">
-        <button onclick="exportDoseReviewsCsv()" title="Export table to CSV">Export CSV</button>
-        <button onclick="closeDoseReviews()" aria-label="Close">Close</button>
-      </div>
-    </div>
-    <div id="doseReviewsMeta" style="font-size:12px; opacity:0.7; margin-bottom:8px;"></div>
-    <table id="doseReviewsTable" style="width:100%; border-collapse:collapse; background:#fff;">
-      <thead>
-        <tr>
-          <th>Label</th>
-          <th>Segment</th>
-          <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-          <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div style="font-size:11px; opacity:0.65; margin-top:6px;">
-      Source: visible rows from the main table at open time. Re-open after filtering to refresh.
-    </div>
-  </div>
-</div>
 <script>
 
 // === UI Column Visibility & Shading Config ===
@@ -503,10 +466,10 @@ const NO_SHADE = new Set(['change','Change','Deg']);
 // Shading caps (max value that maps to full opacity)
 const SHADE_CAP = {
   'Score': 25,
-  'Max': 25,
-  'Min': 10,
-  'Weighted': 10,
-  '5Max': 10
+  'Max': 30,
+  'Min': 12,
+  'Weighted': 100,
+  '5Max': 6
 };
 
 const GREEN_SET = new Set(['Rush','Mood','Social','Score','Weighted','5Max','Max']);
@@ -569,230 +532,167 @@ function applyRowShading(tr) {
     else td.style.background = '';
   });
 }
-
     const labelMappings = {
         rush: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+            "0": 'No',
+            "1": 'Low',
+            "1.5": 'Low',
+            "2.5": 'Mid-High',
+            "3.5": 'Very High',
+            "2": 'Mid',
+            "3": 'High',
+            "4": 'Strong',
+            "4.5": 'Very Intense',
+            "5": 'Intense',
+            "6": 'Extreme',
+            "7": 'Overwhelming'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         mood: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+            "0": 'No/None',
+            "1": 'Very Low',
+            "1.5": 'Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Mid',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "4.5": 'Outgoing',
+            "5": 'Very/Euphoric',
+            "6": 'Auto/High'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         social: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+            "0": 'No/None',
+            "1": 'Very Low',
+            "1.5": 'Low',
+            "2": 'Low',
+            "2.5": 'Mid',
+            "3": 'Mid',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "4.5": 'Outgoing',
+            "5": 'Very/Outgoing',
+            "6": 'Disinhibited'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         energy: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+            "0": 'None',
+            "1": 'Very Low',
+            "1.5": 'Lower',
+            "2": 'Some/Low',
+            "2.5": 'Low-Mid',
+            "3.5": 'Mid-High',
+            "3": 'Mid',
+            "4": 'High',
+            "4.5": 'Higher',
+            "5": 'Very High',
+            "6": 'Ultra/Overdrive'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         focus: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+            "0": 'None',
+            "1": 'Very Low',
+            "1.5": 'Lower',
+            "2": 'Some/Low',
+            "2.5": 'Some-Mid',
+            "3.5": 'Mid-High',
+            "3": 'Mid',
+            "4": 'High',
+            "4.5": 'Higher',
+            "5": 'Very High',
+            "6": 'Ultra/Wired'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         anxiety: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'No/None',
+//            "1": 'Normal',
+//            "2": 'Excessive',
+//            "3": 'Clear/Feel',
+//            "4": 'Extra',
+//            "5": 'Impacting',
+            "0": 'No/None',
+            "1": 'Very Low',
+            "2": 'Low',
+            "2.5": 'Low-Mid',
+            "3": 'Mid',
+            "3.5": 'Mid-High',
+            "4": 'High',
+            "4": 'Higher',
+            "5": 'Severe',
+            "6": 'Very Severe'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         impair: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+//            "-2": '-',
+//            "-1": '-',
+//            "-0.5": '-',
+//            "0": 'None',
+//            "1": 'Minimal',
+//            "2": 'Low',
+//            "2.5": '',
+//            "3": 'Visibly',
+//            "4": 'Impaired',
+//            "4.5": '',
+//            "5": 'Behaviour',
+//            "6": 'AdverseImpact',
+            "0": 'No/None',
+            "1": 'Low',
+            "2": 'Some/Ignore',
+            "2.5": 'Some/Impair',
+            "3": 'Clear',
+            "3.5": 'High',
+            "4": 'Very High',
+            "4.5": 'Severe',
+            "5": 'Very Severe',
+            "6": 'Very Severe'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         change: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+            "0.6": 'Last Row Action',
+            "0.4": 'Last Row Left',
+            "-1.5": 'Last Row Was',
+            "0": 'Destroyed',
+            "1": 'Burned',
+            "1.5": 'Tremors/Shakes',
+            "2": 'Lip/Mouth Open',
+            "2.5": 'Sealed Sucked',
+            "3": 'Shallow Breath',
+            "3.5": 'Plan',
+            "4": 'Repeated Fast',
+            "4.5": 'Deep/Held',
+            "5": 'Carefully Followed',
+            "5.5": 'Slowly Rocked',
+            "6": 'Rapidly Rolled',
+            "0.5": 'Heatbeat Note'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         degree: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
+            "0": 'No/None',
+            "-0.5": '>0mg <5mg',
+            "-1": '>5mg <10mg',
+            "-1": '>5mg <15mg',
+            "1": 'Add Drug',
+            "2": 'Hit/Continue',
+            "2.5": 'Redose',
+            "3.5": 'Wired',
+            "3": 'Nice/Burned',
+            "4": 'Melted',
+            "5.5": 'Nice Vapour',
+            "5": 'Rush',
+            "6": 'Plumes',
+            "0.5": '+'
 , "12.5": "+", "13.5": "+", "-111.5": "-" },
         other: {
-            "-3": "Very Bad",
-            "-2": "Bad",
-            "-1": "Negative",
-            "-0.5": "-",
-            "0.1": "Maybe",
-            "0.2": "Though",
-            "0.2": "Clear",
-            "0.4": "Significant",
-            "0.5": "+",
-            "0.6": "Prominent",
-            "0.7": "Obvioius",
-            "0.8": "Dominating",
-            "0.9": "Controlling",
-            "0": "Normal",
-            "1": "Very Low",
-            "2": "Low",
-            "3": "Medium",
-            "4": "High",
-            "5": "Very High",
-            "6": "Extreme"
-, "12.5": "+", "13.5": "+", "-111.5": "-" }
+            "0": 'Side Effect',
+            "0.5": 'Unsure',
+            "1": 'Ignorable',
+            "2": 'Tremors',
+            "2.5": 'Sweating',
+            "3.5": 'Mid-High',
+            "3": 'Shakes',
+            "3.5": 'Rush',
+            "4": 'Manic',
+            "4.5": 'Autopilot',
+            "5": 'Good',
+            "6": 'Noticed'
+             }
     };
-
 ['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
 
     function getLabels(metric, values) {
@@ -811,37 +711,6 @@ function applyRowShading(tr) {
     }
 
     function fmt2(x){ const n = Number.parseFloat(x); return Number.isFinite(n) ? n.toFixed(2) : (x ?? ""); }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // Per-metric button ordering/sets (independent for each metric)
-    // 12 buttons per metric by default; override any metric at runtime via localStorage.
-    const DEFAULT_BUTTONS_12 = [6,5,4,3,2,1,0,'--------------------',0.5,-0.5,-1];
-    const PER_METRIC_BUTTONS = {
-      rush:    DEFAULT_BUTTONS_12.slice(),
-      mood:    DEFAULT_BUTTONS_12.slice(),
-      social:  DEFAULT_BUTTONS_12.slice(),
-      energy:  DEFAULT_BUTTONS_12.slice(),
-      focus:   DEFAULT_BUTTONS_12.slice(),
-      anxiety: DEFAULT_BUTTONS_12.slice(),
-      impair:  DEFAULT_BUTTONS_12.slice(),
-      change:  DEFAULT_BUTTONS_12.slice(),
-      degree:  DEFAULT_BUTTONS_12.slice(),
-      other:   DEFAULT_BUTTONS_12.slice()
-    };
-    function getMetricButtons(metric){
-      try {
-        const overrides = JSON.parse(localStorage.getItem('metricButtonOrder') || '{}');
-        if (overrides && Array.isArray(overrides[metric])) return overrides[metric];
-      } catch(e){}
-      return PER_METRIC_BUTTONS[metric] || DEFAULT_BUTTONS_12;
-    }
-    // Save an override (from DevTools): saveMetricButtons('focus',[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,6])
-    function saveMetricButtons(metric, arr){
-      const data = (()=>{ try { return JSON.parse(localStorage.getItem('metricButtonOrder')||'{}'); } catch(e){ return {}; } })();
-      data[metric] = Array.isArray(arr) ? arr.slice() : [];
-      localStorage.setItem('metricButtonOrder', JSON.stringify(data));
-    }
-    // ─────────────────────────────────────────────────────────────────────────────
 
     const metrics = ['rush', 'mood', 'social', 'energy', 'focus', 'anxiety', 'impair','change','degree','other'];
     let selections = {},
@@ -865,9 +734,7 @@ function applyRowShading(tr) {
             const t = document.createElement('strong');
             t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
             col.appendChild(t);
-//            [4.8,3.2,1.6,'--------------------',6,5,4,'--------------------',3.5,3,2.5,'--------------------',2,1.5,1,0,'--------------------','--------------------',,0.5,-0.5,-1,-1.5,-2].forEach(v => {
-
-           getMetricButtons(f).forEach(v => {
+           [6,5,4.5,4,3.5,3,2.5,2,1,0,0.5,-0.5,0.6,0.4,-1.5].forEach(v => {
 
                 const b = document.createElement('button');
                 let customLabel = '';
@@ -894,10 +761,6 @@ else if (v === -0.25) customLabel = 'less';
 else if (v === -0.5) customLabel = '-';
 else if (v === 0.5) customLabel = '+';
 else if (v === 12) customLabel = 'RUSH';
-else if (v === -1) customLabel = '-';
-else if (v === 1.6) customLabel = 'Low';
-else if (v === 3.2) customLabel = 'Mid';
-else if (v === 4.8) customLabel = 'High';
 else if (v === -1) customLabel = '-';
 else if (v === -2) customLabel = '-';
 
@@ -962,7 +825,7 @@ b.innerText = `${v}: ${customLabel}`;
 // Extra notes (gold)
         const extraCont = document.getElementById('extraNoteButtons');
         extraCont.innerHTML = '';
-        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'Unsure', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
+        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'UnsureIfUsable', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
         extra.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -987,7 +850,7 @@ b.innerText = `${v}: ${customLabel}`;
 
         (function(){const h=document.createElement("h4");h.textContent="Dose";document.getElementById("extraNoteButtons").appendChild(h);})();
 // Dark grey dose buttons
-        const darkLabels = [">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<25mg", "<30mg", "<40mg"];
+        const darkLabels = ["AddDrug", "NothingAdded", "Eyeballed", "Weighed", "Loose", "Moving", "Leftovers", "Useful", "", "", "Context", "Associate", "Change", "Review", "Weighed", "Yes", "No", "Maybe", "Certain", "Half", ">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<25mg", "<30mg", "<40mg"];
         darkLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -1037,7 +900,7 @@ b.innerText = `${v}: ${customLabel}`;
 
         (function(){const h=document.createElement("h4");h.textContent="Red";document.getElementById("extraNoteButtons").appendChild(h);})();
 // Bright red custom buttons
-        const redLabels = ['Mental', 'FocusLocked', 'MusicOn', 'MusicOff', 'GoodSong', 'Physical', 'BloodPressure',  'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
+        const redLabels = ['Mental', 'FocusLocked', 'Locked', 'Computer', 'MusicOn', 'MusicOff', 'GoodSong', 'Visceral', 'Physical', 'BloodPressure', 'BodyTemp', 'TempIncrease', 'TempDecrease', 'Sweat', 'Bathroom', 'Heartbeat', 'WideEyes', 'MinorTremor', 'Tremor', 'Shakes', 'Avoidant', 'MinorNausea', 'Nausea', 'Sick', 'WideEyes', 'Wired', 'HalfWired', 'EarsRinging', 'SideEffect'];
         redLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -1059,9 +922,9 @@ b.innerText = `${v}: ${customLabel}`;
             extraCont.appendChild(b);
         });
         (function(){const h=document.createElement("h4");h.textContent="Green";document.getElementById("extraNoteButtons").appendChild(h);})();
-const greenLabels =  ["ThroatSuction", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
-        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "RuleOf3", "555sHold", "DensePackedCone", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Remains",
-        "HeatedOnce", "AlreadyHeated"];
+const greenLabels =  ["ThroatSuction", "Suck", "MouthOpen", "TopLip", "Sucked", "LipSeal", "NoSeal", "15s_Late",
+        "Eyeballed", "Weighed", "Waited", "Pooled", "DeepBreath", "ShallowBreath", "Stationary", "Following", "Moving", "Random", "Rolled", "SideToSide", "Rapid", "Still", "Gentle", "Aggressive", "OneHit", "TwoHits", "MultipleHits", "StemHit", "DoubleStack", "LowHeat", "HighHeat", "Burned", "Destroyed", "BurnedRemains",
+        "HeatedOnce", "AlreadyHeated", "NotYetHeated"];
         greenLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -1083,7 +946,7 @@ const greenLabels =  ["ThroatSuction", "MouthOpen", "TopLip", "Sucked", "LipSeal
             extraCont.appendChild(b);
         });
         (function(){const h=document.createElement("h4");h.textContent="Orange";document.getElementById("extraNoteButtons").appendChild(h);})();
-const orangeLabels =  ['Lighter', 'Candle', 'Blowtorch', 'Vape', 'Cone', 'Snowcone', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Loose', 'Liquid', 'Sludge', 'PG', 'LiquidWeighted', 'Melted', 'SomeColour', 'ColourChange', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed','DoseToDetriment'];
+const orangeLabels =  ['Lighter', 'Candle', 'Jet', 'Blowtorch', 'Vape', 'Hotrail', 'Cone', 'Snowcone', 'Bong', 'Bong', 'Pipe', 'Rinsed', 'Clean', 'Dirty', 'Scraped', 'Broken', 'Loose', 'Liquid', 'Sludge', 'PropyleneGlycol', 'Melted', 'Vapourised', 'SomeColour', 'ColourChange', 'Loose', 'NotMoving', 'Chunks', 'Crushed', 'NotCrushed', 'AwareBad', 'BadChoices', 'DoseToDetriment'];
         orangeLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -1133,7 +996,7 @@ yellowLabels.forEach(lbl => {
     // ─── APPEND PURPLE LABELS ───────────────────────────────────────────────
     (function(){const h=document.createElement("h4");h.textContent="Purple";document.getElementById("extraNoteButtons").appendChild(h);})();
 const purpleLabels =  [
-      '[Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone'
+      '5_Secs', '15sLate','Deep','Shallow','Hold','Long','Short','Slow','Rapid','OneBreath','Multiple','Male', 'Female','Others', 'Home', 'NotHome', 'Alone', 'RoomAlone', 'BuildingAlone'
     ];
     const purpleContainer = document.querySelector('#extraNoteButtons');
     purpleLabels.forEach(label => {
@@ -1226,7 +1089,7 @@ if (!startTime)
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Plumes') ? 10 : 0;
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Billowing') ? 10 : 0;
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Rush') ? 10 : 0;
-entry.weighted = 5 + ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5);
+entry.weighted = (+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*4) + (+entry.impairSum*6);
 entry.goodSum = 0;
         logData.push(entry);
         localStorage.setItem('tripLog', JSON.stringify(logData));
@@ -1570,7 +1433,7 @@ function rowsToLogData(rows, mapped){
     entry.scaleMood = 0;
     entry.scaleBad = 0;
     entry.scaleFocus = 0;
-    entry.weighted = 5 + ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5);
+    entry.weighted = (+entry.rushSum*6) + (+entry.socialSum*4) + (+entry.moodSum*4) + (+entry.energySum*3) + (+entry.focusSum*3);
     entry.goodSum = 0;
     out.push(entry);
   }
@@ -1790,7 +1653,7 @@ function computeCompositeFromMeans(M){
   const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
   const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
   const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
-  const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+  const weighted = (3*M.rush + 2*M.mood + 2*M.social + 1.5*M.energy + 1.5*M.focus) - (4*M.anxiety - 6*M.impair);
   const fiveMax  = ((score/5)+5);
   return {score, max, min, weighted, fiveMax};
 }
@@ -2385,7 +2248,7 @@ return "";
     const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
     const max = Math.max(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
     const min = Math.min(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
-    const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    const weighted = ((m.rush*6)+(m.mood*4)+(m.social*4)+(m.energy*3)+(m.focus*3)) - ((m.anxiety*4)-(m.impair*6));
     const fiveMax = [m.rush,m.mood,m.social,m.energy,m.focus].sort((a,b)=>b-a).slice(0,5).reduce((a,b)=>a+b,0);
     return {score, max, min, weighted, fiveMax};
   }
@@ -2629,7 +2492,7 @@ return "";
     const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
     const max = Math.max(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
     const min = Math.min(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
-    const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    const weighted = ((m.rush*6)+(m.mood*4)+(m.social*4)+(m.energy*3)+(m.focus*3)) - ((m.anxiety*4)-(m.impair*6));
     const fiveMax = [m.rush,m.mood,m.social,m.energy,m.focus].sort((a,b)=>b-a).slice(0,5).reduce((a,b)=>a+b,0);
     return {score, max, min, weighted, fiveMax};
   }
@@ -2981,7 +2844,7 @@ return "";
   overflow:auto; min-width: 70%;
 }
 #slidingAvgModal table{ width:100%; border-collapse:collapse; background:#fff; margin-top:10px; }
-#slidingAvgModal th, #slidingAvgModal td{ border:1px solid #ccc; padding:8px; text-align:center; font-size:12px; }
+#slidingAvgModal th, #slidingAvgModal td{ border:1px solid #ccc; padding:8px; text-align:center; font-size:10px; }
 #slidingAvgClose { background:#ccc; color:#000; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; float:right; }
 </style>
 <div id="slidingAvgModal">
@@ -3031,7 +2894,7 @@ return "";
     var score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
     var max   = (M.rush+M.mood+M.social+M.energy+M.focus);
     var min   = (M.anxiety+M.impair);
-    var weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    var weighted = (M.rush*6)+(M.mood*4)+(M.social*4)+(M.energy*3)+(M.focus*3) - (M.anxiety*4) + (M.impair*6);
     return {
       score: +score,
       max: +max,
@@ -3120,7 +2983,7 @@ return "";
 }
 #autoSliderAModal table, #autoSliderBModal table { width:100%; border-collapse:collapse; background:#fff; margin-top:10px; }
 #autoSliderAModal th, #autoSliderAModal td, #autoSliderBModal th, #autoSliderBModal td {
-  border:1px solid #ccc; padding:8px; text-align:center; font-size:12px;
+  border:1px solid #ccc; padding:8px; text-align:center; font-size:10px;
 }
 .as-toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
 .as-toolbar button { background:#eee; color:#000; border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
@@ -3184,7 +3047,7 @@ return "";
     var score=(M.rush+M.mood+M.social+M.energy+M.focus)-(M.anxiety+M.impair);
     var max=(M.rush+M.mood+M.social+M.energy+M.focus);
     var min=(M.anxiety+M.impair);
-    var weighted=5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    var weighted=(M.rush*6)+(M.mood*4)+(M.social*4)+(M.energy*3)+(M.focus*3) - (M.anxiety*4) + (M.impair*6);
     return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:+(weighted/10)};
   }
   function slidingMeanAtIndex(snap, i){
@@ -3408,7 +3271,7 @@ function buildEmotionButtons() {
     const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
     const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
     const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
-    const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    const weighted = (6*M.rush + 4*M.mood + 4*M.social + 3*M.energy + 3*M.focus) - (4*M.anxiety - 6*M.impair);
     const fiveMax  = ((score/5)+5);
     return {score, max, min, weighted, fiveMax};
   }
@@ -3535,337 +3398,4 @@ function buildEmotionButtons() {
   window.emitAuto5m = function(){};           // keep disabled; we use new per-table emitters
   // setSummaryWindowAndOpen remains untouched; summary buttons will simply open/focus any UI you already have
 })();
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Dose Reviews popup: show summaries (avg/median/min/max) + all visible rows
-// ──────────────────────────────────────────────────────────────────────────────
-(function(){
-  // Columns we will extract (must match data-col in main table rows)
-  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"]; const ALL_COLS = ["Time","Since Dose", ...NUM_COLS];
-
-  // Attempt to find the main table reliably
-  function getMainTable(){
-    // Try common IDs used in earlier builds; fallback to the first big data table
-    const candidates = [
-      "#dataTable", "#mainTable", "#logTable",
-      "table[data-role='main']", ".main-table"
-    ];
-    for (const sel of candidates){
-      const el = document.querySelector(sel);
-      if (el) return el;
-    }
-    // Fallback: the largest table in DOM (by number of body rows)
-    const tables = Array.from(document.querySelectorAll("table"));
-    let best = null, bestCount = -1;
-    for (const t of tables){
-      const c = t.tBodies && t.tBodies[0] ? t.tBodies[0].rows.length : 0;
-      if (c > bestCount){ best = t; bestCount = c; }
-    }
-    return best;
-  }
-
-  // Read visible rows and extract a normalized object per row
-  function collectVisibleMainRows(){
-    const tbl = getMainTable();
-    const out = [];
-    if (!tbl || !tbl.tBodies || !tbl.tBodies[0]) return out;
-    const rows = Array.from(tbl.tBodies[0].rows);
-    for (const tr of rows){
-      const style = window.getComputedStyle(tr);
-      if (style.display === 'none' || tr.hidden) continue; // skip non-visible
-      // Extract by data-col if present; else map by header text
-      const cells = Array.from(tr.cells);
-      const rowObj = {};
-
-      // Build index by data-col
-      const byCol = {};
-      for (const td of cells){
-        const col = (td.getAttribute('data-col')||'').trim();
-        if (col) byCol[col] = td;
-      }
-
-      // Helper to get cell text/value for a named col
-      function cellVal(colName){
-        let td = byCol[colName];
-        if (!td){
-          // fallback: try to locate by header position
-          const ths = tbl.tHead ? Array.from(tbl.tHead.rows[0].cells) : [];
-          const idx = ths.findIndex(th => (th.textContent||'').trim().toLowerCase() === colName.toLowerCase());
-          if (idx >= 0 && cells[idx]) td = cells[idx];
-        }
-        if (!td) return null;
-        // Prefer numeric from data-value if present; otherwise parse text
-        const dv = td.getAttribute('data-value');
-        if (dv !== null && dv !== undefined) return dv;
-        return td.textContent || "";
-      }
-
-      for (const c of ALL_COLS){
-        rowObj[c] = cellVal(c);
-      }
-
-      // Try to parse a timestamp for stable ordering; tolerate various formats
-      let ts = null;
-      if (rowObj.Time){
-        const tryNum = +rowObj.Time;
-        if (Number.isFinite(tryNum) && tryNum > 1e10){
-          ts = tryNum; // maybe ms-since-epoch
-        } else {
-          const d = new Date(rowObj.Time);
-          if (!isNaN(d.getTime())) ts = d.getTime();
-        }
-      }
-      rowObj._ts = ts;
-
-      // Coerce numeric columns
-      {
-        const n = +rowObj["Since Dose"];
-        rowObj["Since Dose"] = Number.isFinite(n) ? n : null;
-      }
-      for (const k of NUM_COLS){
-        const n = +rowObj[k];
-        rowObj[k] = Number.isFinite(n) ? n : null;
-      }
-      out.push(rowObj);
-    }
-    // Sort by timestamp if we have it, otherwise keep order
-    out.sort((a,b)=>{
-      if (a._ts && b._ts) return a._ts - b._ts;
-      return 0;
-    });
-    return out;
-  }
-
-  // Stats helpers
-  function arrNum(xs){ return xs.filter(v => Number.isFinite(v)); }
-  function mean(xs){
-    const a = arrNum(xs); if (!a.length) return null;
-    let s = 0; for (const v of a) s += v; return s / a.length;
-  }
-  function median(xs){
-    const a = arrNum(xs).slice().sort((x,y)=>x-y);
-    if (!a.length) return null;
-    const m = Math.floor(a.length/2);
-    return (a.length % 2) ? a[m] : (a[m-1]+a[m])/2;
-  }
-  function minv(xs){
-    const a = arrNum(xs); if (!a.length) return null;
-    return Math.min(...a);
-  }
-  function maxv(xs){
-    const a = arrNum(xs); if (!a.length) return null;
-    return Math.max(...a);
-  }
-  function toFixedMaybe(v, p=2){ return (v===null || v===undefined) ? "" : (+v).toFixed(p); }
-
-  function buildSummaryRows(visibleRows){
-    // Build column-wise arrays
-    const cols = {};
-    for (const k of NUM_COLS) cols[k] = [];
-    for (const r of visibleRows){
-      for (const k of NUM_COLS){
-        cols[k].push(r[k]);
-      }
-    }
-    // Compute the four summaries
-    const summaries = [
-      { label: "Average", fn: mean },
-      { label: "Median",  fn: median },
-      { label: "Minimum", fn: minv },
-      { label: "Maximum", fn: maxv },
-    ];
-    const out = [];
-    for (const s of summaries){
-      const rowObj = { Label: s.label, Time: "" };
-      for (const k of NUM_COLS){
-        rowObj[k] = s.fn(cols[k]);
-      }
-      out.push(rowObj);
-    }
-    return out;
-  }
-
-  function renderDoseReviewsTable(visibleRows){
-    const tbody = document.querySelector('#doseReviewsTable tbody');
-    const meta  = document.querySelector('#doseReviewsMeta');
-    if (!tbody) return;
-    tbody.innerHTML = '';
-
-    const segments = segmentBySinceDose(visibleRows);
-
-    // Meta line
-    if (meta){
-      const n = visibleRows.length;
-      const when = new Date().toLocaleString('en-AU', { hour12:false });
-      meta.textContent = `Computed from ${n} visible row(s) in ${segments.length} segment(s) at ${when}.`;
-    }
-
-    // For each segment: header, 4 summary rows, separator, then rows
-    segments.forEach(seg => {
-      // Segment header row (visual)
-      const hdr = document.createElement('tr');
-      hdr.innerHTML = `<td data-col="Label" colspan="${2 + NUM_COLS.length}" style="font-weight:700; background:#f7f7f7;">Segment ${seg.index}</td>`;
-      tbody.appendChild(hdr);
-
-      // Summary rows
-      const summaries = buildSummaryRowsFor(seg.rows);
-      for (const s of summaries){
-        const tr = document.createElement('tr');
-        let html = `<td data-col="Label" style="font-weight:600;">${s.Label}</td><td data-col="Segment">${seg.index}</td><td data-col="Time"></td>`;
-        for (const k of NUM_COLS){
-          const v = s[k];
-          const vv = (v===null||v===undefined) ? "" : (+v).toFixed(2);
-          html += `<td data-col="${k}" data-value="${v??''}">${vv}</td>`;
-        }
-        tr.innerHTML = html;
-        try { tagRowCells(tr); } catch(_){}
-        try { applyRowShading(tr); } catch(_){}
-        try { applyUiColumnVisibility(); } catch(_){}
-        tbody.appendChild(tr);
-      }
-
-      // Thin separator
-      const sep = document.createElement('tr');
-      sep.innerHTML = `<td colspan="${2 + 1 + NUM_COLS.length}" style="height:6px; background:#ececec;"></td>`;
-      tbody.appendChild(sep);
-
-      // Segment rows
-      for (const r of seg.rows){
-        const tr = document.createElement('tr');
-        const timeTxt = r.Time ? r.Time : "";
-        let html = `<td data-col="Label"></td><td data-col="Segment">${seg.index}</td><td data-col="Time">${timeTxt}</td>`;
-        for (const k of NUM_COLS){
-          const v = r[k];
-          const vv = (v===null||v===undefined) ? "" : (+v).toFixed(2);
-          html += `<td data-col="${k}" data-value="${v??''}">${vv}</td>`;
-        }
-        tr.innerHTML = html;
-        try { tagRowCells(tr); } catch(_){}
-        try { applyRowShading(tr); } catch(_){}
-        try { applyUiColumnVisibility(); } catch(_){}
-        tbody.appendChild(tr);
-      }
-
-      // Extra space between segments
-      const space = document.createElement('tr');
-      space.innerHTML = `<td colspan="${2 + 1 + NUM_COLS.length}" style="height:8px;"></td>`;
-      tbody.appendChild(space);
-    });
-  }
-
-  function csvEscape(s){
-    const t = String(s ?? "");
-    return /[",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
-  }
-  function tableToCsv(tbl){
-    const ths = Array.from(tbl.tHead.rows[0].cells).map(th => th.textContent.trim());
-    const rows = Array.from(tbl.tBodies[0].rows).map(tr =>
-      Array.from(tr.cells).map(td => csvEscape(td.textContent.trim())).join(",")
-    );
-    return [ths.join(","), ...rows].join("\n");
-  }
-
-  // --- Segment rows by "Since Dose" resets (== 0 starts a new segment) ---
-  function segmentBySinceDose(visibleRows){
-    const segments = [];
-    let cur = [];
-    let segIndex = 0;
-
-    const pushCur = () => {
-      if (cur.length){
-        segIndex += 1;
-        segments.push({ index: segIndex, rows: cur });
-        cur = [];
-      }
-    };
-
-    for (let i=0;i<visibleRows.length;i++){
-      const r = visibleRows[i];
-      // Start a new segment when Since Dose is exactly 0 (or null->continue in current if empty)
-      if (r["Since Dose"] === 0){
-        // Finish previous
-        pushCur();
-      }
-      cur.push(r);
-    }
-    // Push last
-    pushCur();
-    // If no segment was created (e.g., no 0 found), make a single segment with all rows
-    if (!segments.length && visibleRows.length){
-      segments.push({ index: 1, rows: visibleRows.slice() });
-    }
-    return segments;
-  }
-
-  function buildSummaryRowsFor(rows){
-    const cols = {};
-    for (const k of NUM_COLS) cols[k] = [];
-    for (const r of rows){
-      for (const k of NUM_COLS){
-        cols[k].push(r[k]);
-      }
-    }
-    const summaries = [
-      { label: "Average", fn: mean },
-      { label: "Median",  fn: median },
-      { label: "Minimum", fn: minv },
-      { label: "Maximum", fn: maxv },
-    ];
-    const out = [];
-    for (const s of summaries){
-      const rowObj = { Label: s.label, Time: "", Segment: "" };
-      for (const k of NUM_COLS){
-        rowObj[k] = s.fn(cols[k]);
-      }
-      out.push(rowObj);
-    }
-    return out;
-  }
-
-  // Public entrypoints
-  window.openDoseReviews = function(){
-    try{
-      const vis = collectVisibleMainRows();
-      if (!vis.length){
-        alert("No visible rows in the main table.");
-        return;
-      }
-      const summaries = buildSummaryRows(vis);
-      renderDoseReviewsTable(vis, summaries);
-      const modal = document.getElementById('doseReviewsModal');
-      if (modal) modal.style.display = 'block';
-    }catch(e){
-      console.error(e);
-      alert("Dose Reviews failed: " + e.message);
-    }
-  };
-  window.closeDoseReviews = function(){
-    const modal = document.getElementById('doseReviewsModal');
-    if (modal) modal.style.display = 'none';
-  };
-  window.exportDoseReviewsCsv = function(){
-    const tbl = document.getElementById('doseReviewsTable');
-    if (!tbl) return;
-    const csv = tableToCsv(tbl);
-    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const stamp = new Date().toISOString().replace(/[-:TZ.]/g,'').slice(0,14);
-    a.href = url;
-    a.download = `dose_reviews_${stamp}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  };
-
-  // Close on backdrop click / ESC
-  document.addEventListener('click', (e)=>{
-    if (e.target && e.target.id === 'doseReviewsBackdrop') closeDoseReviews();
-  });
-  document.addEventListener('keydown', (e)=>{
-    if (e.key === 'Escape') closeDoseReviews();
-  });
-})();
-// ──────────────────────────────────────────────────────────────────────────────
 </script>
