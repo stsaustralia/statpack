@@ -256,15 +256,6 @@
 }
 
 </style>
-
-<style>
-.rapid-preview-pill{ 
-  display:block; padding:8px 10px; margin:5px 0; border:1px solid #ddd; border-radius:8px; 
-  background:#fff; font-size:13px; text-align:left; cursor:default; user-select:none;
-}
-.rapid-preview-col{ width: 180px; min-width: 160px; }
-</style>
-
 </head>
 <body>
 <div class="summary-controls">
@@ -508,7 +499,6 @@
 <button aria-label="Close" onclick="closeRapidScores()">Close</button>
 </div>
 <div class="score-columns" id="rapidScoresButtons"></div>
-<div id="rapidPreview" class="score-columns" style="margin-top:12px;"></div>
 <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
 <button onclick="applyRapidScores()">Apply</button>
 <button onclick="applyRapidScoresAndAdd()">Apply &amp; Add Entry</button>
@@ -522,11 +512,11 @@ const NO_SHADE = new Set(['change','Change','Deg']);
 
 // Shading caps (max value that maps to full opacity)
 const SHADE_CAP = {
-  'Score': 30,
-  'Max': 30,
-  'Min': 12,
-  'Weighted': 12,
-  '5Max': 12
+  'Score': 50,
+  'Max': 50,
+  'Min': 20,
+  'Weighted': 20,
+  '5Max': 20
 };
 
 const GREEN_SET = new Set(['Rush','Mood','Social','Score','Weighted','5Max','Max']);
@@ -570,7 +560,7 @@ function cellBgFor(colName, value) {
   if (NO_SHADE.has(colName)) return '';
   const num = Number(value);
   if (!Number.isFinite(num)) return '';
-  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 6;
+  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 10;
   const opacity = Math.min(Math.max(num, 0), cap) / cap;
   if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
   if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
@@ -591,13 +581,13 @@ function applyRowShading(tr) {
 }
 
     const labelMappings = {
-   rush:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   mood:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   social: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   energy: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   focus:  {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   anxiety:{6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   impair: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
+   rush:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   mood:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   social: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   energy: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   focus:  {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   anxiety:{6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   impair: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
         change: {
             "-0.5": "Burned",	
             "0": "Top Lip",
@@ -629,16 +619,22 @@ function applyRowShading(tr) {
             "-0.5": 'Last'
 , "12.5": "+", "13.5": "+", "-111.5": "-" }
     };
-
 // === Rapid popup unified labels (per your spec) ===
 const RAPID_LABELS = {
-  rush:   {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   mood:   {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   social: {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   energy: {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   focus:  {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   anxiety:{4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   impair: {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
+//    rush:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    mood:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    social: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    energy: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    focus:  {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    anxiety:{6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    impair: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   rush:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   mood:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   social: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   energy: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   focus:  {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   anxiety:{6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   impair: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
   change: {"6":"Sucked","5":"DidNotSuck","4":"DeepBreath","3":"ShallowBreath","2":"ThroatBreath","1":"MouthOpen","0.5":"NoSeal","0":"Sealed"},
   degree: {"6":"GoodTasteSmell","5":"Plumes","4":"Vapour","3":"Melted","2":"Burned","1":"ChangeState","0.5":"LastDose","0":"Melted"},
   other:  {"6":"Added","5":"CloseFLame","4":"SideRocked","3":"RollRapid","2":"LastDose","1":"LastHit","0.5":"ColourChange","0":"Loose"}
@@ -650,13 +646,7 @@ const RAPID_LABELS = {
     
 // === Metric-specific label overrides (scores 6,,2,1,0) ===
 const BUTTON_LABELS_BY_METRIC = {
-   rush:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   mood:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   social: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   energy: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   focus:  {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   anxiety:{6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   impair: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"}
+//   rush:   
   }
 function getMetricLabel(metric, v){
   try{
@@ -701,7 +691,7 @@ function getLabels(metric, values) {
     // ─────────────────────────────────────────────────────────────────────────────
     // Per-metric button ordering/sets (independent for each metric)
     // 12 buttons per metric by default; override any metric at runtime via localStorage.
-    const DEFAULT_BUTTONS_12 = [6,5,4,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-2];
+    const DEFAULT_BUTTONS_12 = [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0];
     const PER_METRIC_BUTTONS = {
       rush:    DEFAULT_BUTTONS_12.slice(),
       mood:    DEFAULT_BUTTONS_12.slice(),
@@ -751,7 +741,6 @@ function getLabels(metric, values) {
             const t = document.createElement('strong');
             t.innerText = f.charAt(0).toUpperCase() + f.slice(1);
             col.appendChild(t);
-//            [4.8,3.2,1.6,'--------------------',6,5,4,'--------------------',3.5,3,2.5,'--------------------',2,1.5,1,0,'--------------------','--------------------',,0.5,-0.5,-1,-1.5,-2].forEach(v => {
 
            getMetricButtons(f).forEach(v => {
 
@@ -770,13 +759,13 @@ function getLabels(metric, values) {
 // if (v === 1.02) customLabel = 'Vergy Low';
 if (v === -444) customLabel = '-';
 if (v === -111) customLabel = '-';
-//else if (v === 6) customLabel = 'Extra/Prominent';
+//else if (v === 6) customLabel = 'Extra/Moderate';
 else if (v === 0.22) customLabel = 'MMal';
 
 
 
 //else if (v === 10) customLabel = 'Maximum';
-//else if (v === 6) customLabel = 'Extra/Prominent';
+//else if (v === 6) customLabel = 'Extra/Moderate';
 else customLabel = labelMappings[f]?.[v] ?? '';
 b.innerText = `${v}: ${customLabel}`;
                 b.onclick = () => {
@@ -1112,13 +1101,13 @@ entry.goodSum = 0;
 (function(){
   // Replace mapping in-place
   window.BUTTON_LABELS_BY_METRIC = {
-//    rush:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    mood:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    social: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    energy: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    focus:  {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    anxiety:{6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    impair: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"}
+//    rush:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    mood:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    social: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    energy: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    focus:  {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    anxiety:{6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    impair: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"}
   };
   try { Object.freeze(window.BUTTON_LABELS_BY_METRIC); } catch(e) {}
 })();
@@ -1608,23 +1597,20 @@ function applyRapidScores(){
 
 function applyRapidScoresAndAddStay(){
   try {
-    // Normalise current selections (no rebuild yet)
-    if (typeof RAPID_METRICS !== 'undefined') {
-      RAPID_METRICS.forEach(f => {
-        if (!Array.isArray(selections[f])) selections[f] = [];
-        selections[f] = Array.from(new Set(selections[f])).sort((a,b)=>b-a);
-      });
-    }
-    // Mark provenance and add the entry using current selections
-    window._rapidLabelMode = true;
-    window._rapidInputSource = 'Rapid';
-    if (typeof addEntry === 'function') addEntry();
-    finalizeRapidEntryAsRapid();
-    window._rapidLabelMode = false;
-    window._rapidInputSource = 'Main';
-    // keep modal open for rapid continue
-    // Rebuild main grid after entry is created (so we don't lose selections before addEntry)
-    try { if (typeof buildButtons === 'function') buildButtons(); } catch(e){}
+    // Ensure clean, deduped selections for rapid metrics
+    RAPID_METRICS.forEach(f => {
+      if (!Array.isArray(selections[f])) selections[f] = [];
+      selections[f] = Array.from(new Set(selections[f])).sort((a,b)=>b-a);
+    });
+    // Add the entry (this will clear input fields and reset selections via initSelections/buildButtons)
+    addEntry();
+    // Rebuild rapid popup buttons so UI reflects cleared selections, keep modal open
+    try { buildRapidScoresButtons(); } catch(e){}
+    // Ensure modal remains visible
+    try {
+      const m = document.getElementById('rapidScoresModal');
+      if (m) m.style.display = 'block';
+    } catch(e){}
   } catch(e) { console.warn(e); }
 }
 </script>
@@ -3652,28 +3638,22 @@ return "";
 // === CSV + Rapid provenance patch ===
 
 // Helper: map a numeric value to Rapid label for a metric
-
 function getRapidLabel(metric, value){
   try{
     const key = String(value);
-    // 1) explicit per-metric overrides for Rapid (if present)
     if (typeof RAPID_LABEL_OVERRIDES !== 'undefined' &&
         RAPID_LABEL_OVERRIDES &&
         RAPID_LABEL_OVERRIDES[metric] &&
-        Object.prototype.hasOwnProperty.call(RAPID_LABEL_OVERRIDES[metric], key)){
+        RAPID_LABEL_OVERRIDES[metric][key] != null){
       return RAPID_LABEL_OVERRIDES[metric][key];
     }
-    // 2) canonical Rapid label map (NO fallback to main labels)
-    if (typeof RAPID_LABELS !== 'undefined' &&
-        RAPID_LABELS &&
-        RAPID_LABELS[metric] &&
-        Object.prototype.hasOwnProperty.call(RAPID_LABELS[metric], key)){
-      return RAPID_LABELS[metric][key];
+    // Fallback to main labelMappings if no rapid override
+    if (typeof labelMappings !== 'undefined' && labelMappings[metric]){
+      return labelMappings[metric][value] || '';
     }
   }catch(e){}
   return '';
 }
-
 
 // After addEntry() (when called from Rapid), force the latest row to use Rapid labels
 function finalizeRapidEntryAsRapid(){
@@ -3707,24 +3687,20 @@ function finalizeRapidEntryAsRapid(){
 // Wrapper: Apply selections, add entry, set Rapid provenance, close popup
 function applyRapidScoresAndAdd(){
   try {
-    // Normalise current selections (no rebuild yet)
-    if (typeof RAPID_METRICS !== 'undefined') {
-      RAPID_METRICS.forEach(f => {
-        if (!Array.isArray(selections[f])) selections[f] = [];
-        selections[f] = Array.from(new Set(selections[f])).sort((a,b)=>b-a);
-      });
-    }
-    // Mark provenance and add the entry using current selections
+    if (typeof applyRapidScores === 'function') applyRapidScores(); // dedupe + (may) close modal
+    // Set provenance flags (for any code reading them)
     window._rapidLabelMode = true;
     window._rapidInputSource = 'Rapid';
+    // Add the entry
     if (typeof addEntry === 'function') addEntry();
+    // Post-fix labels to Rapid set
     finalizeRapidEntryAsRapid();
+    // clear flags
     window._rapidLabelMode = false;
     window._rapidInputSource = 'Main';
+    // ensure modal is closed
     try { closeRapidScores(); } catch(e){}
-    // Rebuild main grid after entry is created (so we don't lose selections before addEntry)
-    try { if (typeof buildButtons === 'function') buildButtons(); } catch(e){}
-  } catch(e) { console.warn(e); }
+  } catch(e){ console.warn(e); }
 }
 
 // Wrapper: Apply selections, add entry, set Rapid provenance, keep popup open
