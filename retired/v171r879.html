@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>r895</title>
+<title>r860</title>
 <style>
 
 #logTable {
@@ -46,15 +46,15 @@
 
     .score-columns {
         display: flex;
-/* 
-        flex-wrap: wrap; /* flex-wrap: wrap; */
- */
+ 
+        flex-wrap: wrap;
+ 
         gap: 5px;
         margin-top: 10px;
     }
 
     .score-column {
-        display: flex; /* display: flex; */
+        display: flex;
         flex-direction: column;
         align-items: center;
         margin: 5px;
@@ -256,15 +256,6 @@
 }
 
 </style>
-
-<style>
-.rapid-preview-pill{ 
-  display:block; padding:8px 10px; margin:5px 0; border:1px solid #ddd; border-radius:8px; 
-  background:#fff; font-size:13px; text-align:left; cursor:default; user-select:none;
-}
-.rapid-preview-col{ width: 180px; min-width: 160px; }
-</style>
-
 </head>
 <body>
 <div class="summary-controls">
@@ -283,10 +274,7 @@
 <button id="autoSliderA2Btn" onclick="openAutoSliderA2()">Auto Slider A2</button>
 <button id="autoSliderCBtn" onclick="openAutoSliderC()">Auto Slider C</button>
 <button id="autoSliderDBtn" onclick="openAutoSliderD()">Auto Slider D</button>
-<button id="reviewBtn" onclick="openReview()">Review</button>
-<button id="autoEntriesBtn" onclick="openAutoEntries()">Auto Entries</button>
-<button id="rollingAvgBtn" onclick="openRollingAverage()">Rolling Average</button>
-</div>
+<button id="reviewBtn" onclick="openReview()">Review</button></div>
 <h1>r860</h1>
 <div class="controls">
 <span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:12px;">Append Mode</span>
@@ -508,7 +496,6 @@
 <button aria-label="Close" onclick="closeRapidScores()">Close</button>
 </div>
 <div class="score-columns" id="rapidScoresButtons"></div>
-<div id="rapidPreview" class="score-columns" style="margin-top:12px;"></div>
 <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
 <button onclick="applyRapidScores()">Apply</button>
 <button onclick="applyRapidScoresAndAdd()">Apply &amp; Add Entry</button>
@@ -591,13 +578,13 @@ function applyRowShading(tr) {
 }
 
     const labelMappings = {
-   rush:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   mood:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   social: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   energy: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   focus:  {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   anxiety:{6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   impair: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
+        rush: {"6": "Extremely High", "5": "Very High", "4": "High","3.5": "Very Strong", "3": "Moderate", "2.5": "Mid", "2": "Low-Moderate", "1": "Low-Ignore", "0.5": "+", "0.25": "Minimal","0": "None"  },
+        mood:  {"6": "Extremely High", "5": "Very High", "4": "High","3.5": "Very Strong", "3": "Moderate", "2.5": "Mid", "2": "Low-Moderate", "1": "Low-Ignore", "0.5": "+", "0.25": "Minimal","0": "None" },
+        social: {"6": "Extremely High", "5": "Very High", "4": "High","3.5": "Very Strong", "3": "Moderate","2.5": "Mid",  "2": "Low-Moderate", "1": "Low-Ignore", "0.5": "+","0.25": "Minimal", "0": "None" },
+        energy: {"6": "Extremely High", "5": "Very High", "4": "High","3.5": "Very Strong", "3": "Moderate","2.5": "Mid",  "2": "Low", "1": "Alert", "0.5": "+","0.25": "Minimal", "0": "None" },
+        focus: {"6": "Extremely High", "5": "Very High", "4": "High", "3.5": "Very Strong","3": "Moderate", "2.5": "Mid", "2": "Low", "1": "Alert", "0.5": "+", "0.25": "Minimal","0": "None" },
+        anxiety:{"6": "Extremely High", "5": "Very High", "4": "High","3.5": "Very Strong", "3": "Moderate", "2.5": "Mid", "2": "Some", "1": "Think", "0.5": "+", "0.25": "Minimal","0": "None" },
+        impair: {"6": "Extremely High", "5": "Very High", "4": "High","3.5": "Very Strong", "3": "Moderate", "2.5": "Mid", "2": "Some", "1": "Think", "0.5": "+","0.25": "Minimal", "0": "None" },
         change: {
             "-0.5": "Burned",	
             "0": "Top Lip",
@@ -632,32 +619,35 @@ function applyRowShading(tr) {
 
 // === Rapid popup unified labels (per your spec) ===
 const RAPID_LABELS = {
-  rush:   {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   mood:   {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   social: {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   energy: {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   focus:  {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   anxiety:{4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-   impair: {4:"Strong",4:"Obvious",3:"Clear",2:"Some",1:"Present", 0.5: "Maybe"},
-  change: {"6":"Sucked","5":"DidNotSuck","4":"DeepBreath","3":"ShallowBreath","2":"ThroatBreath","1":"MouthOpen","0.5":"NoSeal","0":"Sealed"},
-  degree: {"6":"GoodTasteSmell","5":"Plumes","4":"Vapour","3":"Melted","2":"Burned","1":"ChangeState","0.5":"LastDose","0":"Melted"},
-  other:  {"6":"Added","5":"CloseFLame","4":"SideRocked","3":"RollRapid","2":"LastDose","1":"LastHit","0.5":"ColourChange","0":"Loose"}
+  rush:   {"5":"Extreme","4":"Very High","3":"High","2":"Mid","1.5":"Mid-Low","1":"Low","0.5":"+","0.25":"Minimal","0":"None"},
+  mood:   {"5":"Extreme","4":"Very High","3":"High","2":"Mid","1.5":"Mid-Low","1":"Low","0.5":"+","0.25":"Minimal","0":"None"},
+  social: {"5":"Extreme","4":"Very High","3":"High","2":"Mid","1.5":"Mid-Low","1":"Low","0.5":"+","0.25":"Minimal","0":"None"},
+  energy: {"5":"Extreme","4":"Very High","3":"High","2":"Mid","1.5":"Mid-Low","1":"Low","0.5":"+","0.25":"Minimal","0":"None"},
+  focus:  {"5":"Extreme","4":"Very High","3":"High","2":"Mid","1.5":"Mid-Low","1":"Low","0.5":"+","0.25":"Minimal","0":"None"},
+  anxiety:{"5":"Extreme","4":"Very High","3":"High","2":"Mid","1.5":"Mid-Low","1":"Low","0.5":"+","0.25":"Minimal","0":"None"},
+  impair: {"5":"Extreme","4":"Very High","3":"High","2":"Mid","1.5":"Mid-Low","1":"Low","0.5":"+","0.25":"Minimal","0":"None"}
+
+  ,
+  change: {"6":"Sucked","5":"Gentle","4":"Deep","3":"TopLip","2":"ThroatBreath","1":"MouthOpen","0.5":"NoSeal","0":"Sealed"},
+  degree: {"6":"Rush","5":"Plumes","4":"Vapour","3":"Melted","2":"Burned","1":"NiceSmell","0.5":"LastDose","0":"LastHit"},
+  other:  {"6":"Rolled","5":"Followed","4":"Stationary","3":"Rapidly","2":"Observed","1":"DeepBreath","0.5":"ColourChange","0":"Loose"}
 };
 
 
 ['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
 
     
-// === Metric-specific label overrides (scores 6,,2,1,0) ===
+// === Metric-specific label overrides (scores 6,5,4,3,2,1,0) ===
 const BUTTON_LABELS_BY_METRIC = {
-   rush:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   mood:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   social: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   energy: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   focus:  {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   anxiety:{6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-   impair: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"}
-  }
+   rush:   {6: "Maximum", 5: "Extreme", 4: "Very High", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low-Mid", 1: "Low", 0.5: "+", 0.25: "Very Low", 0: "None"},
+   mood:   {6: "Maximum", 5: "Extreme", 4: "Very High", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low-Mid", 1: "Low", 0.5: "+", 0.25: "Very Low", 0: "None"},
+   social: {6: "Maximum", 5: "Extreme", 4: "Very High", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low-Mid", 1: "Low", 0.5: "+", 0.25: "Very Low", 0: "None"},
+   energy: {6: "Maximum", 5: "Extreme", 4: "Very High", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low-Mid", 1: "Low", 0.5: "+", 0.25: "Very Low", 0: "None"},
+   focus:  {6: "Maximum", 5: "Extreme", 4: "Very High", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low-Mid", 1: "Low", 0.5: "+", 0.25: "Very Low", 0: "None"},
+   anxiety:{6: "Maximum", 5: "Extreme", 4: "Very High", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low-Mid", 1: "Low", 0.5: "+", 0.25: "Very Low", 0: "None"},
+   impair: {6: "Maximum", 5: "Extreme", 4: "Very High", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low-Mid", 1: "Low", 0.5: "+", 0.25: "Very Low", 0: "None"}
+};
+
 function getMetricLabel(metric, v){
   try{
     const num = Number(v);
@@ -701,7 +691,7 @@ function getLabels(metric, values) {
     // ─────────────────────────────────────────────────────────────────────────────
     // Per-metric button ordering/sets (independent for each metric)
     // 12 buttons per metric by default; override any metric at runtime via localStorage.
-    const DEFAULT_BUTTONS_12 = [6,5,4,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-2];
+    const DEFAULT_BUTTONS_12 = [6,5,'',4,3.5,3,'',2,1.5,1,'',0.5,0.25,0];
     const PER_METRIC_BUTTONS = {
       rush:    DEFAULT_BUTTONS_12.slice(),
       mood:    DEFAULT_BUTTONS_12.slice(),
@@ -721,7 +711,7 @@ function getLabels(metric, values) {
       } catch(e){}
       return PER_METRIC_BUTTONS[metric] || DEFAULT_BUTTONS_12;
     }
-    // Save an override (from DevTools): saveMetricButtons('focus',[5,4..5,3,2.5,2,1.5,1,0.5,0,6])
+    // Save an override (from DevTools): saveMetricButtons('focus',[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,6])
     function saveMetricButtons(metric, arr){
       const data = (()=>{ try { return JSON.parse(localStorage.getItem('metricButtonOrder')||'{}'); } catch(e){ return {}; } })();
       data[metric] = Array.isArray(arr) ? arr.slice() : [];
@@ -767,11 +757,12 @@ function getLabels(metric, values) {
 // if (v === 2.52) customLabel = 'Low-Medium';
 // if (v === 2.02) customLabel = 'Low';
 // if (v === 1.52) customLabel = 'Lower';
-// if (v === 1.02) customLabel = 'Vergy Low';
+// if (v === 1.02) customLabel = 'Very Low';
+// if (v === 0.252) customLabel = 'Minimal';
 if (v === -444) customLabel = '-';
 if (v === -111) customLabel = '-';
 //else if (v === 6) customLabel = 'Extra/Prominent';
-else if (v === 0.22) customLabel = 'MMal';
+else if (v === 0.22) customLabel = 'Minimal';
 
 
 
@@ -836,7 +827,7 @@ b.innerText = `${v}: ${customLabel}`;
 // Extra notes (gold)
         const extraCont = document.getElementById('extraNoteButtons');
         extraCont.innerHTML = '';
-        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'Unsure', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun', 'A', 'B', 'C'];
+        const extra = ['Start', 'Now', 'Before', 'After', 'Onset', 'Rush', 'Peak', 'Main', 'Offset', 'Comedown', 'Crash', 'Over', 'Next', 'Last', 'Noticed', 'AddDrug', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'Usable', 'NotUsable', 'Unsure', 'YellowOrange', 'SomeColour', 'Film', 'Continue', 'AlreadyToday', 'Redose', 'Same', 'DarkRoom', 'ObserveProgress', 'Comparative', 'Absolute', 'Relative', 'Analytics', 'Fun', 'HaveFun'];
         extra.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -861,7 +852,7 @@ b.innerText = `${v}: ${customLabel}`;
 
         (function(){const h=document.createElement("h4");h.textContent="Dose";document.getElementById("extraNoteButtons").appendChild(h);})();
 // Dark grey dose buttons
-        const darkLabels = ["A", "B","C","D","E","F","G","LastHit", "LastDose", "LastRow", "Next", "Rolled", "Rocked", "Rapidly", "Randomly", "LowHeat", "HighHeat", "FlameClose", "FlameFar", "WaitForVapour", "VapourPooled", "Gentle", "Aggressive", "Pipe", "Clean", "Dirty", "Broken", "Rinsed", "Scraped", "Soaked", "Dried", "Wet", "Loose", "Sludge", "Paste", "ChangeState", "Melted", "Colour", "Film", "NiceVapour", "BurnedVapour", "Plumes", "Billowing", "LotsOFVapour", "VisibleVapour", "InvisibleVapour", "Air","Home","Upstairs","Alone","Music","Motivated","Neglecting","Productive","Lazy","AddDrug","NothingAdded","Loose","Moving","Uncombusted","SomeChange","UsedUsable","UsedBurned"];
+        const darkLabels = [">0mg", ">5mg", ">10mg", ">15mg", ">20mg", "<5mg", "<10mg", "<15mg", "<20mg", "<25mg", "<30mg", "<40mg"];
         darkLabels.forEach(lbl => {
             const b = document.createElement('button');
             b.className = 'note-btn';
@@ -1112,13 +1103,13 @@ entry.goodSum = 0;
 (function(){
   // Replace mapping in-place
   window.BUTTON_LABELS_BY_METRIC = {
-//    rush:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    mood:   {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    social: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    energy: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    focus:  {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    anxiety:{6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"},
-//    impair: {6: "Extreme", 5: "Very High", 4: "High", 3.5: "Mid-High", 3: "Moderate", 2.5: "Low-Mid", 2: "Low", 1: "Very Low", 0.5: "+",0.4:"Strong",0.3:"Significant",0.25:"Minimal",0.2:"Clear",0.1:"Present", 0: "None"}
+   rush:   {6: "Maximum", 5: "Extreme", 4: "Very Hig", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low", 1: "Very Low", 0.5: "+", 0.25: "Minimal", 0: "None"},
+   mood:   {6: "Maximum", 5: "Extreme", 4: "Very Hig", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low", 1: "Very Low", 0.5: "+", 0.25: "Minimal", 0: "None"},
+   social: {6: "Maximum", 5: "Extreme", 4: "Very Hig", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low", 1: "Very Low", 0.5: "+", 0.25: "Minimal", 0: "None"},
+   energy: {6: "Maximum", 5: "Extreme", 4: "Very Hig", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low", 1: "Very Low", 0.5: "+", 0.25: "Minimal", 0: "None"},
+   focus:  {6: "Maximum", 5: "Extreme", 4: "Very Hig", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low", 1: "Very Low", 0.5: "+", 0.25: "Minimal", 0: "None"},
+   anxiety:{6: "Maximum", 5: "Extreme", 4: "Very Hig", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low", 1: "Very Low", 0.5: "+", 0.25: "Minimal", 0: "None"},
+   impair: {6: "Maximum", 5: "Extreme", 4: "Very Hig", 3.5: "Very Strong", 3: "High", 2: "Moderate", 1.5: "Low", 1: "Very Low", 0.5: "+", 0.25: "Minimal", 0: "None"}
   };
   try { Object.freeze(window.BUTTON_LABELS_BY_METRIC); } catch(e) {}
 })();
@@ -1308,7 +1299,7 @@ renderTable();
   reader.readAsText(file);
 }
 
-// Mminimal RFC4180 CSV parser (handles quotes and escaped quotes)
+// Minimal RFC4180 CSV parser (handles quotes and escaped quotes)
 function parseCSV(text){
   const lines = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n");
   const rows = [];
@@ -1531,10 +1522,8 @@ function showStatus(msg){
 
 // === Rapid Scores Modal ===
 // const RAPID_VALUES = [6.02, 5.02, 4.02, 3.02, 2.02, 1.02, 0.02,];
-// const RAPID_VALUES = [5.9,4.8,3.6,2.4,1.6,0.6,0];
-const RAPID_VALUES = [6,5,4,3,2,1,0];
+const RAPID_VALUES = [5,4,3,2,1,0.25,0];
 const RAPID_METRICS = ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other'];
-// const RAPID_METRICS = ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other'];
 const ZERO_SCORE_METRICS = new Set(['change','degree','other']);
 
 
@@ -1608,23 +1597,20 @@ function applyRapidScores(){
 
 function applyRapidScoresAndAddStay(){
   try {
-    // Normalise current selections (no rebuild yet)
-    if (typeof RAPID_METRICS !== 'undefined') {
-      RAPID_METRICS.forEach(f => {
-        if (!Array.isArray(selections[f])) selections[f] = [];
-        selections[f] = Array.from(new Set(selections[f])).sort((a,b)=>b-a);
-      });
-    }
-    // Mark provenance and add the entry using current selections
-    window._rapidLabelMode = true;
-    window._rapidInputSource = 'Rapid';
-    if (typeof addEntry === 'function') addEntry();
-    finalizeRapidEntryAsRapid();
-    window._rapidLabelMode = false;
-    window._rapidInputSource = 'Main';
-    // keep modal open for rapid continue
-    // Rebuild main grid after entry is created (so we don't lose selections before addEntry)
-    try { if (typeof buildButtons === 'function') buildButtons(); } catch(e){}
+    // Ensure clean, deduped selections for rapid metrics
+    RAPID_METRICS.forEach(f => {
+      if (!Array.isArray(selections[f])) selections[f] = [];
+      selections[f] = Array.from(new Set(selections[f])).sort((a,b)=>b-a);
+    });
+    // Add the entry (this will clear input fields and reset selections via initSelections/buildButtons)
+    addEntry();
+    // Rebuild rapid popup buttons so UI reflects cleared selections, keep modal open
+    try { buildRapidScoresButtons(); } catch(e){}
+    // Ensure modal remains visible
+    try {
+      const m = document.getElementById('rapidScoresModal');
+      if (m) m.style.display = 'block';
+    } catch(e){}
   } catch(e) { console.warn(e); }
 }
 </script>
@@ -3329,7 +3315,7 @@ return "";
 </div>
 <div class="ls-row">
 <label>Values (comma-separated)</label>
-<input id="bs-values" placeholder="e.g., 6,,2.5,2,1,0.5,0,-0.5" type="text"/>
+<input id="bs-values" placeholder="e.g., 6,5,4,3,2.5,2,1,0.5,0,-0.5" type="text"/>
 </div>
 <div class="ls-controls">
 <button id="bs-save">Save Button Set</button>
@@ -3652,28 +3638,22 @@ return "";
 // === CSV + Rapid provenance patch ===
 
 // Helper: map a numeric value to Rapid label for a metric
-
 function getRapidLabel(metric, value){
   try{
     const key = String(value);
-    // 1) explicit per-metric overrides for Rapid (if present)
     if (typeof RAPID_LABEL_OVERRIDES !== 'undefined' &&
         RAPID_LABEL_OVERRIDES &&
         RAPID_LABEL_OVERRIDES[metric] &&
-        Object.prototype.hasOwnProperty.call(RAPID_LABEL_OVERRIDES[metric], key)){
+        RAPID_LABEL_OVERRIDES[metric][key] != null){
       return RAPID_LABEL_OVERRIDES[metric][key];
     }
-    // 2) canonical Rapid label map (NO fallback to main labels)
-    if (typeof RAPID_LABELS !== 'undefined' &&
-        RAPID_LABELS &&
-        RAPID_LABELS[metric] &&
-        Object.prototype.hasOwnProperty.call(RAPID_LABELS[metric], key)){
-      return RAPID_LABELS[metric][key];
+    // Fallback to main labelMappings if no rapid override
+    if (typeof labelMappings !== 'undefined' && labelMappings[metric]){
+      return labelMappings[metric][value] || '';
     }
   }catch(e){}
   return '';
 }
-
 
 // After addEntry() (when called from Rapid), force the latest row to use Rapid labels
 function finalizeRapidEntryAsRapid(){
@@ -3707,24 +3687,20 @@ function finalizeRapidEntryAsRapid(){
 // Wrapper: Apply selections, add entry, set Rapid provenance, close popup
 function applyRapidScoresAndAdd(){
   try {
-    // Normalise current selections (no rebuild yet)
-    if (typeof RAPID_METRICS !== 'undefined') {
-      RAPID_METRICS.forEach(f => {
-        if (!Array.isArray(selections[f])) selections[f] = [];
-        selections[f] = Array.from(new Set(selections[f])).sort((a,b)=>b-a);
-      });
-    }
-    // Mark provenance and add the entry using current selections
+    if (typeof applyRapidScores === 'function') applyRapidScores(); // dedupe + (may) close modal
+    // Set provenance flags (for any code reading them)
     window._rapidLabelMode = true;
     window._rapidInputSource = 'Rapid';
+    // Add the entry
     if (typeof addEntry === 'function') addEntry();
+    // Post-fix labels to Rapid set
     finalizeRapidEntryAsRapid();
+    // clear flags
     window._rapidLabelMode = false;
     window._rapidInputSource = 'Main';
+    // ensure modal is closed
     try { closeRapidScores(); } catch(e){}
-    // Rebuild main grid after entry is created (so we don't lose selections before addEntry)
-    try { if (typeof buildButtons === 'function') buildButtons(); } catch(e){}
-  } catch(e) { console.warn(e); }
+  } catch(e){ console.warn(e); }
 }
 
 // Wrapper: Apply selections, add entry, set Rapid provenance, keep popup open
@@ -3882,24 +3858,6 @@ function getLogTableColumnMap(){
   });
   return map;
 }
-// Robust metric column resolver
-function resolveMetricIndex(colMap, headerCells, rowEl, baseName){
-  if (colMap[baseName + ' Sum'] != null) return colMap[baseName + ' Sum'];
-  var idxs = []; headerCells.forEach(function(h,i){ if (h === baseName) idxs.push(i); });
-  if (!idxs.length) return colMap[baseName];
-  var tr = rowEl;
-  if (!tr){
-    var tb = document.querySelector('#logTable tbody');
-    tr = tb && tb.querySelector('tr') ? tb.querySelector('tr') : null;
-  }
-  function isNum(t){ var s=String(t||'').trim(); var x=parseFloat(s); return s && !isNaN(x); }
-  for (var k=0;k<idxs.length;k++){
-    var i=idxs[k]; var cell=tr&&tr.children&&tr.children[i]? tr.children[i].textContent:null;
-    if (isNum(cell)) return i;
-  }
-  return idxs[idxs.length-1];
-}
-
 
 // ===== Utility: get all visible data rows from #logTable
 function getLogRows(){
@@ -3926,13 +3884,13 @@ function rowToObj(tr, col){
     Drug: cell('Drug'),
     Qty: parseFloat(cell('Qty')) || 0,
     ROA: cell('ROA'),
-    Rush:(function(){var hs=Array.from(document.querySelectorAll('#logTable thead th')).map(t=>t.textContent.trim());var i=resolveMetricIndex(col,hs,tr,'Rush');return i!=null?(parseFloat(c[i].textContent)||0):0;})(),
-    Mood:(function(){var hs=Array.from(document.querySelectorAll('#logTable thead th')).map(t=>t.textContent.trim());var i=resolveMetricIndex(col,hs,tr,'Mood');return i!=null?(parseFloat(c[i].textContent)||0):0;})(),
-    Social:(function(){var hs=Array.from(document.querySelectorAll('#logTable thead th')).map(t=>t.textContent.trim());var i=resolveMetricIndex(col,hs,tr,'Social');return i!=null?(parseFloat(c[i].textContent)||0):0;})(),
-    Energy:(function(){var hs=Array.from(document.querySelectorAll('#logTable thead th')).map(t=>t.textContent.trim());var i=resolveMetricIndex(col,hs,tr,'Energy');return i!=null?(parseFloat(c[i].textContent)||0):0;})(),
-    Focus:(function(){var hs=Array.from(document.querySelectorAll('#logTable thead th')).map(t=>t.textContent.trim());var i=resolveMetricIndex(col,hs,tr,'Focus');return i!=null?(parseFloat(c[i].textContent)||0):0;})(),
-    Anxiety:(function(){var hs=Array.from(document.querySelectorAll('#logTable thead th')).map(t=>t.textContent.trim());var i=resolveMetricIndex(col,hs,tr,'Anxiety');return i!=null?(parseFloat(c[i].textContent)||0):0;})(),
-    Impair:(function(){var hs=Array.from(document.querySelectorAll('#logTable thead th')).map(t=>t.textContent.trim());var i=resolveMetricIndex(col,hs,tr,'Impair');return i!=null?(parseFloat(c[i].textContent)||0):0;})(),
+    Rush: num('Rush Sum'),
+    Mood: num('Mood Sum'),
+    Social: num('Social Sum'),
+    Energy: num('Energy Sum'),
+    Focus: num('Focus Sum'),
+    Anxiety: num('Anxiety Sum'),
+    Impair: num('Impair Sum'),
     ChangeLabel: cell('Change Label'),
     DegreeLabel: cell('Degree Label'),
     OtherLabel: cell('Other Label'),
@@ -4184,173 +4142,6 @@ window.addEventListener('load', function(){
   window.exportReviewCSV=function(){ var rows=rowsFromMain(); var metrics=['rush','mood','social','energy','focus','anxiety','impair']; var head=['metric','count','sum','mean','mode','median','stdev']; var out=[head.join(',')]; metrics.forEach(function(m){ var s=basicStats(rows.map(function(r){return r[m];})); out.push([m,s.count,s.sum.toFixed(2),s.mean.toFixed(2),s.mode??'',s.median.toFixed(2),s.stdev.toFixed(2)].join(',')); }); var blob=new Blob([out.join('\\n')],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='review_stats.csv'; a.click(); URL.revokeObjectURL(a.href); };
 })();
 </script>
-
-
-<!-- ===== Auto Entries & Rolling Average (modal-based) ===== -->
-<style>
-  /* Tables inside the two new modals */
-  #autoEntriesModal table, #rollingAverageModal table{
-    width:100%; border-collapse:collapse; background:#fff; margin-top:10px;
-  }
-  #autoEntriesModal th, #autoEntriesModal td,
-  #rollingAverageModal th, #rollingAverageModal td{
-    border:1px solid #ccc; padding:8px; text-align:center; font-size:12px;
-  }
-  .as-toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
-  .as-toolbar button { background:#eee; color:#000; border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
-</style>
-
-<!-- Auto Entries Modal (uses shared .modal/.modal-content pattern) -->
-<div id="autoEntriesModal" style="display:none;">
-  <div class="modal-content" style="max-width: 95vw;">
-    <span class="close" data-close="#autoEntriesModal">&times;</span>
-    <h2>Auto Entries (current selections every 15s)</h2>
-    <div class="as-toolbar" style="margin: 8px 0;">
-      <button onclick="exportAutoEntriesCSV()">Export CSV</button>
-      <button onclick="clearAutoEntries()">Clear</button>
-    </div>
-    <table id="autoEntriesTable" class="table compact">
-      <thead>
-        <tr>
-          <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th>
-          <th>Anxiety</th><th>Impair</th><th>Weighted</th><th>Score5</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="autoEntriesStatus" style="margin-top:6px; font-size:12px; opacity:0.75;"></div>
-  </div>
-</div>
-
-<!-- Rolling Average Modal (uses shared .modal/.modal-content pattern) -->
-<div id="rollingAverageModal" class="modal" style="display:none;">
-  <div class="modal-content" style="max-width: 95vw;">
-    <span class="close" data-close="#rollingAverageModal">&times;</span>
-    <h2>Rolling Average (last 5 rows, every 15s)</h2>
-    <div class="as-toolbar" style="margin: 8px 0;">
-      <button onclick="exportRollingAverageCSV()">Export CSV</button>
-      <button onclick="clearRollingAverage()">Clear</button>
-    </div>
-    <table id="rollingAverageTable" class="table compact">
-      <thead>
-        <tr>
-          <th>Time</th><th>Avg Rush</th><th>Avg Mood</th><th>Avg Social</th><th>Avg Energy</th>
-          <th>Avg Focus</th><th>Avg Anxiety</th><th>Avg Impair</th><th>Weighted</th><th>Score5</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="rollingAverageStatus" style="margin-top:6px; font-size:12px; opacity:0.75;"></div>
-  </div>
-</div>
-
-<script>
-(function(){
-  function pad(n){ return String(n).padStart(2,'0'); }
-  function timeLabel(ms){
-    try {
-      var d = new Date(ms||Date.now());
-      return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
-    } catch(e){ return new Date().toLocaleString(); }
-  }
-  function fmt2(x){ var n=Number(x); return Number.isFinite(n)? n.toFixed(2) : ""; }
-
-  function postDecorateRow(tr){
-    try { if (typeof applyRowShading === 'function') applyRowShading(tr); } catch(e){}
-    try { if (typeof applyUiColumnVisibility === 'function') applyUiColumnVisibility(); } catch(e){}
-  }
-
-  function getLogTableColumnMap(){
-    var map = {};
-    var ths = document.querySelectorAll('#logTable thead th');
-    ths.forEach(function(th, idx){
-      var name = (th.textContent || '').trim();
-      if (name) map[name] = idx;
-    });
-    return map;
-  }
-  function getLogRows(){
-    return Array.from(document.querySelectorAll('#logTable tbody tr')).filter(function(tr){
-      return tr.offsetParent !== null;
-    });
-  }
-  function rowToObj(tr, col){
-    var c = tr.children;
-    function cell(name){
-      var idx = col[name];
-      return (idx != null && c[idx]) ? (c[idx].textContent || '').trim() : '';
-    }
-    function num(name){
-      var v = cell(name), x = parseFloat(v);
-      return isNaN(x) ? 0 : x;
-    }
-    return {
-      Rush: num('Rush Sum') || num('Rush') || 0,
-      Mood: num('Mood Sum') || num('Mood') || 0,
-      Social: num('Social Sum') || num('Social') || 0,
-      Energy: num('Energy Sum') || num('Energy') || 0,
-      Focus: num('Focus Sum') || num('Focus') || 0,
-      Anxiety: num('Anxiety Sum') || num('Anxiety') || 0,
-      Impair: num('Impair Sum') || num('Impair') || 0,
-      Weighted: num('Weighted') || 0,
-      Score5: num('Score5') || 0
-    };
-  }
-
-  // ===== 1) Auto Entries =====
-  var LS_KEY_ENTRIES = 'auto_entries_rows';
-  var autoEntriesTimer = null;
-
-  function loadEntries(){ try{ return JSON.parse(localStorage.getItem(LS_KEY_ENTRIES) || '[]'); }catch(e){ return []; } }
-  function saveEntries(rows){ try{ localStorage.setItem(LS_KEY_ENTRIES, JSON.stringify(rows||[])); }catch(e){} }
-
-  
-function readCurrentSelections(){
-  function readById(id){
-    var el = document.getElementById(id);
-    if (!el) return null;
-    var v = parseFloat(el.value || el.getAttribute('data-value') || el.textContent);
-    return isFinite(v) ? v : null;
-  }
-  var legacy = {
-    Rush:   readById('rushValue'),
-    Mood:   readById('moodValue'),
-    Social: readById('socialValue'),
-    Energy: readById('energyValue'),
-    Focus:  readById('focusValue'),
-    Anxiety:readById('anxietyValue'),
-    Impair: readById('impairValue'),
-    Weighted: readById('weightedValue'),
-    Score5:   readById('score5Value')
-  };
-  var haveLegacy = Object.values(legacy).some(function(v){ return v != null && !isNaN(v); });
-  if (haveLegacy){
-    Object.keys(legacy).forEach(function(k){ legacy[k] = (legacy[k]==null || isNaN(legacy[k])) ? 0 : legacy[k]; });
-    return legacy;
-  }
-  try{
-    var col = getLogTableColumnMap();
-    var rows = getLogRows();
-    if (!rows || !rows.length) return {Rush:0,Mood:0,Social:0,Energy:0,Focus:0,Anxiety:0,Impair:0,Weighted:0,Score5:0};
-    var tr = rows[rows.length-1];
-    var obj = rowToObj(tr, col);
-    return {
-      Rush: +obj.Rush || 0,
-      Mood: +obj.Mood || 0,
-      Social: +obj.Social || 0,
-      Energy: +obj.Energy || 0,
-      Focus: +obj.Focus || 0,
-      Anxiety: +obj.Anxiety || 0,
-      Impair: +obj.Impair || 0,
-      Weighted: +obj.Weighted || 0,
-      Score5: +obj.Score5 || 0
-    };
-  }catch(e){
-    return {Rush:0,Mood:0,Social:0,Energy:0,Focus:0,Anxiety:0,Impair:0,Weighted:0,Score5:0};
-  }
-)();
-</script>
-
 </body>
 <script>
 function openEmotionModal() {
@@ -4913,156 +4704,4 @@ function buildEmotionButtons() {
   });
 })();
 // ──────────────────────────────────────────────────────────────────────────────
-</script>
-<script>
-
-// Ensure Auto Entries open/clear/export exist
-(function(){
-  if (typeof window.openAutoEntries === 'function') return;
-  function appendAutoEntriesRow(d){
-    var tb=document.querySelector('#autoEntriesTable tbody'); if(!tb) return;
-    var tr=document.createElement('tr');
-    function td(n,v){ var c=document.createElement('td'); c.textContent=(v!=null?v:''); c.setAttribute('data-col', n); return c; }
-    var now = (typeof timeLabel==='function') ? timeLabel(Date.now()) : new Date().toLocaleTimeString();
-    tr.appendChild(td('Time', now));
-    tr.appendChild(td('Rush', (d&&d.Rush)||0));  tr.appendChild(td('Mood', (d&&d.Mood)||0));  tr.appendChild(td('Social', (d&&d.Social)||0));
-    tr.appendChild(td('Energy',(d&&d.Energy)||0));tr.appendChild(td('Focus',(d&&d.Focus)||0));tr.appendChild(td('Anxiety',(d&&d.Anxiety)||0));
-    tr.appendChild(td('Impair',(d&&d.Impair)||0));tr.appendChild(td('Weighted',(d&&d.Weighted)||0));tr.appendChild(td('Score5',(d&&d.Score5)||0));
-    try{ applyRowShading(tr); }catch(e){} tb.appendChild(tr);
-  }
-  function loadEntries(){ try{return JSON.parse(localStorage.getItem('auto_entries_rows')||'[]');}catch(e){return [];} }
-  function saveEntries(r){ try{localStorage.setItem('auto_entries_rows', JSON.stringify(r||[]));}catch(e){} }
-  window.openAutoEntries=function(){
-    var tb=document.querySelector('#autoEntriesTable tbody'); if(tb) tb.innerHTML='';
-    (loadEntries()||[]).forEach(function(r){ appendAutoEntriesRow(r.data); });
-    if (typeof openModal==='function') openModal('#autoEntriesModal'); else { var m=document.getElementById('autoEntriesModal'); if(m) m.style.display='block'; }
-  };
-  window.toggleAutoEntries=function(){
-    if (window.autoEntriesTimer){ clearInterval(window.autoEntriesTimer); window.autoEntriesTimer=null; return; }
-    function emit(){ var data=readCurrentSelections(); var rows=loadEntries(); rows.push({t:Date.now(), data:data}); saveEntries(rows); appendAutoEntriesRow(data); }
-    emit(); window.autoEntriesTimer = setInterval(emit, 15000);
-  };
-  window.clearAutoEntries=function(){ saveEntries([]); var tb=document.querySelector('#autoEntriesTable tbody'); if(tb) tb.innerHTML=''; };
-  window.exportAutoEntriesCSV=function(){
-    var rows = loadEntries(); if(!rows.length){ alert('No rows to export.'); return; }
-    var out = ['Time,Rush,Mood,Social,Energy,Focus,Anxiety,Impair,Weighted,Score5'];
-    rows.forEach(function(r){ var d=r.data||{}; out.push([timeLabel(r.t),d.Rush,d.Mood,d.Social,d.Energy,d.Focus,d.Anxiety,d.Impair,d.Weighted,d.Score5].join(',')); });
-    var blob=new Blob([out.join('\n')],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='auto_entries.csv'; a.click(); URL.revokeObjectURL(a.href);
-  };
-})();
-
-</script>
-
-<!-- === Rolling Average Patch (bind missing APIs) === -->
-<script>
-(function(){
-  // Storage keys and state
-  var LS_KEY_RA = 'rolling_average_rows';
-  function loadRolling(){ try{ return JSON.parse(localStorage.getItem(LS_KEY_RA) || '[]'); }catch(e){ return []; } }
-  function saveRolling(rows){ try{ localStorage.setItem(LS_KEY_RA, JSON.stringify(rows||[])); }catch(e){} }
-
-  function getLogRows(){
-    return Array.from(document.querySelectorAll('#logTable tbody tr')).filter(function(tr){
-      return tr.offsetParent !== null;
-    });
-  }
-  function getLogTableColumnMap(){
-    var map = {};
-    document.querySelectorAll('#logTable thead th').forEach(function(th, idx){
-      var name = (th.textContent || '').trim();
-      if (name) map[name] = idx;
-    });
-    return map;
-  }
-  function resolveMetricIndex(colMap, headerCells, rowEl, baseName){
-    if (colMap[baseName + ' Sum'] != null) return colMap[baseName + ' Sum'];
-    var idxs = []; headerCells.forEach(function(h,i){ if (h === baseName) idxs.push(i); });
-    if (!idxs.length) return colMap[baseName];
-    var tr = rowEl;
-    if (!tr){
-      var tb = document.querySelector('#logTable tbody');
-      tr = tb && tb.querySelector('tr') ? tb.querySelector('tr') : null;
-    }
-    function isNum(t){ var s=String(t||'').trim(); var x=parseFloat(s); return s && !isNaN(x); }
-    for (var k=0;k<idxs.length;k++){
-      var i=idxs[k]; var cell=tr&&tr.children&&tr.children[i]? tr.children[i].textContent:null;
-      if (isNum(cell)) return i;
-    }
-    return idxs[idxs.length-1];
-  }
-  function rowToObj(tr, col){
-    var c = tr.children;
-    function cell(name){ var idx = col[name]; return (idx != null && c[idx]) ? (c[idx].textContent || '').trim() : ''; }
-    function numBy(base){
-      var hs = Array.from(document.querySelectorAll('#logTable thead th')).map(function(t){return t.textContent.trim();});
-      var i = resolveMetricIndex(col, hs, tr, base);
-      return i!=null ? (parseFloat(c[i].textContent)||0) : 0;
-    }
-    return {
-      Rush: numBy('Rush'), Mood: numBy('Mood'), Social: numBy('Social'),
-      Energy: numBy('Energy'), Focus: numBy('Focus'), Anxiety: numBy('Anxiety'), Impair: numBy('Impair'),
-      Weighted: parseFloat(cell('Weighted')) || 0,
-      Score5: parseFloat(cell('5Max')) || parseFloat(cell('Score5')) || 0
-    };
-  }
-
-  function computeRollingAverage(){
-    var col = getLogTableColumnMap();
-    var rs = getLogRows().map(function(tr){ return rowToObj(tr, col); });
-    if (rs.length < 1) return null;
-    var windowSize = 5;
-    var slice = rs.slice(-windowSize);
-    function mean(k){ return slice.reduce(function(a,r){return a+(+r[k]||0);},0) / slice.length; }
-    return {
-      Rush: mean('Rush'), Mood: mean('Mood'), Social: mean('Social'), Energy: mean('Energy'),
-      Focus: mean('Focus'), Anxiety: mean('Anxiety'), Impair: mean('Impair'),
-      Weighted: mean('Weighted'), Score5: mean('Score5')
-    };
-  }
-
-  function appendRollingRow(avg){
-    var tb = document.querySelector('#rollingAverageTable tbody'); if (!tb) return;
-    var tr = document.createElement('tr');
-    function td(n,v){ var c=document.createElement('td'); c.textContent=(v!=null? (typeof v==='number'? v.toFixed(2):v):''); c.setAttribute('data-col',n); return c; }
-    var now = new Date();
-    tr.appendChild(td('Time', now.toLocaleTimeString()));
-    tr.appendChild(td('Rush', avg.Rush)); tr.appendChild(td('Mood', avg.Mood)); tr.appendChild(td('Social', avg.Social));
-    tr.appendChild(td('Energy', avg.Energy)); tr.appendChild(td('Focus', avg.Focus)); tr.appendChild(td('Anxiety', avg.Anxiety));
-    tr.appendChild(td('Impair', avg.Impair)); tr.appendChild(td('Weighted', avg.Weighted)); tr.appendChild(td('Score5', avg.Score5));
-    try{ if (typeof applyRowShading==='function') applyRowShading(tr); }catch(e){}
-    tb.appendChild(tr);
-  }
-
-  window.openRollingAverage = function(){
-    var tb = document.querySelector('#rollingAverageTable tbody'); if (tb) tb.innerHTML = '';
-    (loadRolling()||[]).forEach(function(r){ appendRollingRow(r.data); });
-    if (typeof openModal === 'function') { openModal('#rollingAverageModal'); }
-    else { var m=document.getElementById('rollingAverageModal'); if(m) m.style.display='block'; }
-  };
-  window.clearRollingAverage = function(){
-    saveRolling([]); var tb = document.querySelector('#rollingAverageTable tbody'); if (tb) tb.innerHTML='';
-  };
-  window.exportRollingAverageCSV = function(){
-    var rows = loadRolling(); if (!rows.length){ alert('No rows to export.'); return; }
-    var out = ['Time,Avg Rush,Avg Mood,Avg Social,Avg Energy,Avg Focus,Avg Anxiety,Avg Impair,Weighted,Score5'];
-    rows.forEach(function(r){
-      var d = r.data;
-      out.push([
-        (new Date(r.t)).toLocaleTimeString(),
-        d.Rush.toFixed(2), d.Mood.toFixed(2), d.Social.toFixed(2), d.Energy.toFixed(2),
-        d.Focus.toFixed(2), d.Anxiety.toFixed(2), d.Impair.toFixed(2),
-        d.Weighted.toFixed(2), d.Score5.toFixed(2)
-      ].join(','));
-    });
-    var blob = new Blob([out.join('\n')], {type:'text/csv'});
-    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='rolling_average.csv'; a.click(); URL.revokeObjectURL(a.href);
-  };
-
-  // Optional toggle timer (30s) — if you have a button, wire to this.
-  window.toggleRollingAverage = function(){
-    if (window.rollingAvgTimer){ clearInterval(window.rollingAvgTimer); window.rollingAvgTimer=null; return; }
-    function emit(){ var avg = computeRollingAverage(); if (!avg) return; var rows = loadRolling(); rows.push({t:Date.now(), data:avg}); saveRolling(rows); appendRollingRow(avg); }
-    emit(); window.rollingAvgTimer = setInterval(emit, 30000);
-  };
-})();
 </script>
