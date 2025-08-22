@@ -256,27 +256,6 @@
 }
 
 </style>
-
-<!-- === Auto Slider Shading (CSS) : injected 20250822080400 === -->
-<style>
-.auto-slider-modal table{
-  border-collapse: collapse;
-  width: 100%;
-  table-layout: fixed;
-}
-.auto-slider-modal th,
-.auto-slider-modal td{
-  padding: 6px 8px;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-.auto-slider-modal thead th{
-  position: sticky;
-  top: 0;
-  background: #fafafa;
-  z-index: 1;
-}
-</style>
-
 </head>
 <body>
 <div class="summary-controls">
@@ -537,7 +516,7 @@ const SHADE_CAP = {
   'Max': 35,
   'Min': 14,
   'Weighted': 14,
-  '5Max': 14
+  '5Max': 20
 };
 
 const GREEN_SET = new Set(['Rush','Mood','Social','Score','Weighted','5Max','Max']);
@@ -602,13 +581,21 @@ function applyRowShading(tr) {
 }
 
     const labelMappings = {
-   rush:   {10:"Peak", 9:"Overwhelming", 8:"Extreme",7:"Intense",6:"Ultra Strong", 5:"Very Strong", 4.5:"Strong/Obvious", 4:"Strong", 3.5:"Clear", 3:"Moderate", 2.5:"Light-Mid", 2:"Light/Subtle", 1.5:"Thinking", 1:"Mild", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
-   mood:   {6:"Autopilot", 5:"Euphoric", 4.5:"Very Good", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Yes", 1.5:"Slight", 1:"Low/Flat", 0.5:"Maybe", 0.75:"+", 0.25:"+", 0:"None/No Change"},
-   social: {6:"Disinhibited", 5:"Outgoing", 4.5:"Very Social", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Want", 1.5:"Slight", 1:"Low/Flat", 0.5:"Maybe", 0.75:"+", 0.25:"+", 0:"No/Not"},
-   energy: {8:"Overdrive", 7:"Manic", 6:"Hyperactive", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Alert", 1.5:"Alert", 1:"Alert/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
-   focus:  {8:"Laser", 7:"Wired", 6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Alert", 1.5:"Vigilant", 1:"Alert/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
-   anxiety:{6:"Panic", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Adverse/Affected", 3:"Anxious", 2.5:"Nervous", 2:"Excess/Overthinking", 1.5:"Ignorable", 1:"Normal/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
-   impair: {6:"Crippled", 5:"Dangerously", 4.5:"Unwell", 4:"Severe", 3.5:"Adverse/Impairment", 3:"Moderate/Impaired", 2.5:"Difficulty", 2:"Some/Excess", 1.5:"Side Effect/Tremor", 1:"Minor", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   rush:   {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   mood:   {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   social: {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   energy: {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   focus:  {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   anxiety:{10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   impair: {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+    // {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+//    rush:   {10:"Peak", 9:"Overwhelming", 8:"Extreme",7:"Intense",6:"Ultra Strong", 5:"Very Strong", 4.5:"Strong/Obvious", 4:"Strong", 3.5:"Clear", 3:"Mid", 2.5:"Low-Mid", 2:"Light/Subtle", 1.5:"Thinking", 1:"Mild", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    mood:   {6:"Autopilot", 5:"Euphoric", 4.5:"Very Good", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Yes", 1.5:"Slight", 1:"Low/Flat", 0.5:"Maybe", 0.75:"+", 0.25:"+", 0:"None"},
+//    social: {6:"Disinhibited", 5:"Outgoing", 4.5:"Very Social", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Want", 1.5:"Slight", 1:"Low/Flat", 0.5:"Maybe", 0.75:"+", 0.25:"+", 0:"No/Not"},
+//    energy: {8:"Overdrive", 7:"Manic", 6:"Hyperactive", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Alert", 1.5:"Alert", 1:"Alert/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    focus:  {8:"Laser", 7:"Wired", 6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Alert", 1.5:"Vigilant", 1:"Alert/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    anxiety:{6:"Panic", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Adverse/Affected", 3:"Anxious", 2.5:"Low-Mid", 2:"Excess/Overthinking", 1.5:"Ignorable", 1:"Normal/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    impair: {6:"Crippled", 5:"Dangerously", 4.5:"Unwell", 4:"Severe", 3.5:"Adverse/Impairment", 3:"Mid/Impaired", 2.5:"Low-Mid", 2:"Some/Excess", 1.5:"Side Effect/Tremor", 1:"Minor", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
 change: {
     "6": "Sucked/Sealed",
     "5": "HalfSealed",
@@ -681,51 +668,65 @@ other: {
     };
 // === Rapid popup unified labels (per your spec) ===
 const RAPID_LABELS = {
-//    rush:   {10:"Peak", 9:"Overwhelming", 8:"Extreme",7:"Intense",6:"Ultra Strong", 5:"Very Strong", 4.5:"Strong/Obvious", 4:"Strong", 3.5:"Clear", 3:"Moderate", 2.5:"Light-Mid", 2:"Light/Subtle", 1.5:"Thinking", 1:"Mild", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
-//    mood:   {6:"Autopilot", 5:"Euphoric", 4.5:"Very Good", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Yes", 1.5:"Slight", 1:"Low/Flat", 0.5:"Maybe", 0.75:"+", 0.25:"+", 0:"None/No Change"},
-//    social: {6:"Disinhibited", 5:"Outgoing", 4.5:"Very Social", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Want", 1.5:"Slight", 1:"Low/Flat", 0.5:"Maybe", 0.75:"+", 0.25:"+", 0:"No/Not"},
-//    energy: {8:"Overdrive", 7:"Manic", 6:"Hyperactive", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Increasing", 2:"Increased/Alert", 1.5:"Alert", 1:"Alert/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
-//    focus:  {8:"Laser", 7:"Wired", 6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Improved", 2:"Increased/Alert", 1.5:"Vigilant", 1:"Alert/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
-//    anxiety:{6:"Panic", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Adverse/Affected", 3:"Anxious", 2.5:"Nervous", 2:"Excess/Overthinking", 1.5:"Ignorable", 1:"Normal/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
-//    impair: {6:"Crippled", 5:"Dangerously", 4.5:"Unwell", 4:"Severe", 3.5:"Adverse/Impairment", 3:"Moderate/Impaired", 2.5:"Difficulty", 2:"Some/Excess", 1.5:"Side Effect/Tremor", 1:"Minor", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   rush:   {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   mood:   {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   social: {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   energy: {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   focus:  {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   anxiety: {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+   impair: {10:"Overwhelming", 9:"Extreme", 8:"Intense",7:"Extremely High",6:"Ultra High", 5:"Very High", 4.5:"High/Obvious", 4:"High", 3.5:"Clear/Mid", 3:"Moderate", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"+", 0.75:"Present", 0.25:"Minimal", 0:"None", "-0.5":"-"},
+//    rush:   {10:"Peak", 9:"Overwhelming", 8:"Extreme",7:"Intense",6:"Ultra Strong", 5:"Very Strong", 4.5:"Strong/Obvious", 4:"Strong", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    mood:   {6:"Extreme", 5:"Very High", 4.5:"Very Good", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    social: {6:"Disinhibited", 5:"Very High", 4.5:"Very Social", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    energy: {8:"Overdrive", 7:"Manic", 6:"Hyperactive", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    focus:  {8:"Laser", 7:"Wired", 6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    anxiety:{6:"Panic", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    impair: {6:"Crippled", 5:"Very High", 4.5:"Unwell", 4:"Severe",3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    rush:   {10:"Peak", 9:"Overwhelming", 8:"Extreme",7:"Intense",6:"Ultra Strong", 5:"Very Strong", 4.5:"Strong/Obvious", 4:"Strong", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Light-Mid", 2:"Some/Subtle", 1.5:"Low", 1:"Mild", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    mood:   {6:"Autopilot", 5:"Euphoric", 4.5:"Very Good", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Yes", 1.5:"Low", 1:"Low/Flat", 0.5:"Maybe", 0.75:"+", 0.25:"+", 0:"None"},
+//    social: {6:"Disinhibited", 5:"Outgoing", 4.5:"Very Social", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Want", 1.5:"Low", 1:"Low/Flat", 0.5:"Maybe", 0.75:"+", 0.25:"+", 0:"No/Not"},
+//    energy: {8:"Overdrive", 7:"Manic", 6:"Hyperactive", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Alert", 1.5:"Alert/Low", 1:"Alert/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    focus:  {8:"Laser", 7:"Wired", 6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Some/Alert", 1.5:"Alert/Low", 1:"Alert/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    anxiety:{6:"Panic", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Anxious/Affected", 3:"Mid", 2.5:"Nervous", 2:"Excess/Think", 1.5:"Low/Ignorable", 1:"Normal/Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+//    impair: {6:"Crippled", 5:"Dangerously", 4.5:"Unwell", 4:"Severe", 3.5:"Impaired", 3:"Mid", 2.5:"Difficulty", 2:"Some/Excess", 1.5:"Tremor/Ignore", 1:"Minor", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
 change: {
-    "6": "Sucked/Sealed",
-    "5": "HalfSealed",
-    "4": "DeepBreath",
-    "3": "ShallowBreath",
-    "2": "GentleInhalation",
-    "1": "MouthOpen",
-    "0.5": "NoSeal",
-    "0": "Sealed",
-    "12.5": "+",
-    "13.5": "+",
-    "-111.5": "-"
+//     "6": "Sucked/Sealed",
+//     "5": "HalfSealed",
+//     "4": "DeepBreath",
+//     "3": "ShallowBreath",
+//     "2": "GentleInhalation",
+//     "1": "MouthOpen",
+//     "0.5": "NoSeal",
+//     "0": "Sealed",
+//     "12.5": "+",
+//     "13.5": "+",
+//     "-111.5": "-"
 },
 degree: {
-    "6": "RolledRapidly",
-    "5": "SlowlyRocked",
-    "4": "FlameClose",
-    "3": "FlameFar",
-    "2": "SlowHeat",
-    "1": "FastHeat",
-    "0.5": "Gentle",
-    "0": "Aggressive",
-    "12.5": "+",
-    "13.5": "+",
-    "-111.5": "-"
+//     "6": "RolledRapidly",
+//     "5": "SlowlyRocked",
+//     "4": "FlameClose",
+//     "3": "FlameFar",
+//     "2": "SlowHeat",
+//     "1": "FastHeat",
+//     "0.5": "Gentle",
+//     "0": "Aggressive",
+//     "12.5": "+",
+//     "13.5": "+",
+//     "-111.5": "-"
 },
 other: {
-    "6": "Melted",
-    "5": "ChangeState",
-    "4": "SomeColour",
-    "3": "SomeUnused",
-    "2": "Loose",
-    "1": "Moving",
-    "0.5": "Last",
-    "0": "Next",
-    "12.5": "+",
-    "13.5": "+",
-    "-111.5": "-"
+//     "6": "Melted",
+//     "5": "ChangeState",
+//     "4": "SomeColour",
+//     "3": "SomeUnused",
+//     "2": "Loose",
+//     "1": "Moving",
+//     "0.5": "Last",
+//     "0": "Next",
+//     "12.5": "+",
+//     "13.5": "+",
+//     "-111.5": "-"
 }
 //   change: {"6":"Sucked/Sealed","5":"HalfSealed","4":"DeepBreath","3":"ShallowBreath","2":"GentleInhalation","1":"MouthOpen","0.5":"NoSeal","0":"Sealed"},
 //   degree: {"6":"RolledRapidly","5":"SlowlyRocked","4":"FlameClose","3":"FlameFar","2":"SlowHeat","1":"FastHeat","0.5":"Gentle","0":"Aggressive"},
@@ -783,19 +784,20 @@ function getLabels(metric, values) {
     // ─────────────────────────────────────────────────────────────────────────────
     // Per-metric button ordering/sets (independent for each metric)
     // 12 buttons per metric by default; override any metric at runtime via localStorage.
-//     const DEFAULT_BUTTONS_12 = [8,7,6,'----------',5,4.5,4,'----------',3.5,3,2.5,'----------',2,1.5,1,'----------',0.75,0.5,0.25,0];
-    const DEFAULT_BUTTONS_12 = [8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0];
+//     const DEFAULT_BUTTONS_12 = [8,7,6,'----------,5,4.5,4,'----------,3.5,3,2.5,'----------,2,1.5,1,'----------,0.75,0.5,0.25,0];
+    const DEFAULT_BUTTONS_12 = [8,7,'---------------',6,5,'---------------',4.5,4,'---------------',3.5,3,2.5,'---------------',2,1.5,1,'---------------',0.75,0.5,0.25,0,-0.5];
     const PER_METRIC_BUTTONS = {
-      rush:    DEFAULT_BUTTONS_12.slice(),
-      mood:    DEFAULT_BUTTONS_12.slice(),
-      social:  DEFAULT_BUTTONS_12.slice(),
-      energy:  DEFAULT_BUTTONS_12.slice(),
-      focus:   DEFAULT_BUTTONS_12.slice(),
-      anxiety: DEFAULT_BUTTONS_12.slice(),
-      impair:  DEFAULT_BUTTONS_12.slice(),
-      change:  [7,6,5,4,3,2,1,0.5,0],
-      degree:  [7,6,5,4,3,2,1,0.5,0],
-      other:   [7,6,5,4,3,2,1,0.5,0]};
+//       rush:    DEFAULT_BUTTONS_12.slice(),
+      rush:    [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      mood:    [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      social:  [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      energy:  [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      focus:   [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      anxiety: [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      impair:  [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      change:  [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      degree:  [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1],
+      other:   [10,9,8,7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,-0.5,-1]};
     function getMetricButtons(metric){
       try {
         const overrides = JSON.parse(localStorage.getItem('metricButtonOrder') || '{}');
@@ -1192,7 +1194,7 @@ entry.goodSum = 0;
 (function(){
   // Replace mapping in-place
   window.BUTTON_LABELS_BY_METRIC = {
-//    rush:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
+   rush:   {6:"EXTREME", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
 //    mood:   {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
 //    social: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
 //    energy: {6:"Extreme", 5:"Very High", 4.5:"Intense", 4:"High", 3.5:"Clear/Mid", 3:"Mid", 2.5:"Low-Mid", 2:"Low", 1.5:"Lower", 1:"Very Low", 0.5:"Minimal", 0.75:"+", 0.25:"+", 0:"None"},
@@ -1612,7 +1614,7 @@ function showStatus(msg){
 // === Rapid Scores Modal ===
 // const RAPID_VALUES = [6.02, 5.02, 4.02, 3.02, 2.02, 1.02, 0.02,];
 // const RAPID_VALUES = [5.9,4.8,3.6,2.4,1.6,0.6,0];
-const RAPID_VALUES = [7,6,5,4,3,2,1,0.5,0];
+const RAPID_VALUES = [6,5,4,3,2,1,0,'',0.5,-0.5];
 const RAPID_METRICS = ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other'];
 // const RAPID_METRICS = ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other'];
 const ZERO_SCORE_METRICS = new Set(['change','degree','other']);
@@ -3900,7 +3902,7 @@ function applyRapidScoresAndAddStay(){
 <div id="autoSliderDModal" class="modal" style="display:none;">
   <div class="modal-content" style="max-width: 95vw;">
     <span class="close" data-close="#autoSliderDModal">&times;</span>
-    <h2>Auto Slider D — Rolling Avg of Last 2 Rows (auto every 30s)</h2>
+    <h2>\1 3\2 (auto every 30s)</h2>
     <div style="margin: 8px 0;">
       <button id="autoDForceAppend">Append now</button>
       <span id="autoDStatus" style="margin-left:12px; font-size:0.9em; opacity:0.8;"></span>
@@ -4419,156 +4421,30 @@ function readCurrentSelections(){
 </script>
 
 
-<!-- === Auto Slider Shading (JS) : injected 20250822080400 === -->
+<!-- === Auto Slider D Config (rolling avg = 3) : injected 20250822082130 === -->
 <script>
-(function(global){
-  'use strict';
-
-  const DEFAULT_METRIC_HEADERS = [
-    'avg rush','avg mood','avg social','avg energy','avg focus','avg anxiety','avg impair',
-    'rush','mood','social','energy','focus','anxiety','impair',
-    'weighted','scores','good sum','good'
-  ];
-
-  function el(idOrEl){
-    if (!idOrEl) return null;
-    if (typeof idOrEl === 'string') return document.getElementById(idOrEl);
-    return idOrEl;
-  }
-
-  function getHeaders(table){
-    const thead = table.querySelector('thead');
-    if (!thead) return [];
-    return Array.from(thead.querySelectorAll('th')).map(th => (th.textContent || '').trim().toLowerCase());
-  }
-
-  function findMetricColumns(headers, targetSet){
-    const cols = [];
-    headers.forEach((h, idx) => targetSet.has(h) && cols.push(idx));
-    return cols;
-  }
-
-  function parseNumeric(text){
-    const s = String(text || '').replace(/[^\d.\-]/g, '');
-    const v = parseFloat(s);
-    return Number.isFinite(v) ? v : null;
-  }
-
-  function isMetricInverted(metricName){
+(function(){
+  function setDToLast3(){
+    var d = document.getElementById('autoSliderDModal');
+    if (!d) return;
     try{
-      if (typeof global.isMetricInverted === 'function'){
-        return !!global.isMetricInverted(metricName);
-      }
+      if (typeof window.setAutoSliderRollingCountByModal === 'function'){ window.setAutoSliderRollingCountByModal(d, 3); }
+      if (typeof window.setAutoSliderRollingCount === 'function'){ window.setAutoSliderRollingCount('D', 3); }
     }catch(_){}
-    return /anxiety|impair/.test(metricName);
-  }
-
-  function normalise(metricName, value, scaleMax){
-    const max = Math.max(1, scaleMax || 6);
-    let v = value;
-    if (isMetricInverted(metricName)) v = max - value;
-    v = Math.max(0, Math.min(v, max));
-    return v / max;
-  }
-
-  function shadeTD(td, n01){
-    try{
-      if (typeof global.shadeCell === 'function'){
-        global.shadeCell(td, n01);
-        return;
-      }
-      if (typeof global.getShadeStyle === 'function'){
-        td.style.background = global.getShadeStyle(n01);
-        return;
-      }
-    }catch(_){}
-    const h = 210, s = 70, l = 96 - Math.round(n01 * 46);
-    td.style.background = `hsl(${h} ${s}% ${l}%)`;
-  }
-
-  function applyShadingToTable(table, options){
-    const headers = getHeaders(table);
-    if (!headers.length) return;
-    const metricList = (options && options.metricHeaders && options.metricHeaders.length)
-      ? options.metricHeaders.map(s => s.toLowerCase())
-      : DEFAULT_METRIC_HEADERS;
-    const targetSet = new Set(metricList);
-    const metricCols = findMetricColumns(headers, targetSet);
-    if (!metricCols.length) return;
-    const tbody = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
-    const rows = Array.from(tbody.rows);
-    for (const tr of rows){
-      for (const colIdx of metricCols){
-        const td = tr.cells[colIdx];
-        if (!td) continue;
-        const v = parseNumeric(td.getAttribute('data-value') || td.textContent);
-        if (v == null){ td.style.background = ''; continue; }
-        const n = normalise(headers[colIdx], v, (options && options.scaleMax) || 6);
-        shadeTD(td, n);
-      }
-    }
-  }
-
-  function getTableFromModal(modal){
-    const dataSel = modal.getAttribute('data-table-selector');
-    if (dataSel){
-      const t = modal.querySelector(dataSel);
-      if (t && t.tagName && t.tagName.toLowerCase() === 'table') return t;
-    }
-    return modal.querySelector('table');
-  }
-
-  function initAutoSliderShading(modalOrId, options){
-    const modal = el(modalOrId);
-    if (!modal || modal.__autoSliderShadeObserver) return;
-    modal.classList.add('auto-slider-modal');
-    const table = getTableFromModal(modal);
-    if (!table) return;
-    const opts = Object.assign({scaleMax:6, applyOnOpen:true}, options||{});
-    if (opts.applyOnOpen) applyShadingToTable(table, opts);
-    const target = table.tBodies && table.tBodies[0] ? table.tBodies[0] : table;
-    const obs = new MutationObserver(() => requestAnimationFrame(() => applyShadingToTable(table, opts)));
-    obs.observe(target, { childList:true, subtree:true, characterData:true });
-    modal.__autoSliderShadeObserver = obs;
-  }
-
-  function teardownAutoSliderShading(modalOrId){
-    const modal = el(modalOrId);
-    if (!modal) return;
-    const obs = modal.__autoSliderShadeObserver;
-    if (obs) obs.disconnect();
-    delete modal.__autoSliderShadeObserver;
-  }
-
-  function autoAttachObserver(){
-    const wanted = /autoSlider[ABCD]Modal/i;
-    const attachIfNeeded = (node) => {
-      if (!(node instanceof HTMLElement)) return;
-      if (wanted.test(node.id) || node.hasAttribute('data-auto-slider')){
-        initAutoSliderShading(node);
-      }
-      node.querySelectorAll('[id$="Modal"]').forEach(el => {
-        if (wanted.test(el.id) || el.hasAttribute('data-auto-slider')) initAutoSliderShading(el);
-      });
-    };
-    const mo = new MutationObserver((muts)=>{
-      muts.forEach(m => { m.addedNodes && m.addedNodes.forEach(attachIfNeeded); });
+    d.setAttribute('data-rolling-count','3');
+    var titles = d.querySelectorAll('.modal-title, [data-role="title"], h1, h2, h3');
+    titles.forEach(function(t){
+      var txt = t.textContent || '';
+      t.textContent = txt.replace(/Last\s*2\s*Rows/i, 'Last 3 Rows');
     });
-    mo.observe(document.body, { childList:true, subtree:true });
-    document.querySelectorAll('[id$="Modal"]').forEach(attachIfNeeded);
+    d.setAttribute('data-patched-last3','1');
   }
-
-  global.initAutoSliderShading = initAutoSliderShading;
-  global.teardownAutoSliderShading = teardownAutoSliderShading;
-  global.applyShadingToTable = applyShadingToTable;
-
   if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', autoAttachObserver);
+    document.addEventListener('DOMContentLoaded', setDToLast3);
   } else {
-    autoAttachObserver();
+    setDToLast3();
   }
-
-})(window);
+})();
 </script>
 
 </body>
