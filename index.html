@@ -675,20 +675,20 @@ function getLabels(metric, values) {
     // Per-metric button ordering/sets (independent for each metric)
     // 12 buttons per metric by default; override any metric at runtime via localStorage.
 //     const DEFAULT_BUTTONS_12 = [8,7,6,'----------,5,4.5,4,'----------,3.5,3,2.5,'----------,2,1.5,1,'----------,0.75,0.5,0.25,0];
-     const DEFAULT_BUTTONS_12 = [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0];
+     const DEFAULT_BUTTONS_12 = [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0];
     const PER_METRIC_BUTTONS = {
 //       rush:    DEFAULT_BUTTONS_12.slice(),
 // BOOKMARK
-      rush:    [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      mood:    [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      social:  [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      energy:  [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      focus:   [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      anxiety: [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      impair:  [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      change:  [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      degree:  [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      other:   [7,6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0]
+      rush:    [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      mood:    [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      social:  [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      energy:  [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      focus:   [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      anxiety: [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      impair:  [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      change:  [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      degree:  [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0],
+      other:   [7,6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,'',0.5,0]
       };
     function getMetricButtons(metric){
       try {
@@ -1517,7 +1517,7 @@ function showStatus(msg){
 }	
 
 // BOOKMARK
-const RAPID_VALUES = [6,5,4,3,2,1,0];
+const RAPID_VALUES = [7,6,5,4,3,2,1,0];
 // const RAPID_VALUES = [6,5,5.9,4.8,3.6,2.4,1.2,0.6,0,0.5,-0.5];
 const RAPID_METRICS = ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other'];
 // const RAPID_METRICS = ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other'];
