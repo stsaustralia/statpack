@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack 1.6.3 r933</title>
+<title>statpack r946</title>
 <style>
 
 #logTable {
@@ -597,7 +597,7 @@ function applyRowShading(tr) {
 }
 // BOOKMARK LABELS
 const labelMappings = {
-  rush: {6.0: 'Super Extreme', 5.0: 'Extreme', 4.5: 'Intense', 4.0: 'Very Strong', 3.5: 'Strong', 3.0: 'Mid', 2.5: 'Mid-Low', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Very Low', 0.5: '+', 0.0: 'None'},
+  rush: {6.0: 'Super Extreme', 5.0: 'Extreme', 4.5: 'Intense', 4.0: 'Very Strong', 3.5: 'Strong', 3.0: 'Mid', 2.5: 'Mid-Low', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'None'},
   mood: {6.0: 'Very Euphoric', 5.0: 'Euphoric', 4.5: 'Brilliant', 4.0: 'Very Good', 3.5: 'Clear/Good', 3.0: 'Mid/Good', 2.5: 'Low-Mid', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
   social: {6.0: 'Autopilot', 5.0: 'Disinhibited', 4.5: 'Manic', 4.0: 'Very Outgoing', 3.5: 'Clear/Good', 3.0: 'Mid/Good', 2.5: 'Low-Mid', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
   energy: {6.0: 'Overdrive', 5.0: 'Manic', 4.5: 'Hyper', 4.0: 'Very Energetic', 3.5: 'Energetic/Active', 3.0: 'Energetic', 2.5: 'Alert/Capable', 2.0: 'Alert/Some', 1.5: 'Low/Alert', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
@@ -625,7 +625,7 @@ const RAPID_LABELS = {
     
 // === Metric-specific label overrides (scores 6,,2,1,0) ===
 const BUTTON_LABELS_BY_METRIC = {
-  rush: {6.0: 'Super Extreme', 5.0: 'Extreme', 4.5: 'Intense', 4.0: 'Very Strong', 3.5: 'Strong', 3.0: 'Mid', 2.5: 'Mid-Low', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Very Low', 0.5: '+', 0.0: 'None'},
+  rush: {6.0: 'Super Extreme', 5.0: 'Extreme', 4.5: 'Intense', 4.0: 'Very Strong', 3.5: 'Strong', 3.0: 'Mid', 2.5: 'Mid-Low', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'None'},
   mood: {6.0: 'Very Euphoric', 5.0: 'Euphoric', 4.5: 'Brilliant', 4.0: 'Very Good', 3.5: 'Clear/Good', 3.0: 'Mid/Good', 2.5: 'Low-Mid', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
   social: {6.0: 'Autopilot', 5.0: 'Disinhibited', 4.5: 'Manic', 4.0: 'Very Outgoing', 3.5: 'Clear/Good', 3.0: 'Mid/Good', 2.5: 'Low-Mid', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
   energy: {6.0: 'Overdrive', 5.0: 'Manic', 4.5: 'Hyper', 4.0: 'Very Energetic', 3.5: 'Energetic/Active', 3.0: 'Energetic', 2.5: 'Alert/Capable', 2.0: 'Alert/Some', 1.5: 'Low/Alert', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
@@ -1099,7 +1099,7 @@ entry.goodSum = 0;
 (function(){
   // Replace mapping in-place
   window.BUTTON_LABELS_BY_METRIC = {
-  rush: {6.0: 'Super Extreme', 5.0: 'Extreme', 4.5: 'Intense', 4.0: 'Very Strong', 3.5: 'Strong', 3.0: 'Mid', 2.5: 'Mid-Low', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Very Low', 0.5: '+', 0.0: 'None'},
+  rush: {6.0: 'Super Extreme', 5.0: 'Extreme', 4.5: 'Intense', 4.0: 'Very Strong', 3.5: 'Strong', 3.0: 'Mid', 2.5: 'Mid-Low', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'None'},
   mood: {6.0: 'Very Euphoric', 5.0: 'Euphoric', 4.5: 'Brilliant', 4.0: 'Very Good', 3.5: 'Clear/Good', 3.0: 'Mid/Good', 2.5: 'Low-Mid', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
   social: {6.0: 'Autopilot', 5.0: 'Disinhibited', 4.5: 'Manic', 4.0: 'Very Outgoing', 3.5: 'Clear/Good', 3.0: 'Mid/Good', 2.5: 'Low-Mid', 2.0: 'Low-Mid', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
   energy: {6.0: 'Overdrive', 5.0: 'Manic', 4.5: 'Hyper', 4.0: 'Very Energetic', 3.5: 'Energetic/Active', 3.0: 'Energetic', 2.5: 'Alert/Capable', 2.0: 'Alert/Some', 1.5: 'Low/Alert', 1.0: 'Low', 0.5: '+', 0.0: 'Normal'},
