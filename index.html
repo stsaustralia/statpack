@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack 1.6.3 r933</title>
+<title>statpack r946</title>
 <style>
 
 #logTable {
@@ -678,20 +678,20 @@ function getLabels(metric, values) {
     // Per-metric button ordering/sets (independent for each metric)
     // 12 buttons per metric by default; override any metric at runtime via localStorage.
 //     const DEFAULT_BUTTONS_12 = [8,7,6,'----------,5,4.5,4,'----------,3.5,3,2.5,'----------,2,1.5,1,'----------,0.75,0.5,0.25,0];
-     const DEFAULT_BUTTONS_12 = [6,5,4,3,2.5,2,1,0.5,0];
+     const DEFAULT_BUTTONS_12 = [6,5,4,3,2,1,0.5,0];
     const PER_METRIC_BUTTONS = {
 //       rush:    DEFAULT_BUTTONS_12.slice(),
 // BOOKMARK
-      rush:    [6,5,4,3,2.5,2,1,0.5,0],
-      mood:    [6,5,4,3,2.5,2,1,0.5,0],
-      social:  [6,5,4,3,2.5,2,1,0.5,0],
-      energy:  [6,5,4,3,2.5,2,1,0.5,0],
-      focus:   [6,5,4,3,2.5,2,1,0.5,0],
-      anxiety: [6,5,4,3,2.5,2,1,0.5,0],
-      impair:  [6,5,4,3,2.5,2,1,0.5,0],
-      change:  [6,5,4,3,2.5,2,1,0.5,0],
-      degree:  [6,5,4,3,2.5,2,1,0.5,0],
-      other:   [6,5,4,3,2.5,2,1,0.5,0]
+      rush:    [6,5,4,3,2,1,0.5,0],
+      mood:    [6,5,4,3,2,1,0.5,0],
+      social:  [6,5,4,3,2,1,0.5,0],
+      energy:  [6,5,4,3,2,1,0.5,0],
+      focus:   [6,5,4,3,2,1,0.5,0],
+      anxiety: [6,5,4,3,2,1,0.5,0],
+      impair:  [6,5,4,3,2,1,0.5,0],
+      change:  [6,5,4,3,2,1,0.5,0],
+      degree:  [6,5,4,3,2,1,0.5,0],
+      other:   [6,5,4,3,2,1,0.5,0]
       };
     function getMetricButtons(metric){
       try {
@@ -1108,7 +1108,8 @@ entry.goodSum = 0;
   impair: {6.0: 'Hazardous', 5.0: 'Controlling', 4.5: 'Panic/Despair', 4.0: 'Severe Impact', 3.5: 'Impaired/Adverse', 3.0: 'Impaired', 2.5: 'Some/Noticeable', 2.0: 'Some/Noticeable', 1.5: 'Low', 1.0: 'Low', 0.5: '+', 0.0: 'None'},
   change: {6.0: 'Last Row', 5.0: 'Positive', 4.5: 'Visible', 4.0: 'Flame Close', 3.5: 'High Heat', 3.0: 'Deep Breath', 2.5: 'Rocked Sides', 2.0: 'Stationary', 1.5: 'BIllowing', 1.0: 'Plumes', 0.5: 'Loose', 0.0: 'State Change'},
   degree: {6.0: 'Correlate', 5.0: 'Negative', 4.5: 'Invisible', 4.0: 'Flame Close', 3.5: 'Low Heat', 3.0: 'Shallow Breath', 2.5: 'Rolled', 2.0: 'Followed', 1.5: 'Smoke', 1.0: 'Nice Vapour', 0.5: 'Not Moving', 0.0: 'Some Unchanged'},
-  other: {6.0: 'Extremely High', 5.0: 'Very High', 4.5: 'High', 4.0: 'High', 3.5: 'Mid', 3.0: 'Mid', 2.5: 'Low', 2.0: 'Low', 1.5: 'Very Low', 1.0: 'Very Low', 0.5: 'None', 0.0: 'None'},
+  other: {6.0: 'Extremely High', 5.0: 'Very High', 4.5: 'High', 4.0: 'High', 3.5: 'Mid', 3.0: 'Mid', 2.5: 'Low', 2.0: 'Low', 1.5: 'Very Low', 1.0: 'Very Low', 0.5: 'None', 0.0: 'None'}
+  }
   try { Object.freeze(window.BUTTON_LABELS_BY_METRIC); } catch(e) {}
 })();
 buildButtons();
