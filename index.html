@@ -606,7 +606,7 @@ const labelMappings = {
   impair: {0: 'None', 1: 'Low/Excess', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong', 5: 'Controlling', 6: 'Hazardous', 7: 'Peak', Impair: 'Impair', 4.5: 'Panic/Despair', 3.5: 'Impaired/Adverse', 2.5: 'Some/Noticeable', 1.5: 'Low', 0.5: '+'},
   change: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong', 5: 'Positive', 6: 'Last Row', 7: 'Last Dose', Change: 'Change', 4.5: 'Visible', 3.5: 'High Heat', 2.5: 'Rocked Sides', 1.5: 'BIllowing', 0.5: 'Loose'},
   degree: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong','Flame Close', 5: 'Negative', 6: 'Correlate', 7: 'Last Hit', Degree: 'Degree', 4.5: 'Invisible', 3.5: 'Low Heat', 2.5: 'Rolled', 1.5: 'Smoke', 0.5: 'Not Moving'},
-  other: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong',3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'},
+  other: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong',3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'}
 };
 const RAPID_LABELS = {
   rush: {0: 'None', 1: 'Low/Weak', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong', 5: 'Extreme', 6: 'Immense', 7: 'Extreme', Rush: 'Rush', 4.5: 'Intense', 3.5: 'Strong', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
@@ -618,7 +618,7 @@ const RAPID_LABELS = {
   impair: {0: 'None', 1: 'Low/Excess', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong', 5: 'Controlling', 6: 'Hazardous', 7: 'Peak', Impair: 'Impair', 4.5: 'Panic/Despair', 3.5: 'Impaired/Adverse', 2.5: 'Some/Noticeable', 1.5: 'Low', 0.5: '+'},
   change: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong', 5: 'Positive', 6: 'Last Row', 7: 'Last Dose', Change: 'Change', 4.5: 'Visible', 3.5: 'High Heat', 2.5: 'Rocked Sides', 1.5: 'BIllowing', 0.5: 'Loose'},
   degree: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong','Flame Close', 5: 'Negative', 6: 'Correlate', 7: 'Last Hit', Degree: 'Degree', 4.5: 'Invisible', 3.5: 'Low Heat', 2.5: 'Rolled', 1.5: 'Smoke', 0.5: 'Not Moving'},
-  other: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong',3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'},
+  other: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong',3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'}
 };
 ['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
 
@@ -634,7 +634,7 @@ const BUTTON_LABELS_BY_METRIC = {
   impair: {0: 'None', 1: 'Low/Excess', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong', 5: 'Controlling', 6: 'Hazardous', 7: 'Peak', Impair: 'Impair', 4.5: 'Panic/Despair', 3.5: 'Impaired/Adverse', 2.5: 'Some/Noticeable', 1.5: 'Low', 0.5: '+'},
   change: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong', 5: 'Positive', 6: 'Last Row', 7: 'Last Dose', Change: 'Change', 4.5: 'Visible', 3.5: 'High Heat', 2.5: 'Rocked Sides', 1.5: 'BIllowing', 0.5: 'Loose'},
   degree: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong','Flame Close', 5: 'Negative', 6: 'Correlate', 7: 'Last Hit', Degree: 'Degree', 4.5: 'Invisible', 3.5: 'Low Heat', 2.5: 'Rolled', 1.5: 'Smoke', 0.5: 'Not Moving'},
-  other: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong',3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'},
+  other: {0: 'None', 1: 'Very Low', 2: 'Low', 2.5: 'Low-Mid', 3: 'Mid', 3.5: 'Mid-Strong', 4: 'Strong',3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'}
   };
 function getMetricLabel(metric, v){
   try{
