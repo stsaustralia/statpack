@@ -7,11 +7,12 @@
 # - Skip duplicates by SHA-256 (within-run and/or vs existing target)
 # - Copy to TARGET_DIR with collision-safe renaming, or run in DRY-RUN mode
 #
-# Time zone policy: Sydney, Australia (UTC+10, no DST). All log timestamps are
-# Sydney time formatted as YYYYMMDDHHMMSS.
+# Time zone policy: Use system local time. All log timestamps are formatted as
+# YYYYMMDDHHMMSS using local time. No manual UTC/Sydney offsets applied.
 #
 # Notes:
-# - Creation time read via: stat -f '%B' (BSD/macOS)
+# - Creation time read via: stat -f '%B' (BSD/macOS). Falls back to 0 on error.
+# - Size via: stat -f '%z' (bytes). Falls back to 0 on error.
 # - MIME type via: file --mime-type -b
 # - Header = first non-empty line
 # - "first word" means the first token of the header up to a comma or whitespace
@@ -26,12 +27,12 @@ IFS=$'\n\t'
 # --------------------------- CONFIGURATION -----------------------------------
 
 # Where to look and where to store copies
-SOURCE_DIR="/Users/administrator"
-TARGET_DIR="/Users/Shared/out/1/1"
+SOURCE_DIR="/Users/administrator/Downloads"
+TARGET_DIR="/Users/Shared/filetypes/test"
 
 # Logging
 LOG_TO_FILE=false
-LOG_FILE="/Users/Shared/SaveCombo/log250826x.log"
+LOG_FILE="/Users/Shared/SaveCombo/sh.log"
 
 # Copy toggle (true = actually copy; false = DRY RUN, log only)
 COPY_ENABLED=true
@@ -40,17 +41,17 @@ COPY_ENABLED=true
 HASH_DEDUP_ENABLED=true           # Skip duplicates within this run
 HASH_DEDUP_AGAINST_TARGET=true    # Also skip if hash already exists in TARGET_DIR (pre-scan)
 
-# Date filter (Sydney local). Leave empty string "" to disable.
-# Example: "2025-08-01 00:00:00"
+# Date filter (local time). Leave empty string "" to disable.
+# Example: "2025-01-01 00:00:00"
 CUTOFF_DATE_SYDNEY="2025-01-01 00:00:00"
 
 # Size filters (bytes). Set to 0 to disable the bound.
-MIN_SIZE_BYTES=512                  # e.g. 1024 for 1 KiB; 0 disables min
-MAX_SIZE_BYTES=$((1*256*1024))    # 4 MiB; set 0 to disable max
+MIN_SIZE_BYTES=1024               # e.g. 1024 for 1 KiB; 0 disables min
+MAX_SIZE_BYTES=$((1*1024*1024))   # 1 MiB; set 0 to disable max
 
 # Extension allow-list (case-insensitive). Empty = no extension filtering.
 # Example: EXT_ALLOW=("csv" "tsv")
-EXT_ALLOW=("csv" "ods" "odt" "xls" "xlsx" "numbers")
+EXT_ALLOW=("csv" "ods" "odt" "xls" "xlsx" "numbers" "sh")
 
 # Filename substring filter (case-insensitive). Empty string = no filter.
 # Example: "drug"
@@ -58,7 +59,7 @@ FILENAME_SUBSTR=""
 
 # Filename regex filter (extended regex, case-insensitive). Empty = no filter.
 # Example: "drug|log|record"
-FILENAME_REGEX="drug|log|record|data|good|great|excellent|useful|trip|pihp"
+FILENAME_REGEX=""
 
 # MIME allow-list. Empty = no MIME filtering.
 # Common CSV-ish mimes: text/csv, application/csv, text/plain,
@@ -82,37 +83,33 @@ FIRST_WORD_REQUIRED=""
 # Minimum header columns (only used if HEADER_MODE_AT_LEAST=true)
 MIN_HEADER_COLS=10
 
-# -----------------------------------------------------------------------------
+# --------------------------- UTILITIES ---------------------------------------
 
-# Sydney timestamp (YYYYMMDDHHMMSS)
+# Local timestamp (YYYYMMDDHHMMSS)
 now() {
-  # Produce UTC then add +10h to format as Sydney (fixed, no DST as per policy)
-  # BSD date (macOS): -u for UTC base, -v+10H to add 10 hours
-  date -u -v+10H +%Y%m%d%H%M%S
+  date +%Y%m%d%H%M%S
 }
 
 log() {
-  local msg="$1"
+  local msg="${1:-}"
   local line
-  line="$(now)  $msg"
+  line="$(now)  ${msg}"
   echo "$line"
-  if [[ "$LOG_TO_FILE" == true ]]; then
-    # Ensure log directory exists
+  if [[ "${LOG_TO_FILE}" == true ]]; then
     mkdir -p -- "$(dirname "$LOG_FILE")" || true
     printf '%s\n' "$line" >> "$LOG_FILE"
   fi
 }
 
-# Convert a Sydney local "YYYY-MM-DD HH:MM:SS" to UTC epoch seconds
-sydney_to_utc_epoch() {
-  local s="$1"
+# Convert "YYYY-MM-DD HH:MM:SS" (local time) to epoch seconds
+to_epoch() {
+  local s="${1:-}"
   if [[ -z "$s" ]]; then
-    echo 0
+    printf '0\n'
     return 0
   fi
-  # Interpret the input as Sydney local, convert by subtracting 10 hours to UTC
-  # Then emit epoch in UTC.
-  date -u -j -f "%Y-%m-%d %H:%M:%S" "$s" -v-10H +%s
+  # macOS BSD date: parse as local time; on failure, return 0
+  date -j -f "%Y-%m-%d %H:%M:%S" "$s" +%s 2>/dev/null || printf '0'
 }
 
 # Lowercase helper
@@ -120,7 +117,7 @@ lower() { awk '{print tolower($0)}'; }
 
 # Check if array contains a value (exact match)
 in_array() {
-  local needle="$1"; shift
+  local needle="${1:-}"; shift || true
   local v
   for v in "$@"; do
     if [[ "$v" == "$needle" ]]; then
@@ -130,22 +127,32 @@ in_array() {
   return 1
 }
 
+# Safe stat size (bytes), falls back to 0
+stat_size() {
+  local f="${1:-}"
+  stat -f '%z' "$f" 2>/dev/null || echo 0
+}
+
+# Safe stat birth epoch (UTC), falls back to 0
+stat_birth() {
+  local f="${1:-}"
+  stat -f '%B' "$f" 2>/dev/null || echo 0
+}
+
+# --------------------------- STARTUP -----------------------------------------
+
 # Pre-scan target directory to populate known hashes (optional)
 declare -a known_hashes=()
-if [[ "$HASH_DEDUP_AGAINST_TARGET" == true && -d "$TARGET_DIR" ]]; then
+if [[ "${HASH_DEDUP_AGAINST_TARGET}" == true && -d "${TARGET_DIR}" ]]; then
   log "Pre-scanning target for existing hashes…"
-  # Only hash regular files up to MAX_SIZE_BYTES (to avoid huge reads if max is set).
-  # If MAX_SIZE_BYTES=0 (disabled), hash all.
   while IFS= read -r -d '' f; do
     # Respect MAX_SIZE if set
-    if (( MAX_SIZE_BYTES > 0 )); then
-      size=$(stat -f '%z' "$f")
-      if (( size > MAX_SIZE_BYTES )); then
-        continue
-      fi
+    local_size="$(stat_size "$f")"
+    if (( ${MAX_SIZE_BYTES:-0} > 0 )) && (( local_size > ${MAX_SIZE_BYTES:-0} )); then
+      continue
     fi
-    h=$(shasum -a 256 "$f" | awk '{print $1}')
-    known_hashes+=("$h")
+    h="$(shasum -a 256 "$f" 2>/dev/null | awk '{print $1}')"
+    [[ -n "${h:-}" ]] && known_hashes+=("$h")
   done < <(find "$TARGET_DIR" -type f -print0 2>/dev/null)
   log "Pre-scan complete: ${#known_hashes[@]} hashes recorded."
 fi
@@ -153,21 +160,26 @@ fi
 # Runtime hash set for this run
 declare -a seen_hashes=()
 
-# Prepare cutoff epoch
+# Prepare cutoff epoch (local time parsing)
 CUTOFF_EPOCH=0
-if [[ -n "$CUTOFF_DATE_SYDNEY" ]]; then
-  CUTOFF_EPOCH=$(sydney_to_utc_epoch "$CUTOFF_DATE_SYDNEY")
-  log "Cutoff (Sydney) $CUTOFF_DATE_SYDNEY => epoch(UTC) $CUTOFF_EPOCH"
+if [[ -n "${CUTOFF_DATE_SYDNEY}" ]]; then
+  CUTOFF_EPOCH="$(to_epoch "$CUTOFF_DATE_SYDNEY")"
+  # Keep only digits (belt & braces)
+  CUTOFF_EPOCH="${CUTOFF_EPOCH//[^0-9]/}"
+  [[ -z "$CUTOFF_EPOCH" ]] && CUTOFF_EPOCH=0
+  # Human-readable (local time) for sanity, without affecting numeric comparison
+  readable_local="$(date -r "${CUTOFF_EPOCH}" "+%a %d %b %Y %H:%M:%S %Z" 2>/dev/null || echo "n/a")"
+  log "Cutoff (local) ${CUTOFF_DATE_SYDNEY} => epoch ${CUTOFF_EPOCH} (${readable_local})"
 fi
 
 # Ensure target exists if copying
-if [[ "$COPY_ENABLED" == true ]]; then
-  mkdir -p -- "$TARGET_DIR"
+if [[ "${COPY_ENABLED}" == true ]]; then
+  mkdir -p -- "${TARGET_DIR}"
 fi
 
 # Validate header mode selection
 header_modes_set=0
-for flag in "$HEADER_MODE_EXACT" "$HEADER_MODE_ANY" "$HEADER_MODE_FIRSTWORD" "$HEADER_MODE_AT_LEAST"; do
+for flag in "${HEADER_MODE_EXACT}" "${HEADER_MODE_ANY}" "${HEADER_MODE_FIRSTWORD}" "${HEADER_MODE_AT_LEAST}"; do
   [[ "$flag" == true ]] && ((header_modes_set++))
 done
 if (( header_modes_set != 1 )); then
@@ -175,29 +187,34 @@ if (( header_modes_set != 1 )); then
   exit 1
 fi
 
-# Candidate file enumeration (start wide; we’ll filter in-process)
-# We do not use find -size here because we support both min & max in bytes with stat.
-log "Scanning: $SOURCE_DIR"
-while IFS= read -r -d '' file; do
+# --------------------------- ENUMERATION -------------------------------------
+# Use a pipe (not process substitution) and temporarily disable pipefail so a
+# benign SIGPIPE from 'find' (exit 141) cannot abort the script under set -e.
+log "Scanning: ${SOURCE_DIR}"
+__pipefail_was_set=0
+if set -o | grep -q 'pipefail *on'; then __pipefail_was_set=1; fi
+set +o pipefail
+
+find "$SOURCE_DIR" -type f -print0 2>/dev/null | while IFS= read -r -d '' file; do
   # --------------------- Basic file stats ---------------------
-  base=$(basename "$file")
+  base="$(basename "$file")"
   ext="${base##*.}"
   ext_lc="$(printf '%s' "$ext" | lower)"
-  size=$(stat -f '%z' "$file")               # bytes
-  birth_epoch=$(stat -f '%B' "$file")        # creation time (UTC epoch)
+  size="$(stat_size "$file")"             # bytes (safe)
+  birth_epoch="$(stat_birth "$file")"     # creation time (UTC epoch, safe)
 
   # --------------------- Size filter --------------------------
-  if (( MIN_SIZE_BYTES > 0 )) && (( size < MIN_SIZE_BYTES )); then
+  if (( ${MIN_SIZE_BYTES:-0} > 0 )) && (( size < ${MIN_SIZE_BYTES:-0} )); then
     log "SKIP size < min (${size}B < ${MIN_SIZE_BYTES}B): $file"
     continue
   fi
-  if (( MAX_SIZE_BYTES > 0 )) && (( size > MAX_SIZE_BYTES )); then
+  if (( ${MAX_SIZE_BYTES:-0} > 0 )) && (( size > ${MAX_SIZE_BYTES:-0} )); then
     log "SKIP size > max (${size}B > ${MAX_SIZE_BYTES}B): $file"
     continue
   fi
 
   # --------------------- Date filter --------------------------
-  if (( CUTOFF_EPOCH > 0 )) && (( birth_epoch <= CUTOFF_EPOCH )); then
+  if (( ${CUTOFF_EPOCH:-0} > 0 )) && (( birth_epoch <= ${CUTOFF_EPOCH:-0} )); then
     log "SKIP too old (birth ${birth_epoch} <= cutoff ${CUTOFF_EPOCH}): $file"
     continue
   fi
@@ -216,7 +233,7 @@ while IFS= read -r -d '' file; do
   fi
 
   # --------------------- Filename substring filter -------------
-  if [[ -n "$FILENAME_SUBSTR" ]]; then
+  if [[ -n "${FILENAME_SUBSTR}" ]]; then
     if ! printf '%s' "$base" | awk -v pat="$(printf '%s' "$FILENAME_SUBSTR" | lower)" '{if (index(tolower($0), pat)==0) exit 1}'; then
       log "SKIP filename substring miss (${FILENAME_SUBSTR}): $file"
       continue
@@ -224,7 +241,7 @@ while IFS= read -r -d '' file; do
   fi
 
   # --------------------- Filename regex filter -----------------
-  if [[ -n "$FILENAME_REGEX" ]]; then
+  if [[ -n "${FILENAME_REGEX}" ]]; then
     if ! printf '%s' "$base" | grep -Eiq "$FILENAME_REGEX"; then
       log "SKIP filename regex miss (${FILENAME_REGEX}): $file"
       continue
@@ -233,7 +250,7 @@ while IFS= read -r -d '' file; do
 
   # --------------------- MIME filter --------------------------
   if ((${#MIME_ALLOW[@]} > 0)); then
-    mime=$(file --mime-type -b "$file" 2>/dev/null || echo "unknown/unknown")
+    mime="$(file --mime-type -b "$file" 2>/dev/null || echo "unknown/unknown")"
     if ! in_array "$mime" "${MIME_ALLOW[@]}"; then
       log "SKIP MIME not allowed ($mime): $file"
       continue
@@ -242,28 +259,28 @@ while IFS= read -r -d '' file; do
 
   # --------------------- Header processing --------------------
   header="$(awk 'NF {print; exit}' "$file" 2>/dev/null || echo "")"
-  if [[ -z "$header" ]]; then
+  if [[ -z "${header}" ]]; then
     log "SKIP empty/absent header: $file"
     continue
   fi
 
-  if [[ "$HEADER_MODE_EXACT" == true ]]; then
+  if [[ "${HEADER_MODE_EXACT}" == true ]]; then
     if [[ "$header" != "$TARGET_HEADER" ]]; then
       log "SKIP header mismatch (EXACT): $file"
       continue
     fi
-  elif [[ "$HEADER_MODE_FIRSTWORD" == true ]]; then
+  elif [[ "${HEADER_MODE_FIRSTWORD}" == true ]]; then
     # First token up to comma or whitespace
-    first_token="$(printf '%s' "$header" | sed -E 's/[ ,].*$//' )"
+    first_token="$(printf '%s' "$header" | sed -E 's/[ ,].*$//')"
     if [[ "$first_token" != "$FIRST_WORD_REQUIRED" ]]; then
       log "SKIP first-word mismatch (need '$FIRST_WORD_REQUIRED', got '$first_token'): $file"
       continue
     fi
-  elif [[ "$HEADER_MODE_AT_LEAST" == true ]]; then
+  elif [[ "${HEADER_MODE_AT_LEAST}" == true ]]; then
     # Count comma-separated fields
     col_count="$(printf '%s' "$header" | awk -F',' '{print NF}')"
-    if [[ -z "$col_count" || "$col_count" -lt "$MIN_HEADER_COLS" ]]; then
-      log "SKIP header has only ${col_count:-0} cols (< $MIN_HEADER_COLS): $file"
+    if [[ -z "${col_count:-}" || "${col_count}" -lt "${MIN_HEADER_COLS}" ]]; then
+      log "SKIP header has only ${col_count:-0} cols (< ${MIN_HEADER_COLS}): $file"
       continue
     fi
   else
@@ -272,43 +289,43 @@ while IFS= read -r -d '' file; do
   fi
 
   # --------------------- Hash duplicate detection --------------
-  if [[ "$HASH_DEDUP_ENABLED" == true || "$HASH_DEDUP_AGAINST_TARGET" == true ]]; then
-    hash=$(shasum -a 256 "$file" | awk '{print $1}')
+  if [[ "${HASH_DEDUP_ENABLED}" == true || "${HASH_DEDUP_AGAINST_TARGET}" == true ]]; then
+    hash="$(shasum -a 256 "$file" 2>/dev/null | awk '{print $1}')"
+    if [[ -z "${hash:-}" ]]; then
+      log "SKIP hashing failed: $file"
+      continue
+    fi
     # Check runtime seen
-    for h in "${seen_hashes[@]}"; do
+    is_dup=false
+    for h in "${seen_hashes[@]:-}"; do
       if [[ "$h" == "$hash" ]]; then
         log "SKIP duplicate (this run): $file"
-        hash=""
+        is_dup=true
         break
       fi
     done
     # Check pre-known (from TARGET)
-    if [[ -n "$hash" && "$HASH_DEDUP_AGAINST_TARGET" == true ]]; then
-      for h in "${known_hashes[@]}"; do
+    if [[ "$is_dup" == false && "${HASH_DEDUP_AGAINST_TARGET}" == true ]]; then
+      for h in "${known_hashes[@]:-}"; do
         if [[ "$h" == "$hash" ]]; then
           log "SKIP duplicate (already in target): $file"
-          hash=""
+          is_dup=true
           break
         fi
       done
     fi
-    # Record if still valid
-    if [[ -n "$hash" ]]; then
-      seen_hashes+=("$hash")
-    else
-      continue
-    fi
+    [[ "$is_dup" == true ]] && continue
+    seen_hashes+=("$hash")
   fi
 
   # --------------------- Copy / Dry-run ------------------------
-  if [[ "$COPY_ENABLED" == true ]]; then
-    # Prepare destination name with suffix if needed
+  if [[ "${COPY_ENABLED}" == true ]]; then
     name="${base%.*}"
     ext="${base##*.}"
-    dest="$TARGET_DIR/$base"
+    dest="${TARGET_DIR}/${base}"
     count=1
     while [[ -e "$dest" ]]; do
-      dest="$TARGET_DIR/${name}_$count.$ext"
+      dest="${TARGET_DIR}/${name}_${count}.${ext}"
       ((count++))
     done
     cp -p "$file" "$dest"
@@ -317,9 +334,12 @@ while IFS= read -r -d '' file; do
     log "DRY-RUN (no copy): $file"
   fi
 
-done < <(find "$SOURCE_DIR" -type f -print0 2>/dev/null)
+done
 
-log "✅ Done. Source='$SOURCE_DIR'  Target='${TARGET_DIR}'  Copy=${COPY_ENABLED}"
+# Restore previous pipefail setting
+if (( __pipefail_was_set )); then set -o pipefail; fi
+
+log "✅ Done. Source='${SOURCE_DIR}'  Target='${TARGET_DIR}'  Copy=${COPY_ENABLED}"
 # =============================================================================
 # End of script
 # =============================================================================

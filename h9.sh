@@ -59,7 +59,7 @@ FILENAME_SUBSTR=""
 
 # Filename regex filter (extended regex, case-insensitive). Empty = no filter.
 # Example: "drug|log|record"
-FILENAME_REGEX="drug|log|record|data|good|great|excellent|useful|trip|pihp"
+FILENAME_REGEX=""
 
 # MIME allow-list. Empty = no MIME filtering.
 # Common CSV-ish mimes: text/csv, application/csv, text/plain,
