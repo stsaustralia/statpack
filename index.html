@@ -528,11 +528,11 @@ const NO_SHADE = new Set(['change','Change','Deg']);
 
 // Shading caps (max value that maps to full opacity)
 const SHADE_CAP = {
-  'Score': 25,
-  'Max': 30,
-  'Min': 12,
-  'Weighted': 10,
-  '5Max': 10
+  'Score': 35,
+  'Max': 35,
+  'Min': 14,
+  'Weighted': 12,
+  '5Max': 12
 };
 
 const GREEN_SET = new Set(['Rush','Mood','Social','Score','Weighted','5Max','Max']);
@@ -597,41 +597,41 @@ function applyRowShading(tr) {
 }
 // BOOKMARK LABELS
 const labelMappings = {
-  rush: {0: 'None', 1: 'Very Low', 2: 'Low-Mid', 3: 'Mid-Strong', 4: 'Very Strong', 5: 'Extreme', 6: 'Immense', 7: 'Extreme', Rush: 'Rush', 4.5: 'Intense', 3.5: 'Strong', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
-  mood: {0: 'Normal', 1: 'Very Low', 2: 'Low-Mid', 3: 'Mid-Good', 4: 'Very Good', 5: 'Euphoric', 6: 'Very Euphoric', 7: 'Peak', Mood: 'Mood', 4.5: 'Brilliant', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
-  social: {0: 'Normal', 1: 'Very Low', 2: 'Low-Mid', 3: 'Mid-Good', 4: 'Very Outgoing', 5: 'Disinhibited', 6: 'Autopilot', 7: 'Peak', Social: 'Social', 4.5: 'Manic', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
-  energy: {0: 'Normal', 1: 'Very Low', 2: 'Alert/Some', 3: 'Energetic', 4: 'Very Energetic', 5: 'Manic', 6: 'Overdrive', 7: 'Peak', Energy: 'Energy', 4.5: 'Hyper', 3.5: 'Energetic/Active', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
-  focus: {0: 'Normal', 1: 'Very Low', 2: 'Alert/Some', 3: 'Focused', 4: 'Hyperfocused', 5: 'Laser', 6: 'Wired', 7: 'Peak', Focus: 'Focus', 4.5: 'Obsessive', 3.5: 'Focused/Fixated', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
-  anxiety: {0: 'None', 1: 'Very Low', 2: 'Some/Ignoreable', 3: 'Anxious', 4: 'Severe Impact', 5: 'Panic', 6: 'Crippled', 7: 'Peak', Anxiety: 'Anxiety', 4.5: 'Paranoia', 3.5: 'Anxious/Adverse', 2.5: 'Some/Ignoreable', 1.5: 'Low', 0.5: '+'},
-  impair: {0: 'None', 1: 'Very Low', 2: 'Some/Noticeable', 3: 'Impaired', 4: 'Severe Impact', 5: 'Controlling', 6: 'Hazardous', 7: 'Peak', Impair: 'Impair', 4.5: 'Panic/Despair', 3.5: 'Impaired/Adverse', 2.5: 'Some/Noticeable', 1.5: 'Low', 0.5: '+'},
+  rush: {0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Moderate', 4: 'Strong', 5: 'Very Strong', 6: 'Immense', 7: 'Extreme', Rush: 'Rush', 4.5: 'Intense', 3.5: 'Strong', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  mood: {0: 'Flat', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Good', 5: 'Euphoric', 6: 'Very Euphoric', 7: 'Peak', Mood: 'Mood', 4.5: 'Brilliant', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  social: {0: 'Avoidant', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Good', 5: 'Disinhibited', 6: 'Autopilot', 7: 'Peak', Social: 'Social', 4.5: 'Manic', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  energy: {0: 'Tired', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Energetic', 5: 'Manic', 6: 'Overdrive', 7: 'Peak', Energy: 'Energy', 4.5: 'Hyper', 3.5: 'Energetic/Active', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
+  focus: {0: 'Scattered', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Focused', 5: 'Laser', 6: 'Wired', 7: 'Peak', Focus: 'Focus', 4.5: 'Obsessive', 3.5: 'Focused/Fixated', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
+  anxiety: {0: 'None', 1: 'Minimal', 2: 'Low', 3: 'Mid', 4: 'Affectedt', 5: 'Panic', 6: 'Crippled', 7: 'Peak', Anxiety: 'Anxiety', 4.5: 'Paranoia', 3.5: 'Anxious/Adverse', 2.5: 'Some/Ignoreable', 1.5: 'Low', 0.5: '+'},
+  impair: {0: 'No', 1: 'Minimal', 2: 'Low', 3: 'Mid', 4: 'Impaired', 5: 'Controlling', 6: 'Hazardous', 7: 'Peak', Impair: 'Impair', 4.5: 'Panic/Despair', 3.5: 'Impaired/Adverse', 2.5: 'Some/Noticeable', 1.5: 'Low', 0.5: '+'},
   change: {0: 'State Change', 1: 'Plumes', 2: 'Stationary', 3: 'Deep Breath', 4: 'Flame Close', 5: 'Positive', 6: 'Last Row', 7: 'Last Dose', Change: 'Change', 4.5: 'Visible', 3.5: 'High Heat', 2.5: 'Rocked Sides', 1.5: 'BIllowing', 0.5: 'Loose'},
   degree: {0: 'Some Unchanged', 1: 'Nice Vapour', 2: 'Followed', 3: 'Shallow Breath', 4: 'Flame Close', 5: 'Negative', 6: 'Correlate', 7: 'Last Hit', Degree: 'Degree', 4.5: 'Invisible', 3.5: 'Low Heat', 2.5: 'Rolled', 1.5: 'Smoke', 0.5: 'Not Moving'},
   other: {7.0: 'X', 6.0: 'X', 5.0: 'X', 4.5: 'X', 4.0: 'X', 3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'},
 };
 const RAPID_LABELS = {
-  rush: { 0: 'None', 1: 'Low/Flat', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
-  mood: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
-  social: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
-  energy: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
-  focus: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
-  anxiety: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
-  impair: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
-  change: { 0: 'No', 1: 'Noticed', 2: 'Some', 3: 'Clear', 4: 'Strong', 5: 'High', 6: 'Ultra' },
-  degree: { 0: 'Aggressive', 1: 'Gentle', 2: 'Burned', 3: 'Nice Taste', 4: 'Good Vapour', 5: 'Negative', 6: 'Positive'},
-  other: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' }
+  rush: {0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Moderate', 4: 'Strong', 5: 'Very Strong', 6: 'Immense', 7: 'Extreme', Rush: 'Rush', 4.5: 'Intense', 3.5: 'Strong', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  mood: {0: 'Flat', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Good', 5: 'Euphoric', 6: 'Very Euphoric', 7: 'Peak', Mood: 'Mood', 4.5: 'Brilliant', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  social: {0: 'Avoidant', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Good', 5: 'Disinhibited', 6: 'Autopilot', 7: 'Peak', Social: 'Social', 4.5: 'Manic', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  energy: {0: 'Tired', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Energetic', 5: 'Manic', 6: 'Overdrive', 7: 'Peak', Energy: 'Energy', 4.5: 'Hyper', 3.5: 'Energetic/Active', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
+  focus: {0: 'Scattered', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Focused', 5: 'Laser', 6: 'Wired', 7: 'Peak', Focus: 'Focus', 4.5: 'Obsessive', 3.5: 'Focused/Fixated', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
+  anxiety: {0: 'None', 1: 'Minimal', 2: 'Low', 3: 'Mid', 4: 'Affectedt', 5: 'Panic', 6: 'Crippled', 7: 'Peak', Anxiety: 'Anxiety', 4.5: 'Paranoia', 3.5: 'Anxious/Adverse', 2.5: 'Some/Ignoreable', 1.5: 'Low', 0.5: '+'},
+  impair: {0: 'No', 1: 'Minimal', 2: 'Low', 3: 'Mid', 4: 'Impaired', 5: 'Controlling', 6: 'Hazardous', 7: 'Peak', Impair: 'Impair', 4.5: 'Panic/Despair', 3.5: 'Impaired/Adverse', 2.5: 'Some/Noticeable', 1.5: 'Low', 0.5: '+'},
+  change: {0: 'State Change', 1: 'Plumes', 2: 'Stationary', 3: 'Deep Breath', 4: 'Flame Close', 5: 'Positive', 6: 'Last Row', 7: 'Last Dose', Change: 'Change', 4.5: 'Visible', 3.5: 'High Heat', 2.5: 'Rocked Sides', 1.5: 'BIllowing', 0.5: 'Loose'},
+  degree: {0: 'Some Unchanged', 1: 'Nice Vapour', 2: 'Followed', 3: 'Shallow Breath', 4: 'Flame Close', 5: 'Negative', 6: 'Correlate', 7: 'Last Hit', Degree: 'Degree', 4.5: 'Invisible', 3.5: 'Low Heat', 2.5: 'Rolled', 1.5: 'Smoke', 0.5: 'Not Moving'},
+  other: {7.0: 'X', 6.0: 'X', 5.0: 'X', 4.5: 'X', 4.0: 'X', 3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'},
 };
 ['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
 
     
 // === Metric-specific label overrides (scores 6,,2,1,0) ===
 const BUTTON_LABELS_BY_METRIC = {
-  rush: {0: 'None', 1: 'Very Low', 2: 'Low-Mid', 3: 'Mid-Strong', 4: 'Very Strong', 5: 'Extreme', 6: 'Immense', 7: 'Extreme', Rush: 'Rush', 4.5: 'Intense', 3.5: 'Strong', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
-  mood: {0: 'Normal', 1: 'Very Low', 2: 'Low-Mid', 3: 'Mid-Good', 4: 'Very Good', 5: 'Euphoric', 6: 'Very Euphoric', 7: 'Peak', Mood: 'Mood', 4.5: 'Brilliant', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
-  social: {0: 'Normal', 1: 'Very Low', 2: 'Low-Mid', 3: 'Mid-Good', 4: 'Very Outgoing', 5: 'Disinhibited', 6: 'Autopilot', 7: 'Peak', Social: 'Social', 4.5: 'Manic', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
-  energy: {0: 'Normal', 1: 'Very Low', 2: 'Alert/Some', 3: 'Energetic', 4: 'Very Energetic', 5: 'Manic', 6: 'Overdrive', 7: 'Peak', Energy: 'Energy', 4.5: 'Hyper', 3.5: 'Energetic/Active', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
-  focus: {0: 'Normal', 1: 'Very Low', 2: 'Alert/Some', 3: 'Focused', 4: 'Hyperfocused', 5: 'Laser', 6: 'Wired', 7: 'Peak', Focus: 'Focus', 4.5: 'Obsessive', 3.5: 'Focused/Fixated', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
-  anxiety: {0: 'None', 1: 'Very Low', 2: 'Some/Ignoreable', 3: 'Anxious', 4: 'Severe Impact', 5: 'Panic', 6: 'Crippled', 7: 'Peak', Anxiety: 'Anxiety', 4.5: 'Paranoia', 3.5: 'Anxious/Adverse', 2.5: 'Some/Ignoreable', 1.5: 'Low', 0.5: '+'},
-  impair: {0: 'None', 1: 'Very Low', 2: 'Some/Noticeable', 3: 'Impaired', 4: 'Severe Impact', 5: 'Controlling', 6: 'Hazardous', 7: 'Peak', Impair: 'Impair', 4.5: 'Panic/Despair', 3.5: 'Impaired/Adverse', 2.5: 'Some/Noticeable', 1.5: 'Low', 0.5: '+'},
+  rush: {0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Moderate', 4: 'Strong', 5: 'Very Strong', 6: 'Immense', 7: 'Extreme', Rush: 'Rush', 4.5: 'Intense', 3.5: 'Strong', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  mood: {0: 'Flat', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Good', 5: 'Euphoric', 6: 'Very Euphoric', 7: 'Peak', Mood: 'Mood', 4.5: 'Brilliant', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  social: {0: 'Avoidant', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Good', 5: 'Disinhibited', 6: 'Autopilot', 7: 'Peak', Social: 'Social', 4.5: 'Manic', 3.5: 'Clear/Good', 2.5: 'Mid', 1.5: 'Low', 0.5: '+'},
+  energy: {0: 'Tired', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Energetic', 5: 'Manic', 6: 'Overdrive', 7: 'Peak', Energy: 'Energy', 4.5: 'Hyper', 3.5: 'Energetic/Active', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
+  focus: {0: 'Scattered', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'Focused', 5: 'Laser', 6: 'Wired', 7: 'Peak', Focus: 'Focus', 4.5: 'Obsessive', 3.5: 'Focused/Fixated', 2.5: 'Alert/Capable', 1.5: 'Low/Alert', 0.5: '+'},
+  anxiety: {0: 'None', 1: 'Minimal', 2: 'Low', 3: 'Mid', 4: 'Affectedt', 5: 'Panic', 6: 'Crippled', 7: 'Peak', Anxiety: 'Anxiety', 4.5: 'Paranoia', 3.5: 'Anxious/Adverse', 2.5: 'Some/Ignoreable', 1.5: 'Low', 0.5: '+'},
+  impair: {0: 'No', 1: 'Minimal', 2: 'Low', 3: 'Mid', 4: 'Impaired', 5: 'Controlling', 6: 'Hazardous', 7: 'Peak', Impair: 'Impair', 4.5: 'Panic/Despair', 3.5: 'Impaired/Adverse', 2.5: 'Some/Noticeable', 1.5: 'Low', 0.5: '+'},
   change: {0: 'State Change', 1: 'Plumes', 2: 'Stationary', 3: 'Deep Breath', 4: 'Flame Close', 5: 'Positive', 6: 'Last Row', 7: 'Last Dose', Change: 'Change', 4.5: 'Visible', 3.5: 'High Heat', 2.5: 'Rocked Sides', 1.5: 'BIllowing', 0.5: 'Loose'},
   degree: {0: 'Some Unchanged', 1: 'Nice Vapour', 2: 'Followed', 3: 'Shallow Breath', 4: 'Flame Close', 5: 'Negative', 6: 'Correlate', 7: 'Last Hit', Degree: 'Degree', 4.5: 'Invisible', 3.5: 'Low Heat', 2.5: 'Rolled', 1.5: 'Smoke', 0.5: 'Not Moving'},
   other: {7.0: 'X', 6.0: 'X', 5.0: 'X', 4.5: 'X', 4.0: 'X', 3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'},
