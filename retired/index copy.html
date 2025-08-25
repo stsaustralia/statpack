@@ -609,16 +609,16 @@ const labelMappings = {
   other: {7.0: 'X', 6.0: 'X', 5.0: 'X', 4.5: 'X', 4.0: 'X', 3.5: 'X', 3.0: 'X', 2.5: 'X', 2.0: 'X', 1.5: 'X', 1.0: 'X', 0.5: 'X', 0.0: 'X'},
 };
 const RAPID_LABELS = {
-  rush: { 5.0: 'Overwhelming', 2.0: 'Extreme', 1.5: 'Strong', 1.0: 'Clear', 0.5: 'Present', 0.0: 'None', Rush: 'Rush' },
-  mood: { 5.0: 'Euphoric', 2.0: 'Dominating', 1.5: 'Obvious', 1.0: 'Distinct', 0.5: 'Change', 0.0: 'None', Mood: 'Mood' },
-  social: { 5.0: 'Disinhibited', 2.0: 'Outgoing', 1.5: 'Social', 1.0: 'Push', 0.5: 'Want', 0.0: 'No', Social: 'Social' },
-  energy: { 5.0: 'Overdrive', 2.0: 'Manic', 1.5: 'Energetic', 1.0: 'Active', 0.5: 'Alert', 0.0: 'None', Energy: 'Energy' },
-  focus: { 5.0: 'Wired', 2.0: 'Obsessive', 1.5: 'Fixated', 1.0: 'Focused', 0.5: 'Capable', 0.0: 'None', Focus: 'Focus' },
-  anxiety: { 5.0: 'Panic', 2.0: 'Adverse', 1.5: 'Affecting', 1.0: 'Proiminent', 0.5: 'Ignorable', 0.0: 'No', Anxiety: 'Anxiety' },
-  impair: { 5.0: 'Dangerous', 2.0: 'Crippled', 1.5: 'Blatant', 1.0: 'Overthinking', 0.5: 'Side Effects', 0.0: 'No', Impair: 'Impair' },
-  change: { 5.0: 'x', 2.0: 'x', 1.5: 'x', 1.0: 'x', 0.5: 'x', 0.0: 'x', Change: 'Change' },
-  degree: { 5.0: 'x', 2.0: 'x', 1.5: 'x', 1.0: 'x', 0.5: 'x', 0.0: 'x', Degree: 'Degree' },
-  other: { 5.0: 'x', 2.0: 'x', 1.5: 'x', 1.0: 'x', 0.5: 'x', 0.0: 'x', Other: 'Other' },
+  rush: { 0: 'None', 1: 'Low/Flat', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
+  mood: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
+  social: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
+  energy: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
+  focus: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
+  anxiety: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
+  impair: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' },
+  change: { 0: 'No', 1: 'Noticed', 2: 'Some', 3: 'Clear', 4: 'Strong', 5: 'High', 6: 'Ultra' },
+  degree: { 0: 'Aggressive', 1: 'Gentle', 2: 'Burned', 3: 'Nice Taste', 4: 'Good Vapour', 5: 'Negative', 6: 'Positive'},
+  other: { 0: 'None', 1: 'Very Low', 2: 'Low', 3: 'Mid', 4: 'High', 5: 'Very High', 6: 'Extremely High' }
 };
 ['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
 

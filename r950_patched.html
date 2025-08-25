@@ -273,7 +273,26 @@
 
 </style>
 </head>
-<body>
+\1
+
+<!-- Timers UI (added by patch) -->
+<div id="timers" style="display:flex; gap:16px; align-items:center; margin:8px 0 2px;">
+  <div class="timer-group" style="display:flex; align-items:center; gap:8px;">
+    <strong>Trip:</strong>
+    <span id="tripTimer">00:00:00</span>
+    <button type="button" onclick="timerStart('trip')">Start</button>
+    <button type="button" onclick="timerPause('trip')">Pause</button>
+    <button type="button" onclick="timerReset('trip')">Reset</button>
+  </div>
+  <div class="timer-group" style="display:flex; align-items:center; gap:8px;">
+    <strong>Since&nbsp;Dose:</strong>
+    <span id="doseTimer">00:00:00</span>
+    <button type="button" onclick="timerStart('dose')">Start</button>
+    <button type="button" onclick="timerPause('dose')">Pause</button>
+    <button type="button" onclick="timerReset('dose')">Reset</button>
+  </div>
+</div>
+
 <div class="summary-controls">
 <button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
 <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
@@ -678,20 +697,21 @@ function getLabels(metric, values) {
     // Per-metric button ordering/sets (independent for each metric)
     // 12 buttons per metric by default; override any metric at runtime via localStorage.
 //     const DEFAULT_BUTTONS_12 = [8,7,6,'----------,5,4.5,4,'----------,3.5,3,2.5,'----------,2,1.5,1,'----------,0.75,0.5,0.25,0];
-     const DEFAULT_BUTTONS_12 = [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0];
+//      const DEFAULT_BUTTONS_12 = [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0];
+     const DEFAULT_BUTTONS_12 = [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5];
     const PER_METRIC_BUTTONS = {
 //       rush:    DEFAULT_BUTTONS_12.slice(),
 // BOOKMARK
-      rush:    [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      mood:    [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      social:  [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      energy:  [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      focus:   [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      anxiety: [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      impair:  [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      change:  [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      degree:  [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      other:   [6,5,4,3.5,3,2.5,2,1.5,1,0.5,0]
+      rush:    [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      mood:    [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      social:  [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      energy:  [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      focus:   [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      anxiety: [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      impair:  [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      change:  [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      degree:  [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5],
+      other:   [6,5,4,3,2,1,0,0.5,3.5,2.5,1.5]
       };
     function getMetricButtons(metric){
       try {
@@ -1005,16 +1025,9 @@ const purpleLabels =  [
     // ──────────────────────────────────────────────────────────────────────────
     }
 
-    function resetTimer() {
-        startTime = doseTime = new Date();
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            document.getElementById('timer').innerText = 'Trip Time: ' + getElapsed(startTime);
-        }, 1000);
+    function resetTimer(){ timerReset('trip'); }, 1000);
     }
-    function pauseTimer() {
-        clearInterval(timerInterval);
-    }
+    function pauseTimer(){ timerPause('trip'); }
     function newTrip() {
         logData = [];
         localStorage.removeItem('tripLog');
@@ -1046,8 +1059,8 @@ if (!startTime)
         const entry = {
    			 _ts: Date.now(),
    			 timestamp: ts,
-            sincedose: getElapsed(doseTime),
-            elapsed: getElapsed(startTime),
+            \1getDoseHMS(),
+            \1getTripHMS(),
             info: document.getElementById('eventInput').value,
             scale: document.getElementById('scaleInput').value,
             drug: document.getElementById('drugSelect').value,
@@ -1346,7 +1359,7 @@ function mapSchema(header){
   const need = {
     ts: ["Timestamp"],
     since: ["Since Dose","Since"],
-    elapsed: ["Elapsed"],
+    \1getTripHMS(),
     info: ["Info"],
     scale: ["Scale"],
     drug: ["Drug"],
@@ -1413,8 +1426,8 @@ function rowsToLogData(rows, mapped){
     const entry = {
       _ts: parseAUDatetime(val(H.ts)) || Date.now(),
       timestamp: val(H.ts),
-      sincedose: val(H.since),
-      elapsed: val(H.elapsed),
+      \1getDoseHMS(),
+      \1getTripHMS(),
       info: val(H.info),
       scale: val(H.scale),
       drug: val(H.drug),
@@ -4353,6 +4366,87 @@ function readCurrentSelections(){
   } else {
     setDToLast3();
   }
+})();
+</script>
+
+
+<script>
+// === Dual timer system (Trip & Since-Dose) — added by patch ===
+(function(){
+  'use strict';
+  window.timers = window.timers || {
+    trip: { start: null, \1getTripHMS(), handle: null, node: null },
+    dose: { start: null, \1getTripHMS(), handle: null, node: null }
+  };
+
+  function nowSec(){ return Date.now()/1000; }
+  function fmtHMS(totalSeconds){
+    const s = Math.max(0, Math.floor(totalSeconds));
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+    const ss= String(s%60).padStart(2,'0');
+    return `${h}:${m}:${ss}`;
+  }
+
+  function renderTimer(kind){
+    const T = timers[kind]; if(!T) return;
+    // compute current elapsed
+    const sec = T.start ? (T.elapsed + (nowSec()-T.start)) : T.elapsed;
+    if (T.node) T.node.textContent = fmtHMS(sec);
+
+    // Optional legacy mirror for single #timer label
+    if (kind === 'trip'){
+      const legacyNode = document.getElementById('timer');
+      if (legacyNode) legacyNode.textContent = 'Trip Time: ' + fmtHMS(sec);
+    }
+  }
+
+  function ensureLoop(kind){
+    const T = timers[kind]; if(!T) return;
+    if (!T.handle){
+      T.handle = setInterval(()=>renderTimer(kind), 1000);
+    }
+  }
+
+  function clearLoop(kind){
+    const T = timers[kind]; if(!T) return;
+    if (T.handle){ clearInterval(T.handle); T.handle = null; }
+  }
+
+  // Public API
+  window.timerStart = function(kind){
+    const T = timers[kind]; if(!T) return;
+    if (!T.start){ T.start = nowSec(); }
+    ensureLoop(kind); renderTimer(kind);
+  };
+
+  window.timerPause = function(kind){
+    const T = timers[kind]; if(!T) return;
+    if (T.start){ T.elapsed += (nowSec() - T.start); T.start = null; }
+    clearLoop(kind); renderTimer(kind);
+  };
+
+  window.timerReset = function(kind){
+    const T = timers[kind]; if(!T) return;
+    T.start = null; T.elapsed = 0; clearLoop(kind); renderTimer(kind);
+  };
+
+  // Keep UI nodes once DOM is ready
+  window.addEventListener('DOMContentLoaded', ()=>{
+    if (!timers.trip.node) timers.trip.node = document.getElementById('tripTimer');
+    if (!timers.dose.node) timers.dose.node = document.getElementById('doseTimer');
+    renderTimer('trip'); renderTimer('dose');
+  });
+
+  // Convenience helpers for consuming code
+  window.getTripHMS = function(){
+    const T = timers.trip; const sec = T.start ? (T.elapsed + (nowSec()-T.start)) : T.elapsed;
+    return fmtHMS(sec);
+  };
+  window.getDoseHMS = function(){
+    const T = timers.dose; const sec = T.start ? (T.elapsed + (nowSec()-T.start)) : T.elapsed;
+    return fmtHMS(sec);
+  };
 })();
 </script>
 
