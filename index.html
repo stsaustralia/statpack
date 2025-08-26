@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.7.2 r977</title>
+<title>statpack v1.7.5 r1015</title>
 <style>
 
 #logTable {
@@ -294,7 +294,7 @@
 <button id="autoEntriesBtn" onclick="openAutoEntries()">Auto Entries</button>
 <button id="rollingAvgBtn" onclick="openRollingAverage()">Rolling Average</button>
 </div>
-<h1>statpack v1.7.2 r977</h1>
+<h1>statpack v1.7.5 r1015</h1>
 <div class="controls">
 <span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:12px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
@@ -528,9 +528,9 @@ const CONFIG = Object.freeze({
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
     noShadeCols: ['change','Change','Deg'],
     shadeCap: {
-      'Score': 35,
-      'Max': 35,
-      'Min': 14,
+      'Score': 30,
+      'Max': 30,
+      'Min': 12,
       'Weighted': 12,
       '5Max': 12
     },
@@ -545,23 +545,23 @@ const CONFIG = Object.freeze({
       rush:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Mid',3:'Mid-Strong',4:'Intense',5:'Extreme',6:'Ultra'},
       mood:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Functional',2:'Fair',3:'Fair-Good',4:'Very Good',5:'Euphoric',6:'Auto',6:'Extreme'},
       social:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Capable',2:'Motivated',3:'Social',4:'Outgoing',5:'Disinhibited',6:'Extreme'},
-      energy:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Alert',2:'Somewhat',3:'Energetic',4:'Very High',5:'Manic',6:'Overdrive'},
-      focus:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Capable',2:'Somewhat',3:'Focused',4:'High',5:'Very High',6:'Extreme'},
+      energy:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Alert',2:'Somewhat',3:'Energetic',4:'Higher',5:'Manic',6:'Overdrive'},
+      focus:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Capable',2:'Somewhat',3:'Focused',4:'Higher',5:'Very High',6:'Extreme'},
       anxiety:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Some',2:'Affecting',3:'Anxious',4:'Severe',5:'Very Severe',6:'Extreme'},
       impair:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Some',2:'Adverse',3:'Impaired',4:'Severe',5:'Very Severe',6:'Extreme'},
-      change:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Engaging',3:'Focused',4:'High',5:'Very High',6:'Extreme'},
+      change:{1:'Present',2:'Certain',3:'Significant',4:'Strong',5.5:'Obvious',4.5:'Very Strong',2.5:'Significant',7.5:'Extreme'},
       degree:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Engaging',3:'Focused',4:'High',5:'Very High',6:'Extreme'},
       other:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Engaging',3:'Focused',4:'High',5:'Very High',6:'Extreme'}
     },
     rapidLabels: {
-      rush:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Moderate',3:'Strong',4:'Intense',5:'Extreme',6:'Ultra'},
-      mood:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Functional',2:'Fair',3:'Good',4:'Very Good',5:'Euphoric',6:'Auto',6:'Extreme'},
+      rush:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Mid',3:'Mid-Strong',4:'Intense',5:'Extreme',6:'Ultra'},
+      mood:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Functional',2:'Fair',3:'Fair-Good',4:'Very Good',5:'Euphoric',6:'Auto',6:'Extreme'},
       social:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Capable',2:'Motivated',3:'Social',4:'Outgoing',5:'Disinhibited',6:'Extreme'},
-      energy:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Alert',2:'Somewhat',3:'Energetic',4:'Very High',5:'Manic',6:'Overdrive'},
-      focus:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Capable',2:'Somewhat',3:'Focused',4:'High',5:'Very High',6:'Extreme'},
+      energy:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Alert',2:'Somewhat',3:'Energetic',4:'Higher',5:'Manic',6:'Overdrive'},
+      focus:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Capable',2:'Somewhat',3:'Focused',4:'Higher',5:'Very High',6:'Extreme'},
       anxiety:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Some',2:'Affecting',3:'Anxious',4:'Severe',5:'Very Severe',6:'Extreme'},
       impair:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Some',2:'Adverse',3:'Impaired',4:'Severe',5:'Very Severe',6:'Extreme'},
-      change:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Engaging',3:'Focused',4:'High',5:'Very High',6:'Extreme'},
+      change:{1:'Present',2:'Certain',3:'Significant',4:'Strong',5.5:'Obvious',4.5:'Very Strong',2.5:'Significant',7.5:'Extreme'},
       degree:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Engaging',3:'Focused',4:'High',5:'Very High',6:'Extreme'},
       other:{0.5:'+',0.25:'Minimal',0.75:'Very Low',1.5:'Low',2.5:'Mid',3.5:'Strong',4.5:'Very Strong',5.5:'Extremely Strong',6.5:'Ultra Strong',0:'None',1:'Low',2:'Engaging',3:'Focused',4:'High',5:'Very High',6:'Extreme'}
     },
@@ -569,18 +569,18 @@ const CONFIG = Object.freeze({
   },
   buttons: {
     perMetricButtons: {
-      rush:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      mood:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      social:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      energy:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      focus:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      anxiety:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      impair:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      change:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      degree:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0],
-      other:[6,5,4,3.5,3,2.5,2,1,0.75,0.5,0.25,0]
+      rush:[6,5,4,3,2,1,0.75,0.5,0.25,0],
+      mood:[6,5,4,3,2,1,0.75,0.5,0.25,0],
+      social:[6,5,4,3,2,1,0.75,0.5,0.25,0],
+      energy:[6,5,4,3,2,1,0.75,0.5,0.25,0],
+      focus:[6,5,4,3,2,1,0.75,0.5,0.25,0],
+      anxiety:[6,5,4,3,2,1,0.75,0.5,0.25,0],
+      impair:[6,5,4,3,2,1,0.75,0.5,0.25,0],
+      change:[4,3.5,1.5,3,2,1,0],
+      degree:[6,5,4,3,2,1,0.75,0.5,0.25,0],
+      other:[6,5,4,3,2,1,0.75,0.5,0.25,0]
     },
-    rapidValues: [6.5,5.5,4.5,3.5,2.5,1.5,0.75,0.25,0],
+    rapidValues: [6.5,5.5,4.5,3.5,2.5,1.5,0.75,0.5,0.25,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other'],
     zeroScoreMetrics: ['change','degree','other']
   },

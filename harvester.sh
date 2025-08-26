@@ -28,11 +28,11 @@ IFS=$'\n\t'
 
 # Where to look and where to store copies
 SOURCE_DIR="/Users/administrator/Downloads"
-TARGET_DIR="/Users/Shared/out/CSVx22"
+TARGET_DIR="/Users/Shared/today/aug26"
 
 # Logging
 LOG_TO_FILE=false
-LOG_FILE="/Users/Shared/SaveCombo/log2508da22116x.log"
+LOG_FILE="/Users/Shared/SaveCombo/a26a1.log"
 
 # Copy toggle (true = actually copy; false = DRY RUN, log only)
 COPY_ENABLED=true
@@ -46,12 +46,12 @@ HASH_DEDUP_AGAINST_TARGET=true    # Also skip if hash already exists in TARGET_D
 CUTOFF_DATE_SYDNEY=""
 
 # Size filters (bytes). Set to 0 to disable the bound.
-MIN_SIZE_BYTES=512                 # e.g. 1024 for 1 KiB; 0 disables min
+MIN_SIZE_BYTES=256                 # e.g. 1024 for 1 KiB; 0 disables min
 MAX_SIZE_BYTES=$((4*1024*1024))   # 4 MiB; set 0 to disable max
 
 # Extension allow-list (case-insensitive). Empty = no extension filtering.
 # Example: EXT_ALLOW=("csv" "tsv")
-EXT_ALLOW=("csv" "ods" "numbers" "xls" "xlsx" "odt")
+EXT_ALLOW=("csv")
 
 # Filename substring filter (case-insensitive). Empty string = no filter.
 # Example: "drug"
@@ -59,7 +59,7 @@ FILENAME_SUBSTR=""
 
 # Filename regex filter (extended regex, case-insensitive). Empty = no filter.
 # Example: ""
-FILENAME_REGEX="drug|log|record|great|good|excellent|useful|pihp"
+FILENAME_REGEX=""
 
 # MIME allow-list. Empty = no MIME filtering.
 # Common CSV-ish mimes: text/csv, application/csv, text/plain,
@@ -78,7 +78,7 @@ HEADER_MODE_AT_LEAST=false    # Header must have at least MIN_HEADER_COLS column
 TARGET_HEADER=""
 
 # First word required (only used if HEADER_MODE_FIRSTWORD=true)
-FIRST_WORD_REQUIRED="Timestamp"
+FIRST_WORD_REQUIRED=""
 
 # Minimum header columns (only used if HEADER_MODE_AT_LEAST=true)
 MIN_HEADER_COLS=10
