@@ -7,8 +7,8 @@
 # - Skip duplicates by SHA-256 (within-run and/or vs existing target)
 # - Copy to TARGET_DIR with collision-safe renaming, or run in DRY-RUN mode
 #
-# Time zone policy: Use system local time. All log timestamps are formatted as
-# YYYYMMDDHHMMSS using local time. No manual UTC/Sydney offsets applied.
+# Time zone policy: Sydney, Australia (UTC+10, no DST). All log timestamps are
+# Sydney time formatted as YYYYMMDDHHMMSS.
 #
 # Notes:
 # - Creation time read via: stat -f '%B' (BSD/macOS). Falls back to 0 on error.
@@ -28,11 +28,11 @@ IFS=$'\n\t'
 
 # Where to look and where to store copies
 SOURCE_DIR="/Users/administrator/Downloads"
-TARGET_DIR="/Users/Shared/filetypes/test"
+TARGET_DIR="/Users/Shared/out/CSVx22"
 
 # Logging
 LOG_TO_FILE=false
-LOG_FILE="/Users/Shared/SaveCombo/sh.log"
+LOG_FILE="/Users/Shared/SaveCombo/log2508da22116x.log"
 
 # Copy toggle (true = actually copy; false = DRY RUN, log only)
 COPY_ENABLED=true
@@ -41,25 +41,25 @@ COPY_ENABLED=true
 HASH_DEDUP_ENABLED=true           # Skip duplicates within this run
 HASH_DEDUP_AGAINST_TARGET=true    # Also skip if hash already exists in TARGET_DIR (pre-scan)
 
-# Date filter (local time). Leave empty string "" to disable.
-# Example: "2025-01-01 00:00:00"
-CUTOFF_DATE_SYDNEY="2025-01-01 00:00:00"
+# Date filter (Sydney local). Leave empty string "" to disable.
+# Example: "2025-08-01 00:00:00"
+CUTOFF_DATE_SYDNEY=""
 
 # Size filters (bytes). Set to 0 to disable the bound.
-MIN_SIZE_BYTES=1024               # e.g. 1024 for 1 KiB; 0 disables min
-MAX_SIZE_BYTES=$((1*1024*1024))   # 1 MiB; set 0 to disable max
+MIN_SIZE_BYTES=512                 # e.g. 1024 for 1 KiB; 0 disables min
+MAX_SIZE_BYTES=$((4*1024*1024))   # 4 MiB; set 0 to disable max
 
 # Extension allow-list (case-insensitive). Empty = no extension filtering.
 # Example: EXT_ALLOW=("csv" "tsv")
-EXT_ALLOW=("csv" "ods" "odt" "xls" "xlsx" "numbers" "sh")
+EXT_ALLOW=("csv" "ods" "numbers" "xls" "xlsx" "odt")
 
 # Filename substring filter (case-insensitive). Empty string = no filter.
 # Example: "drug"
 FILENAME_SUBSTR=""
 
 # Filename regex filter (extended regex, case-insensitive). Empty = no filter.
-# Example: "drug|log|record"
-FILENAME_REGEX=""
+# Example: ""
+FILENAME_REGEX="drug|log|record|great|good|excellent|useful|pihp"
 
 # MIME allow-list. Empty = no MIME filtering.
 # Common CSV-ish mimes: text/csv, application/csv, text/plain,
@@ -78,16 +78,18 @@ HEADER_MODE_AT_LEAST=false    # Header must have at least MIN_HEADER_COLS column
 TARGET_HEADER=""
 
 # First word required (only used if HEADER_MODE_FIRSTWORD=true)
-FIRST_WORD_REQUIRED=""
+FIRST_WORD_REQUIRED="Timestamp"
 
 # Minimum header columns (only used if HEADER_MODE_AT_LEAST=true)
 MIN_HEADER_COLS=10
 
 # --------------------------- UTILITIES ---------------------------------------
 
-# Local timestamp (YYYYMMDDHHMMSS)
+# Sydney timestamp (YYYYMMDDHHMMSS)
 now() {
-  date +%Y%m%d%H%M%S
+  # Produce UTC then add +10h to format as Sydney (fixed, no DST as per policy)
+  # BSD date (macOS): -u for UTC base, -v+10H to add 10 hours
+  date -u -v+10H +%Y%m%d%H%M%S
 }
 
 log() {
@@ -101,15 +103,20 @@ log() {
   fi
 }
 
-# Convert "YYYY-MM-DD HH:MM:SS" (local time) to epoch seconds
-to_epoch() {
+# Convert a Sydney local "YYYY-MM-DD HH:MM:SS" to UTC epoch seconds (digits only)
+sydney_to_utc_epoch() {
   local s="${1:-}"
   if [[ -z "$s" ]]; then
     printf '0\n'
     return 0
   fi
-  # macOS BSD date: parse as local time; on failure, return 0
-  date -j -f "%Y-%m-%d %H:%M:%S" "$s" +%s 2>/dev/null || printf '0'
+  # Parse as local Sydney by subtracting 10h from UTC base
+  local out
+  out="$(date -u -j -f "%Y-%m-%d %H:%M:%S" "$s" -v-10H +%s 2>/dev/null || printf '0')"
+  # Safety: keep only digits
+  out="${out//[^0-9]/}"
+  [[ -z "$out" ]] && out=0
+  printf '%s\n' "$out"
 }
 
 # Lowercase helper
@@ -160,16 +167,16 @@ fi
 # Runtime hash set for this run
 declare -a seen_hashes=()
 
-# Prepare cutoff epoch (local time parsing)
+# Prepare cutoff epoch
 CUTOFF_EPOCH=0
 if [[ -n "${CUTOFF_DATE_SYDNEY}" ]]; then
-  CUTOFF_EPOCH="$(to_epoch "$CUTOFF_DATE_SYDNEY")"
-  # Keep only digits (belt & braces)
+  CUTOFF_EPOCH="$(sydney_to_utc_epoch "$CUTOFF_DATE_SYDNEY")"
+  # Keep only digits (belts & braces)
   CUTOFF_EPOCH="${CUTOFF_EPOCH//[^0-9]/}"
   [[ -z "$CUTOFF_EPOCH" ]] && CUTOFF_EPOCH=0
-  # Human-readable (local time) for sanity, without affecting numeric comparison
-  readable_local="$(date -r "${CUTOFF_EPOCH}" "+%a %d %b %Y %H:%M:%S %Z" 2>/dev/null || echo "n/a")"
-  log "Cutoff (local) ${CUTOFF_DATE_SYDNEY} => epoch ${CUTOFF_EPOCH} (${readable_local})"
+  # Human-readable UTC for sanity, without affecting the numeric value used
+  readable_utc="$(date -u -r "${CUTOFF_EPOCH}" "+%a %d %b %Y %H:%M:%S UTC" 2>/dev/null || echo "n/a")"
+  log "Cutoff (Sydney) ${CUTOFF_DATE_SYDNEY} => epoch(UTC) ${CUTOFF_EPOCH} (${readable_utc})"
 fi
 
 # Ensure target exists if copying
