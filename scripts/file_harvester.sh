@@ -27,12 +27,12 @@ IFS=$'\n\t'
 # --------------------------- CONFIGURATION -----------------------------------
 
 # Where to look and where to store copies
-SOURCE_DIR="/Users/administrator/Downloads"
-TARGET_DIR="/Users/Shared/today/aug26"
+SOURCE_DIR="/Users/administrator"
+TARGET_DIR="/Applications/FileOperations/harvester/250828/spreadsheets"
 
 # Logging
 LOG_TO_FILE=false
-LOG_FILE="/Users/Shared/SaveCombo/a26a1.log"
+LOG_FILE="/Users/Shared/SaveCombo/250828spreadsheets.log"
 
 # Copy toggle (true = actually copy; false = DRY RUN, log only)
 COPY_ENABLED=true
@@ -47,11 +47,11 @@ CUTOFF_DATE_SYDNEY=""
 
 # Size filters (bytes). Set to 0 to disable the bound.
 MIN_SIZE_BYTES=256                 # e.g. 1024 for 1 KiB; 0 disables min
-MAX_SIZE_BYTES=$((4*1024*1024))   # 4 MiB; set 0 to disable max
+MAX_SIZE_BYTES=$((32*1024*1024))   # 4 MiB; set 0 to disable max
 
 # Extension allow-list (case-insensitive). Empty = no extension filtering.
 # Example: EXT_ALLOW=("csv" "tsv")
-EXT_ALLOW=("csv")
+EXT_ALLOW=("csv" "ods" "odt" "xls" "xlsx" "numbers")
 
 # Filename substring filter (case-insensitive). Empty string = no filter.
 # Example: "drug"
