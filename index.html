@@ -1,15 +1,14 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>r1022</title>
+<title>r1025</title>
 <style>
 
 #logTable {
   display: block;
-  max-height: calc(20 * 42px); /* ~40px per row incl. padding/border 
+  max-height: calc(20 * 42px); /* ~40px per row incl. padding/border
  */
 
   overflow-y: auto;
@@ -43,7 +42,7 @@
         margin: 4px;
         font-size: 12px;
     }
-    
+
     .score-columns {
     display: grid;
     grid-template-columns: repeat(10, 1fr); /* exactly 57columns */
@@ -53,23 +52,23 @@
 
 .score-column {
     display: flex;
-/* 
+/*
 	flex-wrap: wrap;
  */
     flex-direction: column;
     align-items: center;
 }
 
-/* 
+/*
     .score-columns {
-        display: flex; 
+        display: flex;
         flex-wrap: wrap;
         gap: 5px;
         margin-top: 10px;
     }
 
     .score-column {
-        display: flex; 
+        display: flex;
         flex-direction: column;
         align-items: center;
         margin: 5px;
@@ -77,8 +76,8 @@
  */
 
     .score-column button {
-        width: 125px;
-        height: 30px;
+        width: 130px;
+        height: 40px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -108,7 +107,7 @@
         text-align: center;
         font-size: 12px;
     }
-    
+
     #extraNoteButtons {
         display: grid;
         grid-template-columns: repeat(8, 80px);
@@ -186,7 +185,7 @@
     #scoreModal input {
         width: 60px;
     }
-    
+
   .note-btn[data-category="purple"] {
     background-color: rebeccapurple;
     color: #fff;
@@ -194,7 +193,7 @@
 
 /* Auto-summary Button */
     #autoSummaryToggleBtn{ /* fixed removed */ }
-    
+
 /* Horizontal layout for summary buttons at top-right */
 .summary-controls{
   display:flex;
@@ -294,7 +293,7 @@
 <button id="autoEntriesBtn" onclick="openAutoEntries()">Auto Entries</button>
 <button id="rollingAvgBtn" onclick="openRollingAverage()">Rolling Average</button>
 </div>
-<h1>statpack v1.7.5 r1015</h1>
+<h1>r1025</h1>
 <div class="controls">
 <span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:12px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
@@ -315,18 +314,18 @@
 </div>
 <div>
 <label>
-            Phase: 
+            Phase:
             <input id="eventInput" maxlength="50" size="50" type="text"/>
 </label>
 <br/>
 <label>
-            Scale: 
+            Scale:
             <input id="scaleInput" maxlength="50" size="30" type="text"/>
 </label>
 <br/>
 <label>
             Add:
-                  
+
             <select id="drugSelect">
 <option value="">--Select--</option>
 <option value="MD-PiHP">MD-PiHP</option>
@@ -376,11 +375,11 @@
 </select>
 </label>
 <label>
-            qty: 
+            qty:
             <input id="qtyInput" size="6" type="number"/>
 </label>
 <label>
-            Detail: 
+            Detail:
             <input id="roaInput" size="10" type="text"/>
 </label>
 <br/>
@@ -569,30 +568,39 @@ const CONFIG = Object.freeze({
   },
   buttons: {
     perMetricButtons: {
-      rush:[6,5,4,3,2,1,0.5,0],
-      mood:[6,5,4,3,2,1,0.5,0],
-      social:[6,5,4,3,2,1,0.5,0],
-      energy:[6,5,4,3,2,1,0.5,0],
-      focus:[6,5,4,3,2,1,0.5,0],
-      anxiety:[6,5,4,3,2,1,0.5,0],
-      impair:[6,5,4,3,2,1,0.5,0],
-      change:[6,4,3,2,1,0],
-      degree:[4,3,2,1,0,'-----',3.252,1.752,0.752],
-      other:[6.01,5.01,4.51,4.01,3.01,2.01,1.01,0.51,0.5,0.01]
+//       rush:[0.5,6,5,4,3,2,1,0.25,0],
+//       mood:[0.5,6,5,4,3,2,1,0.25,0],
+//       social:[0.5,6,5,4,3,2,1,0.25,0],
+//       energy:[0.5,6,5,4,3,2,1,0.25,0],
+//       focus:[0.5,6,5,4,3,2,1,0.25,0],
+//       anxiety:[0.5,6,5,4,3,2,1,0.25,0],
+//       impair:[0.5,6,5,4,3,2,1,0.25,0],
+      rush:[0.5,6,5,4,3,2,1,0.25,0,'-','-',0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+      mood:[0.5,6,5,4,3,2,1,0.25,0,'-','-',0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+      social:[0.5,6,5,4,3,2,1,0.25,0,'-','-',0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+      energy:[0.5,6,5,4,3,2,1,0.25,0,'-','-',0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+      focus:[0.5,6,5,4,3,2,1,0.25,0,'-','-',0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+      anxiety:[0.5,6,5,4,3,2,1,0.25,0,'-','-',0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+      impair:[0.5,6,5,4,3,2,1,0.25,0,'-','-',0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+      change:[4,3,2,1,0],
+      degree:[4,3,2,1,0,,3.252,1.752,0.752],
+      other:[6,5.5,5,4.5,4,4.5,3,2.5,2,1.5,1,0.5,0]
     },
-    rapidValues: [6,5,4.5,4,3,2,1.5,1,0.5,0],
-    rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair','change'],
+    rapidValues: [0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+//     rapidValues: [0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+//     rapidValues: [0.5,6.01,5.01,4.01,3.01,2.01,1.01,0.51,0.01],
+    rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
     zeroScoreMetrics: ['change','degree','other']
   },
   core: {
     metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other']
   },
   notes: {
-    extra: ['Start','Now','Before','After','Onset','Rush','Peak','Main','Offset','Comedown','Crash','Over','Next','Last','Noticed','AddDrug','NothingAdded','UsingRemains','LeftRemains','Usable','NotUsable','Unsure','YellowOrange','SomeColour','Film','Continue','AlreadyToday','Redose','Same','DarkRoom','ObserveProgress','Comparative','Absolute','Relative','Analytics','Fun','HaveFun','A','B','C'],
-    dark: ["Correlate","LastHit","LastDose","LastRow","Next","Rolled","Rocked","Rapidly","Randomly","LowHeat","HighHeat","FlameClose","FlameFar","WaitForVapour","VapourPooled","Gentle","Aggressive","Pipe","Clean","Dirty","Broken","Rinsed","Scraped","Soaked","Dried","Wet","Loose","Sludge","Paste","ChangeState","Melted","Colour","Film","NiceVapour","BurnedVapour","Plumes","Billowing","LotsOFVapour","VisibleVapour","InvisibleVapour","Air","Home","Upstairs","Alone","Music","Motivated","Neglecting","Productive","Lazy","AddDrug","NothingAdded","Loose","Moving","Uncombusted","SomeChange","UsedUsable","UsedBurned"],
+    extra: ['Start','Now','Before','After','Onset','Rush','Peak','Main','Offset','Comedown','Crash','Over','Next','Last','Noticed','AddDrug','NothingAdded','UsingRemains','LeftRemains','Usable','NotUsable','Unsure','YellowOrange','SomeColour','Film','Continue','AlreadyToday','Redose','Same','DarkRoom','ObserveProgress','Comparative','Absolute','Relative','Analytics','Fun','HaveFun'],
+    dark: ["Correlate","Flag","LastHit","LastDose","LastRow","Pipe","Clean","Dirty","Broken","Rinsed","Scraped","Soaked","Dried","Wet","Loose","Sludge","Paste","ChangeState","Melted","Colour","Film","NiceVapour","BurnedVapour","Plumes","Billowing","LotsOFVapour","VisibleVapour","InvisibleVapour","Air","Home","Upstairs","Alone","Music","Motivated","Neglecting","Productive","Lazy","AddDrug","NothingAdded","Loose","Moving","Uncombusted","SomeChange","UsedUsable","UsedBurned"],
     blue: ['VisibleVapour','InvisibleVapour','Billowing','WarmAir','Plumes','Burned','WarmAir','ThickVapour','DarkVapour','Smoke','LotsOfVapour','NiceSmell','NiceTaste','BadSensation','Invisible','Dark','Warm','Smoke','Vapour','BurnedSmell','HalfBurned'],
     red: ['Mental','FocusLocked','MusicOn','MusicOff','GoodSong','Physical','BloodPressure','TempIncrease','TempDecrease','Sweat','Bathroom','Heartbeat','WideEyes','MinorTremor','Tremor','Shakes','Avoidant','MinorNausea','Nausea','Sick','WideEyes','Wired','HalfWired','EarsRinging','SideEffect'],
-    green: ["ThroatSuction","MouthOpen","TopLip","Sucked","LipSeal","NoSeal","15s_Late","Eyeballed","Weighed","Waited","Pooled","DeepBreath","ShallowBreath","Stationary","Following","Moving","Random","Rolled","SideToSide","Rapid","Still","Gentle","Aggressive","OneHit","RuleOf3","555sHold","DensePackedCone","MultipleHits","StemHit","DoubleStack","LowHeat","HighHeat","Burned","Remains","HeatedOnce","AlreadyHeated"],
+    green: ["Spun","Rolled","Rocked","Turned","270Degrees", "Rapidly","Randomly","LowHeat","HighHeat","FlameClose","FlameFar","WaitForVapour","VapourPooled","Gentle","Aggressive","ThroatSuction","MouthOpen","TopLip","Sucked","LipSeal","NoSeal","HalfSealed","15s_Late","Eyeballed","Weighed","Waited","Pooled","FastBreath","HoldBreath","DeepBreath","ShallowBreath","Stationary","Following","Moving","Random","Rolled","SideToSide","Rapid","Still","Gentle","Aggressive","OneHit","RuleOf3","555sHold","DensePackedCone","MultipleHits","StemHit","DoubleStack","LowHeat","HighHeat","Burned","Remains","HeatedOnce","AlreadyHeated"],
     orange: ['Lighter','Candle','Blowtorch','Jet','Vape','Cone','Snowcone','Bong','Pipe','Rinsed','Clean','Dirty','Scraped','Loose','Liquid','Paste','Dried','Rock','Sludge','PG','LiquidWeighted','Melted','SomeColour','ColourChange','NotMoving','Runny','Chunks','Crushed','NotCrushed','DoseToDetriment'],
     yellow: ["Positive","Negative","Flat"],
     purple: ['Male','Female','Others','Home','NotHome','Alone','NotAlone','Public','RoomAlone']
@@ -664,7 +672,7 @@ function applyRowShading(tr) {
     // Prefer numeric machine value for shading so label columns match their paired sums
     const raw = td.getAttribute('data-value');
     const val = (raw != null && raw !== '') ? raw : td.textContent.trim();
-    const bg = cellBgFor(col, val);	
+    const bg = cellBgFor(col, val);
     if (bg) td.style.backgroundColor = bg;
     else td.style.background = '';
   });
@@ -674,7 +682,7 @@ const labelMappings = CONFIG.labels.labelMappings;
 const RAPID_LABELS = CONFIG.labels.rapidLabels;
 ['a'].forEach(metric=>{labelMappings[metric]={};for(let v=-3;v<=10;v++)labelMappings[metric][v]=v.toString();});
 
-    
+
 // === Metric-specific label overrides (scores 6,,2,1,0) ===
 const BUTTON_LABELS_BY_METRIC = CONFIG.labels.buttonLabelsByMetric;
 function getMetricLabel(metric, v){
@@ -719,7 +727,7 @@ function getLabels(metric, values) {
     // Per-metric button ordering/sets (independent for each metric)
     // 12 buttons per metric by default; override any metric at runtime via localStorage.
 //     const DEFAULT_BUTTONS_12 = [8,7,6,'----------,6,5,4,3.5,3,2.5,2,1.5,1,0.5,0.75,0.25,04,'----------,3.5,3,2.5,'----------,2,1.5,1,'----------,0.75,0.5,0.25,0];
- //   const DEFAULT_BUTTONS_12 = [6,5,4,3,2,1,0];
+ //   const DEFAULT_BUTTONS_12 = [0.5,6,5,4,3,2,1,0.25,0];
     const PER_METRIC_BUTTONS = CONFIG.buttons.perMetricButtons;
     function getMetricButtons(metric){
       try {
@@ -798,7 +806,7 @@ b.innerText = `${v}: ${customLabel}`;
                 col.appendChild(b);
             });
             sc.appendChild(col);
-        
+
 });
 
         // Original notes
@@ -1092,7 +1100,7 @@ if (!startTime)
             );
             entry[f + 'Label'] = entry[f].map(v => resolveLabel(f, v)).join(', ');
             entry[f + 'Sum'] = (typeof ZERO_SCORE_METRICS !== 'undefined' && ZERO_SCORE_METRICS.has(f)) ? 0 : getSum(entry[f]);
-    
+
         });
         entry.score = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum + entry.focusSum - entry.anxietySum - entry.impairSum;
         entry.max = ['rush', 'mood', 'social', 'energy', 'focus'].reduce((a, f) => a + (entry[f + 'Sum'] || 0), 0);
@@ -1117,7 +1125,7 @@ entry.goodSum = 0;
         renderTable();
         ['eventInput', 'scaleInput', 'drugSelect', 'qtyInput', 'roaInput', 'notesInput', 'customNotesInput'].forEach(id => document.getElementById(id).value = '');
         initSelections();
-        
+
 // Custom metric button labels (final, no backups; replaces any prior label mappings)
 (function(){
   // Replace mapping in-place
@@ -1127,9 +1135,9 @@ entry.goodSum = 0;
 })();
 buildButtons();
         document.getElementById('addBtn').innerText = 'Add Entry';
-    
+
 }
-    
+
 function renderTable() {
         const tb = document.querySelector('#logTable tbody');
         tb.innerHTML = '';
@@ -1153,7 +1161,7 @@ function renderTable() {
      `<td data-col="Weighted">${fmt2(r.weighted || 0)}</td>` +
      `<td data-col="5Max">${(r.weighted / 10).toFixed(2)}</td>` +
      `<td data-col="GS">${fmt2(r.goodSum || 0)}</td>`;
-            
+
             tr.innerHTML = h;
             tr.setAttribute('data-ts', String(r._ts || 0));
             tagRowCells(tr);
@@ -1247,9 +1255,9 @@ function renderTable() {
         } catch {}
         renderTable();
     };
-    
+
 // === Open Existing Log (CSV) ===
-// Paranoid-safe: local File API only. No network. 
+// Paranoid-safe: local File API only. No network.
 
 function openExistingLog(){
   // Confirm if table has data
@@ -1475,7 +1483,7 @@ function rowsToLogData(rows, mapped){
 function mergeAppendDedupeSort(existing, incoming){
   const left  = Array.isArray(existing) ? existing : [];
   const right = Array.isArray(incoming) ? incoming : [];
-  
+
   // Drop blank/empty rows from the right side before merging
   const filteredRight = right.filter(isNonEmptyLogRow);
   const all = left.concat(filteredRight);
@@ -1531,7 +1539,7 @@ function showStatus(msg){
   el.textContent = msg;
   clearTimeout(el._t);
   el._t = setTimeout(()=>{ el.remove(); }, 5000);
-}	
+}
 
 // BOOKMARK
 // const RAPID_VALUES = CONFIG.buttons.rapidValues;
@@ -1616,7 +1624,7 @@ function applyRapidScoresAndAddStay(){
     RAPID_METRICS.forEach(f => {
       if (!Array.isArray(selections[f])) selections[f] = [];
       selections[f] = Array.from(new Set(selections[f])).sort((a,b)=>b-a);
-    
+
   addEntry('rapid');
 });
     // Add the entry (this will clear input fields and reset selections via initSelections/buildButtons)
@@ -1635,37 +1643,37 @@ function applyRapidScoresAndAddStay(){
 <div id="scoreModal">
 <h3>Manual Score Entry</h3>
 <label>
-            Rush: 
+            Rush:
             <input id="manualRush" max="10" min="-10" type="number"/>
 </label>
 <br/>
 <label>
-            Mood: 
+            Mood:
             <input id="manualMood" max="10" min="-10" type="number"/>
 </label>
 <br/>
 <label>
-            Social: 
+            Social:
             <input id="manualSocial" max="10" min="-10" type="number"/>
 </label>
 <br/>
 <label>
-            Energy: 
+            Energy:
             <input id="manualEnergy" max="10" min="-10" type="number"/>
 </label>
 <br/>
 <label>
-            Focus: 
+            Focus:
             <input id="manualFocus" max="10" min="-10" type="number"/>
 </label>
 <br/>
 <label>
-            Anxiety: 
+            Anxiety:
             <input id="manualAnxiety" max="10" min="-10" type="number"/>
 </label>
 <br/>
 <label>
-            Impair: 
+            Impair:
             <input id="manualImpair" max="10" min="-10" type="number"/>
 </label>
 <br/>
@@ -1935,7 +1943,7 @@ function computeCompositeFromMeans(M){
 
 // Append a row to a table by id ('summaryPopupTable' or 'autoSummaryTable')
 function appendSummaryRowToTable(tableId, d, M, C, opts){
-  
+
   // Skip if summary is empty/blank
   if (!isNonEmptySummary(M, C)) { return; }
 const table = document.getElementById(tableId);
@@ -2055,7 +2063,7 @@ function ensureSummaryPopup(){
   closeBtn.onclick = ()=>popup.remove();
 
   controls.appendChild(exportBtn);
-  
+
   const instant5Btn = document.createElement("button");
   instant5Btn.textContent = "5m Now";
   instant5Btn.onclick = ()=>appendInstantSummaryToPopup(5);
@@ -2300,7 +2308,7 @@ window.toggleAutoSummary = toggleAutoSummary;
     return `${hh}:${mm} Average`;
   }
   // Read-only snapshot of main table rows with extra fields (Notes/Drug/Qty)
-  
+
 function snapshotWithExtras(){
     const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
     return rows.map(tr => {
@@ -2314,7 +2322,7 @@ function snapshotWithExtras(){
           const col = (td.getAttribute('data-col')||'').trim().toLowerCase();
           if (want.includes(col)) return td.textContent.trim();
         }
-        
+
   try { window.snapshotWithExtras = snapshotWithExtras; } catch(e){}
 return "";
       };
@@ -3905,7 +3913,7 @@ function getLogRows(){
 // ===== Utility: extract row object from a table row using column map
 function rowToObj(tr, col){
   var c = tr.children;
-  function cell(name){ 
+  function cell(name){
     var idx = col[name];
     return (idx != null && c[idx]) ? (c[idx].textContent || '').trim() : '';
   }
@@ -3978,7 +3986,7 @@ function refreshAutoSliderC(){
     +', Energy '+mEn.toFixed(2)+', Focus '+mFoc.toFixed(2)+', Anxiety '+mAnx.toFixed(2)
     +', Impair '+mImp.toFixed(2)+', Weighted '+mW.toFixed(2)+', Score5 '+mS5.toFixed(2)+'</td>';
 
-  if (status){ 
+  if (status){
     var ts = new Date();
     status.textContent = 'Updated at ' + ts.toLocaleTimeString();
   }
@@ -4014,7 +4022,7 @@ function computeAndAppendAutoD(){
   ].map(function(v){ return '<td>'+v+'</td>'; }).join('');
   body.appendChild(tr);
 
-  if (status){ 
+  if (status){
     var ts = new Date();
     status.textContent = 'Appended at ' + ts.toLocaleTimeString();
   }
@@ -4297,7 +4305,7 @@ window.addEventListener('load', function(){
   function loadEntries(){ try{ return JSON.parse(localStorage.getItem(LS_KEY_ENTRIES) || '[]'); }catch(e){ return []; } }
   function saveEntries(rows){ try{ localStorage.setItem(LS_KEY_ENTRIES, JSON.stringify(rows||[])); }catch(e){} }
 
-  
+
 function readCurrentSelections(){
   function readById(id){
     var el = document.getElementById(id);
@@ -4341,7 +4349,6 @@ function readCurrentSelections(){
   }catch(e){
     return {Rush:0,Mood:0,Social:0,Energy:0,Focus:0,Anxiety:0,Impair:0,Weighted:0,Score5:0};
   }
-</script>
 
 
 <!-- === Auto Slider D Config (rolling avg = 3) : injected 20250822082130 === -->
