@@ -234,18 +234,17 @@
 
 /* ==== Summary Controls Layout Override (spread horizontally) ==== */
 .summary-controls{
-position: fixed;
-top: 10px;
-left: 20px;
-right: 20px;
-display: grid;
-grid-template-columns: repeat(10, auto); /* at most 6 buttons across */
-grid-auto-rows: auto;
-align-items: center;
-justify-content: start; /* pack from the left */
-gap: 8px 12px;          /* row-gap, column-gap */
-z-index: 9999;
-pointer-events: auto;
+  position: fixed;
+  top: 10px;
+  left: 20px;
+  right: 20px;           /* span across screen */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; /* spread across full width */
+  gap: 16px;
+  z-index: 9999;
+  pointer-events: auto;
 }
 .summary-controls button{
   position: static !important; /* cancel fixed on individual buttons */
@@ -4395,8 +4394,9 @@ function readCurrentSelections(){
   }
 
 
+<!-- === Auto Slider D Config (rolling avg = 3) : injected 20250822082130 === -->
 <script>
-function(){
+(function(){
   function setDToLast3(){
     var d = document.getElementById('autoSliderDModal');
     if (!d) return;
@@ -4417,7 +4417,7 @@ function(){
   } else {
     setDToLast3();
   }
-}();
+})();
 </script>
 
 

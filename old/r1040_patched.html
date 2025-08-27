@@ -239,7 +239,7 @@ top: 10px;
 left: 20px;
 right: 20px;
 display: grid;
-grid-template-columns: repeat(10, auto); /* at most 6 buttons across */
+grid-template-columns: repeat(6, auto); /* at most 6 buttons across */
 grid-auto-rows: auto;
 align-items: center;
 justify-content: start; /* pack from the left */
@@ -4395,8 +4395,9 @@ function readCurrentSelections(){
   }
 
 
+<!-- === Auto Slider D Config (rolling avg = 3) : injected 20250822082130 === -->
 <script>
-function(){
+(function(){
   function setDToLast3(){
     var d = document.getElementById('autoSliderDModal');
     if (!d) return;
@@ -4417,7 +4418,7 @@ function(){
   } else {
     setDToLast3();
   }
-}();
+})();
 </script>
 
 
