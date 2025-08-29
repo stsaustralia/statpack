@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.7.7 r1059</title>
+<title>statpack v1.7.7 r1060</title>
 <style>
 
 #logTable {
@@ -703,7 +703,7 @@ function cellBgFor(colName, value) {
   if (!Number.isFinite(num)) return '';
   const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 7;
   const opacity = Math.min(Math.max(num, 0), cap) / cap;
-  if (GREEN_SET.has(colName)) return `rgba(0.255,0,${opacity})`;
+  if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
   if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
   if (RED_SET.has(colName))   return `rgba(255,0,0,${opacity})`;
   return '';
