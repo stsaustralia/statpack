@@ -3,12 +3,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.7.8t r1082</title>
+<title>statpack v1.7.8 r1090</title>
 <style>
 
 #logTable {
   display: block;
-  max-height: calc(22 * 42px); /* ~40px per row incl. padding/border
+  max-height: calc(20 * 42px); /* ~40px per row incl. padding/border
  */
 
   overflow-y: auto;
@@ -40,7 +40,7 @@
         padding: 6px 10px;
         border-radius: 6px;
         margin: 4px;
-        font-size: 12px;
+        font-size: 11px;
     }
 
     .score-columns {
@@ -59,25 +59,9 @@
     align-items: center;
 }
 
-/*
-    .score-columns {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-top: 10px;
-    }
-
-    .score-column {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 5px;
-    }
- */
-
     .score-column button {
-        width: 150px;
-        height: 35px;
+        width: 130px;
+        height: 30px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -105,7 +89,7 @@
     th, td {
         padding: 10px;
         text-align: center;
-        font-size: 12px;
+        font-size: 11px;
     }
 
     #extraNoteButtons {
@@ -223,7 +207,7 @@
   border:1px solid #ccc;
   padding:10px;
   text-align:center;
-  font-size:12px;
+  font-size:11px;
 }
 #autoSummaryTitle{
   font-weight:600;
@@ -243,7 +227,7 @@ grid-template-columns: repeat(10, auto); /* at most 6 buttons across */
 grid-auto-rows: auto;
 align-items: center;
 justify-content: start; /* pack from the left */
-gap: 8px 12px;          /* row-gap, column-gap */
+gap: 8px 11px;          /* row-gap, column-gap */
 z-index: 9999;
 pointer-events: auto;
 }
@@ -336,7 +320,7 @@ pointer-events: auto;
 </div>
 <h1>statpack</h1>
 <div class="controls">
-<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:12px;">Append Mode</span>
+<span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
 <button onclick="resetTimer()">Reset Timer</button>
 <button onclick="pauseTimer()">Pause Timer</button>
@@ -532,7 +516,7 @@ pointer-events: auto;
 <button aria-label="Close" onclick="closeDoseReviews()">Close</button>
 </div>
 </div>
-<div id="doseReviewsMeta" style="font-size:12px; opacity:0.7; margin-bottom:8px;"></div>
+<div id="doseReviewsMeta" style="font-size:11px; opacity:0.7; margin-bottom:8px;"></div>
 <table id="doseReviewsTable" style="width:100%; border-collapse:collapse; background:#fff;">
 <thead>
 <tr>
@@ -570,7 +554,7 @@ const CONFIG = Object.freeze({
     noShadeCols: ['change','Change','Deg'],
     shadeCap: {
       'Score': 25,
-      'Max': 25,
+      'Max': 35,
       'Min': 10,
       'Weighted': 10,
       '5Max': 10
@@ -583,46 +567,46 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-    rush:    { 0:'None',1:'Low',2:'Moderate',3:'Strong',4:'Intense/Rush',5:'Extreme',6:'Overwhelming',4.5:'Very Intense',3.5:'Strong/Obvious',2.5:'Moderate/Clear',1.5:'Low/Present',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    mood:    { 0:'None',1:'Low',2:'Mid/Some',3:'Clear',4:'Great/Dominant',5:'Euphoric',6:'Autopilot',4.5:'Very High',3.5:'Clear/Distinct',2.5:'Moderate/Yes',1.5:'Low/Some',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    social:  { 0:'None',1:'Low',2:'Mid/Want',3:'Social/Push',4:'Outgoing',5:'Disinhibited',6:'Autopilot',4.5:'Very High',3.5:'Outgoing/Natural',2.5:'Moderate/Push',1.5:'Low/Forced',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    energy:  { 0:'None',1:'Low',2:'Mid/Capable',3:'Energetic',4:'Hyper/Push',5:'Manic',6:'Overdrive',4.5:'Very Energetic',3.5:'Active/Energetic',2.5:'Moderate/Active',1.5:'Low/Functional',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    focus:   { 0:'None',1:'Low',2:'Mid/Effective',3:'Focused',4:'Obsess',5:'Wired',6:'Laser Wired',4.5:'Very Strong',3.5:'Fixated/Focused',2.5:'Moderate/Motivated',1.5:'Low/Functional',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    anxiety: { 0:'None',1:'Low',2:'Mid/Nervous',3:'Anxious',4:'Severe Impact',5:'Panic',6:'Doomed',4.5:'Very Severe',3.5:'Adverse/Decisions',2.5:'Moderate/Affecting',1.5:'Low/Overthinking',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    impair:  { 0:'None',1:'Low',2:'Mid/Affecting',3:'Impaired',4:'Severe Impact',5:'Controlling',6:'Crippled',4.5:'Very Severe',3.5:'Adverse/Behaviour',2.5:'Moderate/Impacting',1.5:'Low/Noticeable',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    change:  { 5.5:'NiceSmell',4.5:'ChangeState',3.5:'Melted',2.5:'Burned',1.5:'Watch',0.5:'Follow',0:'Roll',6:'Rapid',5:'Last',4:'Dose',3:'Hit',2:'DrugAdded',1:'NothingAdded' },
-    degree:  { 5.5:'DrugAdded',4.5:'NothingAdded',3.5:'UsedRemains',2.5:'Colour',1.5:'Film',0.5:'HalfBurned',0:'Irritated',6:'Aggressive',5:'Gentle',4:'Sucked',3:'Throat',2:'MouthOpen',1:'LipSeal',0.7:'HalfSeal',0.2:'Correlate'},
-    other:   { 5.5:'NiceSmell',4.5:'ChangeState',3.5:'Melted',2.5:'Burned',1.5:'Watch/Follow',0.5:'Roll/Rapid',0:'Negative',6:'Positive',5:'Last',4:'Dose',3:'Hit',2:'DrugAdded',1:'NothingAdded'}
-  },
+  rush: { 5.00: 'Extreme', 4.00: 'Intense', 3.00: 'Strong', 2.00: 'Moderate', 1.00: 'Light', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  mood: { 5.00: 'Euphoric', 4.00: 'Great', 3.00: 'Clear', 2.00: 'Thought', 1.00: 'Fair', 0.00: 'Flat', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  social: { 5.00: 'Disinhibited', 4.00: 'Outgoing', 3.00: 'Social', 2.00: 'Motivated', 1.00: 'Functional', 0.00: 'No', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  energy: { 5.00: 'Manic', 4.00: 'Hyperactive', 3.00: 'Energetic', 2.00: 'Moderate', 1.00: 'Some', 0.00: 'Baseline', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  focus: { 5.00: 'Wired', 4.00: 'Obsessive', 3.00: 'Focused', 2.00: 'Moderate', 1.00: 'Some', 0.00: 'Normal', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  anxiety: { 5.00: 'Severe', 4.00: 'Impacted', 3.00: 'Affecting', 2.00: 'Ignorable', 1.00: 'Minimal', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  impair: { 5.00: 'Severe', 4.00: 'Detrimental', 3.00: 'Obvious', 2.00: 'Ignorable', 1.00: 'Minimal', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  change: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  degree: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  other: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+    },
   rapidLabels: {
-    rush:    { 0:'None',1:'Low',2:'Moderate',3:'Strong',4:'Intense/Rush',5:'Extreme',6:'Overwhelming',4.5:'Very Intense',3.5:'Strong/Obvious',2.5:'Moderate/Clear',1.5:'Low/Present',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    mood:    { 0:'None',1:'Low',2:'Mid/Some',3:'Clear',4:'Great/Dominant',5:'Euphoric',6:'Autopilot',4.5:'Very High',3.5:'Clear/Distinct',2.5:'Moderate/Yes',1.5:'Low/Some',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    social:  { 0:'None',1:'Low',2:'Mid/Want',3:'Social/Push',4:'Outgoing',5:'Disinhibited',6:'Autopilot',4.5:'Very High',3.5:'Outgoing/Natural',2.5:'Moderate/Push',1.5:'Low/Forced',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    energy:  { 0:'None',1:'Low',2:'Mid/Capable',3:'Energetic',4:'Hyper/Push',5:'Manic',6:'Overdrive',4.5:'Very Energetic',3.5:'Active/Energetic',2.5:'Moderate/Active',1.5:'Low/Functional',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    focus:   { 0:'None',1:'Low',2:'Mid/Effective',3:'Focused',4:'Obsess',5:'Wired',6:'Laser Wired',4.5:'Very Strong',3.5:'Fixated/Focused',2.5:'Moderate/Motivated',1.5:'Low/Functional',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    anxiety: { 0:'None',1:'Low',2:'Mid/Nervous',3:'Anxious',4:'Severe Impact',5:'Panic',6:'Doomed',4.5:'Very Severe',3.5:'Adverse/Decisions',2.5:'Moderate/Affecting',1.5:'Low/Overthinking',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    impair:  { 0:'None',1:'Low',2:'Mid/Affecting',3:'Impaired',4:'Severe Impact',5:'Controlling',6:'Crippled',4.5:'Very Severe',3.5:'Adverse/Behaviour',2.5:'Moderate/Impacting',1.5:'Low/Noticeable',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    change:  { 5.5:'NiceSmell',4.5:'ChangeState',3.5:'Melted',2.5:'Burned',1.5:'Watch',0.5:'Follow',0:'Roll',6:'Rapid',5:'Last',4:'Dose',3:'Hit',2:'DrugAdded',1:'NothingAdded' },
-    degree:  { 5.5:'DrugAdded',4.5:'NothingAdded',3.5:'UsedRemains',2.5:'Colour',1.5:'Film',0.5:'HalfBurned',0:'Irritated',6:'Aggressive',5:'Gentle',4:'Sucked',3:'Throat',2:'MouthOpen',1:'LipSeal',0.7:'HalfSeal',0.2:'Correlate'},
-    other:   { 5.5:'NiceSmell',4.5:'ChangeState',3.5:'Melted',2.5:'Burned',1.5:'Watch/Follow',0.5:'Roll/Rapid',0:'Negative',6:'Positive',5:'Last',4:'Dose',3:'Hit',2:'DrugAdded',1:'NothingAdded'}
+  rush: { 5.00: 'Extreme', 4.00: 'Intense', 3.00: 'Strong', 2.00: 'Moderate', 1.00: 'Light', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  mood: { 5.00: 'Euphoric', 4.00: 'Great', 3.00: 'Clear', 2.00: 'Thought', 1.00: 'Fair', 0.00: 'Flat', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  social: { 5.00: 'Disinhibited', 4.00: 'Outgoing', 3.00: 'Social', 2.00: 'Motivated', 1.00: 'Functional', 0.00: 'No', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  energy: { 5.00: 'Manic', 4.00: 'Hyperactive', 3.00: 'Energetic', 2.00: 'Moderate', 1.00: 'Some', 0.00: 'Baseline', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  focus: { 5.00: 'Wired', 4.00: 'Obsessive', 3.00: 'Focused', 2.00: 'Moderate', 1.00: 'Some', 0.00: 'Normal', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  anxiety: { 5.00: 'Severe', 4.00: 'Impacted', 3.00: 'Affecting', 2.00: 'Ignorable', 1.00: 'Minimal', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  impair: { 5.00: 'Severe', 4.00: 'Detrimental', 3.00: 'Obvious', 2.00: 'Ignorable', 1.00: 'Minimal', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  change: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  degree: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
+  other: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.50: '+', 4.75: 'Extremely High', 4.25: 'Very High', 3.25: 'High', 2.50: 'Moderate', 1.75: 'Low', 0.75: 'Very Low', 0.25: 'Minimal' },
   },
   buttonLabelsByMetric: {}
 },
   buttons: {
     perMetricButtons: {
-      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.7,0.2,0,'',0.5,-0.5,-1],
-      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.7,0.2,0,'',0.5,-0.5,-1],
-      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.7,0.2,0,'',0.5,-0.5,-1],
-      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.7,0.2,0,'',0.5,-0.5,-1],
-      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.7,0.2,0,'',0.5,-0.5,-1],
-      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.7,0.2,0,'',0.5,-0.5,-1],
-      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.7,0.2,0,'',0.5,-0.5,-1],
-      change:[4,3,2,1,0,4.8,3.4,2.4,1.7,1.2,0.6],
-      degree:[0.1, 0.2, 0.3, 0.4, 5.7,4.4,3.2,1.7,0.7],
-      other:[5.5,4.5,3.5,2.5,1.5,0.5,0,6,5,4,3,1,0.7,0.2]
-//       other:[6.01,5.01,4.51,4.01,3.01,2.01,1.51,1.01,0.51,0.01,0.5]
+      rush:[5,4,3,2,1,0,'',0.5],
+      mood:[5,4,3,2,1,0,'',0.5],
+      social:[5,4,3,2,1,0,'',0.5],
+      energy:[5,4,3,2,1,0,'',0.5],
+      focus:[5,4,3,2,1,0,'',0.5],
+      anxiety:[5,4,3,2,1,0,'',0.5],
+      impair:[5,4,3,2,1,0,'',0.5],
+      change:[5,4,3,2,1,0,'',0.5],
+      degree:[5,4,3,2,1,0,'',0.5],
+      other:[5,4,3,2,1,0,'',0.5]
     },
-    rapidValues: [6,4.5,3.5,2.5,1.5,0.7,0,'',0.5,-0.5],
+    rapidValues: [4.75,4.25,3.25,2.50,1.75,0.75,0.25,0],
+//     rapidValues: [5,4,3,2,1,0,'',0.5],
 //     rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
@@ -631,14 +615,14 @@ labels: {
     metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other']
   },
   notes: {
-    extra: ['Start','Now','Before','After','Onset','Rush','Peak','Main','ChangeState','Melted','Colour','Filmed','Music','Motivated','Neglecting','Productive','Lazy','AddDrug','NothingAdded','AddDrug','UsingRemains','LeftRemains','Usable','NotUsable','Unsure','YellowOrange','SomeColour','Offset','Comedown','Crash','Over','Next','Last','Noticed','Film','Continue','AlreadyToday','Redose','Same','DarkRoom','ObserveProgress','Comparative','Absolute','Relative','Analytics','Fun'],
-    dark: ['Correlate','Flag','Context','Note','Changes','Scale','LastHit','LastDose','LastRow'],
-    blue: ['Vapour','Invisible','NiceSmell','Half','Burned','Smell','Plumes','Billowing','WarmAir','Smoke','LotsOfVapour'],
-    red: ['BloodPressure','TempIncrease','TempDecrease','Sweat','Nausea','Sick','WideEyes','Wired','HalfWired','EarsRinging','SideEffect','Heartbeat','HeartPounding','Tremor','Shakes','FocusLocked'],
-    green: ['Spun','Rolled','Rocked','Turned','270Degrees', 'Rapidly','Randomly','LowHeat','HighHeat','FlameClose','FlameFar','WaitForVapour','VapourPooled','Gentle','Aggressive','ThroatSuction','MouthOpen','TopLip','Sucked','LipSeal','NoSeal','HalfSealed','15s_Late','Eyeballed','Weighed','Waited','Pooled','FastBreath','HoldBreath','DeepBreath','ShallowBreath','Stationary','Following','Moving','Random','Rolled','SideToSide','Rapid','Still','Gentle','Aggressive','OneHit','RuleOf3','555sHold','DensePackedCone','MultipleHits','StemHit','DoubleStack','LowHeat','HighHeat','Burned','Remains','HeatedOnce','AlreadyHeated'],
-    orange: ['Loose','Moving','Uncombusted','SomeChange','UsedUsable','UsedBurned','Pipe','Clean','Dirty','Broken','Rinsed','Scraped','Soaked','Dried','Wet','Loose','Sludge','Paste','Lighter','Candle','Blowtorch','Jet','Vape','Cone','Snowcone','Bong','Liquid','Paste','Dried','Rock','Sludge','PropyleneGlycol','LiquidWeighted','StateChange','Melted','SomeColour','ColourChange','NotMoving','Runny','Chunks','Crushed','NotCrushed','DoseToDetriment'],
-    yellow: ['Positive','Negative','Flat'],
-    purple: ['Male','Female','Others','Home','NotHome','Alone','NotAlone','Public','RoomAlone']
+    extra: ['Correlate', 'Flag','Now', 'This', 'Last', 'Next',  'Changes', 'Note', 'Context', 'Continue', 'LastDose', 'LastRow', 'LastHit', 'Plan', 'One', 'Multiple', 'Dose', 'Redose', 'Continue', 'Hit', 'Hindsight', 'Review', 'Summary'],
+    dark: ['DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'MaybeUsable', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', '>0mg', '>10mg', '>20mg', '>30mg', '<10-mg', '<20mg', '<30mg'],
+    blue: ['Plumes', 'Billowing', 'SoftVapour', 'ThickVapour', 'LotsOfVapour', 'Dark', 'Visible', 'Invisible', 'NiceSmell', 'NiceTaste', 'BurnedTaste', 'BurnedSmell', 'HalfBurned', 'HalfDose', 'Smoke', 'Vapour'],
+    red: ['WideEyes', 'Feel', 'Visceral', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Chills', 'Sweat', 'Tremor', 'Shakes', 'MinorTremor', 'MinorNausea', 'Nausea', 'SideEffects', 'EarsRinging', 'Headache', 'ChestPain', 'SideEffect'],
+    green: ['Watch', 'Follow', 'Adapt', 'Roll', 'Rapid', 'SideToSide', 'CoastBowl', 'LargeRoll', 'SmallRolls', 'ObserveProgress', 'HardToSee', 'LightRoom', 'DarkRoom', '555Hold', 'DeepBreath', 'ShallowBreath', 'HoldBreath', 'MultipleBreath', 'Diaphram', 'Sucked', 'SuckedHard', 'Gentle', 'Aggressive', 'OneBreath', 'VapourWait', 'VapourPool', 'LipSeal', 'HalfSealed', 'NotSealed', 'PowderIgnites', 'MouthOpen', 'ThroatBreath', 'SuctionDistance', 'HighHeat', 'LowHeat'],
+    orange: ['Cone', 'Snowcone', 'Pipe', 'Line', 'Sniff', 'Rectal', 'Oral', 'Inhale', 'Lighter', 'Jet', 'Blowtorch', 'Broken', 'Weathered', 'Glass', 'Dirty', 'Clean', 'Rinsed', 'Scraped', 'Soaked', 'Dried', 'Damp', 'Wet', 'Loose', 'Dry', 'WasWet', 'HasDried','NotMoving', 'Paste', 'Sludge', 'Water', 'WaterWeighted', 'PropyleneGlycol', 'Powder', 'Crushed', 'NotCrushed', 'Granules', 'Cone', 'Snowcone', 'TightlyPacked', 'LoosePacked', 'ObserveAndControl', 'Preheated', 'AlreadyHeated', 'OneHit', 'MeltFirst'],
+    yellow: ['Positive','Negative','ChangeState', 'Melted', 'Burned', 'ColourChange', 'Film', 'Carbon', 'Audible', 'Melt', 'Burn', 'Noticed', 'Fun', 'Analytics', 'Relative', 'Absolute', 'Observe', 'CouldNotSee', 'BrightLight', 'DarkRoom'],
+    purple: ['Male','Female','Others','Home','NotHome','Alone','NotAlone','Public','RoomAlone', 'Downstairs', 'Hungry', 'Thirsty', 'WellSlept', 'AlreadyHadSome', 'Weed', 'Tobacco', 'THC', 'Edible', 'Gummy', 'Solvent', 'Unknown', 'Marquis', 'Lab', 'MDPiHP', 'Freebase', 'MusicPlaying', 'MusicOff', 'NotEating' ,'NotDrinking', 'Neglecting', 'AwareOfChoices', 'BadChoices', 'Motivated', 'Optimistic']
   }
 });
 // ===== End CONFIG =====
@@ -2995,7 +2979,7 @@ return "";
   overflow:auto; min-width: 70%;
 }
 #slidingAvgModal table{ width:100%; border-collapse:collapse; background:#fff; margin-top:10px; }
-#slidingAvgModal th, #slidingAvgModal td{ border:1px solid #ccc; padding:8px; text-align:center; font-size:12px; }
+#slidingAvgModal th, #slidingAvgModal td{ border:1px solid #ccc; padding:8px; text-align:center; font-size:11px; }
 #slidingAvgClose { background:#ccc; color:#000; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; float:right; }
 </style>
 <div id="slidingAvgModal">
@@ -3132,7 +3116,7 @@ return "";
 }
 #autoSliderAModal table, #autoSliderBModal table { width:100%; border-collapse:collapse; background:#fff; margin-top:10px; }
 #autoSliderAModal th, #autoSliderAModal td, #autoSliderBModal th, #autoSliderBModal td {
-  border:1px solid #ccc; padding:8px; text-align:center; font-size:12px;
+  border:1px solid #ccc; padding:8px; text-align:center; font-size:11px;
 }
 .as-toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
 .as-toolbar button { background:#eee; color:#000; border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
@@ -3333,7 +3317,7 @@ return "";
   .ls-row { display: grid; grid-template-columns: 160px 1fr; gap: 10px; margin: 6px 0; align-items: center; }
   .ls-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
   .ls-controls button { padding: 6px 10px; }
-  #ls-preview { border: 1px solid #ddd; border-radius: 8px; padding: 8px; max-height: 240px; overflow: auto; font-size: 12px; }
+  #ls-preview { border: 1px solid #ddd; border-radius: 8px; padding: 8px; max-height: 240px; overflow: auto; font-size: 11px; }
   #ls-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
   #ls-tabs button { padding: 6px 10px; border: 1px solid #ccc; background: #f7f7f7; cursor: pointer; border-radius: 6px; }
   #ls-tabs button.active { background: #e9f2ff; border-color: #9cc1ff; }
@@ -3391,7 +3375,7 @@ return "";
 </div>
 <div id="ls-preview"></div>
 </div>
-<div class="ls-controls" style="justify-content:flex-end; margin-top: 12px;">
+<div class="ls-controls" style="justify-content:flex-end; margin-top: 11px;">
 <button id="ls-close">Close</button>
 </div>
 </div>
@@ -3851,7 +3835,7 @@ function applyRapidScoresAndAddStay(){
     <h2>Auto Slider C — Last 5 Non‑Auto Rows</h2>
     <div style="margin: 8px 0;">
       <button id="autoCRefreshBtn">Refresh now</button>
-      <span id="autoCStatus" style="margin-left:12px; font-size:0.9em; opacity:0.8;"></span>
+      <span id="autoCStatus" style="margin-left:11px; font-size:0.9em; opacity:0.8;"></span>
     </div>
     <table id="autoCTable" class="table compact">
       <thead>
@@ -3872,7 +3856,7 @@ function applyRapidScoresAndAddStay(){
     <h2>\1 3\2 (auto every 30s)</h2>
     <div style="margin: 8px 0;">
       <button id="autoDForceAppend">Append now</button>
-      <span id="autoDStatus" style="margin-left:12px; font-size:0.9em; opacity:0.8;"></span>
+      <span id="autoDStatus" style="margin-left:11px; font-size:0.9em; opacity:0.8;"></span>
     </div>
     <table id="autoDTable" class="table compact">
       <thead>
@@ -3886,7 +3870,7 @@ function applyRapidScoresAndAddStay(){
 <style>
   /* Basic modal styles in case project doesn’t have them */
   .modal { position: fixed; z-index: 9999; left:0; top:0; width:100%; height:100%; overflow:auto; background: rgba(0,0,0,0.5); }
-  .modal-content { background: #fff; margin: 4vh auto; padding: 12px 16px; border: 1px solid #888; border-radius: 10px; }
+  .modal-content { background: #fff; margin: 4vh auto; padding: 11px 16px; border: 1px solid #888; border-radius: 10px; }
   .modal .close { float:right; font-size: 28px; cursor: pointer; }
   .table.compact th, .table.compact td { padding: 4px 6px; }
 </style>
@@ -4230,7 +4214,7 @@ window.addEventListener('load', function(){
   }
   #autoEntriesModal th, #autoEntriesModal td,
   #rollingAverageModal th, #rollingAverageModal td{
-    border:1px solid #ccc; padding:8px; text-align:center; font-size:12px;
+    border:1px solid #ccc; padding:8px; text-align:center; font-size:11px;
   }
   .as-toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
   .as-toolbar button { background:#eee; color:#000; border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
@@ -4254,7 +4238,7 @@ window.addEventListener('load', function(){
       </thead>
       <tbody></tbody>
     </table>
-    <div id="autoEntriesStatus" style="margin-top:6px; font-size:12px; opacity:0.75;"></div>
+    <div id="autoEntriesStatus" style="margin-top:6px; font-size:11px; opacity:0.75;"></div>
   </div>
 </div>
 
@@ -4276,7 +4260,7 @@ window.addEventListener('load', function(){
       </thead>
       <tbody></tbody>
     </table>
-    <div id="rollingAverageStatus" style="margin-top:6px; font-size:12px; opacity:0.75;"></div>
+    <div id="rollingAverageStatus" style="margin-top:6px; font-size:11px; opacity:0.75;"></div>
   </div>
 </div>
 
@@ -4422,9 +4406,9 @@ function(){
 <style>
 #roamingEntriesModal.sts-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:99999; }
 #roamingEntriesModal .sts-box { background:#fff; color:#111; width:min(1100px, 96vw); max-height:90vh; margin:3vh auto; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; overflow:hidden; }
-#roamingEntriesModal .sts-hdr { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; border-bottom:1px solid #ddd; }
+#roamingEntriesModal .sts-hdr { display:flex; align-items:center; justify-content:space-between; gap:11px; padding:11px 16px; border-bottom:1px solid #ddd; }
 #roamingEntriesModal .sts-hdr h2 { margin:0; font-size:18px; }
-#roamingEntriesModal .sts-hdr .sts-status { font-size:12px; opacity:0.8; }
+#roamingEntriesModal .sts-hdr .sts-status { font-size:11px; opacity:0.8; }
 #roamingEntriesModal .sts-ctl { display:flex; gap:8px; padding:8px 16px; border-bottom:1px solid #eee; flex-wrap:wrap; }
 #roamingEntriesModal .sts-ctl button { padding:6px 10px; border-radius:6px; border:1px solid #ccc; background:#f8f8f8; cursor:pointer; }
 #roamingEntriesModal .sts-bdy { padding:8px 16px; overflow:auto; }
@@ -4445,7 +4429,7 @@ function(){
       <button id="roamingStopBtn" title="Stop capture">Stop</button>
       <button id="roamingExportBtn" title="Export captured rows as CSV">Export CSV</button>
       <button id="roamingClearBtn" title="Clear captured rows">Clear</button>
-      <div style="font-size:12px; opacity:0.8;">Every 15 s: selected scores, else last main-row values (with Score/Min/Max)</div>
+      <div style="font-size:11px; opacity:0.8;">Every 15 s: selected scores, else last main-row values (with Score/Min/Max)</div>
     </div>
     <div class="sts-bdy">
       <table id="roamingEntriesTable">
@@ -4663,9 +4647,9 @@ function(){
 <style>
 #roamingAverageModal.sts-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:99999; }
 #roamingAverageModal .sts-box { background:#fff; color:#111; width:min(1100px, 96vw); max-height:90vh; margin:3vh auto; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.2); display:flex; flex-direction:column; overflow:hidden; }
-#roamingAverageModal .sts-hdr { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; border-bottom:1px solid #ddd; }
+#roamingAverageModal .sts-hdr { display:flex; align-items:center; justify-content:space-between; gap:11px; padding:11px 16px; border-bottom:1px solid #ddd; }
 #roamingAverageModal .sts-hdr h2 { margin:0; font-size:18px; }
-#roamingAverageModal .sts-hdr .sts-status { font-size:12px; opacity:0.8; }
+#roamingAverageModal .sts-hdr .sts-status { font-size:11px; opacity:0.8; }
 #roamingAverageModal .sts-ctl { display:flex; gap:8px; padding:8px 16px; border-bottom:1px solid #eee; flex-wrap:wrap; }
 #roamingAverageModal .sts-ctl button { padding:6px 10px; border-radius:6px; border:1px solid #ccc; background:#f8f8f8; cursor:pointer; }
 #roamingAverageModal .sts-bdy { padding:8px 16px; overflow:auto; }
@@ -4686,7 +4670,7 @@ function(){
       <button id="roamingAverageStopBtn" title="Stop averaging">Stop</button>
       <button id="roamingAverageExportBtn" title="Export rows as CSV">Export CSV</button>
       <button id="roamingAverageClearBtn" title="Clear rows">Clear</button>
-      <div style="font-size:12px; opacity:0.8;">Every 15 s: average last 15 s of main entries per metric (with Score/Min/Max)</div>
+      <div style="font-size:11px; opacity:0.8;">Every 15 s: average last 15 s of main entries per metric (with Score/Min/Max)</div>
     </div>
     <div class="sts-bdy">
       <table id="roamingAverageTable">

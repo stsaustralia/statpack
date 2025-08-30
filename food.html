@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>statpack (Food Retrofit) v1.7.5-r1015.FOOD</title>
+<style>
+  /* Preserve original look & feel */
+  #logTable{display:block; max-height:calc(20 * 42px); overflow-y:auto}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f9f9f9;color:#000;margin:0;padding:20px}
+  h1{color:#007aff}
+  .controls{margin-bottom:20px}
+  .controls button,.controls label{margin-right:10px}
+  input,select,textarea{background:#fff;color:#000;border:1px solid #ccc;padding:6px 10px;border-radius:6px;margin:4px;font-size:12px}
+  .score-columns{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;margin-top:10px}
+  .score-column{display:flex;flex-direction:column;align-items:center}
+  .score-column button{width:125px;height:35px;margin:1px;border-radius:6px;border:1px solid #ccc;background:#fff}
+  .selected-score{background-color:#007aff!important;color:#fff!important;font-weight:bold;border:2px solid #000}
+  table{width:100%;border-collapse:collapse;background:#fff;margin-top:20px}
+  table,th,td{border:1px solid #ccc}
+  th,td{padding:10px;text-align:center;font-size:12px}
+  #extraNoteButtons{display:grid;grid-template-columns:repeat(8, 1fr);gap:6px;margin-top:10px}
+  .note-btn{width:100%;height:26px;font-size:12px;padding:0;border-radius:6px;border:1px solid #ccc;background:#f2f2f2;color:#000;transition:box-shadow .1s;margin:0}
+  .note-btn.selected-score{box-shadow:0 0 0 2px #000;color:#fff;background:#007aff}
+  #scoreModal{display:none;position:fixed;top:15%;left:50%;transform:translateX(-50%);background:#fff;padding:20px;border:2px solid #007aff;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,.2);z-index:1000}
+  #scoreModal input{width:60px}
+  .summary-controls{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;gap:8px;padding:8px 10px}
+  .summary-controls button{width:auto;white-space:nowrap}
+  .summary-controls{position: fixed; top:10px; left:20px; right:20px; display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:16px; z-index:9999}
+  .summary-controls button{position:static!important; background:#007aff; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer}
+  #summary5Btn,#summary15Btn,#summary60Btn,#autoSummaryToggleBtn{position:static!important}
+  .group-title{grid-column:1 / -1; margin:8px 0 2px; font-weight:600; color:#333}
+</style>
+</head>
+<body>
+<div class="summary-controls">
+  <button id="summary60Btn" onclick="alert('Summary 60m (food mode)')">Summary 60m</button>
+  <button id="summary15Btn" onclick="alert('Summary 15m (food mode)')">Summary 15m</button>
+  <button id="summary5Btn" onclick="alert('Summary 5m (food mode)')">Summary 5m</button>
+  <button id="autoSliderABtn" onclick="alert('Auto Slider A (food mode)')">Auto Slider A</button>
+  <button id="autoSliderBBtn" onclick="alert('Auto Slider B (food mode)')">Auto Slider B</button>
+  <button id="autoSliderCBtn" onclick="alert('Auto Slider C (food mode)')">Auto Slider C</button>
+  <button id="autoSliderDBtn" onclick="alert('Auto Slider D (food mode)')">Auto Slider D</button>
+  <button id="reviewBtn" onclick="openMealReviews()">Meal Reviews</button>
+  <button id="exportMealsBtn" onclick="exportMealReviewsCsv()">Export Reviews</button>
+</div>
+
+<h1>statpack (Food Retrofit)</h1>
+<div class="controls">
+  <span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:12px;">Append Mode</span>
+  <button onclick="newTrip()">New Log</button>
+  <button onclick="resetTimer()">Reset Timer</button>
+  <button onclick="pauseTimer()">Pause Timer</button>
+  <label><input id="redoseCheckbox" type="checkbox"/> Second helping</label>
+  <button id="addBtn" onclick="addEntry('main')">Add Entry</button>
+  <button onclick="deleteSelected()">Delete Selected</button>
+  <button onclick="editSelected()">Edit Selected</button>
+  <button onclick="exportCSV()">Export CSV</button>
+  <button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
+  <input accept=".csv,text/csv" id="openLogInput" style="display:none" type="file"/>
+  <button onclick="openScoreModal()">Manual Score Entry</button>
+</div>
+
+<div>
+  <label>Meal (was Phase):
+    <input id="eventInput" maxlength="50" size="50" type="text" placeholder="Breakfast / Lunch / Dinner / Snack"/>
+  </label><br/>
+  <label>Category (was Scale):
+    <input id="scaleInput" maxlength="50" size="30" type="text" placeholder="Protein / Carb / Dessert / Beverage"/>
+  </label><br/>
+  <label>Add:
+    <select id="drugSelect">
+      <option value="">--Select--</option>
+      <!-- Replaced with foods -->
+      <optgroup label="Staples / Mains">
+        <option>Rice</option><option>Bread</option><option>Pasta</option><option>Potato</option><option>Sweet Potato</option><option>Oats</option><option>Noodles</option><option>Quinoa</option><option>Couscous</option><option>Tortilla</option><option>Porridge</option><option>Cereal</option><option>Soup</option><option>Salad</option><option>Stir-fry</option><option>Curry</option><option>Sandwich</option><option>Wrap</option><option>Burger</option><option>Pizza</option><option>Stew</option><option>Roast</option><option>Omelette</option><option>Pancakes</option><option>Pie</option><option>Sushi</option><option>Dumplings</option><option>Ramen</option><option>Pho</option><option>Kebab</option>
+      </optgroup>
+      <optgroup label="Proteins & Dairy">
+        <option>Chicken</option><option>Beef</option><option>Pork</option><option>Lamb</option><option>Turkey</option><option>Fish</option><option>Salmon</option><option>Tuna</option><option>Prawns</option><option>Eggs</option><option>Tofu</option><option>Tempeh</option><option>Beans</option><option>Lentils</option><option>Chickpeas</option><option>Edamame</option><option>Nuts</option><option>Seeds</option><option>Peanut Butter</option><option>Greek Yoghurt</option><option>Cottage Cheese</option><option>Cheddar</option><option>Ham</option><option>Bacon</option><option>Prosciutto</option>
+      </optgroup>
+      <optgroup label="Fruit & Veg">
+        <option>Apple</option><option>Banana</option><option>Berries</option><option>Orange</option><option>Grapes</option><option>Mango</option><option>Pineapple</option><option>Avocado</option><option>Tomato</option><option>Cucumber</option><option>Lettuce</option><option>Spinach</option><option>Kale</option><option>Carrot</option><option>Broccoli</option><option>Cauliflower</option><option>Peas</option><option>Corn</option><option>Capsicum</option><option>Onion</option><option>Garlic</option><option>Mushrooms</option><option>Zucchini</option><option>Beetroot</option>
+      </optgroup>
+      <optgroup label="Drinks">
+        <option>Water</option><option>Sparkling Water</option><option>Coffee</option><option>Tea</option><option>Milk</option><option>Soy Milk</option><option>Oat Milk</option><option>Juice</option><option>Smoothie</option><option>Soft Drink</option><option>Energy Drink</option><option>Sports Drink</option><option>Kombucha</option><option>Beer</option><option>Wine</option><option>Spirits</option>
+      </optgroup>
+      <optgroup label="Treats">
+        <option>Chocolate</option><option>Ice Cream</option><option>Biscuit</option><option>Cake</option><option>Doughnut</option><option>Lollies</option><option>Chips</option><option>Popcorn</option>
+      </optgroup>
+    </select>
+  </label>
+  <label>qty (g):
+    <input id="qtyInput" size="6" type="number" min="0" step="1" placeholder="150"/>
+  </label>
+  <label>Method (was ROA):
+    <input id="roaInput" size="12" type="text" placeholder="Baked / Grilled / Raw"/>
+  </label>
+  <br/>
+  <label>Notes:</label><br/>
+  <textarea cols="50" id="notesInput" rows="3" placeholder="free text..."></textarea>
+  <br/>
+  <div style="display:flex; align-items:flex-start; gap:20px;">
+    <div class="score-columns" id="scoreColumns"></div>
+    <div id="extraNoteButtons"></div>
+  </div>
+</div>
+
+<div id="timer" style="margin-top:10px;">Time: 00:00:00</div>
+
+<table id="logTable">
+  <thead>
+    <tr>
+      <th data-col="Select">Select</th>
+      <th data-col="Timestamp">Timestamp</th>
+      <th data-col="Since">Since</th>
+      <th data-col="Elapsed">Elapsed</th>
+      <th data-col="Phase">Meal</th>
+      <th data-col="Scale">Category</th>
+      <th data-col="Drug">Food</th>
+      <th data-col="QTY">QTY (g)</th>
+      <th data-col="ROA">Method</th>
+      <th data-col="Rush">Enjoy</th><th data-col="Rush">Enjoy</th>
+      <th data-col="Mood">Satiety</th><th data-col="Mood">Satiety</th>
+      <th data-col="Social">Energy</th><th data-col="Social">Energy</th>
+      <th data-col="Energy">Craving</th><th data-col="Energy">Craving</th>
+      <th data-col="Focus">Negatives</th><th data-col="Focus">Negatives</th>
+      <th data-col="Score">Score</th>
+      <th data-col="Max">Max</th>
+      <th data-col="Min">Min</th>
+      <th data-col="Weighted">Weighted</th>
+      <th data-col="Last">Last</th>
+      <th data-col="Notes">Notes</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- Simple Meal Reviews modal -->
+<div id="mealReviewsModal" style="display:none; position:fixed; inset:0; z-index:9999;">
+  <div style="position:absolute; inset:0; background:rgba(0,0,0,0.45);" onclick="closeMealReviews()"></div>
+  <div style="position:relative; margin:4vh auto; width:min(1100px,94vw); max-height:92vh; overflow:auto; background:#fff; border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+      <div style="font-weight:700; font-size:20px;">Meal Reviews</div>
+      <button onclick="closeMealReviews()">Close</button>
+    </div>
+    <table id="mealReviewsTable" style="width:100%; border-collapse:collapse; background:#fff;">
+      <thead>
+        <tr><th>Time</th><th>Meal</th><th>Food</th><th>Enjoy</th><th>Satiety</th><th>Energy</th><th>Craving</th><th>Neg</th><th>Score</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ===== Read-only configuration (food retrofit) =====
+const CONFIG = Object.freeze({
+  ui: {
+    hideInUi: [], noShadeCols: [],
+    shadeCap: { Score:30, Max:30, Min:12, Weighted:12 },
+    colorSets: { green:['Score','Max'], red:['Min'] }
+  },
+  labels: {
+    labelMappings: {
+      rush:{0:'None',1:'OK',2:'Nice',3:'Tasty',4:'Very Tasty',5:'Delicious',6:'Craveworthy'},
+      mood:{0:'None',1:'Light',2:'Some',3:'Satisfied',4:'Full',5:'Very Full',6:'Overfull'},
+      social:{0:'None',1:'Calm',2:'Alert',3:'Energetic',4:'Focused',5:'Buzzing',6:'Overdrive'},
+      energy:{0:'None',1:'A bit',2:'Some',3:'Well-controlled',4:'Strong control',5:'No cravings',6:'Eliminated'},
+      focus:{0:'None',1:'Mild',2:'Noticeable',3:'Bloating',4:'Sleepy',5:'Indigestion',6:'Bad'},
+      anxiety:{0:'None'}, impair:{0:'None'}, change:{0:'None'}, degree:{0:'None'}, other:{0:'None'}
+    },
+    rapidLabels: {}
+  },
+  buttons: {
+    perMetricButtons: {
+      rush:[6,5,4,3,2,1,0],    // Enjoy
+      mood:[6,5,4,3,2,1,0],    // Satiety
+      social:[6,5,4,3,2,1,0],  // Energy
+      energy:[6,5,4,3,2,1,0],  // Craving control
+      focus:[6,5,4,3,2,1,0],   // Negatives
+      anxiety:[0], impair:[0], change:[0], degree:[0], other:[0]
+    },
+    rapidValues:[6,5,4,3,2,1,0],
+    rapidMetrics:['rush','mood','social','energy','focus'],
+    zeroScoreMetrics:['change','degree','other','anxiety','impair']
+  },
+  core: { metrics:['rush','mood','social','energy','focus'] },
+  notes: {
+    groups:[
+      {title:'Staples / Mains', items:["Rice","Bread","Pasta","Potato","SweetPotato","Oats","Noodles","Quinoa","Couscous","Tortilla","Porridge","Cereal","Soup","Salad","StirFry","Curry","Sandwich","Wrap","Burger","Pizza","Stew","Roast","Omelette","Pancakes","Pie","Sushi","Dumplings","Ramen","Pho","Kebab"]},
+      {title:'Proteins & Dairy', items:["Chicken","Beef","Pork","Lamb","Turkey","Fish","Salmon","Tuna","Prawns","Eggs","Tofu","Tempeh","Beans","Lentils","Chickpeas","Edamame","Nuts","Seeds","PeanutButter","GreekYoghurt","CottageCheese","Cheddar","Ham","Bacon","Prosciutto"]},
+      {title:'Fruit & Veg', items:["Apple","Banana","Berries","Orange","Grapes","Mango","Pineapple","Avocado","Tomato","Cucumber","Lettuce","Spinach","Kale","Carrot","Broccoli","Cauliflower","Peas","Corn","Capsicum","Onion","Garlic","Mushrooms","Zucchini","Beetroot"]},
+      {title:'Grains & Bakery', items:["BrownRice","WhiteRice","WholemealBread","Sourdough","Bagel","Croissant","Muffin","CerealBar","Crackers","Oatmeal","Granola","TortillaChips","Pita","Naan","RicePaper"]},
+      {title:'Prep / Method', items:["Raw","Baked","Roasted","Grilled","Fried","AirFried","Steamed","Boiled","Poached","StirFried","SlowCooked","PressureCooked","Microwaved","Toasted","Pickled","Fermented","Smoked","BBQ","SousVide"]},
+      {title:'Drinks', items:["Water","SparklingWater","Coffee","Tea","Milk","SoyMilk","OatMilk","Juice","Smoothie","SoftDrink","EnergyDrink","SportsDrink","Kombucha","Beer","Wine","Spirits"]},
+      {title:'Treats & Sauces', items:["Chocolate","IceCream","Biscuit","Cake","Doughnut","Lollies","Chips","Popcorn","Sauce","Ketchup","Mayo","Mustard","SoySauce","HotSauce","Honey","Jam","Nutella"]},
+      {title:'Context', items:["Home","Work","Restaurant","Cafe","Takeaway","Delivery","Alone","WithFamily","WithFriends","Public"]}
+    ]
+  }
+});
+
+// === Core from original structure (adapted) ===
+const HIDE_IN_UI = CONFIG.ui.hideInUi || [];
+const NO_SHADE = new Set(CONFIG.ui.noShadeCols || []);
+const SHADE_CAP = CONFIG.ui.shadeCap || {};
+const GREEN_SET=new Set(CONFIG.ui.colorSets?.green||[]), GOLD_SET=new Set(CONFIG.ui.colorSets?.gold||[]), RED_SET=new Set(CONFIG.ui.colorSets?.red||[]);
+
+function applyUiColumnVisibility(){
+  const id='uiHideCols'; if (document.getElementById(id)) return;
+  const style=document.createElement('style'); style.id=id;
+  style.textContent = HIDE_IN_UI.map(c=>`th[data-col="${c}"], td[data-col="${c}"]{display:none !important;}`).join('');
+  document.head.appendChild(style);
+}
+function tagRowCells(tr){
+  const header=document.querySelectorAll('#logTable thead th');
+  Array.from(tr.children).forEach((td,idx)=>{
+    const name=header[idx]?header[idx].textContent.trim():'';
+    if (name) td.setAttribute('data-col', name);
+  });
+}
+function getSum(arr){ return Array.isArray(arr)&&arr.length ? arr.reduce((a,b)=>a+b,0) : 0; }
+function fmt2(x){ const n=Number.parseFloat(x); return Number.isFinite(n)?n.toFixed(2):(x??""); }
+
+const labelMappings = CONFIG.labels.labelMappings;
+const RAPID_LABELS = CONFIG.labels.rapidLabels || {};
+const BUTTON_LABELS_BY_METRIC = {}; // no custom overrides
+
+function getMetricLabel(metric,v){
+  const num=Number(v);
+  if (Number.isFinite(num)){
+    const per = BUTTON_LABELS_BY_METRIC[metric];
+    if (per && Object.prototype.hasOwnProperty.call(per,num)) return per[num];
+  }
+  if (labelMappings?.[metric]?.[String(v)]!=null) return labelMappings[metric][String(v)];
+  if (RAPID_LABELS?.[metric]?.[String(v)]!=null) return RAPID_LABELS[metric][String(v)];
+  return String(v);
+}
+
+const metrics = CONFIG.core.metrics;
+let selections = {}, logData = [], timerInterval, startTime, doseTime, editIndex=null;
+
+function initSelections(){ metrics.forEach(m=>selections[m]=[]); }
+
+function buildButtons(){
+  // Score buttons
+  const sc=document.getElementById('scoreColumns'); sc.innerHTML='';
+  metrics.forEach(f=>{
+    const col=document.createElement('div'); col.className='score-column';
+    const t=document.createElement('strong'); t.innerText=(
+      f==='rush'?'Enjoy':
+      f==='mood'?'Satiety':
+      f==='social'?'Energy':
+      f==='energy'?'Craving control':
+      f==='focus'?'Negatives': f.charAt(0).toUpperCase()+f.slice(1)
+    );
+    col.appendChild(t);
+    const values=CONFIG.buttons.perMetricButtons[f] || [6,5,4,3,2,1,0];
+    values.forEach(v=>{
+      const b=document.createElement('button');
+      b.innerText = `${v}: ${getMetricLabel(f,v)}`;
+      b.onclick=()=>{
+        const i=selections[f].indexOf(v);
+        if (i<0){ selections[f].push(v); b.classList.add('selected-score'); }
+        else { selections[f].splice(i,1); b.classList.remove('selected-score'); }
+      };
+      col.appendChild(b);
+    });
+    sc.appendChild(col);
+  });
+
+  // Food note groups
+  const extraCont=document.getElementById('extraNoteButtons');
+  extraCont.innerHTML='';
+  CONFIG.notes.groups.forEach(g=>{
+    const title=document.createElement('div');
+    title.className='group-title'; title.textContent=g.title;
+    extraCont.appendChild(title);
+    g.items.forEach(lbl=>{
+      const b=document.createElement('button');
+      b.className='note-btn'; b.innerText=lbl;
+      b.onclick=()=>{
+        const ta=document.getElementById('notesInput');
+        const toks=ta.value.split(/\s+/).filter(Boolean);
+        const i=toks.indexOf(lbl);
+        if (i>=0){ toks.splice(i,1); b.classList.remove('selected-score'); }
+        else { toks.push(lbl); b.classList.add('selected-score'); }
+        ta.value=toks.join(' ');
+      };
+      extraCont.appendChild(b);
+    });
+  });
+}
+
+function resetTimer(){
+  startTime = doseTime = new Date();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    document.getElementById('timer').innerText = 'Meal Time: ' + getElapsed(startTime);
+  }, 1000);
+}
+function pauseTimer(){ clearInterval(timerInterval); }
+function newTrip(){
+  logData=[]; try{ localStorage.removeItem('tripLogFood'); }catch(e){}
+  renderTable(); clearInterval(timerInterval);
+  document.getElementById('timer').innerText='Time: 00:00:00';
+  startTime = doseTime = null;
+}
+function getElapsed(start){
+  if (!start) return "00:00:00";
+  let d=Math.floor((new Date()-start)/1000),
+      h=String(Math.floor(d/3600)).padStart(2,'0'),
+      m=String(Math.floor((d%3600)/60)).padStart(2,'0'),
+      s=String(d%60).padStart(2,'0');
+  return `${h}:${m}:${s}`;
+}
+
+function addEntry(labelSource='main'){
+  if (!startTime) resetTimer();
+  const now=new Date();
+  const ts=now.toLocaleString('en-AU',{hour12:false});
+  if (document.getElementById('redoseCheckbox').checked && document.getElementById('drugSelect').value) doseTime=new Date();
+  const entry={
+    _ts:Date.now(),
+    timestamp:ts,
+    sincedose:getElapsed(doseTime),
+    elapsed:getElapsed(startTime),
+    info:document.getElementById('eventInput').value,
+    scale:document.getElementById('scaleInput').value,
+    drug:document.getElementById('drugSelect').value, // food item
+    qty:document.getElementById('qtyInput').value,
+    roa:document.getElementById('roaInput').value,     // method
+    notes:document.getElementById('notesInput').value,
+    customNotes:''
+  };
+  metrics.forEach(f=>{
+    entry[f] = selections[f].length ? Array.from(new Set(selections[f])).sort((a,b)=>b-a) : [];
+    const resolveLabel=(metric,v)=>getMetricLabel(metric,v);
+    entry[f+'Label']=entry[f].map(v=>resolveLabel(f,v)).join(', ');
+    entry[f+'Sum']=getSum(entry[f]);
+  });
+  // Score mapping: positives minus negatives
+  entry.score = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum - entry.focusSum;
+  entry.max = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum;
+  entry.min = entry.focusSum;
+  entry.maxPercent = +(entry.max / 40 * 100).toFixed(1);
+  entry.minPercent = +(entry.min / 6 * 100).toFixed(1);
+  entry.weighted = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum - (+entry.focusSum)) / 4);
+  logData.push(entry);
+  try{ localStorage.setItem('tripLogFood', JSON.stringify(logData)); }catch(e){}
+  renderTable();
+  ['eventInput','scaleInput','drugSelect','qtyInput','roaInput','notesInput'].forEach(id=>document.getElementById(id).value='');
+  initSelections(); buildButtons();
+  document.getElementById('addBtn').innerText='Add Entry';
+}
+
+function renderTable(){
+  const tb=document.querySelector('#logTable tbody'); tb.innerHTML='';
+  logData.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    let h=`<td><input type="checkbox" name="rowSelect" data-index="${i}"></td>`;
+    ['timestamp','sincedose','elapsed','info','scale','drug','qty','roa'].forEach(k=> h+=`<td>${r[k]||''}</td>`);
+    metrics.forEach(f=>{
+      h += `<td data-field="${f}Sum" data-value="${r[f+'Sum']}">${fmt2(r[f+'Sum'])}</td>`;
+      h += `<td data-label-for="${f}Sum" data-value="${r[f+'Sum']}">${r[f+'Label']}</td>`;
+    });
+    h += `<td data-col="Score">${fmt2(r.score)}</td>` +
+         `<td data-col="Max">${fmt2(r.max||0)}</td>` +
+         `<td data-col="Min">${fmt2(r.min||0)}</td>` +
+         `<td data-col="Weighted">${fmt2(r.weighted||0)}</td>` +
+         `<td data-col="Last">${r.customNotes||""}</td>` +
+         `<td data-col="Notes">${r.notes||""}</td>`;
+    tr.innerHTML=h;
+    tr.setAttribute('data-ts', String(r._ts||0));
+    tagRowCells(tr);
+    applyUiColumnVisibility();
+    tb.appendChild(tr);
+  });
+}
+
+function deleteSelected(){
+  const toDel = Array.from(document.querySelectorAll('input[name="rowSelect"]:checked')).map(cb=>+cb.dataset.index);
+  logData = logData.filter((_,i)=>!toDel.includes(i));
+  try{ localStorage.setItem('tripLogFood', JSON.stringify(logData)); }catch(e){}
+  renderTable();
+}
+
+function editSelected(){
+  const sel=document.querySelector('input[name="rowSelect"]:checked');
+  if (!sel) return alert('Select one row');
+  editIndex=+sel.dataset.index;
+  const r=logData[editIndex];
+  document.getElementById('eventInput').value=r.info;
+  document.getElementById('scaleInput').value=r.scale;
+  document.getElementById('drugSelect').value=r.drug;
+  document.getElementById('qtyInput').value=r.qty;
+  document.getElementById('roaInput').value=r.roa;
+  document.getElementById('notesInput').value=r.notes;
+  document.getElementById('addBtn').innerText='Save Changes';
+  initSelections(); buildButtons();
+  // one-shot save
+  const originalAdd=addEntry;
+  window.addEntry=function(){
+    const entry={
+      _ts:r._ts, timestamp:r.timestamp, sincedose:r.sincedose, elapsed:r.elapsed,
+      info:document.getElementById('eventInput').value,
+      scale:document.getElementById('scaleInput').value,
+      drug:document.getElementById('drugSelect').value,
+      qty:document.getElementById('qtyInput').value,
+      roa:document.getElementById('roaInput').value,
+      notes:document.getElementById('notesInput').value,
+      customNotes:r.customNotes||''
+    };
+    metrics.forEach(f=>{
+      const arr = selections[f].length ? Array.from(new Set(selections[f])).sort((a,b)=>b-a) : r[f]||[];
+      entry[f]=arr;
+      entry[f+'Label']=arr.map(v=>getMetricLabel(f,v)).join(', ');
+      entry[f+'Sum']=getSum(arr);
+    });
+    entry.score = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum - entry.focusSum;
+    entry.max = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum;
+    entry.min = entry.focusSum;
+    entry.weighted = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum - (+entry.focusSum)) / 4);
+    logData[editIndex]=entry;
+    try{ localStorage.setItem('tripLogFood', JSON.stringify(logData)); }catch(e){}
+    renderTable();
+    ['eventInput','scaleInput','drugSelect','qtyInput','roaInput','notesInput'].forEach(id=>document.getElementById(id).value='');
+    initSelections(); buildButtons();
+    document.getElementById('addBtn').innerText='Add Entry';
+    window.addEntry=originalAdd;
+  };
+}
+
+function exportCSV(){
+  const h=["Timestamp","Since","Elapsed","Meal","Category","Food","Qty (g)","Method"];
+  metrics.forEach(f => h.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
+  h.push("Score","Max","Min","Weighted","Last","Notes");
+  const rows=[h.join(",")];
+  logData.forEach(r=>{
+    const L=[r.timestamp,r.sincedose,r.elapsed,r.info,r.scale,r.drug,r.qty,r.roa];
+    metrics.forEach(f=> L.push((+r[f+'Sum']||0).toFixed(2), r[f+'Label']));
+    L.push((+r.score||0).toFixed(2), (+r.max||0).toFixed(2), (+r.min||0).toFixed(2), (+r.weighted||0).toFixed(2), r.customNotes||'', r.notes||'');
+    rows.push(L.map(x=>`"${(String(x)).replace(/"/g,'""')}"`).join(","));
+  });
+  const blob=new Blob([rows.join("\n")],{type:"text/csv"}), url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='food_log.csv'; a.click(); URL.revokeObjectURL(url);
+}
+
+// Import (append)
+function openExistingLog(){
+  const inp=document.getElementById('openLogInput'); inp.value=""; inp.onchange=handleFileSelected; inp.click();
+}
+function parseCSV(text){
+  const lines=text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").split("\n").filter(Boolean);
+  const rows=lines.map(parseCSVLine); const header=rows.shift(); return {header, rows};
+}
+function parseCSVLine(line){
+  const out=[]; let cur=""; let inQ=false;
+  for (let i=0;i<line.length;i++){
+    const ch=line[i];
+    if (inQ){ if (ch === '"'){ if (i+1<line.length&&line[i+1]==='"'){ cur+='"'; i++; } else inQ=false; } else cur+=ch; }
+    else { if (ch === '"') inQ=true; else if (ch === ','){ out.push(cur); cur=""; } else cur+=ch; }
+  }
+  out.push(cur); return out;
+}
+function handleFileSelected(ev){
+  const file=ev.target.files && ev.target.files[0]; if (!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const text=String(reader.result||""); const parsed=parseCSV(text);
+      const need=["Timestamp","Since","Elapsed","Meal","Category","Food","Qty (g)","Method","Rush Sum","Rush Label","Mood Sum","Mood Label","Social Sum","Social Label","Energy Sum","Energy Label","Focus Sum","Focus Label","Score","Max","Min","Weighted","Last","Notes"];
+      const hasAll = need.every(n=> parsed.header.some(h => (h||"").trim().toLowerCase() === n.trim().toLowerCase()));
+      if (!hasAll){ alert("Unsupported CSV: please import a file exported by this FOOD retrofit."); return; }
+      const idx = (name)=> parsed.header.findIndex(h => (h||"").trim().toLowerCase() === name.trim().toLowerCase());
+      const imported = parsed.rows.map(r=>{
+        const get=(n)=> r[idx(n)]||"";
+        return {
+          _ts: Date.now(),
+          timestamp:get("Timestamp"), sincedose:get("Since"), elapsed:get("Elapsed"),
+          info:get("Meal"), scale:get("Category"), drug:get("Food"), qty:get("Qty (g)"), roa:get("Method"),
+          rush:[], mood:[], social:[], energy:[], focus:[],
+          rushLabel:get("Rush Label"), moodLabel:get("Mood Label"), socialLabel:get("Social Label"), energyLabel:get("Energy Label"), focusLabel:get("Focus Label"),
+          rushSum:+get("Rush Sum")||0, moodSum:+get("Mood Sum")||0, socialSum:+get("Social Sum")||0, energySum:+get("Energy Sum")||0, focusSum:+get("Focus Sum")||0,
+          score:+get("Score")||0, max:+get("Max")||0, min:+get("Min")||0, weighted:+get("Weighted")||0,
+          customNotes:get("Last"), notes:get("Notes")
+        };
+      });
+      logData = logData.concat(imported);
+      try{ localStorage.setItem('tripLogFood', JSON.stringify(logData)); }catch(e){}
+      renderTable();
+      alert(`Loaded ${imported.length} rows from ${file.name}`);
+    }catch(err){ alert("Failed to import CSV: " + err.message); }
+  };
+  reader.onerror=()=>alert("Failed to read file.");
+  reader.readAsText(file);
+}
+
+// Meal Reviews (simple mirror of visible rows)
+function openMealReviews(){
+  const tb=document.querySelector('#mealReviewsTable tbody'); tb.innerHTML='';
+  logData.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${r.timestamp||''}</td><td>${r.info||''}</td><td>${r.drug||''}</td>
+    <td>${fmt2(r.rushSum||0)}</td><td>${fmt2(r.moodSum||0)}</td><td>${fmt2(r.socialSum||0)}</td><td>${fmt2(r.energySum||0)}</td><td>${fmt2(r.focusSum||0)}</td><td>${fmt2(r.score||0)}</td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById('mealReviewsModal').style.display='block';
+}
+function closeMealReviews(){ document.getElementById('mealReviewsModal').style.display='none'; }
+
+function exportMealReviewsCsv(){
+  const header=["Time","Meal","Food","Enjoy","Satiety","Energy","Craving","Neg","Score"];
+  const rows=[header.join(",")];
+  logData.forEach(r=>{
+    const L=[r.timestamp||'', r.info||'', r.drug||'', fmt2(r.rushSum||0), fmt2(r.moodSum||0), fmt2(r.socialSum||0), fmt2(r.energySum||0), fmt2(r.focusSum||0), fmt2(r.score||0)];
+    rows.push(L.map(x=>`"${(String(x)).replace(/"/g,'""')}"`).join(","));
+  });
+  const blob=new Blob([rows.join("\n")],{type:"text/csv"}), url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='meal_reviews.csv'; a.click(); URL.revokeObjectURL(url);
+}
+
+window.onload=()=>{
+  initSelections();
+  buildButtons();
+  try{ logData = JSON.parse(localStorage.getItem('tripLogFood')) || []; }catch(e){}
+  renderTable();
+}
+</script>
+</body>
+</html>
