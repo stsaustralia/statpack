@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.7.8t r1082</title>
+<title>statpack v1.7.8 r1081</title>
 <style>
 
 #logTable {
@@ -590,9 +590,9 @@ labels: {
     focus:   { 0:'None',1:'Low',2:'Mid/Effective',3:'Focused',4:'Obsess',5:'Wired',6:'Laser Wired',4.5:'Very Strong',3.5:'Fixated/Focused',2.5:'Moderate/Motivated',1.5:'Low/Functional',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
     anxiety: { 0:'None',1:'Low',2:'Mid/Nervous',3:'Anxious',4:'Severe Impact',5:'Panic',6:'Doomed',4.5:'Very Severe',3.5:'Adverse/Decisions',2.5:'Moderate/Affecting',1.5:'Low/Overthinking',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
     impair:  { 0:'None',1:'Low',2:'Mid/Affecting',3:'Impaired',4:'Severe Impact',5:'Controlling',6:'Crippled',4.5:'Very Severe',3.5:'Adverse/Behaviour',2.5:'Moderate/Impacting',1.5:'Low/Noticeable',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    change:  { 5.5:'NiceSmell',4.5:'ChangeState',3.5:'Melted',2.5:'Burned',1.5:'Watch',0.5:'Follow',0:'Roll',6:'Rapid',5:'Last',4:'Dose',3:'Hit',2:'DrugAdded',1:'NothingAdded' },
-    degree:  { 5.5:'DrugAdded',4.5:'NothingAdded',3.5:'UsedRemains',2.5:'Colour',1.5:'Film',0.5:'HalfBurned',0:'Irritated',6:'Aggressive',5:'Gentle',4:'Sucked',3:'Throat',2:'MouthOpen',1:'LipSeal',0.7:'HalfSeal',0.2:'Correlate'},
-    other:   { 5.5:'NiceSmell',4.5:'ChangeState',3.5:'Melted',2.5:'Burned',1.5:'Watch/Follow',0.5:'Roll/Rapid',0:'Negative',6:'Positive',5:'Last',4:'Dose',3:'Hit',2:'DrugAdded',1:'NothingAdded'}
+    change:  { 0:'None',1:'Present',2:'Clear',3:'Significant',4:'Strong',5:'Obvious',6:'Very Strong' },
+    degree:  { 1:'Good',2:'Decent',3:'OK',4:'Present',5:'Noticed',6:'Maybe',3.5:'Alert',2.5:'Fair',0.75:'Medium' },
+    other:   { 1:'Strong/Obvious',2:'Extreme',3:'Yes/Notice',4:'Strong/Obvious',5:'Extreme',6:'Overwhelming',4.5:'Dominating',3.5:'Feel/Clear',2.5:'Overwhelming',0.75:'Feel/Clear' }
   },
   rapidLabels: {
     rush:    { 0:'None',1:'Low',2:'Moderate',3:'Strong',4:'Intense/Rush',5:'Extreme',6:'Overwhelming',4.5:'Very Intense',3.5:'Strong/Obvious',2.5:'Moderate/Clear',1.5:'Low/Present',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
@@ -602,9 +602,9 @@ labels: {
     focus:   { 0:'None',1:'Low',2:'Mid/Effective',3:'Focused',4:'Obsess',5:'Wired',6:'Laser Wired',4.5:'Very Strong',3.5:'Fixated/Focused',2.5:'Moderate/Motivated',1.5:'Low/Functional',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
     anxiety: { 0:'None',1:'Low',2:'Mid/Nervous',3:'Anxious',4:'Severe Impact',5:'Panic',6:'Doomed',4.5:'Very Severe',3.5:'Adverse/Decisions',2.5:'Moderate/Affecting',1.5:'Low/Overthinking',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
     impair:  { 0:'None',1:'Low',2:'Mid/Affecting',3:'Impaired',4:'Severe Impact',5:'Controlling',6:'Crippled',4.5:'Very Severe',3.5:'Adverse/Behaviour',2.5:'Moderate/Impacting',1.5:'Low/Noticeable',0.7:'Very Low',0.5:'+',0.2:'Minimal' },
-    change:  { 5.5:'NiceSmell',4.5:'ChangeState',3.5:'Melted',2.5:'Burned',1.5:'Watch',0.5:'Follow',0:'Roll',6:'Rapid',5:'Last',4:'Dose',3:'Hit',2:'DrugAdded',1:'NothingAdded' },
-    degree:  { 5.5:'DrugAdded',4.5:'NothingAdded',3.5:'UsedRemains',2.5:'Colour',1.5:'Film',0.5:'HalfBurned',0:'Irritated',6:'Aggressive',5:'Gentle',4:'Sucked',3:'Throat',2:'MouthOpen',1:'LipSeal',0.7:'HalfSeal',0.2:'Correlate'},
-    other:   { 5.5:'NiceSmell',4.5:'ChangeState',3.5:'Melted',2.5:'Burned',1.5:'Watch/Follow',0.5:'Roll/Rapid',0:'Negative',6:'Positive',5:'Last',4:'Dose',3:'Hit',2:'DrugAdded',1:'NothingAdded'}
+    change:  { 0:'None',1:'Present',2:'Clear',3:'Significant',4:'Strong',5:'Obvious',6:'Very Strong' },
+    degree:  { 1:'Good',2:'Decent',3:'OK',4:'Present',5:'Noticed',6:'Maybe',3.5:'Alert',2.5:'Fair',0.75:'Medium' },
+    other:   { 1:'Strong/Obvious',2:'Extreme',3:'Yes/Notice',4:'Strong/Obvious',5:'Extreme',6:'Overwhelming',4.5:'Dominating',3.5:'Feel/Clear',2.5:'Overwhelming',0.75:'Feel/Clear' }
   },
   buttonLabelsByMetric: {}
 },
@@ -619,10 +619,10 @@ labels: {
       impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.7,0.2,0,'',0.5,-0.5,-1],
       change:[4,3,2,1,0,4.8,3.4,2.4,1.7,1.2,0.6],
       degree:[0.1, 0.2, 0.3, 0.4, 5.7,4.4,3.2,1.7,0.7],
-      other:[5.5,4.5,3.5,2.5,1.5,0.5,0,6,5,4,3,1,0.7,0.2]
+      other:[6,5,4,3,2,1,0,0.6,0.5,0.4,0.3,0.2,0.1,0]
 //       other:[6.01,5.01,4.51,4.01,3.01,2.01,1.51,1.01,0.51,0.01,0.5]
     },
-    rapidValues: [6,4.5,3.5,2.5,1.5,0.7,0,'',0.5,-0.5],
+    rapidValues: [6,5,4,3,2,1,0,'',0.5,-0.5],
 //     rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
