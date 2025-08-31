@@ -1,12 +1,13 @@
 Rush,Rush,Mood,Mood,Social,Social,Energy,Energy,Focus,Focus,Anxiety,Anxiety,Impair,Impair,Change,Change,Degree,Degree,Other,Other
-6,Overwhelming,6,Bliss,6,Autopilot,6,Overdrive,6,Laser Wired,6,Extreme,6,Extreme,6,Extreme,6,Extreme,6,Extreme
-5,Extreme,5,Euphoric,5,Disinhibited,5,Manic,5,Wired,5,Very Severe,5,Very Severe,5,Correlate,5,Rapid,5,DeepBreath
-4,Very Strong,4,Very Good,4,Outgoing,4,Very High,4,Very Strong,4,Severe,4,Severe,4,Positive,4,SideToSide,4,OneBreath
-3.5,Strong,3.5,Great,3.5,Talkative,3.5,High,3.5,Strong,3.5,Serious,3.5,Serious,3.5,Negative,3.5,Followed,3.5,Diaphram
-3,Rush,3,Good,3,Social,3,Energetic,3,Focused,3,Anxious,3,Impaired,3,Last,3,ThroatBreath,3,Hold
-2.5,Significant,2.5,Clear,2.5,Desire/Push,2.5,Encourage/Push,2.5,Motivated,2.5,Affected,2.5,Impacted,2.5,Plumes,2.5,MouthOpen,2.5,Wait
-2,Some/Light,2,Some/Low,2,Some/Low,2,Some/Low,2,Some/Low,2,Some/Low,2,Some/Low,2,Plumes,2,MouthOpen,2,Wait
-1.5,Light,1.5,OK,1.5,Want,1.5,Functional,1.5,Very Low,1.5,Ignorable,1.5,Maskable,1.5,AddDrug,1.5,Sealed,1.5,FlameClose
-1,Very Light,1,Very Low,1,Very Low,1,Very Low,1,Very Low,1,Very Low,1,Very Low,1,AddDrug,1,Sealed,1,FlameClose
-0,None,0,None,0,None,0,None,0,None,0,None,0,None,0,StateChange,0,NotSealed,0,FlameFar
-0.5,+,0.5,+,0.5,+,0.5,+,0.5,+,0.5,+,0.5,+,0.5,Continue,0.5,HalfSealed,0.5,Adaptive
+6,Overwhelming,6,Autopilot,6,Autopilot,6,Ultra High,6,Ultra High,6,Doomed,6,Dangerous,6,Ultra High,6,Ultra High,6,Ultra High
+5,Extreme,5,Euphoric,5,Disinhibited,5,Extremely High,5,Extremely High,5,Severe,5,Severe,5,Extremely High,5,Extremely High,5,Extremely High
+4.5,Very High,4.5,Very High,4.5,Very High,4.5,Very High,4.5,Very High,4.5,Very High,4.5,Very High,4.5,Very High,4.5,Very High,4.5,Very High
+4,Intense/High,4,Great/Obvious,4,Natural/Outgoing,4,Energetic/Active,4,Obsessed/Fixated,4,High/Paranoid,4,Controlling,4,,4,,4,
+3.25,High/Strong,,High/Clear,,High/Social,,High/Active,,High/Focused,,High/Anxiety,,High/Impaired,,,,,,
+2.75,Mid/Present,2.75,Mid/Fair,2.75,Mid/Capable,2.75,Mid/Alert,2.75,Mid/Alert,2.75,Mid/Noticed,2.75,Mid/Noticed,2.75,,,,,
+2.25,Low-Mid,2.25,Low-Mid,2.25,Low-Mid,2.25,Low-Mid,2.25,Low-Mid,2.25,Low-Mid,2.25,Low-Mid,2.25,,2.25,,2.25,
+1.5,Low/Slight,1.5,Low/Flat,1.5,Low/Forced,1.5,Low/Funcitonal,1.5,Low/Funcitonal,1.5,Low/Minor,1.5,Low/Minor,1.5,Low,1.5,Low,1.5,Low
+0.75,Very Low,0.75,Very Low,0.75,Very Low,0.75,Very Low,0.75,Very Low,0.75,Very Low,0.75,Very Low,0.75,Very Low,0.75,Very Low,0.75,Very Low
+0.25,Minimal,0.25,Minimal,0.25,Minimal,0.25,Minimal,0.25,Minimal,0.25,Minimal,0.25,Minimal,0.25,Minimal,0.25,Minimal,0.25,Minimal
+0,None,0,None,0,None,0,None,0,None,0,None,0,None,0,None,0,None,0,None
+0.5,+,0.5,+,0.5,+,0.5,+,0.5,+,0.5,+,0.5,+,0.5,+,0.5,+,0.5,+
