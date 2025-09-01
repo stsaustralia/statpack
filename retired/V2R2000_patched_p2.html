@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v2b r2007</title>
+<title>statpack v2b r2000</title>
 <style>
 
 #logTable {
@@ -260,20 +260,6 @@ pointer-events: auto;
 
 <!-- STS: UI CONFIG (auto-injected) -->
 <script>
-function computeFiveMax(obj){
-  const vals = [
-    +obj.rush || 0,
-    +obj.mood || 0,
-    +obj.social || 0,
-    +obj.energy || 0,
-    +obj.focus || 0,
-    +obj.anxiety || 0,
-    +obj.impair || 0
-  ];
-  vals.sort((a,b)=>b-a);
-  return vals.slice(0,5).reduce((a,b)=>a+b,0);
-}
-
 (function() {
   const DEFAULTS = {
     shadingEnabled: true,
@@ -404,9 +390,6 @@ function computeFiveMax(obj){
 <option value="Alprazolam">Alprazolam</option>
 <option value="Bromazolam">Bromazolam</option>
 <option value="LSD">LSD</option>
-
-
-
 </select>
 </label>
 <label>
@@ -455,7 +438,7 @@ function computeFiveMax(obj){
 <th data-col="Social">Social</th>
 <th data-col="Social">Social</th>
 <th data-col="Energy">Energy</th>
-<th data-col="Energy">Energy </th>
+<th data-col="Energy">Energy</th>
 <th data-col="Focus">Focus</th>
 <th data-col="Focus">Focus</th>
 <th data-col="Anxiety">Anxiety</th>
@@ -559,7 +542,7 @@ function computeFiveMax(obj){
 // ===== Centralised read-only configuration (edit here to tweak UI/labels/sets) =====
 const CONFIG = Object.freeze({
   ui: {
-//     hideInUi: ['VL','sM','sB','sF','GS','change',	'Change'	,'Deg'	,'D2'	,'Oth',	'O2','Weighted','5Max'],
+//     hideInUi: [['VL','sM','sB','sF','GS','change','Deg','Oth']],
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
     noShadeCols: [],
     shadeCap: {
@@ -1192,7 +1175,7 @@ function renderTable() {
      `<td data-col="Last">${r.customNotes || ""}</td>` +
      `<td data-col="Notes">${r.notes || ""}</td>` +
      `<td data-col="Weighted">${fmt2(r.weighted || 0)}</td>` +
-     `<td data-col="5Max">${(r.fiveMax!=null? Number(r.fiveMax).toFixed(2): '')}</td>` +
+     `<td data-col="5Max">${(r.weighted / 10).toFixed(2)}</td>` +
      `<td data-col="GS">${fmt2(r.goodSum || 0)}</td>`;
 
             tr.innerHTML = h;
@@ -3049,7 +3032,8 @@ return "";
       max: +max,
       min: +min,
       weighted: +weighted,
-      fiveMax: computeFiveMax(means)};
+      fiveMax: +(weighted/10)
+    };
   }
   function fmt2(x){
     var n = Number(x);
@@ -3191,7 +3175,7 @@ return "";
     var max=(M.rush+M.mood+M.social+M.energy+M.focus);
     var min=(M.anxiety+M.impair);
     var weighted=5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
-    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:computeFiveMax(means)};
+    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:+(weighted/10)};
   }
   function slidingMeanAtIndex(snap, i){
     var start=Math.max(0,i-2), cnt=i-start+1;
@@ -4179,7 +4163,7 @@ window.addEventListener('load', function(){
       rows.forEach(function(r){ appendRow('#autoSliderCTable tbody', r); });
       var ro=snapshot(); if(ro){
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_C, rows); appendRow('#autoSliderCTable tbody', r2);
       }
@@ -4196,7 +4180,7 @@ window.addEventListener('load', function(){
       try{
         var rows=loadCD(LS_KEY_D);
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_D, rows); appendRow('#autoSliderDTable tbody', r2);
       }catch(e){}

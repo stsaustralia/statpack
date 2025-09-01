@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v2b r2007</title>
+<title>statpack v1.8 r1100</title>
 <style>
 
 #logTable {
@@ -40,13 +40,13 @@
         padding: 6px 10px;
         border-radius: 6px;
         margin: 4px;
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .score-columns {
     display: grid;
-    grid-template-columns: repeat(7, 1fr); /* exactly 10 columns */
-    gap: 5px;
+    grid-template-columns: repeat(10, 1fr); /* exactly 57columns */
+    gap: 10px;
     margin-top: 10px;
 }
 
@@ -60,13 +60,12 @@
 }
 
     .score-column button {
-        width: 112px;
-        height: 22px;
+        width: 130px;
+        height: 30px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
         background: #fff;
-        font-size: 10px;
     }
 
     .selected-score {
@@ -90,7 +89,7 @@
     th, td {
         padding: 10px;
         text-align: center;
-        font-size: 10px;
+        font-size: 11px;
     }
 
     #extraNoteButtons {
@@ -260,20 +259,6 @@ pointer-events: auto;
 
 <!-- STS: UI CONFIG (auto-injected) -->
 <script>
-function computeFiveMax(obj){
-  const vals = [
-    +obj.rush || 0,
-    +obj.mood || 0,
-    +obj.social || 0,
-    +obj.energy || 0,
-    +obj.focus || 0,
-    +obj.anxiety || 0,
-    +obj.impair || 0
-  ];
-  vals.sort((a,b)=>b-a);
-  return vals.slice(0,5).reduce((a,b)=>a+b,0);
-}
-
 (function() {
   const DEFAULTS = {
     shadingEnabled: true,
@@ -349,7 +334,7 @@ function computeFiveMax(obj){
 <button onclick="exportCSV()">Export CSV</button>
 <button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
 <input accept=".csv,text/csv" id="openLogInput" style="display:none" type="file"/>
-<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button>
+<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button><button onclick="openLowerScores()">Lower Scores</button>
 <button onclick="openEmotionModal()">Emotion Wheel</button>
 </div>
 <div>
@@ -404,9 +389,9 @@ function computeFiveMax(obj){
 <option value="Alprazolam">Alprazolam</option>
 <option value="Bromazolam">Bromazolam</option>
 <option value="LSD">LSD</option>
-
-
-
+<option value="Food">Food</option>
+<option value="Drink">Drink</option>
+<option value="Sleep">Sleep</option>
 </select>
 </label>
 <label>
@@ -462,7 +447,7 @@ function computeFiveMax(obj){
 <th data-col="Anxiety">Anxiety</th>
 <th data-col="Impair">Impair</th>
 <th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
-<th data-col="Confidence">Confidence</th><th data-col="Confidence">Confidence</th><th data-col="Auto">Auto</th><th data-col="Auto">Auto</th><th data-col="Jitter">Jitter</th><th data-col="Jitter">Jitter</th><th data-col="Dopamine">Dopamine</th><th data-col="Dopamine">Dopamine</th><th data-col="Score">Score</th>
+<th data-col="Score">Score</th>
 <th data-col="Max">Max</th>
 <th data-col="Min">Min</th>
 <th data-col="VL">VL</th>
@@ -546,6 +531,19 @@ function computeFiveMax(obj){
 <div id="rapidScoresModal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
 <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
 <div style="font-weight:700; font-size:18px;">Rapid Scores</div>
+<div id="lowerScoresModal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+    <div style="font-weight:700; font-size:18px;">Lower Scores</div>
+    <button aria-label="Close" onclick="closeLowerScores()">Close</button>
+  </div>
+  <div class="score-columns" id="lowerScoresButtons"></div>
+  <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+    <button onclick="applyLowerScores()">Apply</button>
+    <button onclick="applyLowerScoresAndAdd()">Apply &amp; Add Entry</button>
+    <button onclick="applyLowerScoresAndAddStay()">Apply, Add &amp; Stay</button>
+  </div>
+</div>
+
 <button aria-label="Close" onclick="closeRapidScores()">Close</button>
 </div>
 <div class="score-columns" id="rapidScoresButtons"></div>
@@ -561,11 +559,11 @@ const CONFIG = Object.freeze({
   ui: {
 //     hideInUi: ['VL','sM','sB','sF','GS','change',	'Change'	,'Deg'	,'D2'	,'Oth',	'O2','Weighted','5Max'],
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
-    noShadeCols: [],
+    noShadeCols: ['change','Change','Deg'],
     shadeCap: {
-      'Score': 30,
-      'Max': 30,
-      'Min': 10,
+      'Score': 25,
+      'Max': 35,
+      'Min': 14,
       'Weighted': 20,
       '5Max': 5
     },
@@ -573,64 +571,55 @@ const CONFIG = Object.freeze({
       green: ['Rush','Mood','Social','Score','Weighted','5Max','Max'],
       gold:  ['Energy','Focus'],
       red:   ['Anxiety','Impair','Min']
-      , blue:  ['Change','D2','O2']
-      , grey:  ['Confidence','Auto','Jitter','Dopamine']}
+    }
   },
 labels: {
   labelMappings: {
-  rush: { 6.00: 'Extreme', 5.50: 'Intense', 5.00: 'Intense', 4.50: 'Very Strong', 4.00: 'Strong', 3.50: 'Prominent', 3.00: 'Prominent', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Light', 1.00: 'Light', 0.50: 'Minor', 0.00: 'None', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' , 0.75: '+', 0.25: '+' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoric', 5.00: 'Euphoric', 4.50: 'Very Clear/Good', 4.00: 'Clear/Certain', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'OK', 1.00: 'OK', 0.50: 'Flat', 0.00: 'No/No Change', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious', 0.75: '+', 0.25: '+' },
-  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very Outgoing', 4.00: 'Outgoing', 3.50: 'Social', 3.00: 'Social', 2.50: 'Push/Urge', 2.00: 'Push/Urge', 1.50: 'Think/Want', 1.00: 'Think/Want', 0.50: 'Think', 0.00: 'No', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' , 0.75: '+', 0.25: '+' },
-  energy: { 6.00: 'Ultra', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very Energetic', 4.00: 'Energetic', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Minimal', 0.00: 'Baseline', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.30: 'Active' , 0.75: '+', 0.25: '+' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Wired', 5.00: 'Wired', 4.50: 'Hyperfocused', 4.00: 'Focused', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Very Low', 0.00: 'Baseline', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive', 0.75: '+', 0.25: '+'  },
-  anxiety: { 6.00: 'Doomed', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Ignorable', 0.00: 'None', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' , 0.75: '+', 0.25: '+' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Minimal', 0.00: 'No', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' , 0.75: '+', 0.25: '+' },
-  change: { 1.00: 'Noticed', 3.00: 'Significant', 4.00: 'Obvious', 6.00: 'Extreme' },
-  degree: { 6.00: 'Extremely High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.10: 'Present', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Obvious' },
-  other: { 0.10: 'Noticed', 0.30: 'Significant', 0.40: 'Obvious', 0.50: 'Extreme', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' },
-  confidence: { 6.00:'Extreme', 5.50:'Intense', 5.00:'Very High', 4.50:'High', 4.00:'Strong', 3.50:'Prominent', 3.00:'Prominent', 2.50:'Distinct', 2.00:'Distinct', 1.50:'Light', 1.00:'Light', 0.50:'Minor', 0.00:'None' },
-  auto:       { 6.00:'Extreme', 5.50:'Intense', 5.00:'Very High', 4.50:'High', 4.00:'Strong', 3.50:'Prominent', 3.00:'Prominent', 2.50:'Distinct', 2.00:'Distinct', 1.50:'Light', 1.00:'Light', 0.50:'Minor', 0.00:'None' },
-  jitter:     { 6.00:'Extreme', 5.50:'Intense', 5.00:'Very High', 4.50:'High', 4.00:'Strong', 3.50:'Prominent', 3.00:'Prominent', 2.50:'Distinct', 2.00:'Distinct', 1.50:'Light', 1.00:'Light', 0.50:'Minor', 0.00:'None' },
-  dopamine:   { 6.00:'Extreme', 5.50:'Intense', 5.00:'Very High', 4.50:'High', 4.00:'Strong', 3.50:'Prominent', 3.00:'Prominent', 2.50:'Distinct', 2.00:'Distinct', 1.50:'Light', 1.00:'Light', 0.50:'Minor', 0.00:'None' },
-}
-, rapidLabels: {
-  rush: { 6.00: 'Extreme', 5.50: 'Intense', 5.00: 'Intense', 4.50: 'Very Strong', 4.00: 'Strong', 3.50: 'Prominent', 3.00: 'Prominent', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Light', 1.00: 'Light', 0.50: 'Minor', 0.00: 'None', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' , 0.75: '+', 0.25: '+' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoric', 5.00: 'Euphoric', 4.50: 'Very Clear/Good', 4.00: 'Clear/Certain', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'OK', 1.00: 'OK', 0.50: 'Flat', 0.00: 'No/No Change', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious', 0.75: '+', 0.25: '+' },
-  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very Outgoing', 4.00: 'Outgoing', 3.50: 'Social', 3.00: 'Social', 2.50: 'Push/Urge', 2.00: 'Push/Urge', 1.50: 'Think/Want', 1.00: 'Think/Want', 0.50: 'Think', 0.00: 'No', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' , 0.75: '+', 0.25: '+' },
-  energy: { 6.00: 'Ultra', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very Energetic', 4.00: 'Energetic', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Minimal', 0.00: 'Baseline', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.30: 'Active' , 0.75: '+', 0.25: '+' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Wired', 5.00: 'Wired', 4.50: 'Hyperfocused', 4.00: 'Focused', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Very Low', 0.00: 'Baseline', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive', 0.75: '+', 0.25: '+'  },
-  anxiety: { 6.00: 'Doomed', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Ignorable', 0.00: 'None', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' , 0.75: '+', 0.25: '+' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Minimal', 0.00: 'No', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' , 0.75: '+', 0.25: '+' },
-  change: { 1.00: 'Noticed', 3.00: 'Significant', 4.00: 'Obvious', 6.00: 'Extreme' },
-  degree: { 6.00: 'Extremely High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.10: 'Present', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Obvious' },
-  other: { 0.10: 'Noticed', 0.30: 'Significant', 0.40: 'Obvious', 0.50: 'Extreme', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' },
+  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Moderate', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Very Euphoric', 5.00: 'Euphoric', 4.50: 'Very Good', 4.00: 'Obvious', 3.50: 'High/Clear', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Some', 1.50: 'Low', 1.00: 'OK', 0.75: 'Very Poor', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Fair', 0.30: 'Good', 0.40: 'Great' },
+  social: { 6.00: 'Autopilot', 5.50: 'Very Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High/Social', 3.00: 'Social', 2.50: 'Moderate', 2.00: 'Capable', 1.50: 'Low', 1.00: 'Want', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
+  energy: { 6.00: 'Ultra', 5.50: 'Very Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High/Energy', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
+  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'High/Obsessed', 3.50: 'High/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
+  anxiety: { 6.00: 'Doomed', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Dominating', 3.50: 'High/Anxiety', 3.00: 'Anxious', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid', 1.25: 'Ignorable' },
+  impair: { 6.00: 'Dangerous', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High/Impairment', 3.00: 'Impaired', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Ignorable' },
+  change: { 1.00: 'Noticed', 2.00: 'Distinct', 3.00: 'Significant', 4.00: 'Strong' },
+  degree: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low' },
+  other: { 5.00: 'Positive', 4.00: 'Negative', 3.00: 'Up', 2.00: 'Down', 1.00: 'Flat', 0.00: 'No' },
+    },
+  rapidLabels: {
+  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Moderate', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Very Euphoric', 5.00: 'Euphoric', 4.50: 'Very Good', 4.00: 'Obvious', 3.50: 'High/Clear', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Some', 1.50: 'Low', 1.00: 'OK', 0.75: 'Very Poor', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Fair', 0.30: 'Good', 0.40: 'Great' },
+  social: { 6.00: 'Autopilot', 5.50: 'Very Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High/Social', 3.00: 'Social', 2.50: 'Moderate', 2.00: 'Capable', 1.50: 'Low', 1.00: 'Want', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
+  energy: { 6.00: 'Ultra', 5.50: 'Very Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High/Energy', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
+  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'High/Obsessed', 3.50: 'High/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
+  anxiety: { 6.00: 'Doomed', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Dominating', 3.50: 'High/Anxiety', 3.00: 'Anxious', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid', 1.25: 'Ignorable' },
+  impair: { 6.00: 'Dangerous', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High/Impairment', 3.00: 'Impaired', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Ignorable' },
+  change: { 1.00: 'Noticed', 2.00: 'Distinct', 3.00: 'Significant', 4.00: 'Strong' },
+  degree: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low' },
+  other: { 5.00: 'Positive', 4.00: 'Negative', 3.00: 'Up', 2.00: 'Down', 1.00: 'Flat', 0.00: 'No' },
   },
   buttonLabelsByMetric: {}
 },
   buttons: {
     perMetricButtons: {
-      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      confidence:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      auto:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      jitter:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      dopamine:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
-      change:[6,4,3,1],
-      degree:[6,4,3,2,1,0],
-      other: [4.99,4.33,3.67,2.33,1.33,0.67,0]
+      rush:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      mood:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      social:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      energy:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      focus:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      anxiety:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1.25,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      impair:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1.25,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      change:[4,3,2,1],
+      degree:[5,4,3,2,1],
+      other:[5,4,3,2,1]
     },
-    rapidValues: [6,5,4,3,2,1,0,'','',0.25,-0.25],
+    rapidValues: [5.5,4.5,3.5,2.5,1.5,0.75,0,0.5,-0.5],
 //     rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
   core: {
-    metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other', 'confidence','auto','jitter','dopamine']
+    metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other']
   },
   notes: {
     extra: ['Correlate', 'Flag','Now', 'This', 'Last', 'Next',  'Changes', 'Note', 'Context', 'Continue', 'LastDose', 'LastRow', 'LastHit', 'Plan', 'One', 'Multiple', 'Dose', 'Redose', 'Continue', 'Hit', 'Hindsight', 'Review', 'Summary'],
@@ -657,8 +646,6 @@ const SHADE_CAP = CONFIG.ui.shadeCap;
 const GREEN_SET = new Set(CONFIG.ui.colorSets.green);
 const GOLD_SET  = new Set(CONFIG.ui.colorSets.gold);
 const RED_SET   = new Set(CONFIG.ui.colorSets.red);
-const BLUE_SET  = new Set(CONFIG.ui.colorSets.blue || []);
-const GREY_SET  = new Set(CONFIG.ui.colorSets.grey || []);
 
 function applyUiColumnVisibility() {
   const id = 'uiHideCols';
@@ -676,7 +663,10 @@ function applyUiColumnVisibility() {
     const s = document.createElement('style');
     s.id = id2;
     s.textContent = `
-      `;
+      th[data-col="change"], td[data-col="change"],
+      th[data-col="Change"],  td[data-col="Change"],
+      th[data-col="Deg"], td[data-col="Deg"] { background: transparent !important; }
+    `;
     document.head.appendChild(s);
   }
 }
@@ -699,8 +689,6 @@ function cellBgFor(colName, value) {
   if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
   if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
   if (RED_SET.has(colName))   return `rgba(255,0,0,${opacity})`;
-  if (BLUE_SET.has(colName))  return `rgba(0,0,255,${opacity})`;
-  if (GREY_SET.has(colName))  return `rgba(128,128,128,${opacity})`;
   return '';
 }
 
@@ -819,8 +807,13 @@ function getLabels(metric, values) {
 // if (v === 2.02) customLabel = 'Low';
 // if (v === 1.52) customLabel = 'Lower';
 // if (v === 1.02) customLabel = 'Vergy Low';
+if (v === 1) customLabel = 'TEST';
 if (v === -111) customLabel = '-';
 //else if (v === 6) customLabel = 'Extra/Moderate';
+else if (v === 1) customLabel = 'TESTER';
+
+
+
 //else if (v === 10) customLabel = 'Maximum';
 //else if (v === 6) customLabel = 'Extra/Moderate';
 else customLabel = getMetricLabel(f, v);
@@ -1192,7 +1185,7 @@ function renderTable() {
      `<td data-col="Last">${r.customNotes || ""}</td>` +
      `<td data-col="Notes">${r.notes || ""}</td>` +
      `<td data-col="Weighted">${fmt2(r.weighted || 0)}</td>` +
-     `<td data-col="5Max">${(r.fiveMax!=null? Number(r.fiveMax).toFixed(2): '')}</td>` +
+     `<td data-col="5Max">${(r.weighted / 10).toFixed(2)}</td>` +
      `<td data-col="GS">${fmt2(r.goodSum || 0)}</td>`;
 
             tr.innerHTML = h;
@@ -3049,7 +3042,8 @@ return "";
       max: +max,
       min: +min,
       weighted: +weighted,
-      fiveMax: computeFiveMax(means)};
+      fiveMax: +(weighted/10)
+    };
   }
   function fmt2(x){
     var n = Number(x);
@@ -3191,7 +3185,7 @@ return "";
     var max=(M.rush+M.mood+M.social+M.energy+M.focus);
     var min=(M.anxiety+M.impair);
     var weighted=5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
-    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:computeFiveMax(means)};
+    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:+(weighted/10)};
   }
   function slidingMeanAtIndex(snap, i){
     var start=Math.max(0,i-2), cnt=i-start+1;
@@ -3330,7 +3324,7 @@ return "";
   .ls-row { display: grid; grid-template-columns: 160px 1fr; gap: 10px; margin: 6px 0; align-items: center; }
   .ls-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
   .ls-controls button { padding: 6px 10px; }
-  #ls-preview { border: 1px solid #ddd; border-radius: 8px; padding: 8px; max-height: 240px; overflow: auto; font-size: 10px; }
+  #ls-preview { border: 1px solid #ddd; border-radius: 8px; padding: 8px; max-height: 240px; overflow: auto; font-size: 11px; }
   #ls-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
   #ls-tabs button { padding: 6px 10px; border: 1px solid #ccc; background: #f7f7f7; cursor: pointer; border-radius: 6px; }
   #ls-tabs button.active { background: #e9f2ff; border-color: #9cc1ff; }
@@ -4179,7 +4173,7 @@ window.addEventListener('load', function(){
       rows.forEach(function(r){ appendRow('#autoSliderCTable tbody', r); });
       var ro=snapshot(); if(ro){
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_C, rows); appendRow('#autoSliderCTable tbody', r2);
       }
@@ -4196,7 +4190,7 @@ window.addEventListener('load', function(){
       try{
         var rows=loadCD(LS_KEY_D);
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_D, rows); appendRow('#autoSliderDTable tbody', r2);
       }catch(e){}
@@ -4861,6 +4855,137 @@ function(){
 })();
 </script>
 <!-- /STS: Roaming Average (auto-injected) -->
+
+<script>
+// ===== Lower Scores Modal (uses MAIN labelMappings) =====
+(function(){
+  const LOWER_VALUES = Object.freeze({
+    rush:    [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    mood:    [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    social:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    energy:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    focus:   [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    anxiety: [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    impair:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+  });
+  const METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
+  let lowerSelections = Object.fromEntries(METRICS.map(m => [m, null]));
+
+  function nearestLabel(metric, val){
+    try{
+      const map = (window.CONFIG && window.CONFIG.labels && window.CONFIG.labels.labelMappings && window.CONFIG.labels.labelMappings[metric]) || {};
+      if (map[val] !== undefined) return map[val];
+      const keys = Object.keys(map).map(parseFloat).filter(n => !Number.isNaN(n));
+      if (!keys.length) return String(val);
+      keys.sort((a,b)=>Math.abs(val-a)-Math.abs(val-b));
+      return map[keys[0]] ?? String(val);
+    }catch(e){ return String(val); }
+  }
+
+  function renderLowerScores(){
+    const host = document.getElementById('lowerScoresButtons');
+    if (!host) return;
+    host.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'score-columns';
+    METRICS.forEach(metric => {
+      const col = document.createElement('div');
+      col.className = 'score-column';
+      const hdr = document.createElement('div');
+      hdr.textContent = metric.charAt(0).toUpperCase() + metric.slice(1);
+      hdr.style.fontWeight = '600';
+      col.appendChild(hdr);
+      (LOWER_VALUES[metric]||[]).forEach(v => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.metric = metric;
+        btn.dataset.value = String(v);
+        btn.textContent = v + ': ' + nearestLabel(metric, v);
+        btn.classList.toggle('selected-score', lowerSelections[metric] === v);
+        btn.addEventListener('click', () => {
+          lowerSelections[metric] = (lowerSelections[metric] === v) ? null : v;
+          [...col.querySelectorAll('button')].forEach(b => {
+            b.classList.toggle('selected-score', parseFloat(b.dataset.value) === lowerSelections[metric]);
+          });
+        });
+        col.appendChild(btn);
+      });
+      grid.appendChild(col);
+    });
+    host.appendChild(grid);
+  }
+
+  function annotateMainButtons(){
+    try{
+      const host = document.getElementById('scoreColumns');
+      if (!host) return;
+      host.querySelectorAll('.score-column').forEach(col => {
+        let header = null;
+        for (const n of col.childNodes){
+          if (n.nodeType === 1 && n.tagName !== 'BUTTON'){ header = n; break; }
+        }
+        if (!header) return;
+        const metric = (header.textContent || '').trim().toLowerCase();
+        col.querySelectorAll('button').forEach(b => {
+          const txt = (b.textContent || '').trim();
+          const m = txt.match(/^(-?\d+(?:\.\d+)?):/);
+          if (m){ b.dataset.metric = metric; b.dataset.value = m[1]; }
+        });
+      });
+    }catch(e){}
+  }
+
+  function syncToMainButtons(){
+    try {
+      const container = document.getElementById('scoreColumns');
+      if (!container) return;
+      METRICS.forEach(metric => {
+        const val = lowerSelections[metric];
+        if (val == null) return;
+        const btn = [...container.querySelectorAll('button')].find(b => {
+          if (b.dataset && b.dataset.metric === metric && b.dataset.value != null){
+            return Math.abs(parseFloat(b.dataset.value) - val) < 1e-9;
+          }
+          return (b.textContent || '').trim().startsWith(String(val) + ':');
+        });
+        if (btn) btn.click();
+      });
+    } catch(e){}
+  }
+
+  window.openLowerScores = function(){
+    const modal = document.getElementById('lowerScoresModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    renderLowerScores();
+  };
+  window.closeLowerScores = function(){
+    const modal = document.getElementById('lowerScoresModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+  };
+
+  function applyCommon({doAdd=false, stayOpen=false} = {}){
+    syncToMainButtons();
+    if (doAdd && typeof window.addEntry === 'function'){
+      try { window._lowerInputSource = true; window.addEntry('main'); }
+      finally { delete window._lowerInputSource; }
+    }
+    if (!stayOpen) window.closeLowerScores();
+    if (stayOpen) renderLowerScores();
+  }
+
+  window.applyLowerScores = function(){ applyCommon({doAdd:false, stayOpen:false}); };
+  window.applyLowerScoresAndAdd = function(){ applyCommon({doAdd:true, stayOpen:false}); };
+  window.applyLowerScoresAndAddStay = function(){ applyCommon({doAdd:true, stayOpen:true}); };
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', annotateMainButtons);
+  } else {
+    annotateMainButtons();
+  }
+})();
+</script>
 </body>
 <script>
 function openEmotionModal() {
