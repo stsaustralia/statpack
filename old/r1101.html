@@ -45,7 +45,7 @@
 
     .score-columns {
     display: grid;
-    grid-template-columns: repeat(10, 1fr); /* exactly 57columns */
+    grid-template-columns: repeat(7, 1fr); /* exactly 57columns */
     gap: 10px;
     margin-top: 10px;
 }
@@ -102,7 +102,7 @@
     .note-btn {
         width: 80px;
         height: 20px;
-        font-size: 10px;
+        font-size: 11px;
         padding: 0;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -548,11 +548,11 @@ const CONFIG = Object.freeze({
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
     noShadeCols: ['change','Change','Deg'],
     shadeCap: {
-      'Score': 25,
-      'Max': 35,
-      'Min': 14,
-      'Weighted': 20,
-      '5Max': 5
+      'Score': 30,
+      'Max': 30,
+      'Min': 10,
+      'Weighted': 10,
+      '5Max': 10
     },
     colorSets: {
       green: ['Rush','Mood','Social','Score','Weighted','5Max','Max'],
@@ -562,11 +562,11 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Moderate', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
+  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Strong', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
   mood: { 6.00: 'Autopilot', 5.50: 'Very Euphoric', 5.00: 'Euphoric', 4.50: 'Very Good', 4.00: 'Obvious', 3.50: 'High/Clear', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Some', 1.50: 'Low', 1.00: 'OK', 0.75: 'Very Poor', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Fair', 0.30: 'Good', 0.40: 'Great' },
   social: { 6.00: 'Autopilot', 5.50: 'Very Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High/Social', 3.00: 'Social', 2.50: 'Moderate', 2.00: 'Capable', 1.50: 'Low', 1.00: 'Want', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
   energy: { 6.00: 'Ultra', 5.50: 'Very Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High/Energy', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'High/Obsessed', 3.50: 'High/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
+  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'Very/Obsessed', 3.50: 'HIgh/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
   anxiety: { 6.00: 'Doomed', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Dominating', 3.50: 'High/Anxiety', 3.00: 'Anxious', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid', 1.25: 'Ignorable' },
   impair: { 6.00: 'Dangerous', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High/Impairment', 3.00: 'Impaired', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Ignorable' },
   change: { 1.00: 'Noticed', 2.00: 'Distinct', 3.00: 'Significant', 4.00: 'Strong' },
@@ -574,11 +574,11 @@ labels: {
   other: { 5.00: 'Positive', 4.00: 'Negative', 3.00: 'Up', 2.00: 'Down', 1.00: 'Flat', 0.00: 'No' },
     },
   rapidLabels: {
-  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Moderate', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
+  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Strong', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
   mood: { 6.00: 'Autopilot', 5.50: 'Very Euphoric', 5.00: 'Euphoric', 4.50: 'Very Good', 4.00: 'Obvious', 3.50: 'High/Clear', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Some', 1.50: 'Low', 1.00: 'OK', 0.75: 'Very Poor', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Fair', 0.30: 'Good', 0.40: 'Great' },
   social: { 6.00: 'Autopilot', 5.50: 'Very Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High/Social', 3.00: 'Social', 2.50: 'Moderate', 2.00: 'Capable', 1.50: 'Low', 1.00: 'Want', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
   energy: { 6.00: 'Ultra', 5.50: 'Very Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High/Energy', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'High/Obsessed', 3.50: 'High/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
+  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'Very/Obsessed', 3.50: 'HIgh/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
   anxiety: { 6.00: 'Doomed', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Dominating', 3.50: 'High/Anxiety', 3.00: 'Anxious', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid', 1.25: 'Ignorable' },
   impair: { 6.00: 'Dangerous', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High/Impairment', 3.00: 'Impaired', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Ignorable' },
   change: { 1.00: 'Noticed', 2.00: 'Distinct', 3.00: 'Significant', 4.00: 'Strong' },
@@ -594,11 +594,11 @@ labels: {
       social:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
       energy:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
       focus:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      anxiety:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1.25,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      impair:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1.25,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      change:[4,3,2,1],
-      degree:[5,4,3,2,1],
-      other:[5,4,3,2,1]
+      anxiety:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      impair:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      change:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      degree:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
+      other:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4]
     },
     rapidValues: [5.5,4.5,3.5,2.5,1.5,0.75,0,0.5,-0.5],
 //     rapidValues: [6,5,4,3,2,1,0],

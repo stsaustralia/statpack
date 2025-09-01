@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.8 r1100</title>
+<title>statpack v1.7.8 r1095</title>
 <style>
 
 #logTable {
@@ -45,7 +45,7 @@
 
     .score-columns {
     display: grid;
-    grid-template-columns: repeat(10, 1fr); /* exactly 57columns */
+    grid-template-columns: repeat(7, 1fr); /* exactly 57columns */
     gap: 10px;
     margin-top: 10px;
 }
@@ -102,7 +102,7 @@
     .note-btn {
         width: 80px;
         height: 20px;
-        font-size: 10px;
+        font-size: 11px;
         padding: 0;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -548,11 +548,11 @@ const CONFIG = Object.freeze({
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
     noShadeCols: ['change','Change','Deg'],
     shadeCap: {
-      'Score': 25,
-      'Max': 35,
-      'Min': 14,
-      'Weighted': 20,
-      '5Max': 5
+      'Score': 30,
+      'Max': 30,
+      'Min': 10,
+      'Weighted': 10,
+      '5Max': 10
     },
     colorSets: {
       green: ['Rush','Mood','Social','Score','Weighted','5Max','Max'],
@@ -562,45 +562,55 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Moderate', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Very Euphoric', 5.00: 'Euphoric', 4.50: 'Very Good', 4.00: 'Obvious', 3.50: 'High/Clear', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Some', 1.50: 'Low', 1.00: 'OK', 0.75: 'Very Poor', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Fair', 0.30: 'Good', 0.40: 'Great' },
-  social: { 6.00: 'Autopilot', 5.50: 'Very Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High/Social', 3.00: 'Social', 2.50: 'Moderate', 2.00: 'Capable', 1.50: 'Low', 1.00: 'Want', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
-  energy: { 6.00: 'Ultra', 5.50: 'Very Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High/Energy', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'High/Obsessed', 3.50: 'High/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
-  anxiety: { 6.00: 'Doomed', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Dominating', 3.50: 'High/Anxiety', 3.00: 'Anxious', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid', 1.25: 'Ignorable' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High/Impairment', 3.00: 'Impaired', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Ignorable' },
-  change: { 1.00: 'Noticed', 2.00: 'Distinct', 3.00: 'Significant', 4.00: 'Strong' },
-  degree: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low' },
-  other: { 5.00: 'Positive', 4.00: 'Negative', 3.00: 'Up', 2.00: 'Down', 1.00: 'Flat', 0.00: 'No' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Very High', 4.00: 'Intense', 3.50: 'High', 3.00: 'Strong', 2.50: 'Mid', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  mood: { 6.00: 'Autopilot', 5.00: 'Euphoric', 4.50: 'Very High', 4.00: 'Excellent', 3.50: 'High', 3.00: 'Good/Clear', 2.50: 'Mid', 2.00: 'Fair', 1.50: 'Low', 1.00: 'Flat', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High', 3.00: 'Social/Natural', 2.50: 'Mid', 2.00: 'Capable', 1.50: 'Low', 1.00: 'If Forced', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  energy: { 6.00: 'Ultra High', 5.00: 'Extremely High', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High', 3.00: 'Active/Energy', 2.50: 'Mid', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  focus: { 6.00: 'Ultra High', 5.00: 'Extremely High', 4.50: 'Very High', 4.00: 'Obsessive', 3.50: 'High', 3.00: 'Focused', 2.50: 'Mid', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  anxiety: { 6.00: 'Doomed', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Paranoid', 3.50: 'High', 3.00: 'Anxious', 2.50: 'Mid', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Minor', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  impair: { 6.00: 'Dangerous', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High', 3.00: 'Impaired', 2.50: 'Mid', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Minor', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  change: { 6.00: 'Extreme', 5.00: 'Correlate', 4.00: 'Positive', 3.50: 'Negative', 3.00: 'Last', 2.50: 'Plumes', 2.00: 'Plumes', 1.50: 'AddDrug', 1.00: 'AddDrug', 0.00: 'StateChange', 0.50: 'Continue' },
+  degree: { 6.00: 'Extreme', 5.00: 'Rapid', 4.00: 'SideToSide', 3.50: 'Followed', 3.00: 'ThroatBreath', 2.50: 'MouthOpen', 2.00: 'MouthOpen', 1.50: 'Sealed', 1.00: 'Sealed', 0.00: 'NotSealed', 0.50: 'HalfSealed' },
+  other: { 6.00: 'Extreme', 5.00: 'DeepBreath', 4.00: 'OneBreath', 3.50: 'Diaphram', 3.00: 'Hold', 2.50: 'Wait', 2.00: 'Wait', 1.50: 'FlameClose', 1.00: 'FlameClose', 0.00: 'FlameFar', 0.50: 'Adaptive' },
     },
   rapidLabels: {
-  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Moderate', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Very Euphoric', 5.00: 'Euphoric', 4.50: 'Very Good', 4.00: 'Obvious', 3.50: 'High/Clear', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Some', 1.50: 'Low', 1.00: 'OK', 0.75: 'Very Poor', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Fair', 0.30: 'Good', 0.40: 'Great' },
-  social: { 6.00: 'Autopilot', 5.50: 'Very Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High/Social', 3.00: 'Social', 2.50: 'Moderate', 2.00: 'Capable', 1.50: 'Low', 1.00: 'Want', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
-  energy: { 6.00: 'Ultra', 5.50: 'Very Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High/Energy', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'High/Obsessed', 3.50: 'High/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
-  anxiety: { 6.00: 'Doomed', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Dominating', 3.50: 'High/Anxiety', 3.00: 'Anxious', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid', 1.25: 'Ignorable' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High/Impairment', 3.00: 'Impaired', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Ignorable' },
-  change: { 1.00: 'Noticed', 2.00: 'Distinct', 3.00: 'Significant', 4.00: 'Strong' },
-  degree: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low' },
-  other: { 5.00: 'Positive', 4.00: 'Negative', 3.00: 'Up', 2.00: 'Down', 1.00: 'Flat', 0.00: 'No' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Very High', 4.00: 'Intense', 3.50: 'High', 3.00: 'Strong', 2.50: 'Mid', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  mood: { 6.00: 'Autopilot', 5.00: 'Euphoric', 4.50: 'Very High', 4.00: 'Excellent', 3.50: 'High', 3.00: 'Good/Clear', 2.50: 'Mid', 2.00: 'Fair', 1.50: 'Low', 1.00: 'Flat', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High', 3.00: 'Social/Natural', 2.50: 'Mid', 2.00: 'Capable', 1.50: 'Low', 1.00: 'If Forced', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  energy: { 6.00: 'Ultra High', 5.00: 'Extremely High', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High', 3.00: 'Active/Energy', 2.50: 'Mid', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  focus: { 6.00: 'Ultra High', 5.00: 'Extremely High', 4.50: 'Very High', 4.00: 'Obsessive', 3.50: 'High', 3.00: 'Focused', 2.50: 'Mid', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  anxiety: { 6.00: 'Doomed', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Paranoid', 3.50: 'High', 3.00: 'Anxious', 2.50: 'Mid', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Minor', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  impair: { 6.00: 'Dangerous', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High', 3.00: 'Impaired', 2.50: 'Mid', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Minor', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None' },
+  change: { 6.00: 'Extreme', 5.00: 'Correlate', 4.00: 'Positive', 3.50: 'Negative', 3.00: 'Last', 2.50: 'Plumes', 2.00: 'Plumes', 1.50: 'AddDrug', 1.00: 'AddDrug', 0.00: 'StateChange', 0.50: 'Continue' },
+  degree: { 6.00: 'Extreme', 5.00: 'Rapid', 4.00: 'SideToSide', 3.50: 'Followed', 3.00: 'ThroatBreath', 2.50: 'MouthOpen', 2.00: 'MouthOpen', 1.50: 'Sealed', 1.00: 'Sealed', 0.00: 'NotSealed', 0.50: 'HalfSealed' },
+  other: { 6.00: 'Extreme', 5.00: 'DeepBreath', 4.00: 'OneBreath', 3.50: 'Diaphram', 3.00: 'Hold', 2.50: 'Wait', 2.00: 'Wait', 1.50: 'FlameClose', 1.00: 'FlameClose', 0.00: 'FlameFar', 0.50: 'Adaptive' },
+//   rush: { : 'Overwhelming', 5.00: 'Extreme', 4.00: 'Very Strong', 3.50: 'Strong', 3.00: 'Rush', 2.50: 'Significant', 2.00: 'Some/Light', 1.50: 'Light', 1.00: 'Very Light', 0.00: 'None', 0.50: '+' },
+//   mood: { 6.00: 'Euphoric Bliss', 5.00: 'Euphoric', 4.00: 'Very Good', 3.50: 'Great', 3.00: 'Good/Clear', 2.50: 'Clear', 2.00: 'Some/Low', 1.50: 'OK', 1.00: 'Very Low', 0.00: 'None', 0.50: '+' },
+//   social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.00: 'Very Outgoing', 3.50: 'Talkative', 3.00: 'Social', 2.50: 'Desire/Push', 2.00: 'Some/Low', 1.50: 'Want', 1.00: 'Very Low', 0.00: 'None', 0.50: '+' },
+//   energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.00: 'Very High', 3.50: 'High', 3.00: 'Energetic', 2.50: 'Encourage/Push', 2.00: 'Some/Low', 1.50: 'Functional', 1.00: 'Very Low', 0.00: 'None', 0.50: '+' },
+//   focus: { 6.00: 'Laser Wired', 5.00: 'Wired', 4.00: 'Very Strong', 3.50: 'Strong', 3.00: 'Focused', 2.50: 'Motivated', 2.00: 'Some/Low', 1.50: 'Very Low', 1.00: 'Very Low', 0.00: 'None', 0.50: '+' },
+//   anxiety: { 6.00: 'Very Severe', 5.00: 'Very Severe', 4.00: 'Severe', 3.50: 'Serious', 3.00: 'Anxious', 2.50: 'Affected', 2.00: 'Some/Low', 1.50: 'Ignorable', 1.00: 'Very Low', 0.00: 'None', 0.50: '+' },
+//   impair: { 6.00: 'Very Severe', 5.00: 'Very Severe', 4.00: 'Severe', 3.50: 'Serious', 3.00: 'Impaired', 2.50: 'Impacted', 2.00: 'Some/Low', 1.50: 'Maskable', 1.00: 'Very Low', 0.00: 'None', 0.50: '+' },
+//   change: { 6.00: 'Extreme', 5.00: 'Correlate', 4.00: 'Positive', 3.50: 'Negative', 3.00: 'Last', 2.50: 'Plumes', 2.00: 'Plumes', 1.50: 'AddDrug', 1.00: 'AddDrug', 0.00: 'StateChange', 0.50: 'Continue' },
+//   degree: { 6.00: 'Extreme', 5.00: 'Rapid', 4.00: 'SideToSide', 3.50: 'Followed', 3.00: 'ThroatBreath', 2.50: 'MouthOpen', 2.00: 'MouthOpen', 1.50: 'Sealed', 1.00: 'Sealed', 0.00: 'NotSealed', 0.50: 'HalfSealed' },
+//   other: { 6.00: 'Extreme', 5.00: 'DeepBreath', 4.00: 'OneBreath', 3.50: 'Diaphram', 3.00: 'Hold', 2.50: 'Wait', 2.00: 'Wait', 1.50: 'FlameClose', 1.00: 'FlameClose', 0.00: 'FlameFar', 0.50: 'Adaptive' },
   },
   buttonLabelsByMetric: {}
 },
   buttons: {
     perMetricButtons: {
-      rush:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      mood:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      social:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      energy:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      focus:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      anxiety:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1.25,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      impair:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1.25,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      change:[4,3,2,1],
-      degree:[5,4,3,2,1],
-      other:[5,4,3,2,1]
+      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      change:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      degree:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
+      other:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1]
     },
-    rapidValues: [5.5,4.5,3.5,2.5,1.5,0.75,0,0.5,-0.5],
+    rapidValues: [6,5,4,3,2,1,0,'',0.5,-0.5],
 //     rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
