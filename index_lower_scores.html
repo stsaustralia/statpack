@@ -46,7 +46,7 @@
     .score-columns {
     display: grid;
     grid-template-columns: repeat(10, 1fr); /* exactly 57columns */
-    gap: 5px;
+    gap: 10px;
     margin-top: 10px;
 }
 
@@ -60,13 +60,12 @@
 }
 
     .score-column button {
-        width: 102px;
-        height: 22px;
+        width: 130px;
+        height: 30px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
         background: #fff;
-        font-size: 10px;
     }
 
     .selected-score {
@@ -335,7 +334,7 @@ pointer-events: auto;
 <button onclick="exportCSV()">Export CSV</button>
 <button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
 <input accept=".csv,text/csv" id="openLogInput" style="display:none" type="file"/>
-<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button>
+<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button><button onclick="openLowerScores()">Lower Scores</button>
 <button onclick="openEmotionModal()">Emotion Wheel</button>
 </div>
 <div>
@@ -532,6 +531,19 @@ pointer-events: auto;
 <div id="rapidScoresModal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
 <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
 <div style="font-weight:700; font-size:18px;">Rapid Scores</div>
+<div id="lowerScoresModal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+    <div style="font-weight:700; font-size:18px;">Lower Scores</div>
+    <button aria-label="Close" onclick="closeLowerScores()">Close</button>
+  </div>
+  <div class="score-columns" id="lowerScoresButtons"></div>
+  <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+    <button onclick="applyLowerScores()">Apply</button>
+    <button onclick="applyLowerScoresAndAdd()">Apply &amp; Add Entry</button>
+    <button onclick="applyLowerScoresAndAddStay()">Apply, Add &amp; Stay</button>
+  </div>
+</div>
+
 <button aria-label="Close" onclick="closeRapidScores()">Close</button>
 </div>
 <div class="score-columns" id="rapidScoresButtons"></div>
@@ -601,7 +613,7 @@ labels: {
       degree:[5,4,3,2,1],
       other:[5,4,3,2,1]
     },
-    rapidValues: [6,5,4,3,2,1.5,0.75,0,'',0.5,-0.5],
+    rapidValues: [5.5,4.5,3.5,2.5,1.5,0.75,0,0.5,-0.5],
 //     rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
@@ -4843,6 +4855,137 @@ function(){
 })();
 </script>
 <!-- /STS: Roaming Average (auto-injected) -->
+
+<script>
+// ===== Lower Scores Modal (uses MAIN labelMappings) =====
+(function(){
+  const LOWER_VALUES = Object.freeze({
+    rush:    [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    mood:    [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    social:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    energy:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    focus:   [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    anxiety: [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+    impair:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
+  });
+  const METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
+  let lowerSelections = Object.fromEntries(METRICS.map(m => [m, null]));
+
+  function nearestLabel(metric, val){
+    try{
+      const map = (window.CONFIG && window.CONFIG.labels && window.CONFIG.labels.labelMappings && window.CONFIG.labels.labelMappings[metric]) || {};
+      if (map[val] !== undefined) return map[val];
+      const keys = Object.keys(map).map(parseFloat).filter(n => !Number.isNaN(n));
+      if (!keys.length) return String(val);
+      keys.sort((a,b)=>Math.abs(val-a)-Math.abs(val-b));
+      return map[keys[0]] ?? String(val);
+    }catch(e){ return String(val); }
+  }
+
+  function renderLowerScores(){
+    const host = document.getElementById('lowerScoresButtons');
+    if (!host) return;
+    host.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'score-columns';
+    METRICS.forEach(metric => {
+      const col = document.createElement('div');
+      col.className = 'score-column';
+      const hdr = document.createElement('div');
+      hdr.textContent = metric.charAt(0).toUpperCase() + metric.slice(1);
+      hdr.style.fontWeight = '600';
+      col.appendChild(hdr);
+      (LOWER_VALUES[metric]||[]).forEach(v => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.metric = metric;
+        btn.dataset.value = String(v);
+        btn.textContent = v + ': ' + nearestLabel(metric, v);
+        btn.classList.toggle('selected-score', lowerSelections[metric] === v);
+        btn.addEventListener('click', () => {
+          lowerSelections[metric] = (lowerSelections[metric] === v) ? null : v;
+          [...col.querySelectorAll('button')].forEach(b => {
+            b.classList.toggle('selected-score', parseFloat(b.dataset.value) === lowerSelections[metric]);
+          });
+        });
+        col.appendChild(btn);
+      });
+      grid.appendChild(col);
+    });
+    host.appendChild(grid);
+  }
+
+  function annotateMainButtons(){
+    try{
+      const host = document.getElementById('scoreColumns');
+      if (!host) return;
+      host.querySelectorAll('.score-column').forEach(col => {
+        let header = null;
+        for (const n of col.childNodes){
+          if (n.nodeType === 1 && n.tagName !== 'BUTTON'){ header = n; break; }
+        }
+        if (!header) return;
+        const metric = (header.textContent || '').trim().toLowerCase();
+        col.querySelectorAll('button').forEach(b => {
+          const txt = (b.textContent || '').trim();
+          const m = txt.match(/^(-?\d+(?:\.\d+)?):/);
+          if (m){ b.dataset.metric = metric; b.dataset.value = m[1]; }
+        });
+      });
+    }catch(e){}
+  }
+
+  function syncToMainButtons(){
+    try {
+      const container = document.getElementById('scoreColumns');
+      if (!container) return;
+      METRICS.forEach(metric => {
+        const val = lowerSelections[metric];
+        if (val == null) return;
+        const btn = [...container.querySelectorAll('button')].find(b => {
+          if (b.dataset && b.dataset.metric === metric && b.dataset.value != null){
+            return Math.abs(parseFloat(b.dataset.value) - val) < 1e-9;
+          }
+          return (b.textContent || '').trim().startsWith(String(val) + ':');
+        });
+        if (btn) btn.click();
+      });
+    } catch(e){}
+  }
+
+  window.openLowerScores = function(){
+    const modal = document.getElementById('lowerScoresModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    renderLowerScores();
+  };
+  window.closeLowerScores = function(){
+    const modal = document.getElementById('lowerScoresModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+  };
+
+  function applyCommon({doAdd=false, stayOpen=false} = {}){
+    syncToMainButtons();
+    if (doAdd && typeof window.addEntry === 'function'){
+      try { window._lowerInputSource = true; window.addEntry('main'); }
+      finally { delete window._lowerInputSource; }
+    }
+    if (!stayOpen) window.closeLowerScores();
+    if (stayOpen) renderLowerScores();
+  }
+
+  window.applyLowerScores = function(){ applyCommon({doAdd:false, stayOpen:false}); };
+  window.applyLowerScoresAndAdd = function(){ applyCommon({doAdd:true, stayOpen:false}); };
+  window.applyLowerScoresAndAddStay = function(){ applyCommon({doAdd:true, stayOpen:true}); };
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', annotateMainButtons);
+  } else {
+    annotateMainButtons();
+  }
+})();
+</script>
 </body>
 <script>
 function openEmotionModal() {

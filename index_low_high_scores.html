@@ -46,7 +46,7 @@
     .score-columns {
     display: grid;
     grid-template-columns: repeat(10, 1fr); /* exactly 57columns */
-    gap: 5px;
+    gap: 10px;
     margin-top: 10px;
 }
 
@@ -60,13 +60,12 @@
 }
 
     .score-column button {
-        width: 102px;
-        height: 22px;
+        width: 130px;
+        height: 30px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
         background: #fff;
-        font-size: 10px;
     }
 
     .selected-score {
@@ -335,7 +334,7 @@ pointer-events: auto;
 <button onclick="exportCSV()">Export CSV</button>
 <button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
 <input accept=".csv,text/csv" id="openLogInput" style="display:none" type="file"/>
-<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button>
+<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button><button onclick="openHighScores()">High Scores</button><button onclick="openLowerScores()">Lower Scores</button>
 <button onclick="openEmotionModal()">Emotion Wheel</button>
 </div>
 <div>
@@ -532,6 +531,42 @@ pointer-events: auto;
 <div id="rapidScoresModal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
 <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
 <div style="font-weight:700; font-size:18px;">Rapid Scores</div>
+<div id="lowerScoresModal" style="display:none; position:fixed; inset:0; z-index:11000;">
+  <div id="lowerScoresModalBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
+  <div id="lowerScoresModalCard" style="position:relative; margin:4vh auto; width:min(1200px,94vw); max-height:92vh; overflow:auto; background:#fff; border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+      <div style="font-weight:700; font-size:20px;">Lower Scores</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button aria-label="Close" onclick="closeLowerScores()">Close</button>
+      </div>
+    </div>
+    <div class="score-columns" id="lowerScoresModalButtons"></div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+      <button onclick="applyLowerScores()">Apply</button>
+      <button onclick="applyLowerScoresAndAdd()">Apply &amp; Add Entry</button>
+      <button onclick="applyLowerScoresAndAddStay()">Apply, Add &amp; Stay</button>
+    </div>
+  </div>
+</div>
+
+<div id="highScoresModal" style="display:none; position:fixed; inset:0; z-index:11010;">
+  <div id="highScoresModalBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
+  <div id="highScoresModalCard" style="position:relative; margin:4vh auto; width:min(1200px,94vw); max-height:92vh; overflow:auto; background:#fff; border-radius:14px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+      <div style="font-weight:700; font-size:20px;">High Scores</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button aria-label="Close" onclick="closeHighScores()">Close</button>
+      </div>
+    </div>
+    <div class="score-columns" id="highScoresModalButtons"></div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+      <button onclick="applyHighScores()">Apply</button>
+      <button onclick="applyHighScoresAndAdd()">Apply &amp; Add Entry</button>
+      <button onclick="applyHighScoresAndAddStay()">Apply, Add &amp; Stay</button>
+    </div>
+  </div>
+</div>
+
 <button aria-label="Close" onclick="closeRapidScores()">Close</button>
 </div>
 <div class="score-columns" id="rapidScoresButtons"></div>
@@ -601,7 +636,7 @@ labels: {
       degree:[5,4,3,2,1],
       other:[5,4,3,2,1]
     },
-    rapidValues: [6,5,4,3,2,1.5,0.75,0,'',0.5,-0.5],
+    rapidValues: [5.5,4.5,3.5,2.5,1.5,0.75,0,0.5,-0.5],
 //     rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
@@ -4843,6 +4878,191 @@ function(){
 })();
 </script>
 <!-- /STS: Roaming Average (auto-injected) -->
+
+<script>
+// ===== Low & High Scores Modals (independent overlays; use MAIN labelMappings) =====
+(function(){
+  const METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
+
+  // Value subsets
+  const LOWER_VALUES = Object.freeze({
+    rush:[2.5,2.25,2.0,1.75,1.5,1.25,1.0,0.75,0.5,0.25,0.0],
+    mood:[2.5,2.25,2.0,1.75,1.5,1.25,1.0,0.75,0.5,0.25,0.0],
+    social:[2.5,2.25,2.0,1.75,1.5,1.25,1.0,0.75,0.5,0.25,0.0],
+    energy:[2.5,2.25,2.0,1.75,1.5,1.25,1.0,0.75,0.5,0.25,0.0],
+    focus:[2.5,2.25,2.0,1.75,1.5,1.25,1.0,0.75,0.5,0.25,0.0],
+    anxiety:[2.5,2.25,2.0,1.75,1.5,1.25,1.0,0.75,0.5,0.25,0.0],
+    impair:[2.5,2.25,2.0,1.75,1.5,1.25,1.0,0.75,0.5,0.25,0.0],
+  });
+  const HIGH_VALUES = Object.freeze({
+    rush:[6.0,5.5,5.0,4.5,4.0,3.5,3.0,2.5],
+    mood:[6.0,5.5,5.0,4.5,4.0,3.5,3.0,2.5],
+    social:[6.0,5.5,5.0,4.5,4.0,3.5,3.0,2.5],
+    energy:[6.0,5.5,5.0,4.5,4.0,3.5,3.0,2.5],
+    focus:[6.0,5.5,5.0,4.5,4.0,3.5,3.0,2.5],
+    anxiety:[6.0,5.5,5.0,4.5,4.0,3.5,3.0,2.5],
+    impair:[6.0,5.5,5.0,4.5,4.0,3.5,3.0,2.5],
+  });
+
+  // selected value per metric
+  let lowerSelections = Object.fromEntries(METRICS.map(m => [m, null]));
+  let highSelections  = Object.fromEntries(METRICS.map(m => [m, null]));
+
+  function nearestLabel(metric, val){
+    try{
+      const map = (window.CONFIG && window.CONFIG.labels && window.CONFIG.labels.labelMappings && window.CONFIG.labels.labelMappings[metric]) || {};
+      if (map[val] !== undefined) return map[val];
+      const keys = Object.keys(map).map(parseFloat).filter(n => !Number.isNaN(n));
+      if (!keys.length) return String(val);
+      keys.sort((a,b)=>Math.abs(val-a)-Math.abs(val-b));
+      return map[keys[0]] ?? String(val);
+    }catch(e){ return String(val); }
+  }
+
+  function renderGroup(targetId, values, selections){
+    const host = document.getElementById(targetId);
+    if (!host) return;
+    host.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'score-columns';
+    METRICS.forEach(metric => {
+      const col = document.createElement('div');
+      col.className = 'score-column';
+      const hdr = document.createElement('div');
+      hdr.textContent = metric.charAt(0).toUpperCase() + metric.slice(1);
+      hdr.style.fontWeight = '600';
+      col.appendChild(hdr);
+      (values[metric]||[]).forEach(v => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.metric = metric;
+        btn.dataset.value  = String(v);
+        btn.textContent    = v + ': ' + nearestLabel(metric, v);
+        btn.classList.toggle('selected-score', selections[metric] === v);
+        btn.addEventListener('click', () => {
+          selections[metric] = (selections[metric] === v) ? null : v;
+          [...col.querySelectorAll('button')].forEach(b => {
+            b.classList.toggle('selected-score', parseFloat(b.dataset.value) === selections[metric]);
+          });
+        });
+        col.appendChild(btn);
+      });
+      grid.appendChild(col);
+    });
+    host.appendChild(grid);
+  }
+
+  // annotate main-grid buttons to aid syncing
+  function annotateMainButtons(){
+    try{
+      const host = document.getElementById('scoreColumns');
+      if (!host) return;
+      host.querySelectorAll('.score-column').forEach(col => {
+        let header = null;
+        for (const n of col.childNodes){
+          if (n.nodeType === 1 && n.tagName !== 'BUTTON'){ header = n; break; }
+        }
+        if (!header) return;
+        const metric = (header.textContent || '').trim().toLowerCase();
+        col.querySelectorAll('button').forEach(b => {
+          const txt = (b.textContent || '').trim();
+          const m = txt.match(/^(-?\d+(?:\.\d+)?):/);
+          if (m){
+            b.dataset.metric = metric;
+            b.dataset.value  = m[1];
+          }
+        });
+      });
+    }catch(e){}
+  }
+
+  function syncSelectionsToMain(selections){
+    try {
+      const container = document.getElementById('scoreColumns');
+      if (!container) return;
+      METRICS.forEach(metric => {
+        const val = selections[metric];
+        if (val == null) return;
+        const btn = [...container.querySelectorAll('button')].find(b => {
+          if (b.dataset && b.dataset.metric === metric && b.dataset.value != null){
+            return Math.abs(parseFloat(b.dataset.value) - val) < 1e-9;
+          }
+          return (b.textContent || '').trim().startsWith(String(val) + ':');
+        });
+        if (btn) btn.click();
+      });
+    } catch(e){}
+  }
+
+  // ----- Lower Scores public API (independent) -----
+  window.openLowerScores = function(){
+    const modal = document.getElementById('lowerScoresModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    renderGroup('lowerScoresModalButtons' in window ? 'lowerScoresModalButtons' : 'lowerScoresButtons', LOWER_VALUES, lowerSelections);
+  };
+  window.closeLowerScores = function(){
+    const modal = document.getElementById('lowerScoresModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+  };
+  function applyLowerCommon({doAdd=false, stayOpen=false}={}){
+    syncSelectionsToMain(lowerSelections);
+    if (doAdd && typeof window.addEntry === 'function'){
+      try { window._lowerInputSource = true; window.addEntry('main'); }
+      finally { delete window._lowerInputSource; }
+    }
+    if (!stayOpen) window.closeLowerScores();
+    if (stayOpen) renderGroup('lowerScoresButtons', LOWER_VALUES, lowerSelections);
+  }
+  window.applyLowerScores = function(){ applyLowerCommon({doAdd:false, stayOpen:false}); };
+  window.applyLowerScoresAndAdd = function(){ applyLowerCommon({doAdd:true, stayOpen:false}); };
+  window.applyLowerScoresAndAddStay = function(){ applyLowerCommon({doAdd:true, stayOpen:true}); };
+
+  // Close on ESC / backdrop click
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape'){
+      const m1 = document.getElementById('lowerScoresModal');
+      if (m1 && m1.style.display !== 'none') window.closeLowerScores();
+      const m2 = document.getElementById('highScoresModal');
+      if (m2 && m2.style.display !== 'none') window.closeHighScores();
+    }
+  });
+  const lsBackdrop = document.getElementById('lowerScoresModalBackdrop') || document.getElementById('lowerScoresBackdrop');
+  if (lsBackdrop){ lsBackdrop.addEventListener('click', ()=> window.closeLowerScores()); }
+
+  // ----- High Scores public API (independent) -----
+  window.openHighScores = function(){
+    const modal = document.getElementById('highScoresModal');
+    if (!modal) return;
+    modal.style.display = 'block';
+    renderGroup('highScoresModalButtons' in window ? 'highScoresModalButtons' : 'highScoresButtons', HIGH_VALUES, highSelections);
+  };
+  window.closeHighScores = function(){
+    const modal = document.getElementById('highScoresModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+  };
+  function applyHighCommon({doAdd=false, stayOpen=false}={}){
+    syncSelectionsToMain(highSelections);
+    if (doAdd && typeof window.addEntry === 'function'){
+      try { window._highInputSource = true; window.addEntry('main'); }
+      finally { delete window._highInputSource; }
+    }
+    if (!stayOpen) window.closeHighScores();
+    if (stayOpen) renderGroup('highScoresButtons', HIGH_VALUES, highSelections);
+  }
+  window.applyHighScores = function(){ applyHighCommon({doAdd:false, stayOpen:false}); };
+  window.applyHighScoresAndAdd = function(){ applyHighCommon({doAdd:true, stayOpen:false}); };
+  window.applyHighScoresAndAddStay = function(){ applyHighCommon({doAdd:true, stayOpen:true}); };
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', annotateMainButtons);
+  } else {
+    annotateMainButtons();
+  }
+})();
+</script>
 </body>
 <script>
 function openEmotionModal() {
