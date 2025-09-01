@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v2b r2010</title>
+<title>statpack v2b r2001</title>
 <style>
 
 #logTable {
@@ -260,18 +260,19 @@ pointer-events: auto;
 
 <!-- STS: UI CONFIG (auto-injected) -->
 <script>
-function computeFiveMax(obj){
-  const vals = [
-    +obj.rush || 0,
-    +obj.mood || 0,
-    +obj.social || 0,
-    +obj.energy || 0,
-    +obj.focus || 0,
-    +obj.anxiety || 0,
-    +obj.impair || 0
-  ];
-  vals.sort((a,b)=>b-a);
-  return vals.slice(0,5).reduce((a,b)=>a+b,0);
+function shadeLinear(v, minRed, maxGreen){
+  function clamp(x,a,b){return Math.max(a, Math.min(b, x));}
+  let g = 0, r = 0;
+  if (v >= 0){
+    const t = clamp(v / (maxGreen || 1), 0, 1);
+    g = Math.round(255 * t);
+    r = 0;
+  } else {
+    const t = clamp((v - minRed) / (0 - minRed), 0, 1);
+    r = Math.round(255 * t);
+    g = 0;
+  }
+  return `background-color: rgba(${r},${g},0,0.20);`;
 }
 
 (function() {
@@ -309,10 +310,17 @@ function computeFiveMax(obj){
     }
   };
 })();
-</script>
+
+
 <!-- /STS: UI CONFIG (auto-injected) -->
 </head>
 <body>
+<div id="bootOkBanner" style="position:fixed;top:8px;right:8px;z-index:99999;
+  padding:4px 8px;border-radius:6px;background:#e6ffe6;border:1px solid #a3e6a3;
+  font:12px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,sans-serif;color:#0b6;box-shadow:0 1px 4px rgba(0,0,0,0.1)">
+  boot ok
+</div>
+
 <div class="summary-controls">
 <button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
 <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
@@ -404,9 +412,6 @@ function computeFiveMax(obj){
 <option value="Alprazolam">Alprazolam</option>
 <option value="Bromazolam">Bromazolam</option>
 <option value="LSD">LSD</option>
-
-
-
 </select>
 </label>
 <label>
@@ -448,21 +453,21 @@ function computeFiveMax(obj){
 <th data-col="Drug">Drug</th>
 <th data-col="QTY">QTY</th>
 <th data-col="ROA">ROA</th>
+<th data-col="Rush">Rush</th><th>Rush Avg</th>
 <th data-col="Rush">Rush</th>
-<th data-col="Rush">Rush</th>
+<th data-col="Mood">Mood</th><th>Mood Avg</th>
 <th data-col="Mood">Mood</th>
-<th data-col="Mood">Mood</th>
+<th data-col="Social">Social</th><th>Social Avg</th>
 <th data-col="Social">Social</th>
-<th data-col="Social">Social</th>
+<th data-col="Energy">Energy</th><th>Energy Avg</th>
 <th data-col="Energy">Energy</th>
-<th data-col="Energy">Energy </th>
+<th data-col="Focus">Focus</th><th>Focus Avg</th>
 <th data-col="Focus">Focus</th>
-<th data-col="Focus">Focus</th>
+<th data-col="Anxiety">Anxiety</th><th>Anxiety Avg</th>
 <th data-col="Anxiety">Anxiety</th>
-<th data-col="Anxiety">Anxiety</th>
-<th data-col="Impair">Impair</th>
-<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
-<th data-col="Confidence">Confidence</th><th data-col="Confidence">Confidence</th><th data-col="Auto">Auto</th><th data-col="Auto">Auto</th><th data-col="Jitter">Jitter</th><th data-col="Jitter">Jitter</th><th data-col="Dopamine">Dopamine</th><th data-col="Dopamine">Dopamine</th><th data-col="Score">Score</th>
+<th data-col="Impair">Impair</th><th>Impair Avg</th>
+<th data-col="Impair">Impair</th><th data-col="change">change</th><th>Change Avg</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th>Dopamine Avg</th><th>Degree Avg</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th><th>Other Avg</th>
+<th data-col="Confidence">Confidence</th><th>Confidence Avg</th><th data-col="Confidence">Confidence</th><th data-col="Auto">Auto</th><th>Auto Avg</th><th data-col="Auto">Auto</th><th data-col="Jitter">Jitter</th><th>Jitter Avg</th><th data-col="Jitter">Jitter</th><th data-col="Dopamine">Dopamine</th><th data-col="Dopamine">Dopamine</th><th data-col="Score">Score</th>
 <th data-col="Max">Max</th>
 <th data-col="Min">Min</th>
 <th data-col="VL">VL</th>
@@ -479,7 +484,7 @@ function computeFiveMax(obj){
 <div id="autoSummaryDock">
 <div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
 <table id="autoSummaryTable">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
@@ -491,21 +496,21 @@ function computeFiveMax(obj){
 <button class="ctrl-btn" id="backfillBtn" style="margin-left:10px;">Run Backfill</button>
 </div>
 <table id="summary5Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
 <div id="summary15Dock" style="margin-top:20px;">
 <div id="summary15Title">Summary 15m (rolling)</div>
 <table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
 <div id="summary60Dock" style="margin-top:20px;">
 <div id="summary60Title">Summary 60m (rolling)</div>
 <table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
@@ -533,7 +538,7 @@ function computeFiveMax(obj){
 <th>Label</th>
 <th>Segment</th>
 <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-<th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+<th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -559,7 +564,7 @@ function computeFiveMax(obj){
 // ===== Centralised read-only configuration (edit here to tweak UI/labels/sets) =====
 const CONFIG = Object.freeze({
   ui: {
-//     hideInUi: ['VL','sM','sB','sF','GS','change',	'Change'	,'Deg'	,'D2'	,'Oth',	'O2','Weighted','5Max'],
+//     hideInUi: [['VL','sM','sB','sF','GS','change','Deg','Oth']],
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
     noShadeCols: [],
     shadeCap: {
@@ -578,32 +583,36 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 6.00: 'Extreme', 5.50: 'Intense', 5.00: 'Intense', 4.50: 'Very Strong', 4.00: 'Strong', 3.50: 'Prominent', 3.00: 'Prominent', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Light', 1.00: 'Light', 0.50: 'Minor', 0.00: 'None', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' , 0.75: '+', 0.25: '+' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoric', 5.00: 'Euphoric', 4.50: 'Very Clear/Good', 4.00: 'Clear/Certain', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'OK', 1.00: 'OK', 0.50: 'Flat', 0.00: 'No/No Change', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious', 0.75: '+', 0.25: '+' },
-  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very Outgoing', 4.00: 'Outgoing', 3.50: 'Social', 3.00: 'Social', 2.50: 'Push/Urge', 2.00: 'Push/Urge', 1.50: 'Think/Want', 1.00: 'Think/Want', 0.50: 'Think', 0.00: 'No', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' , 0.75: '+', 0.25: '+' },
-  energy: { 6.00: 'Ultra', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very Energetic', 4.00: 'Energetic', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Minimal', 0.00: 'Baseline', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.30: 'Active' , 0.75: '+', 0.25: '+' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Wired', 5.00: 'Wired', 4.50: 'Hyperfocused', 4.00: 'Focused', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Very Low', 0.00: 'Baseline', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive', 0.75: '+', 0.25: '+'  },
-  anxiety: { 6.00: 'Doomed', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Ignorable', 0.00: 'None', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' , 0.75: '+', 0.25: '+' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Minimal', 0.00: 'No', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' , 0.75: '+', 0.25: '+' },
-  change: { 1.00: 'Noticed', 3.00: 'Significant', 4.00: 'Obvious', 6.00: 'Extreme' },
-  degree: { 6.00: 'Extremely High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.10: 'Present', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Obvious' },
-  other: { 0.10: 'Noticed', 0.30: 'Significant', 0.40: 'Obvious', 0.50: 'Extreme', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' },
-  confidence: { 6.00:'Extreme', 5.50:'Intense', 5.00:'Very High', 4.50:'High', 4.00:'Strong', 3.50:'Prominent', 3.00:'Prominent', 2.50:'Distinct', 2.00:'Distinct', 1.50:'Light', 1.00:'Light', 0.50:'Minor', 0.00:'None' },
-  auto:       { 6.00:'Extreme', 5.50:'Intense', 5.00:'Very High', 4.50:'High', 4.00:'Strong', 3.50:'Prominent', 3.00:'Prominent', 2.50:'Distinct', 2.00:'Distinct', 1.50:'Light', 1.00:'Light', 0.50:'Minor', 0.00:'None' },
-  jitter:     { 6.00:'Extreme', 5.50:'Intense', 5.00:'Very High', 4.50:'High', 4.00:'Strong', 3.50:'Prominent', 3.00:'Prominent', 2.50:'Distinct', 2.00:'Distinct', 1.50:'Light', 1.00:'Light', 0.50:'Minor', 0.00:'None' },
-  dopamine:   { 6.00:'Extreme', 5.50:'Intense', 5.00:'Very High', 4.50:'High', 4.00:'Strong', 3.50:'Prominent', 3.00:'Prominent', 2.50:'Distinct', 2.00:'Distinct', 1.50:'Light', 1.00:'Light', 0.50:'Minor', 0.00:'None' },
+  rush: { 6.00: 'Extreme', 5.50: 'Intense', 5.00: 'Intense', 4.50: 'Very Strong', 4.25: 'Very High', 4.00: 'Strong', 3.50: 'Prominent', 3.00: 'Prominent', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Light', 1.00: 'Light', 0.50: 'Minor', 0.00: 'None' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoric', 5.00: 'Euphoric', 4.50: 'Very Clear/Good', 4.25: 'Very High', 4.00: 'Clear/Certain', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'OK', 1.00: 'OK', 0.50: 'Flat', 0.00: 'No/No Change', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious' },
+  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very Outgoing', 4.25: 'Outgoing', 4.00: 'Outgoing', 3.25: 'Social', 3.00: 'Social', 2.75: 'Push', 2.50: 'Push', 2.25: 'Urge', 2.00: 'Urge', 1.75: 'Desire', 1.50: 'Desire', 1.00: 'Think/Want', 0.50: 'Think', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
+  energy: { 6.00: 'Ultra', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very Energetic', 4.25: 'Very High', 4.00: 'Energetic', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
+  focus: { 6.00: 'Laser Wired', 5.50: 'Wired', 5.00: 'Wired', 4.50: 'Hyperfocused', 4.25: 'Very High', 4.00: 'Foucsed', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Very Low', 0.00: 'Baseline', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
+  anxiety: { 6.00: 'Doomed', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.25: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Ignorable', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' },
+  impair: { 6.00: 'Dangerous', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.25: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Minimal', 0.00: 'No' },
+  change: { 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Certain', 1.50: 'Present', 1.00: 'Noticed', 0.50: 'Maybe', 0.00: 'None' },
+  degree: { 6.00: 'Extremely High', 5.50: 'Extremely High', 5.00: 'Very High', 4.50: 'Higher', 4.00: 'High', 3.50: 'Moderate-High', 3.00: 'Moderate', 2.50: 'Low-Moderate', 2.00: 'Low', 1.50: 'Lower', 1.00: 'Very Low', 0.50: 'Extremely Low' },
+  other: {  },
+  confidence: { 4.00: 'Obvious', 3.50: 'Definite', 3.00: 'Certain', 2.00: 'Required Thought', 1.50: 'Yes', 1.00: 'Maybe' },
+  auto: {  },
+  jitter: { 6.00: 'Regret', 5.50: 'Embarrassingly', 5.00: 'Cannot Hide', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Aware', 3.00: 'Visible', 2.50: 'Maskable', 2.00: 'Ignorable' },
+  dopamine: { 10.00: 'Peak', 0.00: 'Depleted' },
 }
 , rapidLabels: {
-  rush: { 6.00: 'Extreme', 5.50: 'Intense', 5.00: 'Intense', 4.50: 'Very Strong', 4.00: 'Strong', 3.50: 'Prominent', 3.00: 'Prominent', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Light', 1.00: 'Light', 0.50: 'Minor', 0.00: 'None', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' , 0.75: '+', 0.25: '+' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoric', 5.00: 'Euphoric', 4.50: 'Very Clear/Good', 4.00: 'Clear/Certain', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'OK', 1.00: 'OK', 0.50: 'Flat', 0.00: 'No/No Change', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious', 0.75: '+', 0.25: '+' },
-  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very Outgoing', 4.00: 'Outgoing', 3.50: 'Social', 3.00: 'Social', 2.50: 'Push/Urge', 2.00: 'Push/Urge', 1.50: 'Think/Want', 1.00: 'Think/Want', 0.50: 'Think', 0.00: 'No', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' , 0.75: '+', 0.25: '+' },
-  energy: { 6.00: 'Ultra', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very Energetic', 4.00: 'Energetic', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Minimal', 0.00: 'Baseline', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.30: 'Active' , 0.75: '+', 0.25: '+' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Wired', 5.00: 'Wired', 4.50: 'Hyperfocused', 4.00: 'Focused', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Very Low', 0.00: 'Baseline', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive', 0.75: '+', 0.25: '+'  },
-  anxiety: { 6.00: 'Doomed', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Ignorable', 0.00: 'None', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' , 0.75: '+', 0.25: '+' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Minimal', 0.00: 'No', 0.04: 'Obvious', 0.03: 'Clear/Distinct', 0.02: 'Required Thought', 0.01: 'Unsure', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' , 0.75: '+', 0.25: '+' },
-  change: { 1.00: 'Noticed', 3.00: 'Significant', 4.00: 'Obvious', 6.00: 'Extreme' },
-  degree: { 6.00: 'Extremely High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None', 0.10: 'Present', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Obvious' },
-  other: { 0.10: 'Noticed', 0.30: 'Significant', 0.40: 'Obvious', 0.50: 'Extreme', 4.99: 'Extremely High', 4.33: 'Very High', 3.67: 'High', 2.33: 'Medium', 1.33: 'Low', 0.67: 'Very Low' },
+  rush: { 6.00: 'Extreme', 5.50: 'Intense', 5.00: 'Intense', 4.50: 'Very Strong', 4.25: 'Very High', 4.00: 'Strong', 3.50: 'Prominent', 3.00: 'Prominent', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Light', 1.00: 'Light', 0.50: 'Minor', 0.00: 'None' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoric', 5.00: 'Euphoric', 4.50: 'Very Clear/Good', 4.25: 'Very High', 4.00: 'Clear/Certain', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'OK', 1.00: 'OK', 0.50: 'Flat', 0.00: 'No/No Change', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious' },
+  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very Outgoing', 4.25: 'Outgoing', 4.00: 'Outgoing', 3.25: 'Social', 3.00: 'Social', 2.75: 'Push', 2.50: 'Push', 2.25: 'Urge', 2.00: 'Urge', 1.75: 'Desire', 1.50: 'Desire', 1.00: 'Think/Want', 0.50: 'Think', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
+  energy: { 6.00: 'Ultra', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very Energetic', 4.25: 'Very High', 4.00: 'Energetic', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
+  focus: { 6.00: 'Laser Wired', 5.50: 'Wired', 5.00: 'Wired', 4.50: 'Hyperfocused', 4.25: 'Very High', 4.00: 'Foucsed', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Very Low', 0.00: 'Baseline', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
+  anxiety: { 6.00: 'Doomed', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.25: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Ignorable', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' },
+  impair: { 6.00: 'Dangerous', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.25: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Minimal', 0.00: 'No' },
+  change: { 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Certain', 1.50: 'Present', 1.00: 'Noticed', 0.50: 'Maybe', 0.00: 'None' },
+  degree: { 6.00: 'Extremely High', 5.50: 'Extremely High', 5.00: 'Very High', 4.50: 'Higher', 4.00: 'High', 3.50: 'Moderate-High', 3.00: 'Moderate', 2.50: 'Low-Moderate', 2.00: 'Low', 1.50: 'Lower', 1.00: 'Very Low', 0.50: 'Extremely Low' },
+  other: {  },
+  confidence: { 4.00: 'Obvious', 3.50: 'Definite', 3.00: 'Certain', 2.00: 'Required Thought', 1.50: 'Yes', 1.00: 'Maybe' },
+  auto: {  },
+  jitter: { 6.00: 'Regret', 5.50: 'Embarrassingly', 5.00: 'Cannot Hide', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Aware', 3.00: 'Visible', 2.50: 'Maskable', 2.00: 'Ignorable' },
+  dopamine: { 10.00: 'Peak', 0.00: 'Depleted' },
   },
   buttonLabelsByMetric: {}
 },
@@ -1182,7 +1191,7 @@ function renderTable() {
                 h += `<td data-field="${f}Sum" data-value="${r[f + 'Sum']}">${fmt2(r[f + 'Sum'])}</td>`;
                 h += `<td data-label-for="${f}Sum" data-value="${r[f + 'Sum']}">${r[f + 'Label']}</td>`;
             });
-        h += `<td data-col="Score" class="score-cell">${fmt2(r.score)}</td>` +
+        h += `<td data-col="Score" class="score-cell">${fmt2(r.score)}</td><td data-col="TotalScore">${r.totalScore?.toFixed ? r.totalScore.toFixed(2) : (r.totalScore ?? "")}</td><td data-col="TotalWeighted">${r.totalWeighted?.toFixed ? r.totalWeighted.toFixed(2) : (r.totalWeighted ?? "")}</td>` +
      `<td data-col="Max" class="max-cell">${fmt2(r.max || 0)}</td>` +
      `<td data-col="Min" class="min-cell">${fmt2(r.min || 0)}</td>` +
      `<td data-col="VL">${fmt2(r.valence)}</td>` +
@@ -1192,7 +1201,7 @@ function renderTable() {
      `<td data-col="Last">${r.customNotes || ""}</td>` +
      `<td data-col="Notes">${r.notes || ""}</td>` +
      `<td data-col="Weighted">${fmt2(r.weighted || 0)}</td>` +
-     `<td data-col="5Max">${(r.fiveMax!=null? Number(r.fiveMax).toFixed(2): '')}</td>` +
+     `<td data-col="5Max">${(r.score / 10).toFixed(2)}</td>` +
      `<td data-col="GS">${fmt2(r.goodSum || 0)}</td>`;
 
             tr.innerHTML = h;
@@ -1240,8 +1249,10 @@ function renderTable() {
     function exportCSV() {
         const h = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
         metrics.forEach(f => h.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
-        h.push("Score","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum");
-        const rows = [h.join(",")];
+        h.push("Score","TotalScore","TotalWeighted","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum");
+        row.push((typeof computeRowMetricAverage==="function")? computeRowMetricAverage(r,"focus").toFixed(2) : (r.focus ?? ""));
+row.push((typeof computeRowMetricAverage==="function")? computeRowMetricAverage(r,"mood").toFixed(2) : (r.mood ?? ""));
+const rows = [h.join(",")];
         logData.forEach(r => {
             const L = [r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa];
             metrics.forEach(f => L.push((+r[f + "Sum"]||0).toFixed(2), r[f + "Label"]));
@@ -1406,7 +1417,7 @@ function mapSchema(header){
     drug: ["Drug"],
     qty: ["Qty","QTY"],
     roa: ["ROA","Detail"],
-    score: ["Score"],
+    score: ["Score"], totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)),
     max: ["Max"],
     min: ["Min"],
     maxp: ["Max %","Max%","Max Percent"],
@@ -1528,7 +1539,7 @@ function mergeAppendDedupeSort(existing, incoming){
       r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa,
       r.notes, r.customNotes,
       r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum, r.anxietySum, r.impairSum,
-      r.score, r.max, r.min, r.weighted, r.maxPercent, r.minPercent
+      r.score, r.totalScore, r.totalWeighted, r.max, r.min, r.weighted, r.maxPercent, r.minPercent
     ]);
     if (!seen.has(key)){ seen.add(key); out.push(r); }
   }
@@ -1541,7 +1552,7 @@ function isNonEmptyLogRow(r){
   if (!r) return false;
   const numericVals = [
     r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum,
-    r.anxietySum, r.impairSum, r.score, r.max, r.min, r.weighted,
+    r.anxietySum, r.impairSum, r.score, r.totalScore, r.totalWeighted, r.max, r.min, r.weighted,
     r.maxPercent, r.minPercent
   ].map(v => Number(v));
   return numericVals.some(v => Number.isFinite(v) && v !== 0);
@@ -1671,7 +1682,8 @@ function applyRapidScoresAndAddStay(){
     } catch(e){}
   } catch(e) { console.warn(e); }
 }
-</script>
+
+
 <!-- Manual Score Entry Modal -->
 <div id="scoreModal">
 <h3>Manual Score Entry</h3>
@@ -1732,7 +1744,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
-</script>
+
+
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 <script>
 // === Summary Core (revised to read ONLY from main table) ===
@@ -1742,7 +1755,7 @@ function setSummaryWindowAndOpen(mins){ SUMMARY_WINDOW_MINUTES = mins; createSum
 
 
 // Columns for popup + CSV
-const SUMMARY_COLUMNS = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+const SUMMARY_COLUMNS = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"];
 
 // Timers/state
 let auto1mIntervalId = null;
@@ -2186,7 +2199,8 @@ function exportPopupCSV(){
 }
 window.createSummaryPopupTable = createSummaryPopupTable;
 window.toggleAutoSummary = toggleAutoSummary;
-</script>
+
+
 <button class="ctrl-btn" id="backfillBtn">Backfill</button>
 <script>
 // Group note buttons by colour into separate rows (no colour/style changes)
@@ -2270,7 +2284,8 @@ window.toggleAutoSummary = toggleAutoSummary;
     });
   });
 })();
-</script>
+
+
 <script>
 // === Statistical Analysis (5m) — popup + table, cloned from 5m Summary with extra columns ===
 // Columns: base SUMMARY_COLUMNS + Notes, Drug, QtySum (new; only for this summary)
@@ -2278,7 +2293,7 @@ window.toggleAutoSummary = toggleAutoSummary;
   // Fallbacks if base helpers are not in scope
   const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
     ? SUMMARY_COLUMNS.slice()
-    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"];
   const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum"]);
 
   function ensureStatAnalysisPopup(){
@@ -2522,13 +2537,14 @@ return "";
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
 })();
-</script>
+
+
 <script>
 // === Statistical Analysis (60m) — popup + table, cloned from 5m Statistical Analysis with hourly bins ===
 (function(){
   const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
     ? SUMMARY_COLUMNS.slice()
-    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"];
   const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum"]);
 
   function ensureStatAnalysisHourPopup(){
@@ -2762,7 +2778,8 @@ return "";
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
 })();
-</script>
+
+
 <script>
 // === Summary Significant 5m — 5-minute bins; numeric = MAX, labels = MEDIAN ===
 (function(){
@@ -2983,7 +3000,8 @@ return "";
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
 })();
-</script>
+
+
 <!-- Sliding Average Popup (3-row moving average) -->
 <style>
 #slidingAvgModal {
@@ -3002,7 +3020,7 @@ return "";
 <table id="slidingAvgTable">
 <thead>
 <tr>
-<th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+<th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -3045,11 +3063,12 @@ return "";
     var min   = (M.anxiety+M.impair);
     var weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
     return {
-      score: +score,
+      score: +score, totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)),
       max: +max,
       min: +min,
       weighted: +weighted,
-      fiveMax: computeFiveMax(means)};
+      fiveMax: +(weighted/10)
+    };
   }
   function fmt2(x){
     var n = Number(x);
@@ -3118,7 +3137,8 @@ return "";
     }
   };
 })();
-</script>
+
+
 <!-- Auto Slider A & B (auto-appending sliding averages) -->
 <style>
 #autoSliderAModal, #autoSliderBModal {
@@ -3134,34 +3154,6 @@ return "";
 .as-toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
 .as-toolbar button { background:#eee; color:#000; border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
 </style>
-
-<script>
-(function(){
-  function postfillTotalsInTable(tblId){
-    try{
-      var tbl = document.getElementById(tblId);
-      if(!tbl) return;
-      var ths = Array.from(tbl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-      // Ensure headers include TotalScore/TotalWeighted (already patched in thead)
-      var tbody = tbl.querySelector('tbody');
-      if(!tbody) return;
-      Array.from(tbody.querySelectorAll('tr')).forEach(function(tr){
-        var data = {};
-        Array.from(tr.children).forEach(function(td){
-          var col = td.getAttribute('data-col') || td.textContent.trim();
-          var val = parseFloat(td.getAttribute('data-value')||td.textContent)||NaN;
-          data[col] = val;
-        });
-      });
-    }catch(e){}
-  }
-  // Run after openAutoSlider* calls by hooking them lightly (no-op safe)
-  ['autoSliderATable','autoSliderBTable','autoSliderCTable','autoSliderDTable'].forEach(function(id){
-    try{ postfillTotalsInTable(id); }catch(e){}
-  });
-})();
-</script>
-
 <div id="autoSliderAModal">
 <div class="as-toolbar">
 <button onclick="exportAutoSliderCSV('A')">Export CSV</button>
@@ -3219,7 +3211,7 @@ return "";
     var max=(M.rush+M.mood+M.social+M.energy+M.focus);
     var min=(M.anxiety+M.impair);
     var weighted=5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
-    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:computeFiveMax(means)};
+    return {score:+score, totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), max:+max, min:+min, weighted:+weighted, fiveMax:+(weighted/10)};
   }
   function slidingMeanAtIndex(snap, i){
     var start=Math.max(0,i-2), cnt=i-start+1;
@@ -3261,7 +3253,7 @@ return "";
 
   window.exportAutoSliderCSV = function(which){
     var rows = loadRows(which);
-    var header = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max","N"];
+    var header = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max","N"];
     var lines = [header.join(",")];
     rows.forEach(function(r){
       var tt = timeLabel(r.ms);
@@ -3335,7 +3327,8 @@ return "";
   try{ if (window.autoSummaryActive) startAutoSliderA(); }catch(e){}
   try{ ['A','B'].forEach(function(k){ var rows=loadRows(k); rows.forEach(function(r){ appendRowToModalTable(k, r); }); }); }catch(e){}
 })();
-</script>
+
+
 <!-- ===== Label Settings & CSV Import/Export (Option C + Option 4) ===== -->
 <style>
   #labelGearBtn {
@@ -3717,7 +3710,8 @@ return "";
     // Populate selectors lazily when opening
   });
 
-})();</script>
+})();
+
 <!-- ===== End Label Settings ===== -->
 <script>
 // === CSV + Rapid provenance patch ===
@@ -3821,8 +3815,10 @@ function applyRapidScoresAndAddStay(){
       const metrics = CONFIG.core.metrics;
       const header = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
       metrics.forEach(f => header.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
-      header.push("Score","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum","Input Source");
-      const rows = [header.join(",")];
+      header.push("Score","TotalScore","TotalWeighted","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum","Input Source");
+      row.push((typeof computeRowMetricAverage==="function")? computeRowMetricAverage(r,"focus").toFixed(2) : (r.focus ?? ""));
+row.push((typeof computeRowMetricAverage==="function")? computeRowMetricAverage(r,"mood").toFixed(2) : (r.mood ?? ""));
+const rows = [header.join(",")];
       if (!Array.isArray(logData)) return;
       logData.forEach(r => {
         const L = [r.timestamp||"", r.sincedose||"", r.elapsed||"", r.info||"", r.scale||"", r.drug||"", r.qty||"", r.roa||""];
@@ -3860,7 +3856,8 @@ function applyRapidScoresAndAddStay(){
     }
   };
 })();
-</script>
+
+
 
 <!-- Quick openers for new Auto Sliders -->
 <div style="position:fixed; right: 16px; bottom: 16px; z-index: 9999;">
@@ -4104,7 +4101,8 @@ window.addEventListener('load', function(){
   if (btnD) btnD.addEventListener('click', computeAndAppendAutoD);
   startAutoD();
 });
-</script>
+
+
 
 
 <!-- ===== Added: Auto Slider C/D modals (tables only) & Review modal ===== -->
@@ -4113,7 +4111,7 @@ window.addEventListener('load', function(){
   <table id="autoSliderCTable">
     <thead><tr>
       <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-      <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+      <th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
     </tr></thead>
     <tbody></tbody>
   </table>
@@ -4124,7 +4122,7 @@ window.addEventListener('load', function(){
   <table id="autoSliderDTable">
     <thead><tr>
       <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-      <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+      <th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
     </tr></thead>
     <tbody></tbody>
   </table>
@@ -4207,7 +4205,7 @@ window.addEventListener('load', function(){
       rows.forEach(function(r){ appendRow('#autoSliderCTable tbody', r); });
       var ro=snapshot(); if(ro){
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score, totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)),max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_C, rows); appendRow('#autoSliderCTable tbody', r2);
       }
@@ -4224,7 +4222,7 @@ window.addEventListener('load', function(){
       try{
         var rows=loadCD(LS_KEY_D);
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score, totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)),max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_D, rows); appendRow('#autoSliderDTable tbody', r2);
       }catch(e){}
@@ -4244,7 +4242,8 @@ window.addEventListener('load', function(){
   window.openReview=function(){ var rows=rowsFromMain(); var html=''; html+=renderStats(rows); var idxs=findDoseEvents(rows); html+=renderDoseWindows(rows, idxs); var segs=stretches(rows); html+=renderStretches(rows, segs); var cont=document.getElementById('reviewContent'); if(cont) cont.innerHTML=html; var modal=document.getElementById('reviewModal'); if(modal) modal.style.display='block'; };
   window.exportReviewCSV=function(){ var rows=rowsFromMain(); var metrics=['rush','mood','social','energy','focus','anxiety','impair']; var head=['metric','count','sum','mean','mode','median','stdev']; var out=[head.join(',')]; metrics.forEach(function(m){ var s=basicStats(rows.map(function(r){return r[m];})); out.push([m,s.count,s.sum.toFixed(2),s.mean.toFixed(2),s.mode??'',s.median.toFixed(2),s.stdev.toFixed(2)].join(',')); }); var blob=new Blob([out.join('\\n')],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='review_stats.csv'; a.click(); URL.revokeObjectURL(a.href); };
 })();
-</script>
+
+
 
 
 <!-- ===== Auto Entries & Rolling Average (modal-based) ===== -->
@@ -4434,7 +4433,8 @@ function(){
     setDToLast3();
   }
 }();
-</script>
+
+
 
 
 <!-- STS: Buttons (auto-injected) -->
@@ -4484,7 +4484,7 @@ function(){
 <script>
 (function(){
   const METRICS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair"];
-  const EXTRA_COLS = ["Score","Min","Max"];
+  const EXTRA_COLS = ["Score","TotalScore","TotalWeighted","Min","Max"];
   const LS_KEY = "STS_ROAMING_ENTRIES_v1";
   let roamingRows = [];
   let roamingTimer = null;
@@ -4681,7 +4681,8 @@ function(){
   window.startRoamingEntries = start;
   window.stopRoamingEntries = stop;
 })();
-</script>
+
+
 <!-- /STS: Roaming Entries (auto-injected) -->
 
 <!-- STS: Roaming Average (auto-injected) -->
@@ -4725,7 +4726,7 @@ function(){
 <script>
 (function(){
   const METRICS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair"];
-  const EXTRA_COLS = ["Score","Min","Max"];
+  const EXTRA_COLS = ["Score","TotalScore","TotalWeighted","Min","Max"];
   const LS_KEY = "STS_ROAMING_AVG_ENTRIES_v1";
   let rows = [];
   let timer = null;
@@ -4887,8 +4888,53 @@ function(){
   window.startRoamingAverage = start;
   window.stopRoamingAverage = stop;
 })();
-</script>
+
+
 <!-- /STS: Roaming Average (auto-injected) -->
+<script>
+(function(){
+  function hideBootOkBanner(){
+    var el = document.getElementById('bootOkBanner');
+    if (el) { el.style.display = 'none'; }
+  }
+  window.setAppBootOk = hideBootOkBanner;
+
+  function checkUIReady(){
+    // Heuristics: look for common elements that appear after init
+    var ready = !!(document.querySelector('#rapidScoresModal') ||
+                   document.querySelector('#autoSummaryTable') ||
+                   document.querySelector('button, .button, .btn'));
+    if (ready){ hideBootOkBanner(); return true; }
+    return false;
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    // If the UI becomes ready soon, hide; otherwise hide after 3s as a failsafe
+    var tries = 0;
+    var iv = setInterval(function(){
+      tries++;
+      if (checkUIReady() || tries > 30){ clearInterval(iv); }
+    }, 100);
+    setTimeout(hideBootOkBanner, 3000);
+  });
+})();
+</script>
+
+<script>
+function computeRowMetricAverage(r, key){
+  const val = (r && typeof r[key] === 'number' && isFinite(r[key])) ? r[key] : 0;
+  try{
+    if (r && r._inputs && Array.isArray(r._inputs[key]) && r._inputs[key].length){
+      const arr = r._inputs[key].filter(x => typeof x === 'number' && isFinite(x));
+      if (arr.length) return arr.reduce((a,b)=>a+b,0) / arr.length;
+    }
+    if (r && r.detail && r.detail[key] && typeof r.detail[key].sum === 'number' && typeof r.detail[key].count === 'number' && r.detail[key].count > 0){
+      return r.detail[key].sum / r.detail[key].count;
+    }
+  }catch(e){}
+  return val;
+}
+</script>
 </body>
 <script>
 function openEmotionModal() {
@@ -4922,7 +4968,8 @@ function buildEmotionButtons() {
         container.appendChild(btn);
     });
 }
-</script>
+
+
 </html>
 <!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
 <script>
@@ -5007,7 +5054,7 @@ function buildEmotionButtons() {
       C.score, C.max, C.min, C.weighted, C.fiveMax
     ];
     const tr = document.createElement("tr");
-    const cols = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    const cols = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"];
     tr.innerHTML = row.map((v,i)=>{
       if (i===0) return `<td>${v??''}</td>`;
       const num = Number(v);
@@ -5124,7 +5171,7 @@ function buildEmotionButtons() {
 // ──────────────────────────────────────────────────────────────────────────────
 (function(){
   // Columns we will extract (must match data-col in main table rows)
-  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"]; const ALL_COLS = ["Time","Since Dose", ...NUM_COLS];
+  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"]; const ALL_COLS = ["Time","Since Dose", ...NUM_COLS];
 
   // Attempt to find the main table reliably
   function getMainTable(){
@@ -5451,7 +5498,8 @@ function buildEmotionButtons() {
   });
 })();
 // ──────────────────────────────────────────────────────────────────────────────
-</script>
+
+
 <script>
 
 // Ensure Auto Entries open/clear/export exist
@@ -5489,7 +5537,8 @@ function buildEmotionButtons() {
   };
 })();
 
-</script>
+
+
 
 <!-- === Rolling Average Patch (bind missing APIs) === -->
 <script>
@@ -5603,4 +5652,5 @@ function buildEmotionButtons() {
     emit(); window.rollingAvgTimer = setInterval(emit, 30000);
   };
 })();
-</script>
+
+

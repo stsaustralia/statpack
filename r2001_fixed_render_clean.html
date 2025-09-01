@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.8 r1100</title>
+<title>statpack v2b r2001</title>
 <style>
 
 #logTable {
@@ -40,13 +40,13 @@
         padding: 6px 10px;
         border-radius: 6px;
         margin: 4px;
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .score-columns {
     display: grid;
-    grid-template-columns: repeat(10, 1fr); /* exactly 57columns */
-    gap: 10px;
+    grid-template-columns: repeat(7, 1fr); /* exactly 10 columns */
+    gap: 5px;
     margin-top: 10px;
 }
 
@@ -60,12 +60,13 @@
 }
 
     .score-column button {
-        width: 130px;
-        height: 30px;
+        width: 112px;
+        height: 22px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
         background: #fff;
+        font-size: 10px;
     }
 
     .selected-score {
@@ -89,7 +90,7 @@
     th, td {
         padding: 10px;
         text-align: center;
-        font-size: 11px;
+        font-size: 10px;
     }
 
     #extraNoteButtons {
@@ -259,14 +260,29 @@ pointer-events: auto;
 
 <!-- STS: UI CONFIG (auto-injected) -->
 <script>
+function shadeLinear(v, minRed, maxGreen){
+  function clamp(x,a,b){return Math.max(a, Math.min(b, x));}
+  let g = 0, r = 0;
+  if (v >= 0){
+    const t = clamp(v / (maxGreen || 1), 0, 1);
+    g = Math.round(255 * t);
+    r = 0;
+  } else {
+    const t = clamp((v - minRed) / (0 - minRed), 0, 1);
+    r = Math.round(255 * t);
+    g = 0;
+  }
+  return `background-color: rgba(${r},${g},0,0.20);`;
+}
+
 (function() {
   const DEFAULTS = {
     shadingEnabled: true,
     tables: {
-      main:           { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Min","Max","Weighted","5Max"] },
-      roaming:        { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Min","Max"] },
-      roamingAverage: { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Min","Max"] },
-      slidingAverage: { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Min","Max"] }
+      main:           { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Min","Max","Weighted","5Max"] },
+      roaming:        { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Min","Max"] },
+      roamingAverage: { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Min","Max"] },
+      slidingAverage: { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Min","Max"] }
     },
     roamingScoreMode: "mean"
   };
@@ -294,10 +310,18 @@ pointer-events: auto;
     }
   };
 })();
+
+
 </script>
 <!-- /STS: UI CONFIG (auto-injected) -->
 </head>
 <body>
+<div id="bootOkBanner" style="position:fixed;top:8px;right:8px;z-index:99999;
+  padding:4px 8px;border-radius:6px;background:#e6ffe6;border:1px solid #a3e6a3;
+  font:12px/1.2 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Ubuntu,sans-serif;color:#0b6;box-shadow:0 1px 4px rgba(0,0,0,0.1)">
+  boot ok
+</div>
+
 <div class="summary-controls">
 <button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
 <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
@@ -334,7 +358,7 @@ pointer-events: auto;
 <button onclick="exportCSV()">Export CSV</button>
 <button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
 <input accept=".csv,text/csv" id="openLogInput" style="display:none" type="file"/>
-<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button><button onclick="openLowerScores()">Lower Scores</button>
+<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button>
 <button onclick="openEmotionModal()">Emotion Wheel</button>
 </div>
 <div>
@@ -389,9 +413,6 @@ pointer-events: auto;
 <option value="Alprazolam">Alprazolam</option>
 <option value="Bromazolam">Bromazolam</option>
 <option value="LSD">LSD</option>
-<option value="Food">Food</option>
-<option value="Drink">Drink</option>
-<option value="Sleep">Sleep</option>
 </select>
 </label>
 <label>
@@ -433,21 +454,20 @@ pointer-events: auto;
 <th data-col="Drug">Drug</th>
 <th data-col="QTY">QTY</th>
 <th data-col="ROA">ROA</th>
-<th data-col="Rush">Rush</th>
-<th data-col="Rush">Rush</th>
-<th data-col="Mood">Mood</th>
-<th data-col="Mood">Mood</th>
-<th data-col="Social">Social</th>
-<th data-col="Social">Social</th>
-<th data-col="Energy">Energy</th>
-<th data-col="Energy">Energy </th>
-<th data-col="Focus">Focus</th>
-<th data-col="Focus">Focus</th>
-<th data-col="Anxiety">Anxiety</th>
-<th data-col="Anxiety">Anxiety</th>
-<th data-col="Impair">Impair</th>
-<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
-<th data-col="Score">Score</th>
+<th data-col="Rush">Rush</th><th data-col="Rush">Rush</th><th>Rush Avg</th>
+
+<th data-col="Mood">Mood</th><th data-col="Mood">Mood</th><th>Mood Avg</th>
+
+<th data-col="Social">Social</th><th data-col="Social">Social</th><th>Social Avg</th>
+
+<th data-col="Energy">Energy</th><th data-col="Energy">Energy</th><th>Energy Avg</th>
+
+<th data-col="Focus">Focus</th><th data-col="Focus">Focus</th><th>Focus Avg</th>
+
+<th data-col="Anxiety">Anxiety</th><th data-col="Anxiety">Anxiety</th><th>Anxiety Avg</th>
+
+<th data-col="Impair">Impair</th><th data-col="Impair">Impair</th><th>Impair Avg</th>
+<th data-col="change">change</th><th data-col="Change">Change</th><th>Change Avg</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th>Dopamine Avg</th><th>Degree Avg</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th><th>Other Avg</th><th data-col="Confidence">Confidence</th><th data-col="Confidence">Confidence</th><th>Confidence Avg</th><th data-col="Auto">Auto</th><th data-col="Auto">Auto</th><th>Auto Avg</th><th data-col="Jitter">Jitter</th><th data-col="Jitter">Jitter</th><th>Jitter Avg</th><th data-col="Dopamine">Dopamine</th><th data-col="Dopamine">Dopamine</th><th data-col="Score">Score</th>
 <th data-col="Max">Max</th>
 <th data-col="Min">Min</th>
 <th data-col="VL">VL</th>
@@ -464,7 +484,7 @@ pointer-events: auto;
 <div id="autoSummaryDock">
 <div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
 <table id="autoSummaryTable">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
@@ -476,21 +496,21 @@ pointer-events: auto;
 <button class="ctrl-btn" id="backfillBtn" style="margin-left:10px;">Run Backfill</button>
 </div>
 <table id="summary5Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
 <div id="summary15Dock" style="margin-top:20px;">
 <div id="summary15Title">Summary 15m (rolling)</div>
 <table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
 <div id="summary60Dock" style="margin-top:20px;">
 <div id="summary60Title">Summary 60m (rolling)</div>
 <table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
@@ -518,7 +538,7 @@ pointer-events: auto;
 <th>Label</th>
 <th>Segment</th>
 <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-<th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+<th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -531,19 +551,6 @@ pointer-events: auto;
 <div id="rapidScoresModal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); z-index:1000;">
 <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
 <div style="font-weight:700; font-size:18px;">Rapid Scores</div>
-<div id="lowerScoresModal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000;">
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
-    <div style="font-weight:700; font-size:18px;">Lower Scores</div>
-    <button aria-label="Close" onclick="closeLowerScores()">Close</button>
-  </div>
-  <div class="score-columns" id="lowerScoresButtons"></div>
-  <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
-    <button onclick="applyLowerScores()">Apply</button>
-    <button onclick="applyLowerScoresAndAdd()">Apply &amp; Add Entry</button>
-    <button onclick="applyLowerScoresAndAddStay()">Apply, Add &amp; Stay</button>
-  </div>
-</div>
-
 <button aria-label="Close" onclick="closeRapidScores()">Close</button>
 </div>
 <div class="score-columns" id="rapidScoresButtons"></div>
@@ -557,13 +564,13 @@ pointer-events: auto;
 // ===== Centralised read-only configuration (edit here to tweak UI/labels/sets) =====
 const CONFIG = Object.freeze({
   ui: {
-//     hideInUi: ['VL','sM','sB','sF','GS','change',	'Change'	,'Deg'	,'D2'	,'Oth',	'O2','Weighted','5Max'],
+//     hideInUi: [['VL','sM','sB','sF','GS','change','Deg','Oth']],
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
-    noShadeCols: ['change','Change','Deg'],
+    noShadeCols: [],
     shadeCap: {
-      'Score': 25,
-      'Max': 35,
-      'Min': 14,
+      'Score': 30,
+      'Max': 30,
+      'Min': 10,
       'Weighted': 20,
       '5Max': 5
     },
@@ -571,55 +578,68 @@ const CONFIG = Object.freeze({
       green: ['Rush','Mood','Social','Score','Weighted','5Max','Max'],
       gold:  ['Energy','Focus'],
       red:   ['Anxiety','Impair','Min']
-    }
+      , blue:  ['Change','D2','O2']
+      , grey:  ['Confidence','Auto','Jitter','Dopamine']}
   },
 labels: {
   labelMappings: {
-  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Moderate', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Very Euphoric', 5.00: 'Euphoric', 4.50: 'Very Good', 4.00: 'Obvious', 3.50: 'High/Clear', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Some', 1.50: 'Low', 1.00: 'OK', 0.75: 'Very Poor', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Fair', 0.30: 'Good', 0.40: 'Great' },
-  social: { 6.00: 'Autopilot', 5.50: 'Very Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High/Social', 3.00: 'Social', 2.50: 'Moderate', 2.00: 'Capable', 1.50: 'Low', 1.00: 'Want', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
-  energy: { 6.00: 'Ultra', 5.50: 'Very Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High/Energy', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'High/Obsessed', 3.50: 'High/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
-  anxiety: { 6.00: 'Doomed', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Dominating', 3.50: 'High/Anxiety', 3.00: 'Anxious', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid', 1.25: 'Ignorable' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High/Impairment', 3.00: 'Impaired', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Ignorable' },
-  change: { 1.00: 'Noticed', 2.00: 'Distinct', 3.00: 'Significant', 4.00: 'Strong' },
-  degree: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low' },
-  other: { 5.00: 'Positive', 4.00: 'Negative', 3.00: 'Up', 2.00: 'Down', 1.00: 'Flat', 0.00: 'No' },
-    },
-  rapidLabels: {
-  rush: { 6.00: 'Overwhelming', 5.50: 'Very Extreme', 5.00: 'Extreme', 4.50: 'Very Strong', 4.00: 'Intense', 3.50: 'High/Strong', 3.00: 'Moderate', 2.50: 'Moderate', 2.00: 'Present', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Light', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Maybe', 0.20: 'Some', 0.30: 'Rush', 0.40: 'Powerful' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Very Euphoric', 5.00: 'Euphoric', 4.50: 'Very Good', 4.00: 'Obvious', 3.50: 'High/Clear', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Some', 1.50: 'Low', 1.00: 'OK', 0.75: 'Very Poor', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Fair', 0.30: 'Good', 0.40: 'Great' },
-  social: { 6.00: 'Autopilot', 5.50: 'Very Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very High', 4.00: 'Outgoing', 3.50: 'High/Social', 3.00: 'Social', 2.50: 'Moderate', 2.00: 'Capable', 1.50: 'Low', 1.00: 'Want', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
-  energy: { 6.00: 'Ultra', 5.50: 'Very Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Energetic', 3.50: 'High/Energy', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
-  focus: { 6.00: 'Laser Wired', 5.50: 'Very Wired', 5.00: 'Wired', 4.50: 'Very High', 4.00: 'High/Obsessed', 3.50: 'High/Focus', 3.00: 'Focus', 2.50: 'Moderate', 2.00: 'Alert', 1.50: 'Low', 1.00: 'Functional', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'Normal', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
-  anxiety: { 6.00: 'Doomed', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Dominating', 3.50: 'High/Anxiety', 3.00: 'Anxious', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid', 1.25: 'Ignorable' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Very Severe', 5.00: 'Severe', 4.50: 'Very High', 4.00: 'Controlling', 3.50: 'High/Impairment', 3.00: 'Impaired', 2.50: 'Moderate', 2.00: 'Noticeable', 1.50: 'Low', 1.00: 'Slight', 0.75: 'Very Low', 0.50: '+', 0.25: 'Minimal', 0.00: 'None', 1.25: 'Ignorable' },
-  change: { 1.00: 'Noticed', 2.00: 'Distinct', 3.00: 'Significant', 4.00: 'Strong' },
-  degree: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Moderate', 2.00: 'Low', 1.00: 'Very Low' },
-  other: { 5.00: 'Positive', 4.00: 'Negative', 3.00: 'Up', 2.00: 'Down', 1.00: 'Flat', 0.00: 'No' },
+  rush: { 6.00: 'Extreme', 5.50: 'Intense', 5.00: 'Intense', 4.50: 'Very Strong', 4.25: 'Very High', 4.00: 'Strong', 3.50: 'Prominent', 3.00: 'Prominent', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Light', 1.00: 'Light', 0.50: 'Minor', 0.00: 'None' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoric', 5.00: 'Euphoric', 4.50: 'Very Clear/Good', 4.25: 'Very High', 4.00: 'Clear/Certain', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'OK', 1.00: 'OK', 0.50: 'Flat', 0.00: 'No/No Change', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious' },
+  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very Outgoing', 4.25: 'Outgoing', 4.00: 'Outgoing', 3.25: 'Social', 3.00: 'Social', 2.75: 'Push', 2.50: 'Push', 2.25: 'Urge', 2.00: 'Urge', 1.75: 'Desire', 1.50: 'Desire', 1.00: 'Think/Want', 0.50: 'Think', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
+  energy: { 6.00: 'Ultra', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very Energetic', 4.25: 'Very High', 4.00: 'Energetic', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
+  focus: { 6.00: 'Laser Wired', 5.50: 'Wired', 5.00: 'Wired', 4.50: 'Hyperfocused', 4.25: 'Very High', 4.00: 'Foucsed', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Very Low', 0.00: 'Baseline', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
+  anxiety: { 6.00: 'Doomed', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.25: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Ignorable', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' },
+  impair: { 6.00: 'Dangerous', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.25: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Minimal', 0.00: 'No' },
+  change: { 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Certain', 1.50: 'Present', 1.00: 'Noticed', 0.50: 'Maybe', 0.00: 'None' },
+  degree: { 6.00: 'Extremely High', 5.50: 'Extremely High', 5.00: 'Very High', 4.50: 'Higher', 4.00: 'High', 3.50: 'Moderate-High', 3.00: 'Moderate', 2.50: 'Low-Moderate', 2.00: 'Low', 1.50: 'Lower', 1.00: 'Very Low', 0.50: 'Extremely Low' },
+  other: {  },
+  confidence: { 4.00: 'Obvious', 3.50: 'Definite', 3.00: 'Certain', 2.00: 'Required Thought', 1.50: 'Yes', 1.00: 'Maybe' },
+  auto: {  },
+  jitter: { 6.00: 'Regret', 5.50: 'Embarrassingly', 5.00: 'Cannot Hide', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Aware', 3.00: 'Visible', 2.50: 'Maskable', 2.00: 'Ignorable' },
+  dopamine: { 10.00: 'Peak', 0.00: 'Depleted' },
+}
+, rapidLabels: {
+  rush: { 6.00: 'Extreme', 5.50: 'Intense', 5.00: 'Intense', 4.50: 'Very Strong', 4.25: 'Very High', 4.00: 'Strong', 3.50: 'Prominent', 3.00: 'Prominent', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Light', 1.00: 'Light', 0.50: 'Minor', 0.00: 'None' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoric', 5.00: 'Euphoric', 4.50: 'Very Clear/Good', 4.25: 'Very High', 4.00: 'Clear/Certain', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'OK', 1.00: 'OK', 0.50: 'Flat', 0.00: 'No/No Change', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious' },
+  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Very Outgoing', 4.25: 'Outgoing', 4.00: 'Outgoing', 3.25: 'Social', 3.00: 'Social', 2.75: 'Push', 2.50: 'Push', 2.25: 'Urge', 2.00: 'Urge', 1.75: 'Desire', 1.50: 'Desire', 1.00: 'Think/Want', 0.50: 'Think', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
+  energy: { 6.00: 'Ultra', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very Energetic', 4.25: 'Very High', 4.00: 'Energetic', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Minimal', 0.00: 'Baseline', 0.30: 'Active' },
+  focus: { 6.00: 'Laser Wired', 5.50: 'Wired', 5.00: 'Wired', 4.50: 'Hyperfocused', 4.25: 'Very High', 4.00: 'Foucsed', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Lower Mid', 2.00: 'Capable', 1.50: 'Functional', 1.00: 'Functional', 0.50: 'Very Low', 0.00: 'Baseline', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive' },
+  anxiety: { 6.00: 'Doomed', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.25: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Ignorable', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' },
+  impair: { 6.00: 'Dangerous', 5.50: 'Severe', 5.00: 'Severe', 4.50: 'Very High', 4.25: 'Very High', 4.00: 'High', 3.50: 'Significant', 3.00: 'Significant', 2.50: 'Distinct', 2.00: 'Distinct', 1.50: 'Noticeable', 1.00: 'Noticeable', 0.50: 'Minimal', 0.00: 'No' },
+  change: { 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Certain', 1.50: 'Present', 1.00: 'Noticed', 0.50: 'Maybe', 0.00: 'None' },
+  degree: { 6.00: 'Extremely High', 5.50: 'Extremely High', 5.00: 'Very High', 4.50: 'Higher', 4.00: 'High', 3.50: 'Moderate-High', 3.00: 'Moderate', 2.50: 'Low-Moderate', 2.00: 'Low', 1.50: 'Lower', 1.00: 'Very Low', 0.50: 'Extremely Low' },
+  other: {  },
+  confidence: { 4.00: 'Obvious', 3.50: 'Definite', 3.00: 'Certain', 2.00: 'Required Thought', 1.50: 'Yes', 1.00: 'Maybe' },
+  auto: {  },
+  jitter: { 6.00: 'Regret', 5.50: 'Embarrassingly', 5.00: 'Cannot Hide', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Aware', 3.00: 'Visible', 2.50: 'Maskable', 2.00: 'Ignorable' },
+  dopamine: { 10.00: 'Peak', 0.00: 'Depleted' },
   },
   buttonLabelsByMetric: {}
 },
   buttons: {
     perMetricButtons: {
-      rush:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      mood:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      social:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      energy:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      focus:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      anxiety:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1.25,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      impair:[6,5.5,5,4.5,4,3.5,3,2.5,2,1.5,1.25,1,0.75,0.5,0.25,0,'',0.5,-0.5,-1,'',0.1,0.2,0.3,0.4],
-      change:[4,3,2,1],
-      degree:[5,4,3,2,1],
-      other:[5,4,3,2,1]
+      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      confidence:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      auto:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      jitter:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      dopamine:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.75,0.25,-0.25,-0.75],
+      change:[6,4,3,1],
+      degree:[6,4,3,2,1,0],
+      other: [4.99,4.33,3.67,2.33,1.33,0.67,0]
     },
-    rapidValues: [5.5,4.5,3.5,2.5,1.5,0.75,0,0.5,-0.5],
+    rapidValues: [6,5,4,3,2,1,0,'','',0.25,-0.25],
 //     rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
   core: {
-    metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other']
+    metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other', 'confidence','auto','jitter','dopamine']
   },
   notes: {
     extra: ['Correlate', 'Flag','Now', 'This', 'Last', 'Next',  'Changes', 'Note', 'Context', 'Continue', 'LastDose', 'LastRow', 'LastHit', 'Plan', 'One', 'Multiple', 'Dose', 'Redose', 'Continue', 'Hit', 'Hindsight', 'Review', 'Summary'],
@@ -646,6 +666,8 @@ const SHADE_CAP = CONFIG.ui.shadeCap;
 const GREEN_SET = new Set(CONFIG.ui.colorSets.green);
 const GOLD_SET  = new Set(CONFIG.ui.colorSets.gold);
 const RED_SET   = new Set(CONFIG.ui.colorSets.red);
+const BLUE_SET  = new Set(CONFIG.ui.colorSets.blue || []);
+const GREY_SET  = new Set(CONFIG.ui.colorSets.grey || []);
 
 function applyUiColumnVisibility() {
   const id = 'uiHideCols';
@@ -663,10 +685,7 @@ function applyUiColumnVisibility() {
     const s = document.createElement('style');
     s.id = id2;
     s.textContent = `
-      th[data-col="change"], td[data-col="change"],
-      th[data-col="Change"],  td[data-col="Change"],
-      th[data-col="Deg"], td[data-col="Deg"] { background: transparent !important; }
-    `;
+      `;
     document.head.appendChild(s);
   }
 }
@@ -689,6 +708,8 @@ function cellBgFor(colName, value) {
   if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
   if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
   if (RED_SET.has(colName))   return `rgba(255,0,0,${opacity})`;
+  if (BLUE_SET.has(colName))  return `rgba(0,0,255,${opacity})`;
+  if (GREY_SET.has(colName))  return `rgba(128,128,128,${opacity})`;
   return '';
 }
 
@@ -807,13 +828,8 @@ function getLabels(metric, values) {
 // if (v === 2.02) customLabel = 'Low';
 // if (v === 1.52) customLabel = 'Lower';
 // if (v === 1.02) customLabel = 'Vergy Low';
-if (v === 1) customLabel = 'TEST';
 if (v === -111) customLabel = '-';
 //else if (v === 6) customLabel = 'Extra/Moderate';
-else if (v === 1) customLabel = 'TESTER';
-
-
-
 //else if (v === 10) customLabel = 'Maximum';
 //else if (v === 6) customLabel = 'Extra/Moderate';
 else customLabel = getMetricLabel(f, v);
@@ -1175,7 +1191,7 @@ function renderTable() {
                 h += `<td data-field="${f}Sum" data-value="${r[f + 'Sum']}">${fmt2(r[f + 'Sum'])}</td>`;
                 h += `<td data-label-for="${f}Sum" data-value="${r[f + 'Sum']}">${r[f + 'Label']}</td>`;
             });
-        h += `<td data-col="Score" class="score-cell">${fmt2(r.score)}</td>` +
+        h += `<td data-col="Score" class="score-cell">${fmt2(r.score)}</td><td data-col="TotalScore">${r.totalScore?.toFixed ? r.totalScore.toFixed(2) : (r.totalScore ?? "")}</td><td data-col="TotalWeighted">${r.totalWeighted?.toFixed ? r.totalWeighted.toFixed(2) : (r.totalWeighted ?? "")}</td>` +
      `<td data-col="Max" class="max-cell">${fmt2(r.max || 0)}</td>` +
      `<td data-col="Min" class="min-cell">${fmt2(r.min || 0)}</td>` +
      `<td data-col="VL">${fmt2(r.valence)}</td>` +
@@ -1185,7 +1201,7 @@ function renderTable() {
      `<td data-col="Last">${r.customNotes || ""}</td>` +
      `<td data-col="Notes">${r.notes || ""}</td>` +
      `<td data-col="Weighted">${fmt2(r.weighted || 0)}</td>` +
-     `<td data-col="5Max">${(r.weighted / 10).toFixed(2)}</td>` +
+     `<td data-col="5Max">${(r.score / 10).toFixed(2)}</td>` +
      `<td data-col="GS">${fmt2(r.goodSum || 0)}</td>`;
 
             tr.innerHTML = h;
@@ -1233,8 +1249,10 @@ function renderTable() {
     function exportCSV() {
         const h = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
         metrics.forEach(f => h.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
-        h.push("Score","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum");
-        const rows = [h.join(",")];
+        h.push("Score","TotalScore","TotalWeighted","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum");
+        row.push((typeof computeRowMetricAverage==="function")? computeRowMetricAverage(r,"focus").toFixed(2) : (r.focus ?? ""));
+row.push((typeof computeRowMetricAverage==="function")? computeRowMetricAverage(r,"mood").toFixed(2) : (r.mood ?? ""));
+const rows = [h.join(",")];
         logData.forEach(r => {
             const L = [r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa];
             metrics.forEach(f => L.push((+r[f + "Sum"]||0).toFixed(2), r[f + "Label"]));
@@ -1399,7 +1417,7 @@ function mapSchema(header){
     drug: ["Drug"],
     qty: ["Qty","QTY"],
     roa: ["ROA","Detail"],
-    score: ["Score"],
+    score: ["Score"], totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)),
     max: ["Max"],
     min: ["Min"],
     maxp: ["Max %","Max%","Max Percent"],
@@ -1521,7 +1539,7 @@ function mergeAppendDedupeSort(existing, incoming){
       r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa,
       r.notes, r.customNotes,
       r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum, r.anxietySum, r.impairSum,
-      r.score, r.max, r.min, r.weighted, r.maxPercent, r.minPercent
+      r.score, r.totalScore, r.totalWeighted, r.max, r.min, r.weighted, r.maxPercent, r.minPercent
     ]);
     if (!seen.has(key)){ seen.add(key); out.push(r); }
   }
@@ -1534,7 +1552,7 @@ function isNonEmptyLogRow(r){
   if (!r) return false;
   const numericVals = [
     r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum,
-    r.anxietySum, r.impairSum, r.score, r.max, r.min, r.weighted,
+    r.anxietySum, r.impairSum, r.score, r.totalScore, r.totalWeighted, r.max, r.min, r.weighted,
     r.maxPercent, r.minPercent
   ].map(v => Number(v));
   return numericVals.some(v => Number.isFinite(v) && v !== 0);
@@ -1664,7 +1682,8 @@ function applyRapidScoresAndAddStay(){
     } catch(e){}
   } catch(e) { console.warn(e); }
 }
-</script>
+
+
 <!-- Manual Score Entry Modal -->
 <div id="scoreModal">
 <h3>Manual Score Entry</h3>
@@ -1725,7 +1744,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
-</script>
+
+
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 <script>
 // === Summary Core (revised to read ONLY from main table) ===
@@ -1735,7 +1755,7 @@ function setSummaryWindowAndOpen(mins){ SUMMARY_WINDOW_MINUTES = mins; createSum
 
 
 // Columns for popup + CSV
-const SUMMARY_COLUMNS = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+const SUMMARY_COLUMNS = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"];
 
 // Timers/state
 let auto1mIntervalId = null;
@@ -2179,7 +2199,8 @@ function exportPopupCSV(){
 }
 window.createSummaryPopupTable = createSummaryPopupTable;
 window.toggleAutoSummary = toggleAutoSummary;
-</script>
+
+
 <button class="ctrl-btn" id="backfillBtn">Backfill</button>
 <script>
 // Group note buttons by colour into separate rows (no colour/style changes)
@@ -2263,7 +2284,8 @@ window.toggleAutoSummary = toggleAutoSummary;
     });
   });
 })();
-</script>
+
+
 <script>
 // === Statistical Analysis (5m) — popup + table, cloned from 5m Summary with extra columns ===
 // Columns: base SUMMARY_COLUMNS + Notes, Drug, QtySum (new; only for this summary)
@@ -2271,7 +2293,7 @@ window.toggleAutoSummary = toggleAutoSummary;
   // Fallbacks if base helpers are not in scope
   const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
     ? SUMMARY_COLUMNS.slice()
-    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"];
   const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum"]);
 
   function ensureStatAnalysisPopup(){
@@ -2515,13 +2537,14 @@ return "";
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
 })();
-</script>
+
+
 <script>
 // === Statistical Analysis (60m) — popup + table, cloned from 5m Statistical Analysis with hourly bins ===
 (function(){
   const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
     ? SUMMARY_COLUMNS.slice()
-    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"];
   const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum"]);
 
   function ensureStatAnalysisHourPopup(){
@@ -2755,7 +2778,8 @@ return "";
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
 })();
-</script>
+
+
 <script>
 // === Summary Significant 5m — 5-minute bins; numeric = MAX, labels = MEDIAN ===
 (function(){
@@ -2976,7 +3000,8 @@ return "";
     setTimeout(()=>URL.revokeObjectURL(url), 1000);
   }
 })();
-</script>
+
+
 <!-- Sliding Average Popup (3-row moving average) -->
 <style>
 #slidingAvgModal {
@@ -2995,7 +3020,7 @@ return "";
 <table id="slidingAvgTable">
 <thead>
 <tr>
-<th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+<th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -3038,7 +3063,7 @@ return "";
     var min   = (M.anxiety+M.impair);
     var weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
     return {
-      score: +score,
+      score: +score, totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)),
       max: +max,
       min: +min,
       weighted: +weighted,
@@ -3112,7 +3137,8 @@ return "";
     }
   };
 })();
-</script>
+
+
 <!-- Auto Slider A & B (auto-appending sliding averages) -->
 <style>
 #autoSliderAModal, #autoSliderBModal {
@@ -3138,7 +3164,7 @@ return "";
 <table id="autoSliderATable">
 <thead><tr>
 <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-<th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+<th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
 </tr></thead>
 <tbody></tbody>
 </table>
@@ -3153,7 +3179,7 @@ return "";
 <table id="autoSliderBTable">
 <thead><tr>
 <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-<th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+<th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
 </tr></thead>
 <tbody></tbody>
 </table>
@@ -3185,7 +3211,7 @@ return "";
     var max=(M.rush+M.mood+M.social+M.energy+M.focus);
     var min=(M.anxiety+M.impair);
     var weighted=5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
-    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:+(weighted/10)};
+    return {score:+score, totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), max:+max, min:+min, weighted:+weighted, fiveMax:+(weighted/10)};
   }
   function slidingMeanAtIndex(snap, i){
     var start=Math.max(0,i-2), cnt=i-start+1;
@@ -3227,7 +3253,7 @@ return "";
 
   window.exportAutoSliderCSV = function(which){
     var rows = loadRows(which);
-    var header = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max","N"];
+    var header = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max","N"];
     var lines = [header.join(",")];
     rows.forEach(function(r){
       var tt = timeLabel(r.ms);
@@ -3301,7 +3327,8 @@ return "";
   try{ if (window.autoSummaryActive) startAutoSliderA(); }catch(e){}
   try{ ['A','B'].forEach(function(k){ var rows=loadRows(k); rows.forEach(function(r){ appendRowToModalTable(k, r); }); }); }catch(e){}
 })();
-</script>
+
+
 <!-- ===== Label Settings & CSV Import/Export (Option C + Option 4) ===== -->
 <style>
   #labelGearBtn {
@@ -3324,7 +3351,7 @@ return "";
   .ls-row { display: grid; grid-template-columns: 160px 1fr; gap: 10px; margin: 6px 0; align-items: center; }
   .ls-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
   .ls-controls button { padding: 6px 10px; }
-  #ls-preview { border: 1px solid #ddd; border-radius: 8px; padding: 8px; max-height: 240px; overflow: auto; font-size: 11px; }
+  #ls-preview { border: 1px solid #ddd; border-radius: 8px; padding: 8px; max-height: 240px; overflow: auto; font-size: 10px; }
   #ls-tabs { display: flex; gap: 8px; margin-bottom: 10px; }
   #ls-tabs button { padding: 6px 10px; border: 1px solid #ccc; background: #f7f7f7; cursor: pointer; border-radius: 6px; }
   #ls-tabs button.active { background: #e9f2ff; border-color: #9cc1ff; }
@@ -3683,7 +3710,8 @@ return "";
     // Populate selectors lazily when opening
   });
 
-})();</script>
+})();
+
 <!-- ===== End Label Settings ===== -->
 <script>
 // === CSV + Rapid provenance patch ===
@@ -3787,8 +3815,10 @@ function applyRapidScoresAndAddStay(){
       const metrics = CONFIG.core.metrics;
       const header = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
       metrics.forEach(f => header.push(f.charAt(0).toUpperCase()+f.slice(1)+" Sum", f.charAt(0).toUpperCase()+f.slice(1)+" Label"));
-      header.push("Score","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum","Input Source");
-      const rows = [header.join(",")];
+      header.push("Score","TotalScore","TotalWeighted","Max","Min","Max %","Min %","Valence","scaleMood","scaleBad","scaleFocus","Custom Notes","Notes","Weighted","Score5","Good Sum","Input Source");
+      row.push((typeof computeRowMetricAverage==="function")? computeRowMetricAverage(r,"focus").toFixed(2) : (r.focus ?? ""));
+row.push((typeof computeRowMetricAverage==="function")? computeRowMetricAverage(r,"mood").toFixed(2) : (r.mood ?? ""));
+const rows = [header.join(",")];
       if (!Array.isArray(logData)) return;
       logData.forEach(r => {
         const L = [r.timestamp||"", r.sincedose||"", r.elapsed||"", r.info||"", r.scale||"", r.drug||"", r.qty||"", r.roa||""];
@@ -3826,7 +3856,8 @@ function applyRapidScoresAndAddStay(){
     }
   };
 })();
-</script>
+
+
 
 <!-- Quick openers for new Auto Sliders -->
 <div style="position:fixed; right: 16px; bottom: 16px; z-index: 9999;">
@@ -4070,7 +4101,8 @@ window.addEventListener('load', function(){
   if (btnD) btnD.addEventListener('click', computeAndAppendAutoD);
   startAutoD();
 });
-</script>
+
+
 
 
 <!-- ===== Added: Auto Slider C/D modals (tables only) & Review modal ===== -->
@@ -4079,7 +4111,7 @@ window.addEventListener('load', function(){
   <table id="autoSliderCTable">
     <thead><tr>
       <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-      <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+      <th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
     </tr></thead>
     <tbody></tbody>
   </table>
@@ -4090,7 +4122,7 @@ window.addEventListener('load', function(){
   <table id="autoSliderDTable">
     <thead><tr>
       <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-      <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+      <th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
     </tr></thead>
     <tbody></tbody>
   </table>
@@ -4173,7 +4205,7 @@ window.addEventListener('load', function(){
       rows.forEach(function(r){ appendRow('#autoSliderCTable tbody', r); });
       var ro=snapshot(); if(ro){
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
+        var C={score:ro.comp.score, totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)),max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_C, rows); appendRow('#autoSliderCTable tbody', r2);
       }
@@ -4190,7 +4222,7 @@ window.addEventListener('load', function(){
       try{
         var rows=loadCD(LS_KEY_D);
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
+        var C={score:ro.comp.score, totalScore: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)), totalWeighted: ((r.rush||0)+(r.mood||0)+(r.social||0)+(r.energy||0)+(r.focus||0)-(r.anxiety||0)-(r.impair||0)+(r.auto||0)-(r.jitter||0)+(r.dopamine||0)),max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:ro.comp.fiveMax};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_D, rows); appendRow('#autoSliderDTable tbody', r2);
       }catch(e){}
@@ -4210,7 +4242,8 @@ window.addEventListener('load', function(){
   window.openReview=function(){ var rows=rowsFromMain(); var html=''; html+=renderStats(rows); var idxs=findDoseEvents(rows); html+=renderDoseWindows(rows, idxs); var segs=stretches(rows); html+=renderStretches(rows, segs); var cont=document.getElementById('reviewContent'); if(cont) cont.innerHTML=html; var modal=document.getElementById('reviewModal'); if(modal) modal.style.display='block'; };
   window.exportReviewCSV=function(){ var rows=rowsFromMain(); var metrics=['rush','mood','social','energy','focus','anxiety','impair']; var head=['metric','count','sum','mean','mode','median','stdev']; var out=[head.join(',')]; metrics.forEach(function(m){ var s=basicStats(rows.map(function(r){return r[m];})); out.push([m,s.count,s.sum.toFixed(2),s.mean.toFixed(2),s.mode??'',s.median.toFixed(2),s.stdev.toFixed(2)].join(',')); }); var blob=new Blob([out.join('\\n')],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='review_stats.csv'; a.click(); URL.revokeObjectURL(a.href); };
 })();
-</script>
+
+
 
 
 <!-- ===== Auto Entries & Rolling Average (modal-based) ===== -->
@@ -4400,7 +4433,8 @@ function(){
     setDToLast3();
   }
 }();
-</script>
+
+
 
 
 <!-- STS: Buttons (auto-injected) -->
@@ -4450,7 +4484,7 @@ function(){
 <script>
 (function(){
   const METRICS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair"];
-  const EXTRA_COLS = ["Score","Min","Max"];
+  const EXTRA_COLS = ["Score","TotalScore","TotalWeighted","Min","Max"];
   const LS_KEY = "STS_ROAMING_ENTRIES_v1";
   let roamingRows = [];
   let roamingTimer = null;
@@ -4647,7 +4681,8 @@ function(){
   window.startRoamingEntries = start;
   window.stopRoamingEntries = stop;
 })();
-</script>
+
+
 <!-- /STS: Roaming Entries (auto-injected) -->
 
 <!-- STS: Roaming Average (auto-injected) -->
@@ -4691,7 +4726,7 @@ function(){
 <script>
 (function(){
   const METRICS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair"];
-  const EXTRA_COLS = ["Score","Min","Max"];
+  const EXTRA_COLS = ["Score","TotalScore","TotalWeighted","Min","Max"];
   const LS_KEY = "STS_ROAMING_AVG_ENTRIES_v1";
   let rows = [];
   let timer = null;
@@ -4853,138 +4888,52 @@ function(){
   window.startRoamingAverage = start;
   window.stopRoamingAverage = stop;
 })();
-</script>
+
+
 <!-- /STS: Roaming Average (auto-injected) -->
+<script>
+(function(){
+  function hideBootOkBanner(){
+    var el = document.getElementById('bootOkBanner');
+    if (el) { el.style.display = 'none'; }
+  }
+  window.setAppBootOk = hideBootOkBanner;
+
+  function checkUIReady(){
+    // Heuristics: look for common elements that appear after init
+    var ready = !!(document.querySelector('#rapidScoresModal') ||
+                   document.querySelector('#autoSummaryTable') ||
+                   document.querySelector('button, .button, .btn'));
+    if (ready){ hideBootOkBanner(); return true; }
+    return false;
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    // If the UI becomes ready soon, hide; otherwise hide after 3s as a failsafe
+    var tries = 0;
+    var iv = setInterval(function(){
+      tries++;
+      if (checkUIReady() || tries > 30){ clearInterval(iv); }
+    }, 100);
+    setTimeout(hideBootOkBanner, 3000);
+  });
+})();
+</script>
 
 <script>
-// ===== Lower Scores Modal (uses MAIN labelMappings) =====
-(function(){
-  const LOWER_VALUES = Object.freeze({
-    rush:    [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
-    mood:    [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
-    social:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
-    energy:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
-    focus:   [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
-    anxiety: [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
-    impair:  [2.5, 2.25, 2.0, 1.75, 1.5, 1.25, 1.0, 0.75, 0.5, 0.25, 0.0],
-  });
-  const METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  let lowerSelections = Object.fromEntries(METRICS.map(m => [m, null]));
-
-  function nearestLabel(metric, val){
-    try{
-      const map = (window.CONFIG && window.CONFIG.labels && window.CONFIG.labels.labelMappings && window.CONFIG.labels.labelMappings[metric]) || {};
-      if (map[val] !== undefined) return map[val];
-      const keys = Object.keys(map).map(parseFloat).filter(n => !Number.isNaN(n));
-      if (!keys.length) return String(val);
-      keys.sort((a,b)=>Math.abs(val-a)-Math.abs(val-b));
-      return map[keys[0]] ?? String(val);
-    }catch(e){ return String(val); }
-  }
-
-  function renderLowerScores(){
-    const host = document.getElementById('lowerScoresButtons');
-    if (!host) return;
-    host.innerHTML = '';
-    const grid = document.createElement('div');
-    grid.className = 'score-columns';
-    METRICS.forEach(metric => {
-      const col = document.createElement('div');
-      col.className = 'score-column';
-      const hdr = document.createElement('div');
-      hdr.textContent = metric.charAt(0).toUpperCase() + metric.slice(1);
-      hdr.style.fontWeight = '600';
-      col.appendChild(hdr);
-      (LOWER_VALUES[metric]||[]).forEach(v => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.dataset.metric = metric;
-        btn.dataset.value = String(v);
-        btn.textContent = v + ': ' + nearestLabel(metric, v);
-        btn.classList.toggle('selected-score', lowerSelections[metric] === v);
-        btn.addEventListener('click', () => {
-          lowerSelections[metric] = (lowerSelections[metric] === v) ? null : v;
-          [...col.querySelectorAll('button')].forEach(b => {
-            b.classList.toggle('selected-score', parseFloat(b.dataset.value) === lowerSelections[metric]);
-          });
-        });
-        col.appendChild(btn);
-      });
-      grid.appendChild(col);
-    });
-    host.appendChild(grid);
-  }
-
-  function annotateMainButtons(){
-    try{
-      const host = document.getElementById('scoreColumns');
-      if (!host) return;
-      host.querySelectorAll('.score-column').forEach(col => {
-        let header = null;
-        for (const n of col.childNodes){
-          if (n.nodeType === 1 && n.tagName !== 'BUTTON'){ header = n; break; }
-        }
-        if (!header) return;
-        const metric = (header.textContent || '').trim().toLowerCase();
-        col.querySelectorAll('button').forEach(b => {
-          const txt = (b.textContent || '').trim();
-          const m = txt.match(/^(-?\d+(?:\.\d+)?):/);
-          if (m){ b.dataset.metric = metric; b.dataset.value = m[1]; }
-        });
-      });
-    }catch(e){}
-  }
-
-  function syncToMainButtons(){
-    try {
-      const container = document.getElementById('scoreColumns');
-      if (!container) return;
-      METRICS.forEach(metric => {
-        const val = lowerSelections[metric];
-        if (val == null) return;
-        const btn = [...container.querySelectorAll('button')].find(b => {
-          if (b.dataset && b.dataset.metric === metric && b.dataset.value != null){
-            return Math.abs(parseFloat(b.dataset.value) - val) < 1e-9;
-          }
-          return (b.textContent || '').trim().startsWith(String(val) + ':');
-        });
-        if (btn) btn.click();
-      });
-    } catch(e){}
-  }
-
-  window.openLowerScores = function(){
-    const modal = document.getElementById('lowerScoresModal');
-    if (!modal) return;
-    modal.style.display = 'block';
-    renderLowerScores();
-  };
-  window.closeLowerScores = function(){
-    const modal = document.getElementById('lowerScoresModal');
-    if (!modal) return;
-    modal.style.display = 'none';
-  };
-
-  function applyCommon({doAdd=false, stayOpen=false} = {}){
-    syncToMainButtons();
-    if (doAdd && typeof window.addEntry === 'function'){
-      try { window._lowerInputSource = true; window.addEntry('main'); }
-      finally { delete window._lowerInputSource; }
+function computeRowMetricAverage(r, key){
+  const val = (r && typeof r[key] === 'number' && isFinite(r[key])) ? r[key] : 0;
+  try{
+    if (r && r._inputs && Array.isArray(r._inputs[key]) && r._inputs[key].length){
+      const arr = r._inputs[key].filter(x => typeof x === 'number' && isFinite(x));
+      if (arr.length) return arr.reduce((a,b)=>a+b,0) / arr.length;
     }
-    if (!stayOpen) window.closeLowerScores();
-    if (stayOpen) renderLowerScores();
-  }
-
-  window.applyLowerScores = function(){ applyCommon({doAdd:false, stayOpen:false}); };
-  window.applyLowerScoresAndAdd = function(){ applyCommon({doAdd:true, stayOpen:false}); };
-  window.applyLowerScoresAndAddStay = function(){ applyCommon({doAdd:true, stayOpen:true}); };
-
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', annotateMainButtons);
-  } else {
-    annotateMainButtons();
-  }
-})();
+    if (r && r.detail && r.detail[key] && typeof r.detail[key].sum === 'number' && typeof r.detail[key].count === 'number' && r.detail[key].count > 0){
+      return r.detail[key].sum / r.detail[key].count;
+    }
+  }catch(e){}
+  return val;
+}
 </script>
 </body>
 <script>
@@ -5019,7 +4968,8 @@ function buildEmotionButtons() {
         container.appendChild(btn);
     });
 }
-</script>
+
+
 </html>
 <!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
 <script>
@@ -5104,7 +5054,7 @@ function buildEmotionButtons() {
       C.score, C.max, C.min, C.weighted, C.fiveMax
     ];
     const tr = document.createElement("tr");
-    const cols = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    const cols = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"];
     tr.innerHTML = row.map((v,i)=>{
       if (i===0) return `<td>${v??''}</td>`;
       const num = Number(v);
@@ -5221,7 +5171,7 @@ function buildEmotionButtons() {
 // ──────────────────────────────────────────────────────────────────────────────
 (function(){
   // Columns we will extract (must match data-col in main table rows)
-  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"]; const ALL_COLS = ["Time","Since Dose", ...NUM_COLS];
+  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Max","Min","Weighted","5Max"]; const ALL_COLS = ["Time","Since Dose", ...NUM_COLS];
 
   // Attempt to find the main table reliably
   function getMainTable(){
@@ -5548,7 +5498,8 @@ function buildEmotionButtons() {
   });
 })();
 // ──────────────────────────────────────────────────────────────────────────────
-</script>
+
+
 <script>
 
 // Ensure Auto Entries open/clear/export exist
@@ -5586,7 +5537,8 @@ function buildEmotionButtons() {
   };
 })();
 
-</script>
+
+
 
 <!-- === Rolling Average Patch (bind missing APIs) === -->
 <script>
@@ -5700,4 +5652,5 @@ function buildEmotionButtons() {
     emit(); window.rollingAvgTimer = setInterval(emit, 30000);
   };
 })();
-</script>
+
+

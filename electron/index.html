@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v2b r2010</title>
+<title>statpack v2b r2007</title>
 <style>
 
 #logTable {
@@ -278,10 +278,10 @@ function computeFiveMax(obj){
   const DEFAULTS = {
     shadingEnabled: true,
     tables: {
-      main:           { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Min","Max","Weighted","5Max"] },
-      roaming:        { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Min","Max"] },
-      roamingAverage: { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Min","Max"] },
-      slidingAverage: { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","TotalScore","TotalWeighted","Min","Max"] }
+      main:           { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Min","Max","Weighted","5Max"] },
+      roaming:        { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Min","Max"] },
+      roamingAverage: { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Min","Max"] },
+      slidingAverage: { visibleColumns: ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Min","Max"] }
     },
     roamingScoreMode: "mean"
   };
@@ -479,7 +479,7 @@ function computeFiveMax(obj){
 <div id="autoSummaryDock">
 <div id="autoSummaryTitle">Auto Summary (1m rolling)</div>
 <table id="autoSummaryTable">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
@@ -491,21 +491,21 @@ function computeFiveMax(obj){
 <button class="ctrl-btn" id="backfillBtn" style="margin-left:10px;">Run Backfill</button>
 </div>
 <table id="summary5Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
 <div id="summary15Dock" style="margin-top:20px;">
 <div id="summary15Title">Summary 15m (rolling)</div>
 <table id="summary15Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
 <div id="summary60Dock" style="margin-top:20px;">
 <div id="summary60Title">Summary 60m (rolling)</div>
 <table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
-<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
+<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
 </div>
@@ -3134,34 +3134,6 @@ return "";
 .as-toolbar { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
 .as-toolbar button { background:#eee; color:#000; border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
 </style>
-
-<script>
-(function(){
-  function postfillTotalsInTable(tblId){
-    try{
-      var tbl = document.getElementById(tblId);
-      if(!tbl) return;
-      var ths = Array.from(tbl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-      // Ensure headers include TotalScore/TotalWeighted (already patched in thead)
-      var tbody = tbl.querySelector('tbody');
-      if(!tbody) return;
-      Array.from(tbody.querySelectorAll('tr')).forEach(function(tr){
-        var data = {};
-        Array.from(tr.children).forEach(function(td){
-          var col = td.getAttribute('data-col') || td.textContent.trim();
-          var val = parseFloat(td.getAttribute('data-value')||td.textContent)||NaN;
-          data[col] = val;
-        });
-      });
-    }catch(e){}
-  }
-  // Run after openAutoSlider* calls by hooking them lightly (no-op safe)
-  ['autoSliderATable','autoSliderBTable','autoSliderCTable','autoSliderDTable'].forEach(function(id){
-    try{ postfillTotalsInTable(id); }catch(e){}
-  });
-})();
-</script>
-
 <div id="autoSliderAModal">
 <div class="as-toolbar">
 <button onclick="exportAutoSliderCSV('A')">Export CSV</button>
@@ -3172,7 +3144,7 @@ return "";
 <table id="autoSliderATable">
 <thead><tr>
 <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-<th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+<th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
 </tr></thead>
 <tbody></tbody>
 </table>
@@ -3187,7 +3159,7 @@ return "";
 <table id="autoSliderBTable">
 <thead><tr>
 <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-<th>Score</th><th>TotalScore</th><th>TotalWeighted</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+<th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
 </tr></thead>
 <tbody></tbody>
 </table>
