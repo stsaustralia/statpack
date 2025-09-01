@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spreadsheet → labelMappings (User Format: numeric keys + optional TitleKey)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: system-ui, monospace; margin: 20px; }
+  h1 { font-size: 20px; margin: 0 0 12px; }
+  textarea { width: 100%; min-height: 220px; font-family: monospace; font-size: 13px; }
+  .btn { padding: 6px 12px; border: 1px solid #bbb; background: #f6f6f6; border-radius: 6px; cursor: pointer; }
+  .btn.primary { background: #1f6feb; color: #fff; border-color: #1b5fd1; }
+  .card { border: 1px solid #ddd; border-radius: 10px; padding: 12px; background: #fff; margin-top: 12px; }
+  pre { background: #0f172a; color: #e5e7eb; padding: 12px; border-radius: 8px; overflow: auto; font-size: 12px; white-space: pre; }
+  .muted { color:#555; font-size:12px }
+  label.inline { margin-left: 10px; user-select: none; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Spreadsheet → <code>labelMappings</code> (User Format)</h1>
+
+<div class="card">
+  <h2>1) Paste your table (TSV/CSV)</h2>
+  <textarea id="paste" placeholder="Paste the duplicated-header table:
+Rush	Rush	Mood	Mood	..."></textarea>
+  <div style="margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+    <button class="btn primary" id="parseBtn">Parse &amp; Generate</button>
+    <button class="btn" id="clearBtn">Clear</button>
+    <label class="inline"><input type="checkbox" id="includeTitleKey"> Include TitleKey in each map (e.g., Rush: 'Rush')</label>
+    <span id="info" class="muted"></span>
+  </div>
+  <p class="muted">Output per metric: numeric keys as bare literals. Optionally add a TitleKey (e.g. <code>Rush: 'Rush'</code>) at the end of each map.</p>
+</div>
+
+<div class="card" id="outCard" style="display:none">
+  <div style="margin-bottom:10px;text-align:right">
+    <button class="btn" id="copyBtn">Copy</button>
+    <button class="btn" id="downloadBtn">Download .js</button>
+  </div>
+  <h2>2) Generated code</h2>
+  <pre id="codeOut"></pre>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+
+  // --- Helpers ---
+  function detectDelimiter(text){
+    const line = (text.split(/\r?\n/).find(l => l.trim().length) || "");
+    const counts = { "\t": (line.match(/\t/g)||[]).length, ",": (line.match(/,/g)||[]).length, ";": (line.match(/;/g)||[]).length };
+    const best = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+    return best ? best[0] : "\t";
+  }
+
+  function splitLine(line, delim){
+    // Basic CSV/TSV splitter with quote support
+    const out=[], d=delim; let cur="",inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){inQ=!inQ;cur+=ch;continue;}
+      if(ch===d && !inQ){out.push(cur);cur="";continue;}
+      cur+=ch;
+    }
+    out.push(cur);
+    return out.map(s=>s.replace(/^"(.*)"$/,'$1').trim());
+  }
+
+  function parseTable(text, delim){
+    const rows=text.replace(/\r/g,'').split("\n").filter(r=>r.trim().length);
+    if(!rows.length)return{headers:[],data:[]};
+    const headers=splitLine(rows[0],delim);
+    const data=rows.slice(1).map(r=>splitLine(r,delim));
+    return{headers,data};
+  }
+
+  // Canonical slugs we support
+  const CANON = ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other','confidence','auto','jitter','dopamine'];
+  const ALIASES = {
+    rush:"rush", mood:"mood", social:"social", energy:"energy", focus:"focus",
+    anxiety:"anxiety", impair:"impair", impairment:"impair",
+    change:"change", degree:"degree", other:"other",
+  confidence:"confidence",
+  auto:"auto",
+  autopilot:"auto",
+  jitter:"jitter",
+  dopamine:"dopamine",};
+
+  function toSlug(raw){
+    const s = String(raw||"")
+      .toLowerCase()
+      .replace(/[^\w\s]+/g," ")
+      .trim()
+      .split(/\s+/)[0]; // handles duplicated "Rush Rush"
+    return ALIASES[s] || s;
+  }
+
+  function toTitleKey(metricSlug){
+    return metricSlug.split('_').filter(Boolean).map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+  }
+
+  function titleKeyAsObjectKey(title){
+    return (/\s/.test(title)) ? quoteKey(title) : title;
+  }
+
+  function quoteSingle(str){
+    return "'" + String(str).replace(/\\/g,"\\\\").replace(/'/g,"\\'") + "'";
+  }
+
+  function isNumeric(val){
+    return /^-?\d+(?:\.\d+)?$/.test(String(val).trim());
+  }
+
+  function isNumericKey(k){ return isNumeric(k); }
+
+  function quoteKey(k){
+    return '"' + String(k).replace(/\\/g,"\\\\").replace(/"/g,'\\"') + '"';
+  }
+
+  // Classify each column as (metric slug, role=value|label)
+  function classifyColumns(headers, data){
+    const colCount = Math.max(headers.length, ...data.map(r=>r.length));
+    const sampleRows = Math.min(25, data.length);
+    const colMeta = [];
+    for(let c=0;c<colCount;c++){
+      const h = headers[c] ?? `col_${c+1}`;
+      let numericHits = 0, nonEmpty = 0;
+      for(let i=0;i<sampleRows;i++){
+        const cell = (data[i] && data[i][c] !== undefined) ? data[i][c] : "";
+        if(String(cell).trim().length===0) continue;
+        nonEmpty++;
+        if(isNumeric(cell)) numericHits++;
+      }
+      const ratio = nonEmpty ? (numericHits / nonEmpty) : 0;
+      const role = (ratio >= 0.6) ? "value" : "label"; // majority-numeric => value
+      const slug = toSlug(h);
+      colMeta.push({ index:c, header:h, slug, role, ratio });
+    }
+
+    const groups = new Map();
+    for(const m of colMeta){
+      if(!groups.has(m.slug)) groups.set(m.slug, []);
+      groups.get(m.slug).push(m);
+    }
+
+    const metrics = [];
+    for(const [slug, cols] of groups.entries()){
+      if(!CANON.includes(slug)) continue;
+      const valueCols = cols.filter(x=>x.role==="value");
+      const labelCols = cols.filter(x=>x.role==="label");
+      const valueCol = valueCols.length ? valueCols[0] : cols[0];
+      const labelCol = labelCols.length ? labelCols[0] : (cols.find(x=>x!==valueCol) || null);
+      metrics.push({ slug, valueIndex:valueCol.index, labelIndex: labelCol ? labelCol.index : null });
+    }
+
+    metrics.sort((a,b)=> CANON.indexOf(a.slug) - CANON.indexOf(b.slug));
+    return metrics;
+  }
+
+  function buildFormat(headers, data, includeTitleKey){
+    const metrics = classifyColumns(headers, data);
+
+    const lines = ["const labelMappings = {"];
+    for(const m of metrics){
+      const map = {};
+      for(const row of data){
+        const k = (row[m.valueIndex] ?? "").toString().trim();
+        const v = (m.labelIndex!=null ? (row[m.labelIndex] ?? "") : "").toString().trim();
+        if(!k || !v) continue;
+        map[k] = v;
+      }
+
+      const pretty = toTitleKey(m.slug); // e.g., 'Rush'
+      const kvs = [];
+      for(const [k,v] of Object.entries(map)){
+        const keyOut = isNumericKey(k) ? k : quoteKey(k);
+        kvs.push(`${keyOut}: ${quoteSingle(v)}`);
+      }
+
+      if (includeTitleKey){
+        // Optional TitleKey mapping to itself (e.g., Rush: 'Rush')
+        const titleKey = titleKeyAsObjectKey(pretty);
+        kvs.push(`${titleKey}: ${quoteSingle(pretty)}`);
+      }
+
+      lines.push(`  ${m.slug}: { ${kvs.join(", ")} },`);
+    }
+    lines.push("};");
+    return lines.join("\n");
+  }
+
+  // --- UI wiring ---
+  $("#parseBtn").addEventListener("click",()=>{
+    const raw=$("#paste").value;
+    if(!raw.trim()){alert("Paste table first.");return;}
+    const delim=detectDelimiter(raw);
+    const {headers,data}=parseTable(raw,delim);
+    if(!headers.length){alert("Missing header row.");return;}
+    const include = $("#includeTitleKey").checked;
+    const code=buildFormat(headers,data,include);
+    $("#codeOut").textContent=code;
+    $("#outCard").style.display="";
+    $("#info").textContent=`Rows: ${data.length} • Cols: ${headers.length} • Delimiter: ${delim==="\t"?"tab":delim} • TitleKey: ${include ? "on" : "off"}`;
+  });
+
+  $("#clearBtn").addEventListener("click",()=>{
+    $("#paste").value="";
+    $("#outCard").style.display="none";
+    $("#info").textContent="";
+  });
+
+  $("#copyBtn").addEventListener("click",async()=>{
+    try{await navigator.clipboard.writeText($("#codeOut").textContent);alert("Copied.");}catch{alert("Copy failed.");}
+  });
+
+  $("#downloadBtn").addEventListener("click",()=>{
+    const blob=new Blob([$("#codeOut").textContent],{type:"application/javascript"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="labelMappings.js";
+    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},0);
+  });
+})();
+</script>
+</body>
+</html>
