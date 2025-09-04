@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v2b r2044</title>
+<title>statpack v1.9 r2046</title>
 <style>
 
 #logTable {
@@ -563,7 +563,7 @@ const CONFIG = Object.freeze({
       'Score': 30,
       'Max': 30,
       'Min': 10,
-      'Weighted': 20,
+      'Weighted': 12,
       '5Max': 5
     },
     colorSets: {
@@ -1152,7 +1152,7 @@ if (!startTime)
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Plumes') ? 10 : 0;
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Billowing') ? 10 : 0;
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Rush') ? 10 : 0;
-entry.weighted = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5);
+entry.weighted = (((+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*4) - (+entry.impairSum*6)) / 10);
     entry.fiveMax = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5) + 5;
 entry.fiveMax = computeFiveMax({rush: entry.rushSum, mood: entry.moodSum, social: entry.socialSum, energy: entry.energySum, focus: entry.focusSum, anxiety: entry.anxietySum, impair: entry.impairSum});
 entry.goodSum = 0;
@@ -1507,7 +1507,7 @@ function rowsToLogData(rows, mapped){
     entry.scaleMood = 0;
     entry.scaleBad = 0;
     entry.scaleFocus = 0;
-    entry.weighted = 5 + ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5);
+    entry.weighted = (((+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*4) - (+entry.impairSum*6)) / 10);
     entry.fiveMax = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5) + 5;
     entry.goodSum = 0;
     out.push(entry);
@@ -1815,7 +1815,7 @@ function computeCompositeFromMeans(M){
   const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
   const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
   const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
-  const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+  const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
   const fiveMax  = ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5) + 5;
   return {score, max, min, weighted, fiveMax};
 }
@@ -2405,7 +2405,7 @@ return "";
     const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
     const max = Math.max(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
     const min = Math.min(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
-    const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
     const fiveMax = [m.rush,m.mood,m.social,m.energy,m.focus].sort((a,b)=>b-a).slice(0,5).reduce((a,b)=>a+b,0);
     return {score, max, min, weighted, fiveMax};
   }
@@ -2647,7 +2647,7 @@ return "";
     const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
     const max = Math.max(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
     const min = Math.min(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
-    const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
     const fiveMax = [m.rush,m.mood,m.social,m.energy,m.focus].sort((a,b)=>b-a).slice(0,5).reduce((a,b)=>a+b,0);
     return {score, max, min, weighted, fiveMax};
   }
@@ -3045,7 +3045,7 @@ return "";
     var score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
     var max   = (M.rush+M.mood+M.social+M.energy+M.focus);
     var min   = (M.anxiety+M.impair);
-    var weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    var weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
     return {
       score: +score,
       max: +max,
@@ -3220,7 +3220,7 @@ return "";
     var score=(M.rush+M.mood+M.social+M.energy+M.focus)-(M.anxiety+M.impair);
     var max=(M.rush+M.mood+M.social+M.energy+M.focus);
     var min=(M.anxiety+M.impair);
-    var weighted=5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    var weighted=(((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
     return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:computeFiveMax(means)};
   }
   function slidingMeanAtIndex(snap, i){
@@ -5156,7 +5156,7 @@ function buildEmotionButtons() {
     const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
     const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
     const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
-    const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
+    const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
     const fiveMax  = ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5) + 5;
     return {score, max, min, weighted, fiveMax};
   }

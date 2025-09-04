@@ -3,7 +3,7 @@
 # Usage: ./merge.sh /path/to/source
 
 SRC_DIR="$1"
-OUTFILE="mergedcsvs.csv"
+OUTFILE="mergedcsvfiles2.csv"
 
 if [ -z "$SRC_DIR" ]; then
     echo "Usage: $0 /path/to/source"

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v2b r2020</title>
+<title>statpack v2b r2044</title>
 <style>
 
 #logTable {
@@ -60,8 +60,8 @@
 }
 
     .score-column button {
-        width: 120px;
-        height: 30px;
+        width: 125px;
+        height: 35px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -261,17 +261,14 @@ pointer-events: auto;
 <!-- STS: UI CONFIG (auto-injected) -->
 <script>
 function computeFiveMax(obj){
-  const vals = [
-    +obj.rush || 0,
-    +obj.mood || 0,
-    +obj.social || 0,
-    +obj.energy || 0,
-    +obj.focus || 0,
-    +obj.anxiety || 0,
-    +obj.impair || 0
-  ];
-  vals.sort((a,b)=>b-a);
-  return vals.slice(0,5).reduce((a,b)=>a+b,0);
+  const rush    = +obj.rush    || 0;
+  const mood    = +obj.mood    || 0;
+  const social  = +obj.social  || 0;
+  const energy  = +obj.energy  || 0;
+  const focus   = +obj.focus   || 0;
+  const anxiety = +obj.anxiety || 0;
+  const impair  = +obj.impair  || 0;
+  return ((rush + mood + social + energy + focus - anxiety - impair) / 5) + 5;
 }
 
 (function() {
@@ -560,7 +557,7 @@ function computeFiveMax(obj){
 const CONFIG = Object.freeze({
   ui: {
 //     hideInUi: ['VL','sM','sB','sF','GS','change',	'Change'	,'Deg'	,'D2'	,'Oth',	'O2','Weighted','5Max'],
-    hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
+    hideInUi: ['VL','sM','sB','sF','GS'],
     noShadeCols: [],
     shadeCap: {
       'Score': 30,
@@ -578,57 +575,57 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 0: 'None', 7.00: 'Maximum', 6.00: 'Extreme', 5.25: 'Blatant', 5.00: 'Intense', 4.75: 'Dominanting', 4.50: 'Very Strong', 4.25: 'Obvious', 4.00: 'Strong', 3.75: 'Significant', 3.50: 'Strong', 3.25: 'Distinct', 3.00: 'Clear', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Some', 1.75: 'Noticeable', 1.50: 'Light', 1.25: 'Ignorable', 1.00: 'Present', 0.75: '+', 0.50: 'Think', 0.25: '+', 0.00: 'None', 0.10: 'Maybe' },
-  mood: { 7.00: 'Maximum', 6.00: 'Euphoric', 5.25: 'Blatant', 5.00: 'Bliss', 4.75: 'Dominanting', 4.50: 'Very Significant', 4.25: 'Obvious', 4.00: 'Significant', 3.75: 'Significant', 3.50: 'Major', 3.25: 'Distinct', 3.00: 'Clear', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Thought', 1.75: 'Noticeable', 1.50: 'OK', 1.25: 'Ignorable', 1.00: 'OK', 0.75: '+', 0.50: 'Flat', 0.25: '+', 0.00: 'None', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious' },
-  social: { 7.00: 'Maximum', 6.00: 'Autopilot', 5.25: 'Blatant', 5.00: 'Disinhibited', 4.75: 'Dominanting', 4.50: 'Very Outgoing', 4.25: 'Obvious', 4.00: 'Outgoing', 3.75: 'Significant', 3.50: 'Significant', 3.25: 'Distinct', 3.00: 'Push', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Somewhat', 1.75: 'Noticeable', 1.50: 'Urge', 1.25: 'Ignorable', 1.00: 'Want', 0.75: '+', 0.50: 'Think', 0.25: '+', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
-  energy: { 7.00: 'Maximum', 6.00: 'Manic', 5.25: 'Blatant', 5.00: 'Hyperactive', 4.75: 'Dominanting', 4.50: 'Very Energetic', 4.25: 'Obvious', 4.00: 'Energetic', 3.75: 'Significant', 3.50: 'High', 3.25: 'Distinct', 3.00: 'Push', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Capable', 1.75: 'Noticeable', 1.50: 'Functional', 1.25: 'Ignorable', 1.00: 'Takes Effort', 0.75: '+', 0.50: 'If Forced', 0.25: '+', 0.00: 'Baseline', 0.30: 'Active', 0.40: 'Energetic', 0.60: 'Hyperactive', 0.70: 'Manic' },
-  focus: { 7.00: 'Maximum', 6.00: 'Laser', 5.25: 'Blatant', 5.00: 'Wired', 4.75: 'Dominanting', 4.50: 'Very Focused', 4.25: 'Obvious', 4.00: 'Focused', 3.75: 'Significant', 3.50: 'Strong', 3.25: 'Distinct', 3.00: 'Fixated', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Capable', 1.75: 'Noticeable', 1.50: 'Functional', 1.25: 'Ignorable', 1.00: 'Takes Effort', 0.75: '+', 0.50: 'If Forced', 0.25: '+', 0.00: 'Baseline', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive', 0.60: 'Wired' },
-  anxiety: { 7.00: 'Maximum', 6.00: 'Despair', 5.25: 'Blatant', 5.00: 'Severe', 4.75: 'Dominanting', 4.50: 'Very Anxious', 4.25: 'Obvious', 4.00: 'Adverse', 3.75: 'Significant', 3.50: 'High', 3.25: 'Distinct', 3.00: 'Anxious', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Noticeable', 1.75: 'Noticeable', 1.50: 'Minor', 1.25: 'Ignorable', 1.00: 'Excess', 0.75: '+', 0.50: 'Thinking', 0.25: '+', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' },
-  impair: { 7.00: 'Maximum', 6.00: 'Crippled', 5.25: 'Blatant', 5.00: 'Severe', 4.75: 'Dominanting', 4.50: 'Very Impaired', 4.25: 'Obvious', 4.00: 'Impacted', 3.75: 'Significant', 3.50: 'Large', 3.25: 'Distinct', 3.00: 'Impaired', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Noticeable', 1.75: 'Noticeable', 1.50: 'Minor', 1.25: 'Ignorable', 1.00: 'Excess', 0.75: '+', 0.50: 'Negligible', 0.25: '+', 0.00: 'No' },
-  change: { 6.00: 'Strong', 5.00: 'Obvious', 4.00: 'Distinct', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Certain', 1.50: 'Present', 1.00: 'Noticed', 0.50: 'Maybe', 0.00: 'None' },
-  degree: { 6.00: 'Extremely High', 5.00: 'Very High', 4.50: 'Higher', 4.00: 'High', 3.50: 'Moderate-High', 3.00: 'Moderate', 2.50: 'Low-Moderate', 2.00: 'Low', 1.50: 'Lower', 1.00: 'Very Low', 0.50: 'Extremely Low', 0.00: 'Lowest' },
-  other: { 6.00: 'TRUE', 5.00: 'FALSE', 4.50: 'MAYBE' },
-  confidence: { 6.00: 'Strong', 5.00: 'Obvious', 4.00: 'Distinct', 3.00: 'Clear', 2.00: 'Certain', 1.00: 'Noticed' },
-  auto: { 6.00: 'Autopilot', 5.00: 'Zoned In', 4.50: 'Busy', 4.00: 'Forgetting', 3.50: 'Easier', 3.00: 'Thinking', 2.50: 'Overthinking', 2.00: 'Ruminating', 1.50: 'Locked', 1.00: 'Visceral', 0.50: 'Panic', 0.00: 'Crippled' },
-  jitter: { 6.00: 'Regret', 5.00: 'Cannot Hide', 3.50: 'Aware', 3.00: 'Visible', 2.50: 'Maskable', 2.00: 'Ignorable' },
-  dopamine: { 6.00: 'Peak' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Very Intense', 4.00: 'Intense', 3.50: 'Very Strong', 3.00: 'Strong', 2.50: 'Prominent', 2.00: 'Distinct', 1.50: 'Present', 1.00: 'Slight', 0.00: 'No Rush', 0.50: '+', 5.75: 'Overwhelming', 4.75: 'Extreme', 3.25: 'Strong', 1.75: 'Present', 0.75: 'Maybe' },
+  mood: { 6.00: 'Rush', 5.00: 'Euphoric', 4.50: 'Some Euphoria', 4.00: 'Obvious', 3.50: 'Very Clear', 3.00: 'Clear', 2.50: 'Significant', 2.00: 'Required Thinking', 1.50: 'Fair', 1.00: 'Maybe', 0.00: 'No Change', 0.50: '+', 5.75: 'Euphoric', 4.75: 'Ecstatic', 3.25: 'Good', 1.75: 'Fair', 0.75: 'Low' },
+  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.50: 'Frantic', 4.00: 'Outgoing', 3.50: 'Talkative', 3.00: 'Social', 2.50: 'Prominent', 2.00: 'Some / Urge', 1.50: 'Somewhat', 1.00: 'Want', 0.00: 'Not Social', 0.50: '+', 5.75: 'Disinhibited', 4.75: 'Outgoing', 3.25: 'Talkative', 1.75: 'Somewhat', 0.75: 'Capable' },
+  energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.50: 'Frantic', 4.00: 'Hyperactive', 3.50: 'Very Energetic', 3.00: 'Energetic', 2.50: 'Significant', 2.00: 'Some / Push', 1.50: 'Some', 1.00: 'Takes Effort', 0.00: 'No Energy', 0.50: '+', 5.75: 'Overdrive', 4.75: 'Manic', 3.25: 'Energetic', 1.75: 'Some', 0.75: 'Functional' },
+  focus: { 6.00: 'Wired', 5.00: 'Laser', 4.50: 'Super', 4.00: 'Obsessive', 3.50: 'Very Focuesd', 3.00: 'Focused', 2.50: 'Significant', 2.00: 'Some / Motive', 1.50: 'Normal', 1.00: 'Takes Effort', 0.00: 'No Focus', 0.50: '+', 5.75: 'Wired', 4.75: 'Obsessive', 3.25: 'Focused', 1.75: 'Normal', 0.75: 'Alert' },
+  anxiety: { 6.00: 'Panic', 5.00: 'Severe', 4.50: 'Fear', 4.00: 'Dominating', 3.50: 'Very Anxoious', 3.00: 'Anxious', 2.50: 'Prominent', 2.00: 'Notable', 1.50: 'Affected', 1.00: 'Ignorable', 0.00: 'No Anxiety', 0.50: '+', 5.75: 'Panic', 4.75: 'Detrimental', 3.25: 'Anxious', 1.75: 'Affected', 0.75: 'Ignorable' },
+  impair: { 6.00: 'Crippled', 5.00: 'Severe', 4.50: 'Critical', 4.00: 'Controlling', 3.50: 'Serious', 3.00: 'Impaired', 2.50: 'Significant', 2.00: 'Detrimental', 1.50: 'Somewhat', 1.00: 'Minor', 0.00: 'Not Impaired', 0.50: '+', 5.75: 'Crippled', 4.75: 'Severe', 3.25: 'Behavioural', 1.75: 'Somewhat', 0.75: 'Minor' },
+  change: { 6.00: 'Strong', 5.00: 'Obvious', 4.00: 'Distinct', 3.00: 'Clear', 2.00: 'Certain', 1.00: 'Noticed', 0.00: 'No Change' },
+  degree: { 6.00: 'Extremely High', 5.00: 'Very High', 4.00: 'High', 3.00: 'Medium', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None' },
+  other: { 6.00: 'Correlate', 5.00: 'Drank', 4.00: 'Ate', 3.00: 'Slept', 2.00: 'Hungry', 1.00: 'Thirsty', 0.00: 'Tired' },
+  confidence: { 6.00: 'Extremely High', 5.00: 'Very High', 4.00: 'High', 3.00: 'Medium', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None' },
+  auto: { 6.00: 'Autopilot', 5.00: 'Hindsight', 4.00: 'Forgetting', 3.00: 'Thinking', 2.00: 'Overthinking', 1.00: 'Excessive', 0.00: 'Adverse' },
+  jitter: { 6.00: 'Cannot Hide', 5.00: 'Obvious', 4.00: 'Clear', 3.00: 'Maskable', 2.00: 'Noticeable', 1.00: 'Ignorable', 0.00: 'Not Jittery' },
+  dopamine: { 6.00: 'Positive', 5.00: 'Previously', 4.00: 'Currently', 3.00: 'Future', 2.00: 'Past', 1.00: 'Bad', 0.00: 'Negative' },
 }
 , rapidLabels: {
-  rush: { 0: 'None', 7.00: 'Maximum', 6.00: 'Extreme', 5.25: 'Blatant', 5.00: 'Intense', 4.75: 'Dominanting', 4.50: 'Very Strong', 4.25: 'Obvious', 4.00: 'Strong', 3.75: 'Significant', 3.50: 'Strong', 3.25: 'Distinct', 3.00: 'Clear', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Some', 1.75: 'Noticeable', 1.50: 'Light', 1.25: 'Ignorable', 1.00: 'Present', 0.75: '+', 0.50: 'Think', 0.25: '+', 0.00: 'None', 0.10: 'Maybe' },
-  mood: { 7.00: 'Maximum', 6.00: 'Euphoric', 5.25: 'Blatant', 5.00: 'Bliss', 4.75: 'Dominanting', 4.50: 'Very Significant', 4.25: 'Obvious', 4.00: 'Significant', 3.75: 'Significant', 3.50: 'Major', 3.25: 'Distinct', 3.00: 'Clear', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Thought', 1.75: 'Noticeable', 1.50: 'OK', 1.25: 'Ignorable', 1.00: 'OK', 0.75: '+', 0.50: 'Flat', 0.25: '+', 0.00: 'None', 0.10: 'Fair', 0.20: 'Good', 0.30: 'Great', 0.40: 'Obvious' },
-  social: { 7.00: 'Maximum', 6.00: 'Autopilot', 5.25: 'Blatant', 5.00: 'Disinhibited', 4.75: 'Dominanting', 4.50: 'Very Outgoing', 4.25: 'Obvious', 4.00: 'Outgoing', 3.75: 'Significant', 3.50: 'Significant', 3.25: 'Distinct', 3.00: 'Push', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Somewhat', 1.75: 'Noticeable', 1.50: 'Urge', 1.25: 'Ignorable', 1.00: 'Want', 0.75: '+', 0.50: 'Think', 0.25: '+', 0.00: 'No', 0.10: 'Effort', 0.20: 'Capable', 0.30: 'Natural', 0.40: 'Social' },
-  energy: { 7.00: 'Maximum', 6.00: 'Manic', 5.25: 'Blatant', 5.00: 'Hyperactive', 4.75: 'Dominanting', 4.50: 'Very Energetic', 4.25: 'Obvious', 4.00: 'Energetic', 3.75: 'Significant', 3.50: 'High', 3.25: 'Distinct', 3.00: 'Push', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Capable', 1.75: 'Noticeable', 1.50: 'Functional', 1.25: 'Ignorable', 1.00: 'Takes Effort', 0.75: '+', 0.50: 'If Forced', 0.25: '+', 0.00: 'Baseline', 0.30: 'Active', 0.40: 'Energetic', 0.60: 'Hyperactive', 0.70: 'Manic' },
-  focus: { 7.00: 'Maximum', 6.00: 'Laser', 5.25: 'Blatant', 5.00: 'Wired', 4.75: 'Dominanting', 4.50: 'Very Focused', 4.25: 'Obvious', 4.00: 'Focused', 3.75: 'Significant', 3.50: 'Strong', 3.25: 'Distinct', 3.00: 'Fixated', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Capable', 1.75: 'Noticeable', 1.50: 'Functional', 1.25: 'Ignorable', 1.00: 'Takes Effort', 0.75: '+', 0.50: 'If Forced', 0.25: '+', 0.00: 'Baseline', 0.20: 'Fixated', 0.30: 'Focus Locked', 0.40: 'Obsessive', 0.60: 'Wired' },
-  anxiety: { 7.00: 'Maximum', 6.00: 'Despair', 5.25: 'Blatant', 5.00: 'Severe', 4.75: 'Dominanting', 4.50: 'Very Anxious', 4.25: 'Obvious', 4.00: 'Adverse', 3.75: 'Significant', 3.50: 'High', 3.25: 'Distinct', 3.00: 'Anxious', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Noticeable', 1.75: 'Noticeable', 1.50: 'Minor', 1.25: 'Ignorable', 1.00: 'Excess', 0.75: '+', 0.50: 'Thinking', 0.25: '+', 0.00: 'None', 0.10: 'Nervous', 0.20: 'Worried', 0.30: 'Anxious', 0.40: 'Paranoid' },
-  impair: { 7.00: 'Maximum', 6.00: 'Crippled', 5.25: 'Blatant', 5.00: 'Severe', 4.75: 'Dominanting', 4.50: 'Very Impaired', 4.25: 'Obvious', 4.00: 'Impacted', 3.75: 'Significant', 3.50: 'Large', 3.25: 'Distinct', 3.00: 'Impaired', 2.75: 'Certain', 2.50: 'Moderate', 2.25: 'Prominent', 2.00: 'Noticeable', 1.75: 'Noticeable', 1.50: 'Minor', 1.25: 'Ignorable', 1.00: 'Excess', 0.75: '+', 0.50: 'Negligible', 0.25: '+', 0.00: 'No' },
-  change: { 6.00: 'Strong', 5.00: 'Obvious', 4.00: 'Distinct', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Moderate', 2.00: 'Certain', 1.50: 'Present', 1.00: 'Noticed', 0.50: 'Maybe', 0.00: 'None' },
-  degree: { 6.00: 'Extremely High', 5.00: 'Very High', 4.50: 'Higher', 4.00: 'High', 3.50: 'Moderate-High', 3.00: 'Moderate', 2.50: 'Low-Moderate', 2.00: 'Low', 1.50: 'Lower', 1.00: 'Very Low', 0.50: 'Extremely Low', 0.00: 'Lowest' },
-  other: { 6.00: 'TRUE', 5.00: 'FALSE', 4.50: 'MAYBE' },
-  confidence: { 6.00: 'Strong', 5.00: 'Obvious', 4.00: 'Distinct', 3.00: 'Clear', 2.00: 'Certain', 1.00: 'Noticed' },
-  auto: { 6.00: 'Autopilot', 5.00: 'Zoned In', 4.50: 'Busy', 4.00: 'Forgetting', 3.50: 'Easier', 3.00: 'Thinking', 2.50: 'Overthinking', 2.00: 'Ruminating', 1.50: 'Locked', 1.00: 'Visceral', 0.50: 'Panic', 0.00: 'Crippled' },
-  jitter: { 6.00: 'Regret', 5.00: 'Cannot Hide', 3.50: 'Aware', 3.00: 'Visible', 2.50: 'Maskable', 2.00: 'Ignorable' },
-  dopamine: { 6.00: 'Peak' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Very Intense', 4.00: 'Intense', 3.50: 'Very Strong', 3.00: 'Strong', 2.50: 'Prominent', 2.00: 'Distinct', 1.50: 'Present', 1.00: 'Slight', 0.00: 'No Rush', 0.50: '+', 5.75: 'Overwhelming', 4.75: 'Extreme', 3.25: 'Strong', 1.75: 'Present', 0.75: 'Maybe' },
+  mood: { 6.00: 'Rush', 5.00: 'Euphoric', 4.50: 'Some Euphoria', 4.00: 'Obvious', 3.50: 'Very Clear', 3.00: 'Clear', 2.50: 'Significant', 2.00: 'Required Thinking', 1.50: 'Fair', 1.00: 'Maybe', 0.00: 'No Change', 0.50: '+', 5.75: 'Euphoric', 4.75: 'Ecstatic', 3.25: 'Good', 1.75: 'Fair', 0.75: 'Low' },
+  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.50: 'Frantic', 4.00: 'Outgoing', 3.50: 'Talkative', 3.00: 'Social', 2.50: 'Prominent', 2.00: 'Some / Urge', 1.50: 'Somewhat', 1.00: 'Want', 0.00: 'Not Social', 0.50: '+', 5.75: 'Disinhibited', 4.75: 'Outgoing', 3.25: 'Talkative', 1.75: 'Somewhat', 0.75: 'Capable' },
+  energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.50: 'Frantic', 4.00: 'Hyperactive', 3.50: 'Very Energetic', 3.00: 'Energetic', 2.50: 'Significant', 2.00: 'Some / Push', 1.50: 'Some', 1.00: 'Takes Effort', 0.00: 'No Energy', 0.50: '+', 5.75: 'Overdrive', 4.75: 'Manic', 3.25: 'Energetic', 1.75: 'Some', 0.75: 'Functional' },
+  focus: { 6.00: 'Wired', 5.00: 'Laser', 4.50: 'Super', 4.00: 'Obsessive', 3.50: 'Very Focuesd', 3.00: 'Focused', 2.50: 'Significant', 2.00: 'Some / Motive', 1.50: 'Normal', 1.00: 'Takes Effort', 0.00: 'No Focus', 0.50: '+', 5.75: 'Wired', 4.75: 'Obsessive', 3.25: 'Focused', 1.75: 'Normal', 0.75: 'Alert' },
+  anxiety: { 6.00: 'Panic', 5.00: 'Severe', 4.50: 'Fear', 4.00: 'Dominating', 3.50: 'Very Anxoious', 3.00: 'Anxious', 2.50: 'Prominent', 2.00: 'Notable', 1.50: 'Affected', 1.00: 'Ignorable', 0.00: 'No Anxiety', 0.50: '+', 5.75: 'Panic', 4.75: 'Detrimental', 3.25: 'Anxious', 1.75: 'Affected', 0.75: 'Ignorable' },
+  impair: { 6.00: 'Crippled', 5.00: 'Severe', 4.50: 'Critical', 4.00: 'Controlling', 3.50: 'Serious', 3.00: 'Impaired', 2.50: 'Significant', 2.00: 'Detrimental', 1.50: 'Somewhat', 1.00: 'Minor', 0.00: 'Not Impaired', 0.50: '+', 5.75: 'Crippled', 4.75: 'Severe', 3.25: 'Behavioural', 1.75: 'Somewhat', 0.75: 'Minor' },
+  change: { 6.00: 'Strong', 5.00: 'Obvious', 4.00: 'Distinct', 3.00: 'Clear', 2.00: 'Certain', 1.00: 'Noticed', 0.00: 'No Change' },
+  degree: { 6.00: 'Extremely High', 5.00: 'Very High', 4.00: 'High', 3.00: 'Medium', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None' },
+  other: { 6.00: 'Correlate', 5.00: 'Drank', 4.00: 'Ate', 3.00: 'Slept', 2.00: 'Hungry', 1.00: 'Thirsty', 0.00: 'Tired' },
+  confidence: { 6.00: 'Extremely High', 5.00: 'Very High', 4.00: 'High', 3.00: 'Medium', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None' },
+  auto: { 6.00: 'Autopilot', 5.00: 'Hindsight', 4.00: 'Forgetting', 3.00: 'Thinking', 2.00: 'Overthinking', 1.00: 'Excessive', 0.00: 'Adverse' },
+  jitter: { 6.00: 'Cannot Hide', 5.00: 'Obvious', 4.00: 'Clear', 3.00: 'Maskable', 2.00: 'Noticeable', 1.00: 'Ignorable', 0.00: 'Not Jittery' },
+  dopamine: { 6.00: 'Positive', 5.00: 'Previously', 4.00: 'Currently', 3.00: 'Future', 2.00: 'Past', 1.00: 'Bad', 0.00: 'Negative' },
   },
   buttonLabelsByMetric: {}
 },
   buttons: {
     perMetricButtons: {
-      rush:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5],
-      mood:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      social:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      energy:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      focus:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      anxiety:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      impair:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      confidence:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      auto:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      jitter:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      dopamine:[7,6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      change:[6,4,3,1],
-      degree:[6,4,3,2,1,0],
+      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0,'',0.5],
+      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0,'',0.5],
+      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0,'',0.5],
+      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0,'',0.5],
+      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0,'',0.5],
+      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0,'',0.5],
+      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0,'',0.5],
+      confidence:[6,5,4,3,2,1,0],
+      auto:[6,5,4,3,2,1,0],
+      jitter:[6,5,4,3,2,1,0],
+      dopamine:[6,5,4,3,2,1,0],
+      change:[6,5,4,3,2,1,0],
+      degree:[6,5,4,3,2,1,0],
       other: [6,5,4,3,2,1,0]
     },
-    rapidValues: [7,6,5,4,3,2,1,0],
+    rapidValues: [6,5,4,3,2,1,0,'',0.5],
 //     rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
@@ -637,14 +634,14 @@ labels: {
     metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other', 'confidence','auto','jitter','dopamine']
   },
   notes: {
-    extra: ['Correlate', 'Flag','Now', 'This', 'Last', 'Next',  'Changes', 'Note', 'Context', 'Continue', 'LastDose', 'LastRow', 'LastHit', 'Plan', 'One', 'Multiple', 'Dose', 'Redose', 'Continue', 'Hit', 'Hindsight', 'Review', 'Summary'],
-    dark: ['DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'MaybeUsable', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', '>0mg', '>10mg', '>20mg', '>30mg', '<10-mg', '<20mg', '<30mg'],
-    blue: ['Plumes', 'Billowing', 'SoftVapour', 'ThickVapour', 'LotsOfVapour', 'Dark', 'Visible', 'Invisible', 'NiceSmell', 'NiceTaste', 'BurnedTaste', 'BurnedSmell', 'HalfBurned', 'HalfDose', 'Smoke', 'Vapour'],
-    red: ['WideEyes', 'Feel', 'Visceral', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Chills', 'Sweat', 'Tremor', 'Shakes', 'MinorTremor', 'MinorNausea', 'Nausea', 'SideEffects', 'EarsRinging', 'Headache', 'ChestPain', 'SideEffect'],
-    green: ['Watch', 'Follow', 'Adapt', 'Roll', 'Rapid', 'SideToSide', 'CoastBowl', 'LargeRoll', 'SmallRolls', 'ObserveProgress', 'HardToSee', 'LightRoom', 'DarkRoom', '555Hold', 'DeepBreath', 'ShallowBreath', 'HoldBreath', 'MultipleBreath', 'Diaphram', 'Sucked', 'SuckedHard', 'Gentle', 'Aggressive', 'OneBreath', 'VapourWait', 'VapourPool', 'LipSeal', 'HalfSealed', 'NotSealed', 'PowderIgnites', 'MouthOpen', 'ThroatBreath', 'SuctionDistance', 'HighHeat', 'LowHeat'],
-    orange: ['Cone', 'Snowcone', 'Pipe', 'Line', 'Sniff', 'Rectal', 'Oral', 'Inhale', 'Lighter', 'Jet', 'Blowtorch', 'Broken', 'Weathered', 'Glass', 'Dirty', 'Clean', 'Rinsed', 'Scraped', 'Soaked', 'Dried', 'Damp', 'Wet', 'Loose', 'Dry', 'WasWet', 'HasDried','NotMoving', 'Paste', 'Sludge', 'Water', 'WaterWeighted', 'PropyleneGlycol', 'Powder', 'Crushed', 'NotCrushed', 'Granules', 'Cone', 'Snowcone', 'TightlyPacked', 'LoosePacked', 'ObserveAndControl', 'Preheated', 'AlreadyHeated', 'OneHit', 'MeltFirst'],
-    yellow: ['Positive','Negative','ChangeState', 'Melted', 'Burned', 'ColourChange', 'Film', 'Carbon', 'Audible', 'Melt', 'Burn', 'Noticed', 'Fun', 'Analytics', 'Relative', 'Absolute', 'Observe', 'CouldNotSee', 'BrightLight', 'DarkRoom'],
-    purple: ['Male','Female','Others','Home','NotHome','Alone','NotAlone','Public','RoomAlone', 'Downstairs', 'Hungry', 'Thirsty', 'WellSlept', 'AlreadyHadSome', 'Weed', 'Tobacco', 'THC', 'Edible', 'Gummy', 'Solvent', 'Unknown', 'Marquis', 'Lab', 'MDPiHP', 'Freebase', 'MusicPlaying', 'MusicOff', 'NotEating' ,'NotDrinking', 'Neglecting', 'AwareOfChoices', 'BadChoices', 'Motivated', 'Optimistic']
+    extra: ['Correlate', 'Flag', 'Now', 'Then', 'Next', 'Last', 'Changes', 'Note', 'Context', 'Associate', 'Plan', 'Review', 'HIndsight', 'Redose', 'Hit', 'Continie', 'Food', 'Drink', 'Sleep', 'LastRow', 'LastDose', 'LastHit', 'Single', 'Multiple'],
+    dark: [ 'DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'MaybeUsable', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', 'Scales', 'HardToSee', 'LightRoom', 'DarkRoom'],
+    blue: ['Plumes', 'Billowing', 'Vapour', 'Visible', 'Invisible', 'LotsOfVapour', 'SoftVapour', 'ThickVapour', 'WarmAir', 'BackPressure', 'Smoke', 'HalfBurned', 'NiceSmell', 'NiceTaste', 'Irritant', 'Pressure', 'Ignition', 'BurnedSmell', 'DarkVapour'],
+    red: ['WideEyes', 'Headache', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Visceral', 'Feel', 'Irritant', 'Chills', 'Sweat', 'Tremor', 'Shakes', 'Nausea', 'Minor', 'SideEffects', 'EarsRinging', 'ChestPain'],
+    green: ['Observe', 'Follow', 'Adaptive', 'Rock', 'Fast', 'Slowly', 'Roll', 'Rapid', 'Spin', 'SideToSide', 'CoatBowl', 'LargeRoll', 'SmallRoll', 'ManyHits', 'OneHit', 'MeltFirst', 'Burned', '555Hold', 'DeepBreath', 'ShallowBreath', 'Diaphram', 'HoldBreath', 'MultipleBreath', 'Sucked', 'SuckedHard', 'Gentle', 'Aggressive', 'OneBreath', 'VapourWait', 'VapourPool', 'LipSeal', 'HalfSealed', 'NotSealed', 'PowderIgnites', 'MouthOpen', 'ThroatBreath', 'SuctionDistance', 'HighHeat', 'LowHeat'],
+    orange: [ 'Cone', 'Snowcone', 'Metal', 'Glass', 'Pipe', 'Line', 'Sniff', 'Rectal', 'Inject', 'Oral', 'Sublingual', 'Lighter', 'Jet', 'Blowtorch', 'Broken', 'Clean', 'New', 'Dirty', 'Rinsed', 'Scraped', 'Dried', 'Wet', 'Dry', 'Weathered', 'Soaked', 'Damp', 'WasWet', 'HasDried', 'Loose', 'Moving', 'NotMoving', 'Runny', 'Chunk', 'Paste', 'Rock', 'Sludge', 'Crushed', 'NotCrushed', 'Powder', 'Granules', 'Crystal', 'Crystalline', 'Dust', 'Liquid', 'WaterWeighted', 'PropyleneGlycol', 'Water'],
+    yellow: ['Positive', 'Negative', 'Neither', 'Flat', 'Unknown', 'Melted', 'Burned', 'ColourChange', 'StateChange', 'Melt', 'Burn', 'Audible', 'Carbon', 'Thin', 'Film', 'Fun', 'Analytics', 'Comparative', 'Relative', 'Absolute', 'Observe'],
+    purple: ['Male', 'Female', 'Others', 'Home', 'Alone', 'Downstairs', 'Upstairs', 'RoomAlone', 'NotAon', 'Public', 'WellSlept', 'Thirsty', 'Hungry', 'HungerPains', 'AlreadyHadSome', 'Weed', 'Tobacco', 'Spin', 'THC', 'Edible', 'MusicPlaying', 'MusicOff', 'NotEating', 'NotDrinking', 'Neglecting', 'AwareOfChoices', 'BadChoices']
   }
 });
 // ===== End CONFIG =====
@@ -776,7 +773,7 @@ function getLabels(metric, values) {
         const overrides = JSON.parse(localStorage.getItem('metricButtonOrder') || '{}');
         if (overrides && Array.isArray(overrides[metric])) return overrides[metric];
       } catch(e){}
-      return PER_METRIC_BUTTONS[metric] || DEFAULT_BUTTONS_12;
+      return PER_METRIC_BUTTONS[metric] || [6,5,4,3,2,1,0,0.5,-0.5];
     }
     function saveMetricButtons(metric, arr){
       const data = (()=>{ try { return JSON.parse(localStorage.getItem('metricButtonOrder')||'{}'); } catch(e){ return {}; } })();
@@ -1156,6 +1153,8 @@ if (!startTime)
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Billowing') ? 10 : 0;
         entry.scaleFocus = entry.notes.split(/\s+/).includes('Rush') ? 10 : 0;
 entry.weighted = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5);
+    entry.fiveMax = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5) + 5;
+entry.fiveMax = computeFiveMax({rush: entry.rushSum, mood: entry.moodSum, social: entry.socialSum, energy: entry.energySum, focus: entry.focusSum, anxiety: entry.anxietySum, impair: entry.impairSum});
 entry.goodSum = 0;
         logData.push(entry);
         localStorage.setItem('tripLog', JSON.stringify(logData));
@@ -1249,7 +1248,7 @@ function renderTable() {
         logData.forEach(r => {
             const L = [r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa];
             metrics.forEach(f => L.push((+r[f + "Sum"]||0).toFixed(2), r[f + "Label"]));
-            L.push((+r.score||0).toFixed(2), (+r.max||0).toFixed(2), (+r.min||0).toFixed(2), r.maxPercent || 0, r.minPercent || 0, (+r.valence||0).toFixed(2), (+r.scaleMood||0).toFixed(2), (+r.scaleBad||0).toFixed(2), (+r.scaleFocus||0).toFixed(2), r.customNotes || '', r.notes || '', (+r.weighted || 0).toFixed(2), (r.score / 10).toFixed(2), (+r.goodSum||0).toFixed(2));
+            L.push((+r.score||0).toFixed(2), (+r.max||0).toFixed(2), (+r.min||0).toFixed(2), r.maxPercent || 0, r.minPercent || 0, (+r.valence||0).toFixed(2), (+r.scaleMood||0).toFixed(2), (+r.scaleBad||0).toFixed(2), (+r.scaleFocus||0).toFixed(2), r.customNotes || '', r.notes || '', (+r.weighted || 0).toFixed(2), (+r.fiveMax || 0).toFixed(2), (+r.goodSum||0).toFixed(2));
             rows.push(L.map(x => `"${(x + "").replace(/"/g, '""')}"`).join(","))
         });
         const blob = new Blob([rows.join("\n")], {
@@ -1509,6 +1508,7 @@ function rowsToLogData(rows, mapped){
     entry.scaleBad = 0;
     entry.scaleFocus = 0;
     entry.weighted = 5 + ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5);
+    entry.fiveMax = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5) + 5;
     entry.goodSum = 0;
     out.push(entry);
   }
@@ -1661,12 +1661,10 @@ function applyRapidScoresAndAddStay(){
     RAPID_METRICS.forEach(f => {
       if (!Array.isArray(selections[f])) selections[f] = [];
       selections[f] = Array.from(new Set(selections[f])).sort((a,b)=>b-a);
-
-  addEntry('rapid');
-});
-    // Add the entry (this will clear input fields and reset selections via initSelections/buildButtons)
-    addEntry();
-    // Rebuild rapid popup buttons so UI reflects cleared selections, keep modal open
+    });
+    // Add a single entry using 'rapid' labels and keep modal open
+    addEntry('rapid');
+    // Rebuild rapid popup buttons so UI reflects cleared selections
     try { buildRapidScoresButtons(); } catch(e){}
     // Ensure modal remains visible
     try {
@@ -1818,7 +1816,7 @@ function computeCompositeFromMeans(M){
   const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
   const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
   const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
-  const fiveMax  = ((score/5)+5);
+  const fiveMax  = ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5) + 5;
   return {score, max, min, weighted, fiveMax};
 }
 
@@ -4893,6 +4891,169 @@ function(){
 })();
 </script>
 <!-- /STS: Roaming Average (auto-injected) -->
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────────
+// STS: Dose Reviews segmentation helpers (timer reset OR redose)
+// ──────────────────────────────────────────────────────────────────────────────
+function STS_sinceToSeconds(v) {
+  if (v == null) return NaN;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  const s = String(v).trim();
+  // numeric string
+  if (/^[+-]?\d+(\.\d+)?$/.test(s)) {
+    const n = Number(s);
+    return Number.isFinite(n) ? n : NaN;
+  }
+  // HH:MM:SS
+  const m = s.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+  if (m) {
+    const h = Number(m[1]), mi = Number(m[2]), se = Number(m[3]);
+    if ([h, mi, se].every(Number.isFinite)) return h*3600 + mi*60 + se;
+  }
+  return NaN;
+}
+function STS_isTruthy(x) {
+  if (x === true) return true;
+  const s = String(x ?? "").trim().toLowerCase();
+  return ["1","true","yes","y","on"].includes(s);
+}
+function STS_isRedoseRow(row) {
+  // Dedicated checkbox/column
+  if ("Redose" in row && STS_isTruthy(row["Redose"])) return true;
+  // Text signals
+  const fields = ["Phase","Scale","Notes","Custom Notes","Last"];
+  for (const f of fields) {
+    const val = row[f];
+    if (val != null && String(val).toLowerCase().includes("redose")) return true;
+  }
+  return false;
+}
+// Build segments from visible rows.
+// New segment starts if EITHER:
+// 1) Since timer resets (current since < previous since), OR
+// 2) Row indicates a redose via STS_isRedoseRow().
+function STS_STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
+  const segments = [];
+  let cur = [];
+  let prevSince = NaN;
+  for (const r of rows) {
+    const sinceRaw = r["Since Dose"] ?? r["Since"] ?? r["SinceDose"] ?? r["Time Since Dose"];
+    const curSince = STS_sinceToSeconds(sinceRaw);
+    const timerReset = Number.isFinite(curSince) && Number.isFinite(prevSince) && (curSince < prevSince);
+    const redoseHit  = STS_isRedoseRow(r);
+    if (timerReset || redoseHit) {
+      if (cur.length) segments.push(cur);
+      cur = [];
+    }
+    cur.push(r);
+    prevSince = curSince;
+  }
+  if (cur.length) segments.push(cur);
+  return segments;
+}
+</script>
+
+
+<script>
+// === STS: Dose Reviews segmentation – ONLY on timer reset (no redose) ===
+function STS_parseTimestamp(s){
+  if (s == null) return NaN;
+  // Expect "YYYY/MM/DD HH:MM:SS"
+  const m = String(s).trim().match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);
+  if (!m) return NaN;
+  const year = +m[1], mon = +m[2]-1, day = +m[3], hh = +m[4], mm = +m[5], ss = +m[6];
+  const d = new Date(year, mon, day, hh, mm, ss);
+  return d.getTime();
+}
+function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
+  const arr = Array.isArray(rows) ? rows.slice() : [];
+  arr.sort((a,b)=>{
+    const ta = STS_parseTimestamp(a["Timestamp"] ?? a["Time"]);
+    const tb = STS_parseTimestamp(b["Timestamp"] ?? b["Time"]);
+    if (Number.isFinite(ta) && Number.isFinite(tb)) return ta - tb;
+    return 0;
+  });
+
+  const segments = [];
+  let cur = [];
+  let prevSince = NaN;
+
+  for (const r of arr) {
+    const sinceRaw = r["Since Dose"] ?? r["Since"] ?? r["SinceDose"] ?? r["Time Since Dose"];
+    const curSince = STS_sinceToSeconds(sinceRaw);
+    // New segment whenever timer decreases (any drop, not just reset)
+    const timerDecreased = Number.isFinite(curSince) && Number.isFinite(prevSince) && (curSince < prevSince);
+    if (timerDecreased) {
+      if (cur.length) segments.push(cur);
+      cur = [];
+    }
+    cur.push(r);
+    prevSince = curSince;
+  }
+  if (cur.length) segments.push(cur);
+  return segments;
+}
+// end STS_buildDoseSegmentsOnResetOnly
+</script>
+
+
+<script>
+// === STS: Dose Reviews segmentation – new segment if EITHER timer resets ===
+function STS_parseTimestamp(s){
+  if (s == null) return NaN;
+  const m = String(s).trim().match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})\s+(\d{2}):(\d{2}):(\d{2})$/);
+  if (!m) return NaN;
+  const year = +m[1], mon = +m[2]-1, day = +m[3], hh = +m[4], mm = +m[5], ss = +m[6];
+  return new Date(year, mon, day, hh, mm, ss).getTime();
+}
+function STS_toSeconds(v){
+  if (v == null) return NaN;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  const s = String(v).trim();
+  if (/^[+-]?\d+(\.\d+)?$/.test(s)) {
+    const n = Number(s);
+    return Number.isFinite(n) ? n : NaN;
+  }
+  const m = s.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+  if (m) {
+    const h = +m[1], mi = +m[2], se = +m[3];
+    return h*3600 + mi*60 + se;
+  }
+  return NaN;
+}
+function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
+  const arr = Array.isArray(rows) ? rows.slice() : [];
+  arr.sort((a,b)=>{
+    const ta = STS_parseTimestamp(a["Timestamp"] ?? a["Time"]);
+    const tb = STS_parseTimestamp(b["Timestamp"] ?? b["Time"]);
+    if (Number.isFinite(ta) && Number.isFinite(tb)) return ta - tb;
+    return 0;
+  });
+  const segments = [];
+  let cur = [];
+  let prevSince = NaN;
+  let prevElapsed = NaN;
+  for (const r of arr) {
+    const sinceRaw = r["Since Dose"] ?? r["Since"] ?? r["SinceDose"] ?? r["Time Since Dose"];
+    const elapsedRaw = r["Elapsed"];
+    const curSince = STS_toSeconds(sinceRaw);
+    const curElapsed = STS_toSeconds(elapsedRaw);
+    const resetSince = Number.isFinite(curSince) && Number.isFinite(prevSince) && (curSince < prevSince - 5e-4);
+    const resetElapsed = Number.isFinite(curElapsed) && Number.isFinite(prevElapsed) && (curElapsed < prevElapsed - 5e-4);
+    if (resetSince || resetElapsed) {
+      if (cur.length) segments.push(cur);
+      cur = [];
+    }
+    cur.push(r);
+    prevSince = curSince;
+    prevElapsed = curElapsed;
+  }
+  if (cur.length) segments.push(cur);
+  return segments;
+}
+</script>
+
 </body>
 <script>
 function openEmotionModal() {
@@ -4996,7 +5157,7 @@ function buildEmotionButtons() {
     const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
     const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
     const weighted = 5 + ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5);
-    const fiveMax  = ((score/5)+5);
+    const fiveMax  = ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5) + 5;
     return {score, max, min, weighted, fiveMax};
   }
 

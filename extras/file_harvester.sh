@@ -27,12 +27,12 @@ IFS=$'\n\t'
 # --------------------------- CONFIGURATION -----------------------------------
 
 # Where to look and where to store copies
-SOURCE_DIR="/Users/administrator"
-TARGET_DIR="/Applications/FileOperations/september/04/csv"
+SOURCE_DIR="/Users/administrator/Downloads"
+TARGET_DIR="/Applications/FileOperations/september/04/02/csv"
 
 # Logging
 LOG_TO_FILE=false
-LOG_FILE="/Users/Shared/SaveCombo/logx94.log"
+LOG_FILE="/Users/Shared/SaveCombo/logx94b.log"
 
 # Copy toggle (true = actually copy; false = DRY RUN, log only)
 COPY_ENABLED=true
@@ -42,7 +42,7 @@ HASH_DEDUP_ENABLED=true           # Skip duplicates within this run
 HASH_DEDUP_AGAINST_TARGET=true    # Also skip if hash already exists in TARGET_DIR (pre-scan)
 
 # Date filter (Sydney local). Leave empty string "" to disable.
-# Example: "2025-08-01 00:00:00"
+# Example: "2025-07-31 00:00:00"
 CUTOFF_DATE_SYDNEY=""
 
 # Size filters (bytes). Set to 0 to disable the bound.
@@ -59,7 +59,7 @@ FILENAME_SUBSTR=""
 
 # Filename regex filter (extended regex, case-insensitive). Empty = no filter.
 # Example: ""
-FILENAME_REGEX="log|drug|pihp|trip|great|good|useful|excellent|perfect"
+FILENAME_REGEX="2025_08_"
 
 # MIME allow-list. Empty = no MIME filtering.
 # Common CSV-ish mimes: text/csv, application/csv, text/plain,
