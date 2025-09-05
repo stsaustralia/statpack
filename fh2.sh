@@ -27,12 +27,12 @@ IFS=$'\n\t'
 # --------------------------- CONFIGURATION -----------------------------------
 
 # Where to look and where to store copies
-SOURCE_DIR="/Users/administrator/Downloads"
-TARGET_DIR="/Applications/FileOperations/september/04/02/csv"
+SOURCE_DIR="/Users/administrator"
+TARGET_DIR="/Volumes/Files/MBA/files_png"
 
 # Logging
 LOG_TO_FILE=false
-LOG_FILE="/Users/Shared/SaveCombo/logx94b.log"
+LOG_FILE="/Volumes/Files/MBA/logs/files_program.log"
 
 # Copy toggle (true = actually copy; false = DRY RUN, log only)
 COPY_ENABLED=true
@@ -46,12 +46,12 @@ HASH_DEDUP_AGAINST_TARGET=true    # Also skip if hash already exists in TARGET_D
 CUTOFF_DATE_SYDNEY=""
 
 # Size filters (bytes). Set to 0 to disable the bound.
-MIN_SIZE_BYTES=1024                 # e.g. 1024 for 1 KiB; 0 disables min
-MAX_SIZE_BYTES=$((16*1024*1024))   # 4 MiB; set 0 to disable max
+MIN_SIZE_BYTES=4096                 # e.g. 1024 for 1 KiB; 0 disables min
+MAX_SIZE_BYTES=$((4*1024*1024))   # 4 MiB; set 0 to disable max
 
 # Extension allow-list (case-insensitive). Empty = no extension filtering.
 # Example: EXT_ALLOW=("csv" "tsv")
-EXT_ALLOW=("csv" "ods" "odt" "xls" "xlsx" "numbers")
+EXT_ALLOW=("png")
 
 # Filename substring filter (case-insensitive). Empty string = no filter.
 # Example: "drug"
@@ -59,7 +59,7 @@ FILENAME_SUBSTR=""
 
 # Filename regex filter (extended regex, case-insensitive). Empty = no filter.
 # Example: ""
-FILENAME_REGEX="2025_08_"
+FILENAME_REGEX=""
 
 # MIME allow-list. Empty = no MIME filtering.
 # Common CSV-ish mimes: text/csv, application/csv, text/plain,
@@ -75,7 +75,7 @@ HEADER_MODE_FIRSTWORD=false   # First token of header must equal FIRST_WORD_REQU
 HEADER_MODE_AT_LEAST=false    # Header must have at least MIN_HEADER_COLS columns
 
 # Exact header string (only used if HEADER_MODE_EXACT=true)
-TARGET_HEADER="Timestamp,Since Dose,Elapsed,Info,Scale,Drug,Qty,ROA,Rush Sum,Rush Label,Mood Sum,Mood Label,Social Sum,Social Label,Energy Sum,Energy Label,Focus Sum,Focus Label,Anxiety Sum,Anxiety Label,Impair Sum,Impair Label,Change Sum,Change Label,Degree Sum,Degree Label,Other Sum,Other Label,Score,Max,Min,Max %,Min %,Valence,scaleMood,scaleBad,scaleFocus,Custom Notes,Notes,Weighted,Score5,Good Sum,Input Source"
+TARGET_HEADER=""
 
 # First word required (only used if HEADER_MODE_FIRSTWORD=true)
 FIRST_WORD_REQUIRED=""
