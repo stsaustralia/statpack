@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.9.2 r2078</title>
+<title>statpack v1.9.2 r2079</title>
 <style>
 
 #logTable {
@@ -365,6 +365,9 @@ function computeFiveMax(obj){
 
             <select id="drugSelect">
 <option value="">--Select--</option>
+<option value="AboutToRedose">AboutToRedose</option>
+<option value="JustRedosed">JustRedosed</option>
+<option value="MidRedose">MidRedose</option>
 <option value="MD-PiHP">MD-PiHP</option>
 <option value="2ME-PiHP">2ME-PiHP</option>
 <option value="A-PiHP">A-PiHP</option>
@@ -626,13 +629,13 @@ labels: {
     // 5,4.75,4.5,4.25,4,'Very High',3.75,3.5,3.25,3,'High',2.75,2.5,2.25,2,'Moderate',1.75,1.5,1.25,1,'Low',0.75,0.5,0.25,0
     // Separated
     // 5,4.75,4.5,4.25,4,'----------',3.75,3.5,3.25,3,'----------',2.75,2.5,2.25,2,'----------',1.75,1.5,1.25,1,'----------',0.75,0.5,0.25,0
-      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-1],
+      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-1],
+      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-1],
+      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-1],
+      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-1],
+      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-1],
+      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-1],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -652,7 +655,7 @@ labels: {
     extra: ['Correlate', 'Flag', 'Now', 'Then', 'Next', 'Last', 'Changes', 'Note', 'Context', 'Associate', 'Plan', 'Review', 'HIndsight', 'Redose', 'Hit', 'Continie', 'Food', 'Drink', 'Sleep', 'LastRow', 'LastDose', 'LastHit', 'Single', 'Multiple', 'DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'MaybeUsable', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', 'Scales', 'HardToSee', 'LightRoom', 'DarkRoom'],
     dark: [ 'Observe', 'Follow', 'Adaptive', 'Rock', 'Fast', 'Slowly', 'Roll', 'Rapid', 'Spin', 'SideToSide', 'CoatBowl', 'LargeRoll', 'SmallRoll', 'ManyHits', 'OneHit', 'MeltFirst', 'Burned'],
     blue: ['Plumes', 'Billowing', 'Vapour', 'Visible', 'Invisible', 'LotsOfVapour', 'SoftVapour', 'ThickVapour', 'WarmAir', 'BackPressure', 'Smoke', 'HalfBurned', 'NiceSmell', 'NiceTaste', 'Irritant', 'Pressure', 'Ignition', 'BurnedSmell', 'DarkVapour'],
-    red: ['WideEyes', 'Headache', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Visceral', 'Feel',  'Chills', 'Sweat', 'Tremor', 'Shakes', 'Nausea', 'Minor', 'SideEffects', 'EarsRinging', 'ChestPain'],
+    red: ['WideEyes', 'Headache', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Visceral', 'Feel',  'Chills', 'Sweat', 'Tremor', 'Shakes', 'Nausea', 'Minor', 'SideEffects', 'AfterEffects', 'DayAfter', 'Hangover', 'JustWoke', 'MorningAfter', 'EarsRinging', 'ChestPain'],
     green: [ '555Hold', 'DeepBreath', 'ShallowBreath', 'Diaphram', 'HoldBreath', 'MultipleBreath', 'Sucked', 'SuckedHard', 'Gentle', 'Aggressive', 'OneBreath', 'LipSeal', 'HalfSealed', 'NotSealed', 'MouthOpen', 'ThroatBreath', 'Irritant','SuctionDistance', 'HighHeat', 'LowHeat'],
     orange: [ 'Cone', 'Snowcone', 'Metal', 'Glass', 'Pipe', 'Line', 'Sniff', 'Rectal', 'Inject', 'Oral', 'Sublingual', 'Lighter', 'Jet', 'Blowtorch', 'Broken', 'Clean', 'New', 'Dirty', 'Rinsed', 'Scraped', 'Dried', 'Wet', 'Dry', 'Weathered', 'Soaked', 'Damp', 'WasWet', 'HasDried', 'Loose', 'Moving', 'NotMoving', 'Runny', 'Chunk', 'Paste', 'Rock', 'Sludge', 'Crushed', 'NotCrushed', 'Powder', 'Granules', 'Crystal', 'Crystalline', 'Dust', 'Liquid', 'WaterWeighted', 'PropyleneGlycol', 'Water','VapourWait', 'VapourPool', 'PowderIgnites'],
     yellow: ['Positive', 'Negative', 'Neither', 'Flat', 'Unknown', 'Melted', 'Burned', 'ColourChange', 'StateChange', 'Melt', 'Burn', 'Audible', 'Carbon', 'Thin', 'Film', 'Fun', 'Analytics', 'Comparative', 'Relative', 'Absolute', 'Observe'],
