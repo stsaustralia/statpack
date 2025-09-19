@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.10.0 r2085</title>
+<title>statpack v1.10.1 r2089</title>
 <style>
 
 #logTable {
@@ -5903,8 +5903,8 @@ function closeRatedPopup(){
 function computeRatingCategory(val){
   const v = Number(val || 0);
   if (!isFinite(v) || v === 0) return 'None';
-  if (v <= 2) return 'Low';
-  if (v < 4) return 'Medium';
+  if (v <= 1.5) return 'Low';
+  if (v < 3) return 'Medium';
   return 'High';
 }
 function renderAllRatedPopup(){
