@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.10.1 r2089</title>
+<title>statpack v1.10.2 r2093</title>
 <style>
 
 #logTable {
@@ -335,6 +335,19 @@ function computeFiveMax(obj){
 #ratedPopupTable td.cat.low,  #allRatedPopupTable td.cat.low  { background:red; color:#fff; }
 #ratedPopupTable td.cat.medium,#allRatedPopupTable td.cat.medium { background:#ffeb3b; color:#000; }
 #ratedPopupTable td.cat.high, #allRatedPopupTable td.cat.high { background:green; color:#fff; }
+</style>
+<style>
+
+/* Category cell shading for both popups */
+#ratedPopupTable td.cat.none, #allRatedPopupTable td.cat.none { background:transparent; color:inherit; }
+#ratedPopupTable td.cat.verylow, #allRatedPopupTable td.cat.verylow { background:rgb(255,0,0); color:#fff; }
+#ratedPopupTable td.cat.low, #allRatedPopupTable td.cat.low { background:rgba(255,0,0,0.5); color:#000; }
+#ratedPopupTable td.cat.medium, #allRatedPopupTable td.cat.medium { background:#ffeb3b; color:#000; }
+#ratedPopupTable td.cat.high, #allRatedPopupTable td.cat.high { background:rgba(0,128,0,0.5); color:#000; }
+#ratedPopupTable td.cat.veryhigh, #allRatedPopupTable td.cat.veryhigh { background:rgb(0,128,0); color:#fff; }
+/* Badge styling aligns with cell class but cell shading dominates */
+.badge{ display:inline-block; padding:3px 8px; border-radius:10px; font-weight:600; background:transparent; }
+
 </style>
 </head>
 <body>
@@ -5858,13 +5871,17 @@ function buildEmotionButtons() {
 })();
 
 // === Rated Popup ===
+
 function computeRatingCategory(val){
   const v = Number(val || 0);
-  if (!isFinite(v) || v === 0) return 'None';
-  if (v <= 2) return 'Low';
-  if (v < 4) return 'Medium';
-  return 'High';
+  if (!isFinite(v) || v === 0) return { label: 'None',      cls: 'none' };
+  if (v > 0 && v <= 1)        return { label: 'Very Low',  cls: 'verylow' };
+  if (v > 1 && v <= 1.5)        return { label: 'Low',       cls: 'low' };
+  if (v > 1.5 && v < 3.5)         return { label: 'Medium',    cls: 'medium' };
+  if (v >= 3.5 && v < 4.5)        return { label: 'High',      cls: 'high' };
+  return { label: 'Very High', cls: 'veryhigh' };
 }
+
 function currentMaxFor(metric){
   try{
     const arr = (selections && Array.isArray(selections[metric])) ? selections[metric] : [];
@@ -5900,13 +5917,17 @@ function closeRatedPopup(){
 }
 
 // === All Rated Popup (row-based categories) ===
+
 function computeRatingCategory(val){
   const v = Number(val || 0);
-  if (!isFinite(v) || v === 0) return 'None';
-  if (v <= 1.5) return 'Low';
-  if (v < 3) return 'Medium';
-  return 'High';
+  if (!isFinite(v) || v === 0) return { label: 'None',      cls: 'none' };
+  if (v > 0 && v <= 1)        return { label: 'Very Low',  cls: 'verylow' };
+  if (v > 1 && v <= 1.5)        return { label: 'Low',       cls: 'low' };
+  if (v > 1.5 && v < 3.5)         return { label: 'Medium',    cls: 'medium' };
+  if (v >= 3.5 && v < 4.5)        return { label: 'High',      cls: 'high' };
+  return { label: 'Very High', cls: 'veryhigh' };
 }
+
 function renderAllRatedPopup(){
   try{
     const tb = document.querySelector('#allRatedPopupTable tbody');
@@ -5922,11 +5943,17 @@ function renderAllRatedPopup(){
       const focus = computeRatingCategory(r.focusSum);
       const anxiety = computeRatingCategory(r.anxietySum);
       const impair = computeRatingCategory(r.impairSum);
-      rows.push(`<tr>
-        <td>${t}</td>
-        <td class="cat ${String(rush).toLowerCase()}"><span class="badge ${String(rush).toLowerCase()}">${rush}</span></td><td class="cat ${String(mood).toLowerCase()}"><span class="badge ${String(mood).toLowerCase()}">${mood}</span></td><td class="cat ${String(social).toLowerCase()}"><span class="badge ${String(social).toLowerCase()}">${social}</span></td><td class="cat ${String(energy).toLowerCase()}"><span class="badge ${String(energy).toLowerCase()}">${energy}</span></td><td class="cat ${String(focus).toLowerCase()}"><span class="badge ${String(focus).toLowerCase()}">${focus}</span></td>
-        <td class="cat ${String(anxiety).toLowerCase()}"><span class="badge ${String(anxiety).toLowerCase()}">${anxiety}</span></td><td class="cat ${String(impair).toLowerCase()}"><span class="badge ${String(impair).toLowerCase()}">${impair}</span></td>
-      </tr>`);
+      const _rush=computeRatingCategory(r.rushSum), _mood=computeRatingCategory(r.moodSum), _social=computeRatingCategory(r.socialSum), _energy=computeRatingCategory(r.energySum), _focus=computeRatingCategory(r.focusSum), _anxiety=computeRatingCategory(r.anxietySum), _impair=computeRatingCategory(r.impairSum);
+rows.push(`<tr>
+  <td>${t}</td>
+  <td class="cat ${_rush.cls}"><span class="badge ${_rush.cls}">${_rush.label}</span></td>
+  <td class="cat ${_mood.cls}"><span class="badge ${_mood.cls}">${_mood.label}</span></td>
+  <td class="cat ${_social.cls}"><span class="badge ${_social.cls}">${_social.label}</span></td>
+  <td class="cat ${_energy.cls}"><span class="badge ${_energy.cls}">${_energy.label}</span></td>
+  <td class="cat ${_focus.cls}"><span class="badge ${_focus.cls}">${_focus.label}</span></td>
+  <td class="cat ${_anxiety.cls}"><span class="badge ${_anxiety.cls}">${_anxiety.label}</span></td>
+  <td class="cat ${_impair.cls}"><span class="badge ${_impair.cls}">${_impair.label}</span></td>
+</tr>`);
     });
     tb.innerHTML = rows.join('');
   }catch(e){
