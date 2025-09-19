@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.9.2 r2079</title>
+<title>statpack v1.10.0 r2085</title>
 <style>
 
 #logTable {
@@ -308,6 +308,34 @@ function computeFiveMax(obj){
 })();
 </script>
 <!-- /STS: UI CONFIG (auto-injected) -->
+<style>
+
+/* Rated Popup modal */
+#ratedPopupModal{display:none; position:fixed; inset:0; z-index:10000;}
+#ratedPopupBackdrop{position:absolute; inset:0; background:rgba(0,0,0,0.45);}
+#ratedPopupCard{position:relative; margin:8vh auto; width:min(700px,90vw); max-height:84vh; overflow:auto;
+  background:#fff; border-radius:12px; box-shadow:0 10px 34px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;}
+#ratedPopupCard h2{margin:0 0 8px 0; font-size:18px;}
+#ratedPopupTable{width:100%; border-collapse:collapse; background:#fff;}
+#ratedPopupTable th,#ratedPopupTable td{border:1px solid #ccc; padding:8px; text-align:left; font-size:12px;}
+
+</style>
+
+<style>
+.badge{ display:inline-block; padding:3px 8px; border-radius:10px; font-weight:600; }
+.badge.none{ background:#eee; color:#000; }
+.badge.low{ background:red; color:#fff; }
+.badge.medium{ background:#ffeb3b; color:#000; }
+.badge.high{ background:green; color:#fff; }
+</style>
+
+<style>
+/* Category cell shading */
+#ratedPopupTable td.cat.none, #allRatedPopupTable td.cat.none { background:#eee; color:#000; }
+#ratedPopupTable td.cat.low,  #allRatedPopupTable td.cat.low  { background:red; color:#fff; }
+#ratedPopupTable td.cat.medium,#allRatedPopupTable td.cat.medium { background:#ffeb3b; color:#000; }
+#ratedPopupTable td.cat.high, #allRatedPopupTable td.cat.high { background:green; color:#fff; }
+</style>
 </head>
 <body>
 <div class="summary-controls">
@@ -329,6 +357,8 @@ function computeFiveMax(obj){
 <button id="reviewBtn" onclick="openReview()">Review</button>
 <button id="autoEntriesBtn" onclick="openAutoEntries()">Auto Entries</button>
 <button id="rollingAvgBtn" onclick="openRollingAverage()">Rolling Average</button>
+<button id="ratedPopupBtn" onclick="openRatedPopup()">Rated Popup</button>
+<button id="allRatedPopupBtn" onclick="openAllRatedPopup()">All Rated Popup</button>
 </div>
 <h1>statpack</h1>
 <div class="controls">
@@ -5072,6 +5102,46 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
 }
 </script>
 
+
+<!-- Rated Popup Modal -->
+<div id="ratedPopupModal">
+  <div id="ratedPopupBackdrop"></div>
+  <div id="ratedPopupCard">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+      <h2>Rated Popup</h2>
+      <button aria-label="Close" onclick="closeRatedPopup()">Close</button>
+    </div>
+    <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">Categories: None, Low, Medium, High (derived from current selections)</div>
+    <table id="ratedPopupTable">
+      <thead><tr><th>Metric</th><th>Rating</th><th>Detail</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- All Rated Popup Modal -->
+<div id="allRatedPopupModal" style="display:none; position:fixed; inset:0; z-index:10000;">
+  <div id="allRatedPopupBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
+  <div id="allRatedPopupCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+      <div style="font-weight:700; font-size:18px;">All Rated Popup</div>
+      <button aria-label="Close" onclick="closeAllRatedPopup()">Close</button>
+    </div>
+    <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">Per-row categories computed from numeric sums in the log: None ≤ 0, Low &lt; 1.5, Medium &lt; 3.5, High ≥ 3.5.</div>
+    <table id="allRatedPopupTable" style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th>
+          <th>Anxiety</th><th>Impair</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
 </body>
 <script>
 function openEmotionModal() {
@@ -5786,4 +5856,92 @@ function buildEmotionButtons() {
     emit(); window.rollingAvgTimer = setInterval(emit, 30000);
   };
 })();
+
+// === Rated Popup ===
+function computeRatingCategory(val){
+  const v = Number(val || 0);
+  if (!isFinite(v) || v === 0) return 'None';
+  if (v <= 2) return 'Low';
+  if (v < 4) return 'Medium';
+  return 'High';
+}
+function currentMaxFor(metric){
+  try{
+    const arr = (selections && Array.isArray(selections[metric])) ? selections[metric] : [];
+    if (!arr.length) return 0;
+    const nums = arr.map(Number).filter(Number.isFinite);
+    if (!nums.length) return 0;
+    return Math.max.apply(null, nums);
+  }catch(e){ return 0; }
+}
+function renderRatedPopup(){
+  const tbl = document.querySelector('#ratedPopupTable tbody');
+  if (!tbl) return;
+  const rows = [];
+  const order = ['rush','mood','social','energy','focus','anxiety','impair'];
+  order.forEach(m=>{
+    const maxv = currentMaxFor(m);
+    const cat = computeRatingCategory(maxv);
+    const label = m.charAt(0).toUpperCase() + m.slice(1);
+    rows.push(`<tr><td>${label}</td><td class="cat ${String(cat).toLowerCase()}"><span class="badge ${String(cat).toLowerCase()}">${cat}</span></td><td>${(Number.isFinite(maxv)? maxv.toFixed(2): '')}</td></tr>`);
+  });
+  tbl.innerHTML = rows.join('');
+}
+function openRatedPopup(){
+  try { renderRatedPopup(); } catch(e){}
+  const el = document.getElementById('ratedPopupModal');
+  if (el) el.style.display = 'block';
+  const bd = document.getElementById('ratedPopupBackdrop');
+  if (bd) bd.onclick = closeRatedPopup;
+}
+function closeRatedPopup(){
+  const el = document.getElementById('ratedPopupModal');
+  if (el) el.style.display = 'none';
+}
+
+// === All Rated Popup (row-based categories) ===
+function computeRatingCategory(val){
+  const v = Number(val || 0);
+  if (!isFinite(v) || v === 0) return 'None';
+  if (v <= 2) return 'Low';
+  if (v < 4) return 'Medium';
+  return 'High';
+}
+function renderAllRatedPopup(){
+  try{
+    const tb = document.querySelector('#allRatedPopupTable tbody');
+    if (!tb) return;
+    const rows = [];
+    const source = Array.isArray(logData) ? logData : [];
+    source.forEach(r => {
+      const t = (r.timestamp || '');
+      const rush = computeRatingCategory(r.rushSum);
+      const mood = computeRatingCategory(r.moodSum);
+      const social = computeRatingCategory(r.socialSum);
+      const energy = computeRatingCategory(r.energySum);
+      const focus = computeRatingCategory(r.focusSum);
+      const anxiety = computeRatingCategory(r.anxietySum);
+      const impair = computeRatingCategory(r.impairSum);
+      rows.push(`<tr>
+        <td>${t}</td>
+        <td class="cat ${String(rush).toLowerCase()}"><span class="badge ${String(rush).toLowerCase()}">${rush}</span></td><td class="cat ${String(mood).toLowerCase()}"><span class="badge ${String(mood).toLowerCase()}">${mood}</span></td><td class="cat ${String(social).toLowerCase()}"><span class="badge ${String(social).toLowerCase()}">${social}</span></td><td class="cat ${String(energy).toLowerCase()}"><span class="badge ${String(energy).toLowerCase()}">${energy}</span></td><td class="cat ${String(focus).toLowerCase()}"><span class="badge ${String(focus).toLowerCase()}">${focus}</span></td>
+        <td class="cat ${String(anxiety).toLowerCase()}"><span class="badge ${String(anxiety).toLowerCase()}">${anxiety}</span></td><td class="cat ${String(impair).toLowerCase()}"><span class="badge ${String(impair).toLowerCase()}">${impair}</span></td>
+      </tr>`);
+    });
+    tb.innerHTML = rows.join('');
+  }catch(e){
+    console.error('renderAllRatedPopup error', e);
+  }
+}
+function openAllRatedPopup(){
+  renderAllRatedPopup();
+  const el = document.getElementById('allRatedPopupModal');
+  if (el) el.style.display = 'block';
+  const bd = document.getElementById('allRatedPopupBackdrop');
+  if (bd) bd.onclick = closeAllRatedPopup;
+}
+function closeAllRatedPopup(){
+  const el = document.getElementById('allRatedPopupModal');
+  if (el) el.style.display = 'none';
+}
 </script>
