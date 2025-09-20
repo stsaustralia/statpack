@@ -5888,18 +5888,17 @@ function computeRatingCategory(metricOrVal, maybeVal){
     if (val > 0 && val <= 1)      return { label:'Very Low',  cls:'verylow' };
     if (val > 1 && val <= 2)      return { label:'Low',       cls:'low' };
     if (val > 2 && val < 3)       return { label:'Medium',    cls:'medium' };
-    if (val >= 3 && val < 4)      return { label:'High',      cls:'high' };
-    /* val >= 4 */
+    if (val >= 3 && val < 4.5)      return { label:'High',      cls:'high' };
+ 	if (val >= 4.5)                 return { label:'Very High', cls:'veryhigh' };
     return { label:'Very High', cls:'veryhigh' };
   }
 
   // Default thresholds for other metrics
-  if (val > 0 && val <= 1)        return { label:'Very Low',  cls:'verylow' };
-  if (val > 1 && val <= 2)        return { label:'Low',       cls:'low' };
-  if (val > 2 && val < 4)         return { label:'Medium',    cls:'medium' };
-  if (val >= 4 && val < 5)        return { label:'High',      cls:'high' };
-  /* val >= 5 */
-  return { label:'Very High', cls:'veryhigh' };
+    if (val > 0 && val <= 1)      return { label:'Very Low',  cls:'verylow' };
+    if (val > 1 && val <= 2)      return { label:'Low',       cls:'low' };
+    if (val > 2 && val < 3)       return { label:'Medium',    cls:'medium' };
+    if (val >= 3 && val < 4.5)      return { label:'High',      cls:'high' };
+ 	if (val >= 4.5)                 return { label:'Very High', cls:'veryhigh' };
 }
 
 function currentMaxFor(metric){
