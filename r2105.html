@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.13 r2130</title>
+<title>statpack v1.11.t r2106</title>
 <style>
 
 #logTable {
@@ -354,6 +354,7 @@ function computeFiveMax(obj){
 <div class="summary-controls">
 <button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
 <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
+<button id="avg15Btn" onclick="open15mAverage()">15m Average</button>
 <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
 <button id="slidingAvgBtn" onclick="openSlidingAverage()">Sliding Average</button>
 <button id="doseReviewsBtn" onclick="openDoseReviews()">Dose Reviews</button>
@@ -544,6 +545,19 @@ function computeFiveMax(obj){
 <thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>
 <tbody></tbody>
 </table>
+</div>
+<div id="avg15Dock" style="margin-top:20px;">
+  <div id="avg15Title">15m Average</div>
+  <table id="avg15Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead>
+      <tr>
+        <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th>
+        <th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
+        <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 <div id="summary60Dock" style="margin-top:20px;">
 <div id="summary60Title">Summary 60m (rolling)</div>
@@ -1878,7 +1892,58 @@ function computeCompositeFromMeans(M){
   const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
   const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
   const fiveMax  = ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5) + 5;
-  return {score, max, min, weighted, fiveMax};
+  return {score, max, min, weighted, fiveMax}
+<script>
+/* 15m Average: straight average of all entries within the last 15 minutes */
+function open15mAverage(){
+  try{
+    const endMs = Date.now();
+    const startMs = endMs - 15*60*1000;
+    if (typeof snapshotFromMainTable !== 'function'){
+      alert('snapshotFromMainTable() not found.');
+      return;
+    }
+    const snap = snapshotFromMainTable();
+    const sel = snap.filter(e => e._ts >= startMs && e._ts <= endMs);
+    if (!sel.length){
+      alert('No data in last 15 minutes.');
+      return;
+    }
+    const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const sums = {}; flds.forEach(f => sums[f]=0);
+    sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+    const means = {}; flds.forEach(f => means[f] = +(sums[f] / sel.length));
+    if (typeof computeCompositeFromMeans !== 'function'){
+      alert('computeCompositeFromMeans() not found.');
+      return;
+    }
+    const C = computeCompositeFromMeans(means);
+    const d = new Date();
+    if (typeof appendSummaryRowToTable !== 'function'){
+      // provide minimal fallback appender if host app lacks utility
+      const tbody = document.querySelector('#avg15Table tbody');
+      if (!tbody){ alert('avg15Table not found.'); return; }
+      const fmt = (x) => Number.isFinite(+x) ? (+x).toFixed(2) : '';
+      const tr = document.createElement('tr');
+      const cells = [
+        d.toLocaleTimeString('en-AU',{hour12:false}).slice(0,5) + ' Average',
+        fmt(means.rush), fmt(means.mood), fmt(means.social),
+        fmt(means.energy), fmt(means.focus), fmt(means.anxiety), fmt(means.impair),
+        fmt(C.score), fmt(C.max), fmt(C.min), fmt(C.weighted), fmt(C.fiveMax)
+      ];
+      tr.innerHTML = cells.map(v=>`<td>${v}</td>`).join('');
+      tbody.appendChild(tr);
+      // optional shading if host provides it
+      try { if (window.STS_applyShading) STS_applyShading(tr); } catch(e){}
+    } else {
+      appendSummaryRowToTable('avg15Table', d, means, C, {labelSuffix: ' 15m Avg'});
+    }
+  }catch(err){
+    console.error(err);
+    alert('15m Average failed: ' + (err && err.message ? err.message : err));
+  }
+}
+;
 }
 
 // === Backfill controls (manual; also mirrors to any popups) ==================

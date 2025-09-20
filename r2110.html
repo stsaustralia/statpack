@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>statpack v1.13 r2130</title>
+<title>statpack v1.2 r2110</title>
 <style>
 
 #logTable {
@@ -354,6 +354,7 @@ function computeFiveMax(obj){
 <div class="summary-controls">
 <button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
 <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
+<button id="avg15Btn" onclick="open15mAverage()">15m Average</button>
 <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
 <button id="slidingAvgBtn" onclick="openSlidingAverage()">Sliding Average</button>
 <button id="doseReviewsBtn" onclick="openDoseReviews()">Dose Reviews</button>
@@ -545,6 +546,19 @@ function computeFiveMax(obj){
 <tbody></tbody>
 </table>
 </div>
+<div id="avg15Dock" style="margin-top:20px;">
+  <div id="avg15Title">15m Average</div>
+  <table id="avg15Table" style="width:100%; border-collapse:collapse; background:#fff;">
+    <thead>
+      <tr>
+        <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th>
+        <th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
+        <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 <div id="summary60Dock" style="margin-top:20px;">
 <div id="summary60Title">Summary 60m (rolling)</div>
 <table id="summary60Table" style="width:100%; border-collapse:collapse; background:#fff;">
@@ -621,13 +635,13 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 5.0: 'Extreme', 4.5: 'Intense', 4.0: 'Intense', 3.5: 'Contriollable', 3.0: 'Contriollable', 2.5: 'Some', 2.0: 'Some', 1.5: 'Think/Maybe', 1.0: 'Think/Maybe', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Dysphoric', "’-2’": 'Overwhelming' },
-  mood: { 5.0: 'Very Euphoric', 4.5: 'Somewhat Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear/Distinct', 2.5: 'Certain/Thought', 2.0: 'Some/Thought', 1.5: 'Maybe', 1.0: 'Maybe', 0.5: 'Maybe/Unsure', 0.0: 'No Change', "’-1’": 'Poor', "’-2’": 'Obvious' },
-  social: { 5.0: 'Disinhibited', 4.5: 'Social/Proactive', 4.0: 'Social/Proactive', 3.5: 'Social/Outgoing', 3.0: 'Social/Empathy', 2.5: 'Urge/Push', 2.0: 'Urge/Desire', 1.5: 'Want/Capable', 1.0: 'Can/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Avoidant', "’-2’": 'Antisocial' },
-  energy: { 5.0: 'Manic/Freqnzied', 4.5: 'Energetic/Hyper', 4.0: 'Energetic/Hyper', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Definitely/Some', 2.0: 'Yes/Some', 1.5: 'Capable', 1.0: 'Capable', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Tired', "’-2’": 'Exhasuted' },
-  focus: { 5.0: 'Super/Laser', 4.5: 'Wired', 4.0: 'Half Wired', 3.5: 'Strong/Focus', 3.0: 'Some/Focus', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Effective', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Scattered', "’-2’": 'Tweaking' },
-  anxiety: { 5.0: 'Severe/Panic', 4.5: 'Severe/Adverse', 4.0: 'Serious/Adverse', 3.5: 'Impacted/Anxious', 3.0: 'Affected/Anxious', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Minimal', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Adhednoia', "’-2’": 'Terror' },
-  impair: { 5.0: 'Severe/Crippled', 4.5: 'Severe/Worry', 4.0: 'Serious/Worry', 3.5: 'Impacting/Behaviour', 3.0: 'Affecting/Behaviour', 2.5: 'Affecting/Hindered', 2.0: 'Affecting/Compensating', 1.5: 'Ignorable', 1.0: 'Minimal', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Unwell', "’-2’": 'Dangerous' },
+  rush: { 8.0: 'Extreme', 7.0: 'Intense', 6.0: 'Intense', 5.0: 'Contriollable', 4.0: 'Contriollable', 3.0: 'Some', 2.0: 'Some', 1.5: 'Think/Maybe', 1.0: 'Think/Maybe', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Overwhelming', "’-2’": 'Dysphoric' },
+  mood: { 6.0: 'Very Euphoric', 5.0: 'Somewhat Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear/Distinct', 2.5: 'Certain/Thought', 2.0: 'Some/Thought', 1.5: 'Maybe', 1.0: 'Maybe', 0.5: 'Maybe/Unsure', 0.0: 'No Change', "’-1’": 'Poor', "’-2’": 'Obvious' },
+  social: { 6.0: 'Disinhibited', 5.0: 'Social/Proactive', 4.0: 'Social/Proactive', 3.5: 'Social/Outgoing', 3.0: 'Social/Empathy', 2.5: 'Urge/Push', 2.0: 'Urge/Desire', 1.5: 'Want/Capable', 1.0: 'Can/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Avoidant', "’-2’": 'Antisocial' },
+  energy: { 6.0: 'Manic/Freqnzied', 5.0: 'Energetic/Hyper', 4.0: 'Energetic/Hyper', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Definitely/Some', 2.0: 'Yes/Some', 1.5: 'Capable', 1.0: 'Capable', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Tired', "’-2’": 'Exhasuted' },
+  focus: { 6.0: 'Super/Laser', 5.0: 'Wired', 4.0: 'Half Wired', 3.5: 'Strong/Focus', 3.0: 'Some/Focus', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Effective', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Scattered', "’-2’": 'Tweaking' },
+  anxiety: { 6.0: 'Severe/Panic', 5.0: 'Severe/Adverse', 4.0: 'Serious/Adverse', 3.5: 'Impacted/Anxious', 3.0: 'Affected/Anxious', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Minimal', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Adhednoia', "’-2’": 'Terror' },
+  impair: { 6.0: 'Severe/Crippled', 5.0: 'Severe/Worry', 4.0: 'Serious/Worry', 3.5: 'Impacting/Behaviour', 3.0: 'Affecting/Behaviour', 2.5: 'Affecting/Hindered', 2.0: 'Affecting/Compensating', 1.5: 'Ignorable', 1.0: 'Minimal', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Unwell', "’-2’": 'Dangerous' },
   change: { 5.00: 'Major', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Certain', 2.00: 'Thought', 1.50: 'Some', 1.00: 'Maybe', 0.50: 'Unsure', 0.00: 'None', 0.25: '+' },
   degree: { 5.00: 'Extreme', 4.50: 'Very High', 4.00: 'Higher', 3.50: 'High', 3.00: 'Mid High', 2.50: 'Mid', 2.00: 'Mid Low', 1.50: 'Low', 1.00: 'Lower', 0.50: 'Very Low', 0.00: 'None', 0.25: 'Minimal' },
   other: { 5.00: 'Now', 4.50: '30Seconds', 4.00: 'Last', 3.50: '1Minute', 3.00: 'Next', 2.50: '5Minutes', 2.00: 'Intake', 1.50: 'Plan', 1.00: 'Dose', 0.50: 'Hindsight', 0.00: 'Row', 0.25: 'Last5Minutes' },
@@ -637,13 +651,13 @@ labels: {
   dopamine: { 5.00: 'Yes', 4.00: 'Certain', 3.00: 'Clear', 2.00: 'Some', 1.00: 'Maybe', 0.00: 'No' },
 }
 , rapidLabels: {
-  rush: { 5.0: 'Extreme', 4.5: 'Intense', 4.0: 'Intense', 3.5: 'Contriollable', 3.0: 'Contriollable', 2.5: 'Some', 2.0: 'Some', 1.5: 'Think/Maybe', 1.0: 'Think/Maybe', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Dysphoric', "’-2’": 'Overwhelming' },
-  mood: { 5.0: 'Very Euphoric', 4.5: 'Somewhat Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear/Distinct', 2.5: 'Certain/Thought', 2.0: 'Some/Thought', 1.5: 'Maybe', 1.0: 'Maybe', 0.5: 'Maybe/Unsure', 0.0: 'No Change', "’-1’": 'Poor', "’-2’": 'Obvious' },
-  social: { 5.0: 'Disinhibited', 4.5: 'Social/Proactive', 4.0: 'Social/Proactive', 3.5: 'Social/Outgoing', 3.0: 'Social/Empathy', 2.5: 'Urge/Push', 2.0: 'Urge/Desire', 1.5: 'Want/Capable', 1.0: 'Can/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Avoidant', "’-2’": 'Antisocial' },
-  energy: { 5.0: 'Manic/Freqnzied', 4.5: 'Energetic/Hyper', 4.0: 'Energetic/Hyper', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Definitely/Some', 2.0: 'Yes/Some', 1.5: 'Capable', 1.0: 'Capable', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Tired', "’-2’": 'Exhasuted' },
-  focus: { 5.0: 'Super/Laser', 4.5: 'Wired', 4.0: 'Half Wired', 3.5: 'Strong/Focus', 3.0: 'Some/Focus', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Effective', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Scattered', "’-2’": 'Tweaking' },
-  anxiety: { 5.0: 'Severe/Panic', 4.5: 'Severe/Adverse', 4.0: 'Serious/Adverse', 3.5: 'Impacted/Anxious', 3.0: 'Affected/Anxious', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Minimal', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Adhednoia', "’-2’": 'Terror' },
-  impair: { 5.0: 'Severe/Crippled', 4.5: 'Severe/Worry', 4.0: 'Serious/Worry', 3.5: 'Impacting/Behaviour', 3.0: 'Affecting/Behaviour', 2.5: 'Affecting/Hindered', 2.0: 'Affecting/Compensating', 1.5: 'Ignorable', 1.0: 'Minimal', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Unwell', "’-2’": 'Dangerous' },
+  rush: { 8.0: 'Extreme', 7.0: 'Intense', 6.0: 'Intense', 5.0: 'Contriollable', 4.0: 'Contriollable', 3.0: 'Some', 2.0: 'Some', 1.5: 'Think/Maybe', 1.0: 'Think/Maybe', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Overwhelming', "’-2’": 'Dysphoric' },
+  mood: { 6.0: 'Very Euphoric', 5.0: 'Somewhat Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear/Distinct', 2.5: 'Certain/Thought', 2.0: 'Some/Thought', 1.5: 'Maybe', 1.0: 'Maybe', 0.5: 'Maybe/Unsure', 0.0: 'No Change', "’-1’": 'Poor', "’-2’": 'Obvious' },
+  social: { 6.0: 'Disinhibited', 5.0: 'Social/Proactive', 4.0: 'Social/Proactive', 3.5: 'Social/Outgoing', 3.0: 'Social/Empathy', 2.5: 'Urge/Push', 2.0: 'Urge/Desire', 1.5: 'Want/Capable', 1.0: 'Can/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Avoidant', "’-2’": 'Antisocial' },
+  energy: { 6.0: 'Manic/Freqnzied', 5.0: 'Energetic/Hyper', 4.0: 'Energetic/Hyper', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Definitely/Some', 2.0: 'Yes/Some', 1.5: 'Capable', 1.0: 'Capable', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Tired', "’-2’": 'Exhasuted' },
+  focus: { 6.0: 'Super/Laser', 5.0: 'Wired', 4.0: 'Half Wired', 3.5: 'Strong/Focus', 3.0: 'Some/Focus', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Effective', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Scattered', "’-2’": 'Tweaking' },
+  anxiety: { 6.0: 'Severe/Panic', 5.0: 'Severe/Adverse', 4.0: 'Serious/Adverse', 3.5: 'Impacted/Anxious', 3.0: 'Affected/Anxious', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Minimal', 0.5: 'Maybe/Unsure', 0.0: 'None', "’-1’": 'Adhednoia', "’-2’": 'Terror' },
+  impair: { 6.0: 'Severe/Crippled', 5.0: 'Severe/Worry', 4.0: 'Serious/Worry', 3.5: 'Impacting/Behaviour', 3.0: 'Affecting/Behaviour', 2.5: 'Affecting/Hindered', 2.0: 'Affecting/Compensating', 1.5: 'Ignorable', 1.0: 'Minimal', 0.5: 'Maybe/Unsure', 0.0: 'No', "’-1’": 'Unwell', "’-2’": 'Dangerous' },
   change: { 5.00: 'Major', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Certain', 2.00: 'Thought', 1.50: 'Some', 1.00: 'Maybe', 0.50: 'Unsure', 0.00: 'None', 0.25: '+' },
   degree: { 5.00: 'Extreme', 4.50: 'Very High', 4.00: 'Higher', 3.50: 'High', 3.00: 'Mid High', 2.50: 'Mid', 2.00: 'Mid Low', 1.50: 'Low', 1.00: 'Lower', 0.50: 'Very Low', 0.00: 'None', 0.25: 'Minimal' },
   other: { 5.00: 'Now', 4.50: '30Seconds', 4.00: 'Last', 3.50: '1Minute', 3.00: 'Next', 2.50: '5Minutes', 2.00: 'Intake', 1.50: 'Plan', 1.00: 'Dose', 0.50: 'Hindsight', 0.00: 'Row', 0.25: 'Last5Minutes' },
@@ -672,13 +686,13 @@ labels: {
     // 5,4.75,4.5,4.25,4,'Very High',3.75,3.5,3.25,3,'High',2.75,2.5,2.25,2,'Moderate',1.75,1.5,1.25,1,'Low',0.75,0.5,0.25,0
     // Separated
     // 5,4.75,4.5,4.25,4,'----------',3.75,3.5,3.25,3,'----------',2.75,2.5,2.25,2,'----------',1.75,1.5,1.25,1,'----------',0.75,0.5,0.25,0
-      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      rush:[8,7,6,5,4,4,3,1.5,1,0.5,0,-1,-2],
+      mood:[6,5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      social:[6,5,4,3.5,3,2.5,2,1.5,1,0.5,0,
+      energy:[6,5,4,3.5,3,2.5,2,1.5,1,0.5,0,
+      focus:[6,5,4,3.5,3,2.5,2,1.5,1,0.5,0,
+      anxiety:[6,5,4,3.5,3,2.5,2,1.5,1,0.5,0,
+      impair:[6,5,4,3.5,3,2.5,2,1.5,1,0.5,0,
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -687,7 +701,7 @@ labels: {
       degree:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
       other: [5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0]
     },
-    rapidValues: [5,4,3,2,1,0],
+    rapidValues: [6,5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
@@ -1878,7 +1892,58 @@ function computeCompositeFromMeans(M){
   const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
   const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
   const fiveMax  = ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5) + 5;
-  return {score, max, min, weighted, fiveMax};
+  return {score, max, min, weighted, fiveMax}
+<script>
+/* 15m Average: straight average of all entries within the last 15 minutes */
+function open15mAverage(){
+  try{
+    const endMs = Date.now();
+    const startMs = endMs - 15*60*1000;
+    if (typeof snapshotFromMainTable !== 'function'){
+      alert('snapshotFromMainTable() not found.');
+      return;
+    }
+    const snap = snapshotFromMainTable();
+    const sel = snap.filter(e => e._ts >= startMs && e._ts <= endMs);
+    if (!sel.length){
+      alert('No data in last 15 minutes.');
+      return;
+    }
+    const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
+    const sums = {}; flds.forEach(f => sums[f]=0);
+    sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
+    const means = {}; flds.forEach(f => means[f] = +(sums[f] / sel.length));
+    if (typeof computeCompositeFromMeans !== 'function'){
+      alert('computeCompositeFromMeans() not found.');
+      return;
+    }
+    const C = computeCompositeFromMeans(means);
+    const d = new Date();
+    if (typeof appendSummaryRowToTable !== 'function'){
+      // provide minimal fallback appender if host app lacks utility
+      const tbody = document.querySelector('#avg15Table tbody');
+      if (!tbody){ alert('avg15Table not found.'); return; }
+      const fmt = (x) => Number.isFinite(+x) ? (+x).toFixed(2) : '';
+      const tr = document.createElement('tr');
+      const cells = [
+        d.toLocaleTimeString('en-AU',{hour12:false}).slice(0,5) + ' Average',
+        fmt(means.rush), fmt(means.mood), fmt(means.social),
+        fmt(means.energy), fmt(means.focus), fmt(means.anxiety), fmt(means.impair),
+        fmt(C.score), fmt(C.max), fmt(C.min), fmt(C.weighted), fmt(C.fiveMax)
+      ];
+      tr.innerHTML = cells.map(v=>`<td>${v}</td>`).join('');
+      tbody.appendChild(tr);
+      // optional shading if host provides it
+      try { if (window.STS_applyShading) STS_applyShading(tr); } catch(e){}
+    } else {
+      appendSummaryRowToTable('avg15Table', d, means, C, {labelSuffix: ' 15m Avg'});
+    }
+  }catch(err){
+    console.error(err);
+    alert('15m Average failed: ' + (err && err.message ? err.message : err));
+  }
+}
+;
 }
 
 // === Backfill controls (manual; also mirrors to any popups) ==================
