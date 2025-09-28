@@ -396,7 +396,7 @@ pointer-events: auto;
   left: 20px;
   right: 20px;
   display: grid;
-  grid-template-columns: repeat(12, auto);
+  grid-template-columns: repeat(10, auto);
   grid-auto-rows: auto;
   align-items: center;
   justify-content: start;
@@ -423,7 +423,7 @@ pointer-events: auto;
 </style>
 
 <meta charset="utf-8"/>
-<title>statpack v1.14.2 r2165</title>
+<title>statpack v1.13.3 r2150</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -518,17 +518,11 @@ function computeFiveMax(obj){
 <button id="reviewBtn" onclick="openReview()">Review</button>
 <button id="autoEntriesBtn" onclick="openAutoEntries()">Auto Entries</button>
 <button id="rollingAvgBtn" onclick="openRollingAverage()">Rolling Average</button>
-<button id="allRatedRowsBtn" onclick="openAllRatedPopup()">All Rated (Rows)</button>
-<button id="allRatedOutOf10Btn" onclick="openAllRatedOutOf10Popup()">All Rated /10</button>
-<button id="allRated5mBtn" onclick="openAllRated5MinutesPopup()">All Rated 5m</button>
-<button id="allRated5m10Btn" onclick="openAllRated5MinutesOutOf10Popup()">All Rated 5m /10</button>
-
 <button id="ratedPopupBtn" onclick="openRatedPopup()">Rated Popup</button>
 <button id="allRatedPopupBtn" onclick="openAllRatedPopup()">All Rated Popup</button>
 </div>
 <h1>statpack</h1>
 <div class="controls">
-<label style="margin-left:12px;font-size:12px;"><input type="checkbox" id="dualSelToggle" onchange="CONFIG.dualSelectionAdjust.enabled=this.checked;"> Adjust dual‑select (−0.5)</label>
 <span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
 <button onclick="resetTimer()">Reset Timer</button>
@@ -766,9 +760,6 @@ const CONFIG = Object.freeze({
       'Weighted': 10,
       '5Max': 10
     },
-  /* --- dual-selection behaviour toggle --- */
-  dualSelectionAdjust: { enabled: false, delta: 0.5 },
-
     colorSets: {
       green: ['Rush','Mood','Social','Score','Weighted','5Max','Max'],
       gold:  ['Energy','Focus'],
@@ -955,18 +946,11 @@ function getLabels(metric, values) {
 }
 
 
-    
-function getSum(arr) {
-        if (Array.isArray(arr) && arr.length) {
-            let s = arr.reduce((a,b)=>a+b,0);
-            if (Array.isArray(arr) && arr.length === 2 && CONFIG.dualSelectionAdjust && CONFIG.dualSelectionAdjust.enabled){
-                s = s - (CONFIG.dualSelectionAdjust.delta || 0.5);
-            }
-            return s;
-        }
-        return 0;
+    function getSum(arr) {
+        return Array.isArray(arr) && arr.length
+        ? arr.reduce((a, b) => a + b, 0)
+        : 0;
     }
-
 
     function fmt2(x){ const n = Number.parseFloat(x); return Number.isFinite(n) ? n.toFixed(2) : (x ?? ""); }
 
@@ -5190,366 +5174,6 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
   </div>
 </div>
 
-
-
-
-
-<!-- All Rated OutOf10 Popup Modal -->
-<div id="allRatedOutOf10PopupModal" style="display:none; position:fixed; inset:0; z-index:10000;">
-  <div id="allRatedOutOf10PopupBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
-  <div id="allRatedOutOf10PopupCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
-      <h2>All Rated (/10)</h2>
-      <button aria-label="Close" onclick="closeAllRatedOutOf10Popup()">Close</button>
-    </div>
-    <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">Categories computed on 0–10 scale (Very&nbsp;Low, Low, Medium, High, Very&nbsp;High)</div>
-    <table id="allRatedOutOf10PopupTable">
-      <thead>
-        <tr>
-          <th>Timestamp</th>
-          <th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- All Rated 5‑Minute Popup Modal -->
-<div id="allRated5MinutesPopupModal" style="display:none; position:fixed; inset:0; z-index:10000;">
-  <div id="allRated5MinutesPopupBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
-  <div id="allRated5MinutesPopupCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
-      <h2>All Rated 5‑Minute</h2>
-      <button aria-label="Close" onclick="closeAllRated5MinutesPopup()">Close</button>
-    </div>
-    <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">Averages per 5‑minute block, then +5 to map onto 5‑10 scale</div>
-    <table id="allRated5MinutesPopupTable">
-      <thead>
-        <tr>
-          <th>Offset</th>
-          <th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-
-<!-- All Rated Popups (styled like original) -->
-<script>
-(function(){
-  // ---- helpers ----
-  function ensureTableBody(sel){const tb=document.querySelector(sel);if(tb) tb.innerHTML='';return tb;}
-  function rowHtml(labelSet){ return (
-    `<td class="cat ${labelSet.cls}"><span class="badge ${labelSet.cls}">${labelSet.label}</span></td>`
-  );}
-  function computeCat10(val){
-    if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
-    if(val<=2) return {label:'Very Low',cls:'verylow'};
-    if(val<=4) return {label:'Low',cls:'low'};
-    if(val<=6) return {label:'Medium',cls:'medium'};
-    if(val<=8) return {label:'High',cls:'high'};
-    return {label:'Very High',cls:'veryhigh'};
-  }
-  // ---- OutOf10 ----
-  function renderAllRatedOutOf10Popup(){
-    const tb = ensureTableBody('#allRatedOutOf10PopupTable tbody'); if(!tb) return;
-    const rows=[];
-    (Array.isArray(logData)?logData:[]).forEach(r=>{
-      const t=(r.timestamp||'');
-      rows.push(`<tr><td>${t}</td>`+
-        rowHtml(computeCat10(r.rushSum*2))+
-        rowHtml(computeCat10(r.moodSum*2))+
-        rowHtml(computeCat10(r.socialSum*2))+
-        rowHtml(computeCat10(r.energySum*2))+
-        rowHtml(computeCat10(r.focusSum*2))+
-        rowHtml(computeCat10(computeRatingCategory('anxiety',r.anxietySum).val*2||r.anxietySum*2))+ /* fall back */
-        rowHtml(computeCat10(computeRatingCategory('impair',r.impairSum).val*2||r.impairSum*2))+
-      `</tr>`);
-    });
-    tb.innerHTML = rows.join('');
-  }
-  window.openAllRatedOutOf10Popup = function(){
-    renderAllRatedOutOf10Popup();
-    const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='block';
-    const bd=document.getElementById('allRatedOutOf10PopupBackdrop');if(bd)bd.onclick=closeAllRatedOutOf10Popup;
-  };
-  window.closeAllRatedOutOf10Popup = function(){
-    const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='none';
-  };
-
-  // ---- 5‑Minute ----
-  function fiveMinBuckets(){
-    const src = Array.isArray(logData)?logData:[]; if(!src.length) return [];
-    const res = {};
-    const startT = new Date(src[0].timestamp||0).getTime();
-    src.forEach(r=>{
-      const ts = new Date(r.timestamp||0).getTime();
-      const diff = Math.max(1,Math.floor((ts-startT)/300000)); // 1‑based bin index
-      (res[diff]=res[diff]||[]).push(r);
-    });
-    const out=[];
-    Object.keys(res).sort((a,b)=>a-b).forEach(k=>{
-      const list=res[k], agg={rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
-      list.forEach(r=>{
-        agg.rush+=r.rushSum||0; agg.mood+=r.moodSum||0; agg.social+=r.socialSum||0; agg.energy+=r.energySum||0;
-        agg.focus+=r.focusSum||0; agg.anxiety+=r.anxietySum||0; agg.impair+=r.impairSum||0;
-      });
-      for(const f in agg){ agg[f]/=list.length; } // average
-      out.push({offset:+k,values:agg});
-    });
-    return out;
-  }
-  function renderAllRated5MinutesPopup(){
-    const tb = ensureTableBody('#allRated5MinutesPopupTable tbody'); if(!tb) return;
-    const rows=[];
-    fiveMinBuckets().forEach(b=>{
-      const offStr = String(b.offset*5).padStart(2,'0')+':00';
-      rows.push(`<tr><td>+${offStr}</td>`+
-        rowHtml(computeCat10(b.values.rush+5))+
-        rowHtml(computeCat10(b.values.mood+5))+
-        rowHtml(computeCat10(b.values.social+5))+
-        rowHtml(computeCat10(b.values.energy+5))+
-        rowHtml(computeCat10(b.values.focus+5))+
-        rowHtml(computeCat10(b.values.anxiety+5))+
-        rowHtml(computeCat10(b.values.impair+5))+
-      `</tr>`);
-    });
-    tb.innerHTML = rows.join('');
-  }
-  window.openAllRated5MinutesPopup = function(){
-    renderAllRated5MinutesPopup();
-    const m=document.getElementById('allRated5MinutesPopupModal');if(m)m.style.display='block';
-    const bd=document.getElementById('allRated5MinutesPopupBackdrop');if(bd)bd.onclick=closeAllRated5MinutesPopup;
-  };
-  window.closeAllRated5MinutesPopup = function(){
-    const m=document.getElementById('allRated5MinutesPopupModal');if(m)m.style.display='none';
-  };
-})();
-</script>
-
-
-<script>
-// QuickStatsOne injector for all summaries
-(function(){
-  const METRICS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
-
-  function numFromText(t){
-    if (t == null) return null;
-    const s = String(t).replace(/[^0-9.+-]/g,'');
-    const n = parseFloat(s);
-    return Number.isFinite(n) ? n : null;
-  }
-  function computeQuickStatsOneFromRow(tr){
-    const vals = [];
-    METRICS.forEach(k=>{
-      // prefer explicit data-col match, fallback to indexed columns by header text
-      let td = tr.querySelector(`td[data-col="${k}"]`);
-      if (!td){
-        const tbl = tr.closest('table');
-        if (tbl){
-          const ths = Array.from(tbl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-          const idx = ths.findIndex(h=>h===k);
-          if (idx>=0 && tr.children[idx]) td = tr.children[idx];
-        }
-      }
-      if (!td) return;
-      const v = numFromText(td.textContent);
-      if (v != null) vals.push(v);
-    });
-    const over = vals.filter(v=>v>3);
-    if (over.length===0) return "0 (0.00)";
-    // Mode on one-decimal rounding of >3 set
-    const counts = Object.create(null);
-    let modeVal = null, modeCt = 0;
-    over.forEach(v=>{
-      const key = Number(v.toFixed(1));
-      counts[key] = (counts[key]||0)+1;
-      if (counts[key]>modeCt || (counts[key]===modeCt && (modeVal===null || key<modeVal))){
-        modeCt = counts[key]; modeVal = key;
-      }
-    });
-    const avg = over.reduce((a,b)=>a+b,0)/over.length;
-    return `${modeVal.toFixed(1)} (${avg.toFixed(2)})`;
-  }
-  function ensureHeader(table){
-    const thead = table.querySelector('thead');
-    if (!thead) return;
-    const tr = thead.querySelector('tr');
-    if (!tr) return;
-    if (tr.querySelector('th[data-col="QuickStatsOne"]')) return;
-    // Only attach if table looks like a summary (has the 7 metrics)
-    const hasMetrics = Array.from(thead.querySelectorAll('th')).some(th=>METRICS.includes(th.textContent.trim()));
-    if (!hasMetrics) return;
-    const th = document.createElement('th');
-    th.setAttribute('data-col','QuickStatsOne');
-    th.textContent = 'QuickStatsOne';
-    tr.appendChild(th);
-  }
-  function appendCell(tr){
-    if (tr.querySelector('td[data-col="QuickStatsOne"]')) return;
-    const td = document.createElement('td');
-    td.setAttribute('data-col','QuickStatsOne');
-    td.textContent = computeQuickStatsOneFromRow(tr);
-    tr.appendChild(td);
-  }
-  function processTable(table){
-    ensureHeader(table);
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-    Array.from(tbody.querySelectorAll('tr')).forEach(appendCell);
-  }
-
-  // Initial sweep after DOM is ready
-  function sweep(){
-    document.querySelectorAll('table').forEach(tbl=>{
-      const head = tbl.querySelector('thead');
-      if (!head) return;
-      const cols = Array.from(head.querySelectorAll('th')).map(th=>th.textContent.trim());
-      const ok = METRICS.some(m=>cols.includes(m));
-      if (ok) processTable(tbl);
-    });
-  }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', sweep);
-  } else {
-    try{ sweep(); }catch(e){}
-  }
-
-  // Observe for dynamically added rows/tables used by summaries/popups
-  const obs = new MutationObserver(ms=>{
-    for (const m of ms){
-      for (const node of m.addedNodes){
-        if (!(node instanceof Element)) continue;
-        if (node.matches('table')){
-          processTable(node);
-          continue;
-        }
-        if (node.matches('tr')){
-          const tbl = node.closest('table');
-          if (tbl) processTable(tbl);
-          continue;
-        }
-        node.querySelectorAll && node.querySelectorAll('table').forEach(processTable);
-      }
-    }
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
-})();
-</script>
-
-
-<script>
-// QuickStatsOne injector for all summaries
-(function(){
-  const METRICS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
-
-  function numFromText(t){
-    if (t == null) return null;
-    const s = String(t).replace(/[^0-9.+-]/g,'');
-    const n = parseFloat(s);
-    return Number.isFinite(n) ? n : null;
-  }
-  function computeQuickStatsOneFromRow(tr){
-    const vals = [];
-    METRICS.forEach(k=>{
-      // prefer explicit data-col match, fallback to indexed columns by header text
-      let td = tr.querySelector(`td[data-col="${k}"]`);
-      if (!td){
-        const tbl = tr.closest('table');
-        if (tbl){
-          const ths = Array.from(tbl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-          const idx = ths.findIndex(h=>h===k);
-          if (idx>=0 && tr.children[idx]) td = tr.children[idx];
-        }
-      }
-      if (!td) return;
-      const v = numFromText(td.textContent);
-      if (v != null) vals.push(v);
-    });
-    const over = vals.filter(v=>v>3);
-    if (over.length===0) return "0 (0.00)";
-    // Mode on one-decimal rounding of >3 set
-    const counts = Object.create(null);
-    let modeVal = null, modeCt = 0;
-    over.forEach(v=>{
-      const key = Number(v.toFixed(1));
-      counts[key] = (counts[key]||0)+1;
-      if (counts[key]>modeCt || (counts[key]===modeCt && (modeVal===null || key<modeVal))){
-        modeCt = counts[key]; modeVal = key;
-      }
-    });
-    const avg = over.reduce((a,b)=>a+b,0)/over.length;
-    return `${modeVal.toFixed(1)} (${avg.toFixed(2)})`;
-  }
-  function ensureHeader(table){
-    const thead = table.querySelector('thead');
-    if (!thead) return;
-    const tr = thead.querySelector('tr');
-    if (!tr) return;
-    if (tr.querySelector('th[data-col="QuickStatsOne"]')) return;
-    // Only attach if table looks like a summary (has the 7 metrics)
-    const hasMetrics = Array.from(thead.querySelectorAll('th')).some(th=>METRICS.includes(th.textContent.trim()));
-    if (!hasMetrics) return;
-    const th = document.createElement('th');
-    th.setAttribute('data-col','QuickStatsOne');
-    th.textContent = 'QuickStatsOne';
-    tr.appendChild(th);
-  }
-  function appendCell(tr){
-    if (tr.querySelector('td[data-col="QuickStatsOne"]')) return;
-    const td = document.createElement('td');
-    td.setAttribute('data-col','QuickStatsOne');
-    td.textContent = computeQuickStatsOneFromRow(tr);
-    tr.appendChild(td);
-  }
-  function processTable(table){
-    ensureHeader(table);
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-    Array.from(tbody.querySelectorAll('tr')).forEach(appendCell);
-  }
-
-  // Initial sweep after DOM is ready
-  function sweep(){
-    document.querySelectorAll('table').forEach(tbl=>{
-      const head = tbl.querySelector('thead');
-      if (!head) return;
-      const cols = Array.from(head.querySelectorAll('th')).map(th=>th.textContent.trim());
-      const ok = METRICS.some(m=>cols.includes(m));
-      if (ok) processTable(tbl);
-    });
-  }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', sweep);
-  } else {
-    try{ sweep(); }catch(e){}
-  }
-
-  // Observe for dynamically added rows/tables used by summaries/popups
-  const obs = new MutationObserver(ms=>{
-    for (const m of ms){
-      for (const node of m.addedNodes){
-        if (!(node instanceof Element)) continue;
-        if (node.matches('table')){
-          processTable(node);
-          continue;
-        }
-        if (node.matches('tr')){
-          const tbl = node.closest('table');
-          if (tbl) processTable(tbl);
-          continue;
-        }
-        node.querySelectorAll && node.querySelectorAll('table').forEach(processTable);
-      }
-    }
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
-})();
-</script>
-
 </body>
 <script>
 function openEmotionModal() {
@@ -6279,20 +5903,20 @@ function computeRatingCategory(metricOrVal, maybeVal){
   if (!Number.isFinite(val) || val === 0) return { label:'None', cls:'none' };
 
   // Metric‑specific thresholds
-  if (metric === 'asd' || metric === 'dsa'){
-    if (val > 0 && val <= 0.5)      return { label:'Very Low',  cls:'verylow' };
-    if (val > 0.5 && val <= 2.5)      return { label:'Low',       cls:'low' };
-    if (val > 2.5 && val < 4)       return { label:'Medium',    cls:'medium' };
-    if (val >= 4 && val < 4.5)      return { label:'High',      cls:'high' };
+  if (metric === 'anxiety' || metric === 'impair'){
+    if (val > 0 && val <= 1.5)      return { label:'Very Low',  cls:'verylow' };
+    if (val > 1.5 && val <= 2.5)      return { label:'Low',       cls:'low' };
+    if (val > 2.5 && val < 3.5)       return { label:'Medium',    cls:'medium' };
+    if (val >= 3.5 && val < 4.5)      return { label:'High',      cls:'high' };
     /* val >= 4 */
     return { label:'Very High', cls:'veryhigh' };
   }
 
   // Default thresholds for other metrics
-  if (val > 0 && val <= 0.5)        return { label:'Very Low',  cls:'verylow' };
-  if (val > 0.5 && val <= 2.5)        return { label:'Low',       cls:'low' };
-  if (val > 2.5 && val < 4)         return { label:'Medium',    cls:'medium' };
-  if (val >= 4 && val < 4.5)        return { label:'High',      cls:'high' };
+  if (val > 0 && val <= 1.5)        return { label:'Very Low',  cls:'verylow' };
+  if (val > 1.5 && val <= 2.5)        return { label:'Low',       cls:'low' };
+  if (val > 2.5 && val < 3.5)         return { label:'Medium',    cls:'medium' };
+  if (val >= 3.5 && val < 4.5)        return { label:'High',      cls:'high' };
   /* val >= 5 */
   return { label:'Very High', cls:'veryhigh' };
 }
@@ -6333,6 +5957,35 @@ function closeRatedPopup(){
 
 // === All Rated Popup (row-based categories) ===
 
+function computeRatingCategory(metricOrVal, maybeVal){
+  // Flexible signature: (val) or (metric, val)
+  let metric = '', val;
+  if (typeof metricOrVal === 'string'){
+    metric = String(metricOrVal).toLowerCase();
+    val = Number(maybeVal);
+  } else {
+    val = Number(metricOrVal);
+  }
+  if (!Number.isFinite(val) || val === 0) return { label:'None', cls:'none' };
+
+  // Metric‑specific thresholds
+  if (metric === 'anxiety' || metric === 'impair'){
+    if (val > 0 && val <= 1)      return { label:'Very Low',  cls:'verylow' };
+    if (val > 1 && val <= 2)      return { label:'Low',       cls:'low' };
+    if (val > 2 && val < 3)       return { label:'Medium',    cls:'medium' };
+    if (val >= 3 && val < 4)      return { label:'High',      cls:'high' };
+    /* val >= 4 */
+    return { label:'Very High', cls:'veryhigh' };
+  }
+
+  // Default thresholds for other metrics
+  if (val > 0 && val <= 1)        return { label:'Very Low',  cls:'verylow' };
+  if (val > 1 && val <= 2)        return { label:'Low',       cls:'low' };
+  if (val > 2 && val < 4)         return { label:'Medium',    cls:'medium' };
+  if (val >= 4 && val < 5)        return { label:'High',      cls:'high' };
+  /* val >= 5 */
+  return { label:'Very High', cls:'veryhigh' };
+}
 
 function renderAllRatedPopup(){
   try{

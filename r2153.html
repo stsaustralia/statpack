@@ -396,7 +396,7 @@ pointer-events: auto;
   left: 20px;
   right: 20px;
   display: grid;
-  grid-template-columns: repeat(12, auto);
+  grid-template-columns: repeat(10, auto);
   grid-auto-rows: auto;
   align-items: center;
   justify-content: start;
@@ -423,7 +423,7 @@ pointer-events: auto;
 </style>
 
 <meta charset="utf-8"/>
-<title>statpack v1.14.2 r2165</title>
+<title>statpack v1.13.3 r2150</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -528,7 +528,6 @@ function computeFiveMax(obj){
 </div>
 <h1>statpack</h1>
 <div class="controls">
-<label style="margin-left:12px;font-size:12px;"><input type="checkbox" id="dualSelToggle" onchange="CONFIG.dualSelectionAdjust.enabled=this.checked;"> Adjust dual‑select (−0.5)</label>
 <span style="margin-left:8px; padding:3px 6px; border:1px solid #007aff; border-radius:6px; color:#007aff; font-size:11px;">Append Mode</span>
 <button onclick="newTrip()">New Log</button>
 <button onclick="resetTimer()">Reset Timer</button>
@@ -766,9 +765,6 @@ const CONFIG = Object.freeze({
       'Weighted': 10,
       '5Max': 10
     },
-  /* --- dual-selection behaviour toggle --- */
-  dualSelectionAdjust: { enabled: false, delta: 0.5 },
-
     colorSets: {
       green: ['Rush','Mood','Social','Score','Weighted','5Max','Max'],
       gold:  ['Energy','Focus'],
@@ -955,18 +951,11 @@ function getLabels(metric, values) {
 }
 
 
-    
-function getSum(arr) {
-        if (Array.isArray(arr) && arr.length) {
-            let s = arr.reduce((a,b)=>a+b,0);
-            if (Array.isArray(arr) && arr.length === 2 && CONFIG.dualSelectionAdjust && CONFIG.dualSelectionAdjust.enabled){
-                s = s - (CONFIG.dualSelectionAdjust.delta || 0.5);
-            }
-            return s;
-        }
-        return 0;
+    function getSum(arr) {
+        return Array.isArray(arr) && arr.length
+        ? arr.reduce((a, b) => a + b, 0)
+        : 0;
     }
-
 
     function fmt2(x){ const n = Number.parseFloat(x); return Number.isFinite(n) ? n.toFixed(2) : (x ?? ""); }
 
@@ -5191,362 +5180,96 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
 </div>
 
 
-
-
-
-<!-- All Rated OutOf10 Popup Modal -->
-<div id="allRatedOutOf10PopupModal" style="display:none; position:fixed; inset:0; z-index:10000;">
-  <div id="allRatedOutOf10PopupBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
-  <div id="allRatedOutOf10PopupCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
-      <h2>All Rated (/10)</h2>
-      <button aria-label="Close" onclick="closeAllRatedOutOf10Popup()">Close</button>
-    </div>
-    <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">Categories computed on 0–10 scale (Very&nbsp;Low, Low, Medium, High, Very&nbsp;High)</div>
-    <table id="allRatedOutOf10PopupTable">
-      <thead>
-        <tr>
-          <th>Timestamp</th>
-          <th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- All Rated 5‑Minute Popup Modal -->
-<div id="allRated5MinutesPopupModal" style="display:none; position:fixed; inset:0; z-index:10000;">
-  <div id="allRated5MinutesPopupBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
-  <div id="allRated5MinutesPopupCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
-      <h2>All Rated 5‑Minute</h2>
-      <button aria-label="Close" onclick="closeAllRated5MinutesPopup()">Close</button>
-    </div>
-    <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">Averages per 5‑minute block, then +5 to map onto 5‑10 scale</div>
-    <table id="allRated5MinutesPopupTable">
-      <thead>
-        <tr>
-          <th>Offset</th>
-          <th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-
-<!-- All Rated Popups (styled like original) -->
+<!-- === All Rated Extensions === -->
 <script>
 (function(){
-  // ---- helpers ----
-  function ensureTableBody(sel){const tb=document.querySelector(sel);if(tb) tb.innerHTML='';return tb;}
-  function rowHtml(labelSet){ return (
-    `<td class="cat ${labelSet.cls}"><span class="badge ${labelSet.cls}">${labelSet.label}</span></td>`
-  );}
-  function computeCat10(val){
-    if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
-    if(val<=2) return {label:'Very Low',cls:'verylow'};
-    if(val<=4) return {label:'Low',cls:'low'};
-    if(val<=6) return {label:'Medium',cls:'medium'};
-    if(val<=8) return {label:'High',cls:'high'};
-    return {label:'Very High',cls:'veryhigh'};
+  // Utility to get snapshot same as main
+  function snapshot(){
+    if (typeof snapshotFromMainTable === 'function'){
+      return snapshotFromMainTable();
+    }
+    return [];
   }
-  // ---- OutOf10 ----
-  function renderAllRatedOutOf10Popup(){
-    const tb = ensureTableBody('#allRatedOutOf10PopupTable tbody'); if(!tb) return;
-    const rows=[];
-    (Array.isArray(logData)?logData:[]).forEach(r=>{
-      const t=(r.timestamp||'');
-      rows.push(`<tr><td>${t}</td>`+
-        rowHtml(computeCat10(r.rushSum*2))+
-        rowHtml(computeCat10(r.moodSum*2))+
-        rowHtml(computeCat10(r.socialSum*2))+
-        rowHtml(computeCat10(r.energySum*2))+
-        rowHtml(computeCat10(r.focusSum*2))+
-        rowHtml(computeCat10(computeRatingCategory('anxiety',r.anxietySum).val*2||r.anxietySum*2))+ /* fall back */
-        rowHtml(computeCat10(computeRatingCategory('impair',r.impairSum).val*2||r.impairSum*2))+
-      `</tr>`);
+  function computeCategory(val){
+    if (val <= 0) return 'none';
+    if (val <= 1) return 'verylow';
+    if (val <= 2) return 'low';
+    if (val <= 3.5) return 'medium';
+    if (val <= 5) return 'high';
+    return 'veryhigh';
+  }
+  function computeCategory10(val){
+    return computeCategory(val/2);
+  }
+  function ensurePopup(id, title){
+    let modal = document.getElementById(id+'Modal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = id+'Modal';
+    Object.assign(modal.style,{display:'none',position:'fixed',inset:'0',zIndex:10000});
+    const backdrop = document.createElement('div');
+    backdrop.style.cssText='position:absolute;inset:0;background:rgba(0,0,0,0.45);';
+    backdrop.onclick=()=>{modal.style.display='none';};
+    const card = document.createElement('div');
+    card.style.cssText='position:relative;margin:8vh auto;width:min(720px,90vw);max-height:84vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,0.25);padding:16px;border:2px solid #007aff;';
+    const h2 = document.createElement('h2'); h2.textContent=title; h2.style.margin='0 0 8px 0'; h2.style.fontSize='18px';
+    const tbl = document.createElement('table'); tbl.id=id+'Table'; tbl.style.width='100%'; tbl.style.borderCollapse='collapse'; tbl.style.background='#fff';
+    tbl.innerHTML='<thead><tr><th>Metric</th><th>Sum</th><th>Category</th></tr></thead><tbody></tbody>';
+    card.appendChild(h2); card.appendChild(tbl);
+    modal.appendChild(backdrop); modal.appendChild(card);
+    document.body.appendChild(modal);
+    return modal;
+  }
+  function renderRows(id, dataRows, isTenScale){
+    const tbl = document.getElementById(id+'Table'); if(!tbl) return;
+    const tbody = tbl.querySelector('tbody'); tbody.innerHTML='';
+    const fields=['rush','mood','social','energy','focus','anxiety','impair'];
+    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    dataRows.forEach(r=>fields.forEach(f=>{sums[f]+= (+r[f]||0);}));
+    fields.forEach(f=>{
+      const tr=document.createElement('tr');
+      const td1=document.createElement('td'); td1.textContent=f.charAt(0).toUpperCase()+f.slice(1);
+      const v = isTenScale? (sums[f]*2) : sums[f];
+      const td2=document.createElement('td'); td2.textContent=v.toFixed(2);
+      const td3=document.createElement('td'); const cat = isTenScale? computeCategory10(v):computeCategory(v); td3.textContent=cat; td3.className='cat '+cat;
+      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+      tbody.appendChild(tr);
     });
-    tb.innerHTML = rows.join('');
   }
+  // --- Row-based AllRated /10 ---
   window.openAllRatedOutOf10Popup = function(){
-    renderAllRatedOutOf10Popup();
-    const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='block';
-    const bd=document.getElementById('allRatedOutOf10PopupBackdrop');if(bd)bd.onclick=closeAllRatedOutOf10Popup;
+    ensurePopup('allRatedOutOf10Popup','All Rated (Rows, /10)');
+    renderRows('allRatedOutOf10Popup', snapshot(), true);
+    document.getElementById('allRatedOutOf10PopupModal').style.display='block';
   };
-  window.closeAllRatedOutOf10Popup = function(){
-    const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='none';
-  };
-
-  // ---- 5‑Minute ----
-  function fiveMinBuckets(){
-    const src = Array.isArray(logData)?logData:[]; if(!src.length) return [];
-    const res = {};
-    const startT = new Date(src[0].timestamp||0).getTime();
-    src.forEach(r=>{
-      const ts = new Date(r.timestamp||0).getTime();
-      const diff = Math.max(1,Math.floor((ts-startT)/300000)); // 1‑based bin index
-      (res[diff]=res[diff]||[]).push(r);
+  // --- 5m Avg ---
+  function fiveMinuteBuckets(){
+    const rows = snapshot(); if(!rows.length) return [];
+    rows.sort((a,b)=>a._ts-b._ts);
+    const out = {};
+    rows.forEach(r=>{
+      const offset = Math.max(1, Math.floor((r._ts - rows[0]._ts)/300000)+1);
+      out[offset] = out[offset]||[]; out[offset].push(r);
     });
-    const out=[];
-    Object.keys(res).sort((a,b)=>a-b).forEach(k=>{
-      const list=res[k], agg={rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
-      list.forEach(r=>{
-        agg.rush+=r.rushSum||0; agg.mood+=r.moodSum||0; agg.social+=r.socialSum||0; agg.energy+=r.energySum||0;
-        agg.focus+=r.focusSum||0; agg.anxiety+=r.anxietySum||0; agg.impair+=r.impairSum||0;
-      });
-      for(const f in agg){ agg[f]/=list.length; } // average
-      out.push({offset:+k,values:agg});
+    const buckets=[];
+    Object.keys(out).sort((a,b)=>a-b).forEach(k=>{
+      const list=out[k]; const agg={rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+      list.forEach(r=>{for(const f in agg){agg[f]+= (+r[f]||0);} });
+      for(const f in agg){agg[f]/=list.length;}
+      buckets.push(agg);
     });
-    return out;
-  }
-  function renderAllRated5MinutesPopup(){
-    const tb = ensureTableBody('#allRated5MinutesPopupTable tbody'); if(!tb) return;
-    const rows=[];
-    fiveMinBuckets().forEach(b=>{
-      const offStr = String(b.offset*5).padStart(2,'0')+':00';
-      rows.push(`<tr><td>+${offStr}</td>`+
-        rowHtml(computeCat10(b.values.rush+5))+
-        rowHtml(computeCat10(b.values.mood+5))+
-        rowHtml(computeCat10(b.values.social+5))+
-        rowHtml(computeCat10(b.values.energy+5))+
-        rowHtml(computeCat10(b.values.focus+5))+
-        rowHtml(computeCat10(b.values.anxiety+5))+
-        rowHtml(computeCat10(b.values.impair+5))+
-      `</tr>`);
-    });
-    tb.innerHTML = rows.join('');
+    return buckets;
   }
   window.openAllRated5MinutesPopup = function(){
-    renderAllRated5MinutesPopup();
-    const m=document.getElementById('allRated5MinutesPopupModal');if(m)m.style.display='block';
-    const bd=document.getElementById('allRated5MinutesPopupBackdrop');if(bd)bd.onclick=closeAllRated5MinutesPopup;
+    ensurePopup('allRated5MinutesPopup','All Rated 5m');
+    renderRows('allRated5MinutesPopup', fiveMinuteBuckets(), false);
+    document.getElementById('allRated5MinutesPopupModal').style.display='block';
   };
-  window.closeAllRated5MinutesPopup = function(){
-    const m=document.getElementById('allRated5MinutesPopupModal');if(m)m.style.display='none';
+  window.openAllRated5MinutesOutOf10Popup = function(){
+    ensurePopup('allRated5MinutesOutOf10Popup','All Rated 5m (/10)');
+    renderRows('allRated5MinutesOutOf10Popup', fiveMinuteBuckets(), true);
+    document.getElementById('allRated5MinutesOutOf10PopupModal').style.display='block';
   };
-})();
-</script>
-
-
-<script>
-// QuickStatsOne injector for all summaries
-(function(){
-  const METRICS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
-
-  function numFromText(t){
-    if (t == null) return null;
-    const s = String(t).replace(/[^0-9.+-]/g,'');
-    const n = parseFloat(s);
-    return Number.isFinite(n) ? n : null;
-  }
-  function computeQuickStatsOneFromRow(tr){
-    const vals = [];
-    METRICS.forEach(k=>{
-      // prefer explicit data-col match, fallback to indexed columns by header text
-      let td = tr.querySelector(`td[data-col="${k}"]`);
-      if (!td){
-        const tbl = tr.closest('table');
-        if (tbl){
-          const ths = Array.from(tbl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-          const idx = ths.findIndex(h=>h===k);
-          if (idx>=0 && tr.children[idx]) td = tr.children[idx];
-        }
-      }
-      if (!td) return;
-      const v = numFromText(td.textContent);
-      if (v != null) vals.push(v);
-    });
-    const over = vals.filter(v=>v>3);
-    if (over.length===0) return "0 (0.00)";
-    // Mode on one-decimal rounding of >3 set
-    const counts = Object.create(null);
-    let modeVal = null, modeCt = 0;
-    over.forEach(v=>{
-      const key = Number(v.toFixed(1));
-      counts[key] = (counts[key]||0)+1;
-      if (counts[key]>modeCt || (counts[key]===modeCt && (modeVal===null || key<modeVal))){
-        modeCt = counts[key]; modeVal = key;
-      }
-    });
-    const avg = over.reduce((a,b)=>a+b,0)/over.length;
-    return `${modeVal.toFixed(1)} (${avg.toFixed(2)})`;
-  }
-  function ensureHeader(table){
-    const thead = table.querySelector('thead');
-    if (!thead) return;
-    const tr = thead.querySelector('tr');
-    if (!tr) return;
-    if (tr.querySelector('th[data-col="QuickStatsOne"]')) return;
-    // Only attach if table looks like a summary (has the 7 metrics)
-    const hasMetrics = Array.from(thead.querySelectorAll('th')).some(th=>METRICS.includes(th.textContent.trim()));
-    if (!hasMetrics) return;
-    const th = document.createElement('th');
-    th.setAttribute('data-col','QuickStatsOne');
-    th.textContent = 'QuickStatsOne';
-    tr.appendChild(th);
-  }
-  function appendCell(tr){
-    if (tr.querySelector('td[data-col="QuickStatsOne"]')) return;
-    const td = document.createElement('td');
-    td.setAttribute('data-col','QuickStatsOne');
-    td.textContent = computeQuickStatsOneFromRow(tr);
-    tr.appendChild(td);
-  }
-  function processTable(table){
-    ensureHeader(table);
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-    Array.from(tbody.querySelectorAll('tr')).forEach(appendCell);
-  }
-
-  // Initial sweep after DOM is ready
-  function sweep(){
-    document.querySelectorAll('table').forEach(tbl=>{
-      const head = tbl.querySelector('thead');
-      if (!head) return;
-      const cols = Array.from(head.querySelectorAll('th')).map(th=>th.textContent.trim());
-      const ok = METRICS.some(m=>cols.includes(m));
-      if (ok) processTable(tbl);
-    });
-  }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', sweep);
-  } else {
-    try{ sweep(); }catch(e){}
-  }
-
-  // Observe for dynamically added rows/tables used by summaries/popups
-  const obs = new MutationObserver(ms=>{
-    for (const m of ms){
-      for (const node of m.addedNodes){
-        if (!(node instanceof Element)) continue;
-        if (node.matches('table')){
-          processTable(node);
-          continue;
-        }
-        if (node.matches('tr')){
-          const tbl = node.closest('table');
-          if (tbl) processTable(tbl);
-          continue;
-        }
-        node.querySelectorAll && node.querySelectorAll('table').forEach(processTable);
-      }
-    }
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
-})();
-</script>
-
-
-<script>
-// QuickStatsOne injector for all summaries
-(function(){
-  const METRICS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
-
-  function numFromText(t){
-    if (t == null) return null;
-    const s = String(t).replace(/[^0-9.+-]/g,'');
-    const n = parseFloat(s);
-    return Number.isFinite(n) ? n : null;
-  }
-  function computeQuickStatsOneFromRow(tr){
-    const vals = [];
-    METRICS.forEach(k=>{
-      // prefer explicit data-col match, fallback to indexed columns by header text
-      let td = tr.querySelector(`td[data-col="${k}"]`);
-      if (!td){
-        const tbl = tr.closest('table');
-        if (tbl){
-          const ths = Array.from(tbl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-          const idx = ths.findIndex(h=>h===k);
-          if (idx>=0 && tr.children[idx]) td = tr.children[idx];
-        }
-      }
-      if (!td) return;
-      const v = numFromText(td.textContent);
-      if (v != null) vals.push(v);
-    });
-    const over = vals.filter(v=>v>3);
-    if (over.length===0) return "0 (0.00)";
-    // Mode on one-decimal rounding of >3 set
-    const counts = Object.create(null);
-    let modeVal = null, modeCt = 0;
-    over.forEach(v=>{
-      const key = Number(v.toFixed(1));
-      counts[key] = (counts[key]||0)+1;
-      if (counts[key]>modeCt || (counts[key]===modeCt && (modeVal===null || key<modeVal))){
-        modeCt = counts[key]; modeVal = key;
-      }
-    });
-    const avg = over.reduce((a,b)=>a+b,0)/over.length;
-    return `${modeVal.toFixed(1)} (${avg.toFixed(2)})`;
-  }
-  function ensureHeader(table){
-    const thead = table.querySelector('thead');
-    if (!thead) return;
-    const tr = thead.querySelector('tr');
-    if (!tr) return;
-    if (tr.querySelector('th[data-col="QuickStatsOne"]')) return;
-    // Only attach if table looks like a summary (has the 7 metrics)
-    const hasMetrics = Array.from(thead.querySelectorAll('th')).some(th=>METRICS.includes(th.textContent.trim()));
-    if (!hasMetrics) return;
-    const th = document.createElement('th');
-    th.setAttribute('data-col','QuickStatsOne');
-    th.textContent = 'QuickStatsOne';
-    tr.appendChild(th);
-  }
-  function appendCell(tr){
-    if (tr.querySelector('td[data-col="QuickStatsOne"]')) return;
-    const td = document.createElement('td');
-    td.setAttribute('data-col','QuickStatsOne');
-    td.textContent = computeQuickStatsOneFromRow(tr);
-    tr.appendChild(td);
-  }
-  function processTable(table){
-    ensureHeader(table);
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-    Array.from(tbody.querySelectorAll('tr')).forEach(appendCell);
-  }
-
-  // Initial sweep after DOM is ready
-  function sweep(){
-    document.querySelectorAll('table').forEach(tbl=>{
-      const head = tbl.querySelector('thead');
-      if (!head) return;
-      const cols = Array.from(head.querySelectorAll('th')).map(th=>th.textContent.trim());
-      const ok = METRICS.some(m=>cols.includes(m));
-      if (ok) processTable(tbl);
-    });
-  }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', sweep);
-  } else {
-    try{ sweep(); }catch(e){}
-  }
-
-  // Observe for dynamically added rows/tables used by summaries/popups
-  const obs = new MutationObserver(ms=>{
-    for (const m of ms){
-      for (const node of m.addedNodes){
-        if (!(node instanceof Element)) continue;
-        if (node.matches('table')){
-          processTable(node);
-          continue;
-        }
-        if (node.matches('tr')){
-          const tbl = node.closest('table');
-          if (tbl) processTable(tbl);
-          continue;
-        }
-        node.querySelectorAll && node.querySelectorAll('table').forEach(processTable);
-      }
-    }
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
 })();
 </script>
 

@@ -62,7 +62,7 @@
 }
 
     .score-column button {
-        width: 140px;
+        width: 150px;
         height: 30px;
         margin: 1px;
         border-radius: 6px;
@@ -423,7 +423,7 @@ pointer-events: auto;
 </style>
 
 <meta charset="utf-8"/>
-<title>statpack v1.14.2 r2165</title>
+<title>statpack v1.13.3 r2150</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -5327,116 +5327,6 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
   window.closeAllRated5MinutesPopup = function(){
     const m=document.getElementById('allRated5MinutesPopupModal');if(m)m.style.display='none';
   };
-})();
-</script>
-
-
-<script>
-// QuickStatsOne injector for all summaries
-(function(){
-  const METRICS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
-
-  function numFromText(t){
-    if (t == null) return null;
-    const s = String(t).replace(/[^0-9.+-]/g,'');
-    const n = parseFloat(s);
-    return Number.isFinite(n) ? n : null;
-  }
-  function computeQuickStatsOneFromRow(tr){
-    const vals = [];
-    METRICS.forEach(k=>{
-      // prefer explicit data-col match, fallback to indexed columns by header text
-      let td = tr.querySelector(`td[data-col="${k}"]`);
-      if (!td){
-        const tbl = tr.closest('table');
-        if (tbl){
-          const ths = Array.from(tbl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-          const idx = ths.findIndex(h=>h===k);
-          if (idx>=0 && tr.children[idx]) td = tr.children[idx];
-        }
-      }
-      if (!td) return;
-      const v = numFromText(td.textContent);
-      if (v != null) vals.push(v);
-    });
-    const over = vals.filter(v=>v>3);
-    if (over.length===0) return "0 (0.00)";
-    // Mode on one-decimal rounding of >3 set
-    const counts = Object.create(null);
-    let modeVal = null, modeCt = 0;
-    over.forEach(v=>{
-      const key = Number(v.toFixed(1));
-      counts[key] = (counts[key]||0)+1;
-      if (counts[key]>modeCt || (counts[key]===modeCt && (modeVal===null || key<modeVal))){
-        modeCt = counts[key]; modeVal = key;
-      }
-    });
-    const avg = over.reduce((a,b)=>a+b,0)/over.length;
-    return `${modeVal.toFixed(1)} (${avg.toFixed(2)})`;
-  }
-  function ensureHeader(table){
-    const thead = table.querySelector('thead');
-    if (!thead) return;
-    const tr = thead.querySelector('tr');
-    if (!tr) return;
-    if (tr.querySelector('th[data-col="QuickStatsOne"]')) return;
-    // Only attach if table looks like a summary (has the 7 metrics)
-    const hasMetrics = Array.from(thead.querySelectorAll('th')).some(th=>METRICS.includes(th.textContent.trim()));
-    if (!hasMetrics) return;
-    const th = document.createElement('th');
-    th.setAttribute('data-col','QuickStatsOne');
-    th.textContent = 'QuickStatsOne';
-    tr.appendChild(th);
-  }
-  function appendCell(tr){
-    if (tr.querySelector('td[data-col="QuickStatsOne"]')) return;
-    const td = document.createElement('td');
-    td.setAttribute('data-col','QuickStatsOne');
-    td.textContent = computeQuickStatsOneFromRow(tr);
-    tr.appendChild(td);
-  }
-  function processTable(table){
-    ensureHeader(table);
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-    Array.from(tbody.querySelectorAll('tr')).forEach(appendCell);
-  }
-
-  // Initial sweep after DOM is ready
-  function sweep(){
-    document.querySelectorAll('table').forEach(tbl=>{
-      const head = tbl.querySelector('thead');
-      if (!head) return;
-      const cols = Array.from(head.querySelectorAll('th')).map(th=>th.textContent.trim());
-      const ok = METRICS.some(m=>cols.includes(m));
-      if (ok) processTable(tbl);
-    });
-  }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', sweep);
-  } else {
-    try{ sweep(); }catch(e){}
-  }
-
-  // Observe for dynamically added rows/tables used by summaries/popups
-  const obs = new MutationObserver(ms=>{
-    for (const m of ms){
-      for (const node of m.addedNodes){
-        if (!(node instanceof Element)) continue;
-        if (node.matches('table')){
-          processTable(node);
-          continue;
-        }
-        if (node.matches('tr')){
-          const tbl = node.closest('table');
-          if (tbl) processTable(tbl);
-          continue;
-        }
-        node.querySelectorAll && node.querySelectorAll('table').forEach(processTable);
-      }
-    }
-  });
-  obs.observe(document.body, {childList:true, subtree:true});
 })();
 </script>
 

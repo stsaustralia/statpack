@@ -423,9 +423,86 @@ pointer-events: auto;
 </style>
 
 <meta charset="utf-8"/>
-<title>statpack v1.14.2 r2165</title>
+<title>statpack v1.13.3 r2150</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+
+<script>
+// === Optional per-drug weights (user-imported JSON) for Weighted in Statistical Analysis ===
+// Expected JSON format: { "MDMA": { "weights": {"rush":6,"mood":5,"social":4,"energy":3,"focus":3,"anxiety":3,"impair":4}, "source":"Paper/URL/Notes" }, ... }
+(function(){
+  const LS_W = 'sts_drug_weights_map';
+  const LS_S = 'sts_drug_weights_source';
+
+  function getDefaultWeights(){ return {rush:6,mood:4,social:4,energy:3,focus:3,anxiety:4,impair:6}; }
+  function getWeightsMap(){
+    try { const j = JSON.parse(localStorage.getItem(LS_W)||'{}'); return (j && typeof j==='object')? j : {}; } catch(e){ return {}; }
+  }
+  function getWeightSource(){
+    try { const s = String(localStorage.getItem(LS_S)||'').trim(); return s || 'Default app weights (no external source)'; } catch(e){ return 'Default app weights (no external source)'; }
+  }
+  function setWeightsMap(map, source){
+    try { localStorage.setItem(LS_W, JSON.stringify(map||{})); } catch(e){}
+    try { localStorage.setItem(LS_S, String(source||'')); } catch(e){}
+  }
+  function weightsForDrug(drug){
+    if (!drug) return getDefaultWeights();
+    const map = getWeightsMap();
+    const key = String(drug||'').trim();
+    const p = map[key];
+    if (p && p.weights && typeof p.weights==='object'){
+      const w = Object.assign({}, getDefaultWeights(), p.weights);
+      return w;
+    }
+    return getDefaultWeights();
+  }
+  function computeWeightedForRowSums(row){
+    const w = weightsForDrug(row.Drug);
+    return (((row.rush*+w.rush) + (row.mood*+w.mood) + (row.social*+w.social) + (row.energy*+w.energy) + (row.focus*+w.focus) - (row.anxiety*+w.anxiety) - (row.impair*+w.impair)) / 10);
+  }
+  function computeWeightedForSelection(sel){
+    if (!Array.isArray(sel) || !sel.length) return 0;
+    let sum = 0;
+    sel.forEach(row => {
+      sum += computeWeightedForRowSums(row);
+    });
+    return sum / sel.length;
+  }
+  function openWeightsImportDialog(onDone){
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'application/json,.json'; inp.style.display = 'none';
+    document.body.appendChild(inp);
+    inp.onchange = ()=>{
+      const f = inp.files && inp.files[0]; if (!f) { inp.remove(); return; }
+      const fr = new FileReader();
+      fr.onload = ()=>{
+        try {
+          const data = JSON.parse(String(fr.result||'{}'));
+          // Optional: allow {weightsMap:{...}, source:'...'} wrapper
+          const isWrapped = (data && data.weightsMap && typeof data.weightsMap==='object');
+          const map = isWrapped ? data.weightsMap : data;
+          const src = isWrapped ? (data.source||'User-supplied JSON') : (data.source||'User-supplied JSON');
+          setWeightsMap(map, src);
+          alert('Weights imported. Source: ' + src);
+          if (typeof onDone==='function') onDone();
+        } catch(e){
+          alert('Failed to parse JSON: ' + e.message);
+        } finally { inp.remove(); }
+      };
+      fr.onerror = ()=>{ alert('Failed to read file'); inp.remove(); };
+      fr.readAsText(f);
+    };
+    inp.click();
+  }
+
+  // Hook into Statistical Analysis popups if present
+  window._stsWeights = {
+    getDefaultWeights, getWeightsMap, getWeightSource, setWeightsMap,
+    weightsForDrug, computeWeightedForSelection, openWeightsImportDialog
+  };
+})();
+</script>
+
 
 
 
@@ -496,6 +573,80 @@ function computeFiveMax(obj){
   </div>
   <div id="columnChooserList"></div>
 </div>
+
+<script>
+// === Column Chooser (targets #logTable) ===
+(function(){
+  const PANEL_ID = 'columnChooser';
+  const LIST_ID  = 'columnChooserList';
+  const TOGGLE_ID= 'colChooserToggle';
+  const CLOSE_ID = 'colChooserClose';
+  const STYLE_ID = 'colHideStyle';
+  const LS_KEY   = 'hiddenCols_v2';
+
+  function getHeaderNames(){
+    const ths = Array.from(document.querySelectorAll('#logTable thead th'));
+    return ths.map(th => (th.getAttribute('data-col') || th.textContent || '').trim())
+              .filter(Boolean);
+  }
+  function unique(arr){ const s = new Set(); const out=[]; for(const x of arr){ if(!s.has(x)){ s.add(x); out.push(x);} } return out; }
+  function loadHidden(){ try{ const j = JSON.parse(localStorage.getItem(LS_KEY)||'[]'); return Array.isArray(j)? new Set(j): new Set(); }catch(e){ return new Set(); } }
+  function saveHidden(set){ try{ localStorage.setItem(LS_KEY, JSON.stringify(Array.from(set))); }catch(e){} }
+
+  function buildList(){
+    const box = document.getElementById(LIST_ID); if (!box) return;
+    box.innerHTML = '';
+    const names = unique(getHeaderNames());
+    const hidden = loadHidden();
+    names.forEach(name => {
+      const id = 'col_' + name.replace(/[^a-z0-9]+/ig,'_');
+      const row = document.createElement('div');
+      const lab = document.createElement('label');
+      const cb  = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = id;
+      cb.checked = !hidden.has(name);
+      cb.addEventListener('change', ()=>{
+        if (cb.checked){ hidden.delete(name); } else { hidden.add(name); }
+        saveHidden(hidden);
+        applyHidden();
+      });
+      lab.htmlFor = id;
+      lab.textContent = name;
+      row.appendChild(cb); row.appendChild(lab);
+      box.appendChild(row);
+    });
+  }
+
+  function applyHidden(){
+    const hidden = loadHidden();
+    let style = document.getElementById(STYLE_ID);
+    if (!style){ style = document.createElement('style'); style.id = STYLE_ID; document.head.appendChild(style); }
+    const css = Array.from(hidden).map(n => `th[data-col="${n}"], td[data-col="${n}"]{ display:none !important; }`).join('\n');
+    style.textContent = css;
+  }
+
+  function togglePanel(){
+    const p = document.getElementById(PANEL_ID); if (!p) return;
+    if (p.style.display === 'none' || p.style.display === ''){
+      buildList(); applyHidden(); p.style.display = 'block';
+    } else {
+      p.style.display = 'none';
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    const tgl = document.getElementById(TOGGLE_ID);
+    const cls = document.getElementById(CLOSE_ID);
+    if (tgl) tgl.addEventListener('click', togglePanel);
+    if (cls) cls.addEventListener('click', ()=>{ const p=document.getElementById(PANEL_ID); if (p) p.style.display='none'; });
+    applyHidden();
+  });
+
+  // Expose for other code paths
+  window.applyColumnChooserHidden = applyHidden;
+})();
+</script>
+
 <button id="colChooserToggle" style="position:fixed; top:70px; right:20px; z-index:10000;">Columns</button>
 
 
@@ -652,7 +803,7 @@ function computeFiveMax(obj){
 <th data-col="Social">Social</th>
 <th data-col="Social">Social</th>
 <th data-col="Energy">Energy</th>
-<th data-col="Energy">Energy </th>
+<th data-col="Energy">Energy</th>
 <th data-col="Focus">Focus</th>
 <th data-col="Focus">Focus</th>
 <th data-col="Anxiety">Anxiety</th>
@@ -1016,6 +1167,7 @@ function getSum(arr) {
            getMetricButtons(f).forEach(v => {
 
                 const b = document.createElement('button');
+                b.setAttribute('data-value', String(v));
                 let customLabel = '';
 // if (v === 7.02) customLabel = 'Ultra Extreme';
 // if (v === 6.02) customLabel = 'Ultra High High';
@@ -1310,10 +1462,7 @@ if (!startTime)
             resetTimer();
         // [disabled duplicate summary timer]
 
-        const now = new Date(),
-            ts = now.toLocaleString('en-AU', {
-                hour12: false
-            });
+        const now = new Date(), ts = formatYMDHMS(now);
         if (document.getElementById('redoseCheckbox').checked && document.getElementById('drugSelect').value)
             doseTime = new Date();
         const entry = {
@@ -1347,8 +1496,8 @@ if (!startTime)
         entry.score = entry.rushSum + entry.moodSum + entry.socialSum + entry.energySum + entry.focusSum - entry.anxietySum - entry.impairSum;
         entry.max = ['rush', 'mood', 'social', 'energy', 'focus'].reduce((a, f) => a + (entry[f + 'Sum'] || 0), 0);
         entry.min = entry.anxietySum + entry.impairSum;
-        entry.maxPercent = +(entry.max / 50 * 100).toFixed(1);
-        entry.minPercent = +(entry.min / 20 * 100).toFixed(1);
+        entry.maxPercent = +((entry.max / 25) * 100).toFixed(1);
+        entry.minPercent = +((entry.min / 10) * 100).toFixed(1);
         entry.min = entry.anxietySum + entry.impairSum;
         let val = 0;
         ['rush', 'mood', 'social', 'energy', 'focus'].forEach(m => entry[m].some(v => v >= 3) && val++);
@@ -1419,6 +1568,7 @@ function renderTable() {
             })();
             applyRowShading(tr);
             applyUiColumnVisibility();
+            try{ if (typeof window.applyColumnChooserHidden==='function') window.applyColumnChooserHidden(); }catch(e){}
             tb.appendChild(tr);
         });
     }
@@ -1445,9 +1595,11 @@ function renderTable() {
         initSelections();
         buildButtons();
         metrics.forEach((f, idx) => r[f].forEach(v => {
-            const btn = document.querySelectorAll('.score-column')[idx].querySelector(`button:nth-child(${8 - v})`);
-            btn && btn.classList.add('selected-score');
-        }));
+        const cols = document.querySelectorAll('.score-column');
+        const col = cols && cols[idx] ? cols[idx] : null;
+        const btn = col ? col.querySelector(`button[data-value="${v}"]`) : null;
+        if (btn) btn.classList.add('selected-score');
+      }));
     }
     function exportCSV() {
         const h = ["Timestamp","Since Dose","Elapsed","Info","Scale","Drug","Qty","ROA"];
@@ -1661,9 +1813,7 @@ function mapSchema(header){
 }
 
 // Parse AU datetime like "13/08/2025, 16:57:12" or "13/08/2025 16:57:12"
-function parseAUDatetime(s){
-  if (!s) return null;
-  const m = String(s).match(/^\s*(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})\s*$/);
+function parseAUDatetime(s){ return parseFlexibleDatetimeAU(s); })[\/\-](\d{1,2})[\/\-](\d{4})[,\s]+(\d{1,2}):(\d{2}):(\d{2})\s*$/);
   if (!m) return null;
   const [_, d, mo, y, h, mi, se] = m.map(x => parseInt(x,10));
   const dt = new Date(y, mo-1, d, h, mi, se); // treated as local
@@ -1706,48 +1856,51 @@ function rowsToLogData(rows, mapped){
       entry[name + "Sum"] = sum;
       entry[name + "Label"] = val(labIdx) || "";
     });
-    // Derived / composites (recompute)
-    entry.score = (+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum) - (+entry.anxietySum + +entry.impairSum);
-    entry.max = (+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum);
-    entry.min = (+entry.anxietySum + +entry.impairSum);
-    entry.maxPercent = Math.round((entry.max / 50) * 1000)/10;
-    entry.minPercent = Math.round((entry.min / 20) * 1000)/10;
-    entry.valence = 0; // cannot safely reconstruct; leave 0
-    entry.scaleMood = 0;
-    entry.scaleBad = 0;
-    entry.scaleFocus = 0;
-    entry.weighted = (((+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*4) - (+entry.impairSum*6)) / 10);
-    entry.fiveMax = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5) + 5;
-    entry.goodSum = 0;
-    out.push(entry);
-  }
+    
+// Derived / composites (prefer CSV values if present; otherwise compute)
+const numOrNaN = (x)=>{ const n = parseFloat(x); return Number.isFinite(n)? n : NaN; };
+const vScore = numOrNaN(val(H.score));
+const vMax   = numOrNaN(val(H.max));
+const vMin   = numOrNaN(val(H.min));
+const vMaxP  = numOrNaN(val(H.maxp));
+const vMinP  = numOrNaN(val(H.minp));
+const vWeighted = numOrNaN(val(H.weighted));
+const vScore5   = numOrNaN(val(H.score5));
+const vGoodSum  = numOrNaN(val(H.goodSum));
+
+// Compute from sums if CSV missing
+const sumPos = (+entry.rushSum)+(+entry.moodSum)+(+entry.socialSum)+(+entry.energySum)+(+entry.focusSum);
+const sumNeg = (+entry.anxietySum)+(+entry.impairSum);
+
+entry.score = Number.isFinite(vScore) ? vScore : (sumPos - sumNeg);
+entry.max   = Number.isFinite(vMax)   ? vMax   : sumPos;
+entry.min   = Number.isFinite(vMin)   ? vMin   : sumNeg;
+entry.maxPercent = Number.isFinite(vMaxP) ? vMaxP : Math.round((entry.max / 25) * 1000)/10;
+entry.minPercent = Number.isFinite(vMinP) ? vMinP : Math.round((entry.min / 10) * 1000)/10;
+entry.valence = 0; // cannot safely reconstruct
+entry.scaleMood = 0;
+entry.scaleBad = 0;
+entry.scaleFocus = 0;
+entry.weighted = Number.isFinite(vWeighted) ? vWeighted : ((((+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*4) - (+entry.impairSum*6)) / 10));
+entry.fiveMax = Number.isFinite(vScore5) ? vScore5 : computeFiveMax({rush:entry.rushSum, mood:entry.moodSum, social:entry.socialSum, energy:entry.energySum, focus:entry.focusSum, anxiety:entry.anxietySum, impair:entry.impairSum});
+entry.goodSum = Number.isFinite(vGoodSum) ? vGoodSum : 0;
+out.push(entry);
+}
   return out;
 }
 
 
 // Merge + Dedupe + Sort helper (append-only import)
+
 function mergeAppendDedupeSort(existing, incoming){
-  const left  = Array.isArray(existing) ? existing : [];
-  const right = Array.isArray(incoming) ? incoming : [];
-
-  // Drop blank/empty rows from the right side before merging
-  const filteredRight = right.filter(isNonEmptyLogRow);
-  const all = left.concat(filteredRight);
-
-  const seen = new Set();
-  const out = [];
-  for (const r of all){
-    const key = JSON.stringify([
-      r.timestamp, r.sincedose, r.elapsed, r.info, r.scale, r.drug, r.qty, r.roa,
-      r.notes, r.customNotes,
-      r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum, r.anxietySum, r.impairSum,
-      r.score, r.max, r.min, r.weighted, r.maxPercent, r.minPercent
-    ]);
-    if (!seen.has(key)){ seen.add(key); out.push(r); }
-  }
+  const left  = Array.isArray(existing) ? existing.slice() : [];
+  const right = Array.isArray(incoming) ? incoming.slice() : [];
+  // Append only; no deduplication; no filtering; preserve order then sort by _ts for stable timeline
+  const out = left.concat(right);
   out.sort((a,b)=> (a && a._ts ? a._ts : 0) - (b && b._ts ? b._ts : 0));
   return out;
 }
+
 
 // Helper: determine if a row (log entry) is effectively empty/blank (all key numbers 0/NaN/absent)
 function isNonEmptyLogRow(r){
@@ -1957,8 +2110,104 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+
+<script>
+// === Optional per-drug weights (user-imported JSON) for Weighted in Statistical Analysis ===
+// Expected JSON format: { "MDMA": { "weights": {"rush":6,"mood":5,"social":4,"energy":3,"focus":3,"anxiety":3,"impair":4}, "source":"Paper/URL/Notes" }, ... }
+(function(){
+  const LS_W = 'sts_drug_weights_map';
+  const LS_S = 'sts_drug_weights_source';
+
+  function getDefaultWeights(){ return {rush:6,mood:4,social:4,energy:3,focus:3,anxiety:4,impair:6}; }
+  function getWeightsMap(){
+    try { const j = JSON.parse(localStorage.getItem(LS_W)||'{}'); return (j && typeof j==='object')? j : {}; } catch(e){ return {}; }
+  }
+  function getWeightSource(){
+    try { const s = String(localStorage.getItem(LS_S)||'').trim(); return s || 'Default app weights (no external source)'; } catch(e){ return 'Default app weights (no external source)'; }
+  }
+  function setWeightsMap(map, source){
+    try { localStorage.setItem(LS_W, JSON.stringify(map||{})); } catch(e){}
+    try { localStorage.setItem(LS_S, String(source||'')); } catch(e){}
+  }
+  function weightsForDrug(drug){
+    if (!drug) return getDefaultWeights();
+    const map = getWeightsMap();
+    const key = String(drug||'').trim();
+    const p = map[key];
+    if (p && p.weights && typeof p.weights==='object'){
+      const w = Object.assign({}, getDefaultWeights(), p.weights);
+      return w;
+    }
+    return getDefaultWeights();
+  }
+  function computeWeightedForRowSums(row){
+    const w = weightsForDrug(row.Drug);
+    return (((row.rush*+w.rush) + (row.mood*+w.mood) + (row.social*+w.social) + (row.energy*+w.energy) + (row.focus*+w.focus) - (row.anxiety*+w.anxiety) - (row.impair*+w.impair)) / 10);
+  }
+  function computeWeightedForSelection(sel){
+    if (!Array.isArray(sel) || !sel.length) return 0;
+    let sum = 0;
+    sel.forEach(row => {
+      sum += computeWeightedForRowSums(row);
+    });
+    return sum / sel.length;
+  }
+  function openWeightsImportDialog(onDone){
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'application/json,.json'; inp.style.display = 'none';
+    document.body.appendChild(inp);
+    inp.onchange = ()=>{
+      const f = inp.files && inp.files[0]; if (!f) { inp.remove(); return; }
+      const fr = new FileReader();
+      fr.onload = ()=>{
+        try {
+          const data = JSON.parse(String(fr.result||'{}'));
+          // Optional: allow {weightsMap:{...}, source:'...'} wrapper
+          const isWrapped = (data && data.weightsMap && typeof data.weightsMap==='object');
+          const map = isWrapped ? data.weightsMap : data;
+          const src = isWrapped ? (data.source||'User-supplied JSON') : (data.source||'User-supplied JSON');
+          setWeightsMap(map, src);
+          alert('Weights imported. Source: ' + src);
+          if (typeof onDone==='function') onDone();
+        } catch(e){
+          alert('Failed to parse JSON: ' + e.message);
+        } finally { inp.remove(); }
+      };
+      fr.onerror = ()=>{ alert('Failed to read file'); inp.remove(); };
+      fr.readAsText(f);
+    };
+    inp.click();
+  }
+
+  // Hook into Statistical Analysis popups if present
+  window._stsWeights = {
+    getDefaultWeights, getWeightsMap, getWeightSource, setWeightsMap,
+    weightsForDrug, computeWeightedForSelection, openWeightsImportDialog
+  };
+})();
+</script>
+
 <script>
 // === Summary Core (revised to read ONLY from main table) ===
+
+// === Canonical composite calculator (single source of truth) ===
+// Semantics: Score = sum(positives) - sum(negatives)
+//            Max   = sum(positives)
+//            Min   = sum(negatives)
+//            Weighted = Σ(pos * w_pos) - Σ(neg * w_neg) then /10  (default weights 6,4,4,3,3,4,6)
+//            5Max = ((sum positives - sum negatives)/5) + 5
+function STS_computeCompositeFromMeans(M){
+  if (!M) return {score:0, max:0, min:0, weighted:0, fiveMax:0};
+  const pos = (+M.rush||0)+(+M.mood||0)+(+M.social||0)+(+M.energy||0)+(+M.focus||0);
+  const neg = (+M.anxiety||0)+(+M.impair||0);
+  const score = pos - neg;
+  const max   = pos;
+  const min   = neg;
+  const weighted = ((((+M.rush||0)*6) + ((+M.mood||0)*4) + ((+M.social||0)*4) + ((+M.energy||0)*3) + ((+M.focus||0)*3) - ((+M.anxiety||0)*4) - ((+M.impair||0)*6)) / 10);
+  const fiveMax  = computeFiveMax({rush:+M.rush||0, mood:+M.mood||0, social:+M.social||0, energy:+M.energy||0, focus:+M.focus||0, anxiety:+M.anxiety||0, impair:+M.impair||0});
+  return {score, max, min, weighted, fiveMax};
+}
+
 
 let SUMMARY_WINDOW_MINUTES = 5;
 function setSummaryWindowAndOpen(mins){ SUMMARY_WINDOW_MINUTES = mins; createSummaryPopupTable(); }
@@ -2032,13 +2281,7 @@ function computeRollingMeans(endMs, minutes){
 }
 
 // Composite scores from means
-function computeCompositeFromMeans(M){
-  const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
-  const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
-  const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
-  const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
-  const fiveMax  = ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5) + 5;
-  return {score, max, min, weighted, fiveMax};
+function computeCompositeFromMeans(M){ return STS_computeCompositeFromMeans(M); };
 }
 
 // === Backfill controls (manual; also mirrors to any popups) ==================
@@ -2176,463 +2419,10 @@ const table = document.getElementById(tableId);
   const tbody = table.querySelector('tbody'); if (!tbody) return;
   const suffix = (opts && opts.labelSuffix) ? opts.labelSuffix : "";
   const row = [
-    formatMinuteLabel(d) + suffix,
-    M?.rush, M?.mood, M?.social, M?.energy, M?.focus, M?.anxiety, M?.impair,
-    C?.score, C?.max, C?.min, C?.weighted, C?.fiveMax
-  ];
-  const tr = document.createElement("tr");
-  tr.innerHTML = row.map((v,i)=>{
-    const name = SUMMARY_COLUMNS[i];
-    if (i===0) return `<td>${v??''}</td>`;
-    const num = Number(v);
-    const isNum = Number.isFinite(num);
-    const bg = isNum && typeof cellBgFor==='function' ? cellBgFor(name, num) : '';
-    const val = isNum ? num.toFixed(2) : (v ?? '');
-    return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
-  }).join("");
-  // Tooltips for Max/Min (percent of 10)
-  const cells = tr.children;
-  const idxMax = SUMMARY_COLUMNS.indexOf('Max');
-  const idxMin = SUMMARY_COLUMNS.indexOf('Min');
-  if (idxMax>-1 && cells[idxMax]) {
-    const v = parseFloat(cells[idxMax].textContent); if (!Number.isNaN(v)) cells[idxMax].title = `${Math.round((v/10)*100)}%`;
-  }
-  if (idxMin>-1 && cells[idxMin]) {
-    const v = parseFloat(cells[idxMin].textContent); if (!Number.isNaN(v)) cells[idxMin].title = `${Math.round((v/10)*100)}%`;
-  }
-  tbody.appendChild(tr);
-}
-
-// Emit 1-minute rolling average (used by Auto)
-function emitAuto1m(){
-  const now = new Date();
-  const prev = new Date(now.getTime() - 60*1000); prev.setSeconds(0,0);
-  const key = minuteKey(prev);
-  if (lastAuto1mKey === key) return;
-  lastAuto1mKey = key;
-  const endMs = prev.getTime() + 60*1000;
-  const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
-  const C = M ? computeCompositeFromMeans(M) : null;
-  if (M) {
-    appendSummaryRowToTable('autoSummaryTable', prev, M, C, {bold:false, labelSuffix:' 5m Avg'});
-    // If popup exists, mirror there as well (still isolated from its own data)
-    if (document.getElementById('summaryPopupTable')) {
-    }
-  } else { /* skip empty immediate emit */ }
-}
-
-// Emit 5-minute rolling average at each 5-minute boundary (popup)
-function emitAuto5m(){ /* [number1-only] no-op */ }
-// Toggle Auto (1-minute rolling stream) — sync both buttons and emit immediately
-function toggleAutoSummary(){
-  autoSummaryActive = !autoSummaryActive;
-  const btn1 = document.getElementById('autoSummaryBtn');       // popup button
-  const btn2 = document.getElementById('autoSummaryToggleBtn'); // fixed header button
-  if (autoSummaryActive){
-    if (btn1) btn1.textContent = 'Auto (On)';
-    if (btn2) btn2.textContent = 'Auto (On)';
-    // emit immediate row
-    (function immediateEmit(){
-      const endMs = Date.now();
-      const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
-      const C = M ? computeCompositeFromMeans(M) : null;
-      const d = new Date();
-      if (M) {
-        appendSummaryRowToTable('autoSummaryTable', d, M, C, {bold:false, labelSuffix:' 5m Now'});
-      } else { /* skip empty auto-summary row */ }
-    })();
-    // schedule boundary-aligned loop
-    if (auto1mIntervalId) clearInterval(auto1mIntervalId);
-    const now = new Date();
-    const msToNext = (60 - now.getSeconds())*1000 - now.getMilliseconds();
-    setTimeout(()=>{
-      emitAuto1m();
-      auto1mIntervalId = setInterval(emitAuto1m, 60000);
-    }, Math.max(0, msToNext));
-  } else {
-    if (btn1) btn1.textContent = 'Auto (Off)';
-    if (btn2) btn2.textContent = 'Auto';
-    if (auto1mIntervalId){ clearInterval(auto1mIntervalId); auto1mIntervalId=null; }
-  }
-}
-
-// Popup builder (id=summaryPopup, #summaryPopupTable) — unchanged shell
-function ensureSummaryPopup(){
-  let popup = document.getElementById("summaryPopup");
-  if (popup) return popup;
-  popup = document.createElement("div");
-  popup.id = "summaryPopup";
-  Object.assign(popup.style, {
-    position:"fixed", top:"70px", right:"20px", background:"#fff", border:"1px solid #ccc",
-    borderRadius:"8px", boxShadow:"0 4px 16px rgba(0,0,0,0.2)", maxHeight:"70vh", overflow:"auto",
-    zIndex:"9999", padding:"10px"
-  });
-
-  const head = document.createElement("div");
-  Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
-  head.innerHTML = `<strong>Summary</strong>`;
-  const controls = document.createElement("div");
-
-  const exportBtn = document.createElement("button");
-  exportBtn.textContent = "Export CSV";
-  exportBtn.onclick = exportPopupCSV;
-
-  const autoBtn = document.createElement("button");
-  autoBtn.id = "autoSummaryBtn";
-  autoBtn.textContent = autoSummaryActive ? "Auto (On)" : "Auto (Off)";
-  autoBtn.onclick = toggleAutoSummary;
-
-  const closeBtn = document.createElement("button");
-  closeBtn.textContent = "×";
-  closeBtn.style.marginLeft = "8px";
-  closeBtn.onclick = ()=>popup.remove();
-
-  controls.appendChild(exportBtn);
-
-  const instant5Btn = document.createElement("button");
-  instant5Btn.textContent = "5m Now";
-  instant5Btn.onclick = ()=>appendInstantSummaryToPopup(5);
-  controls.appendChild(instant5Btn);
-
-  const instant15Btn = document.createElement("button");
-  instant15Btn.textContent = "15m Now";
-  instant15Btn.onclick = ()=>appendInstantSummaryToPopup(15);
-  controls.appendChild(instant15Btn);
-
-  controls.appendChild(autoBtn);
-  controls.appendChild(closeBtn);
-  head.appendChild(controls);
-  popup.appendChild(head);
-
-  const table = document.createElement("table");
-  table.id = "summaryPopupTable";
-  table.style.borderCollapse="collapse";
-  table.style.width="100%";
-  const thead = document.createElement("thead");
-  thead.innerHTML = `<tr>${SUMMARY_COLUMNS.map(c=>`<th>${c}</th>`).join("")}</tr>`;
-  table.appendChild(thead);
-  table.appendChild(document.createElement("tbody"));
-  popup.appendChild(table);
-  document.body.appendChild(popup);
-  return popup;
-}
-
-// Create/open popup, dense backfill based on MAIN TABLE data, then start 5m cadence
-function createSummaryPopupTable(){
-  ensureSummaryPopup();
-  // Backfill: find min and max _ts from main table
-  const snap = snapshotFromMainTable();
-  if (snap.length){
-    const minTs = Math.min(...snap.map(x=>x._ts));
-    const now = Date.now();
-    // Build completed 5-min boundaries between minTs and now
-    const start = new Date(minTs); start.setSeconds(0,0);
-    start.setMinutes(start.getMinutes() - (start.getMinutes()%5), 0, 0);
-    for (let t = start.getTime(); t <= now; t += 5*60000){
-      const endMs = t + 60000; // 1 minute after boundary for window end
-      const d = new Date(t);
-      const M = computeRollingMeans(endMs, SUMMARY_WINDOW_MINUTES);
-      if (M){
-      } else {
-      }
-    }
-    // Also append a "now" row
-    const Mnow = computeRollingMeans(Date.now(), SUMMARY_WINDOW_MINUTES);
-    const dnow = new Date();
-    if (Mnow){
-    } else {
-    }
-  }
-  // Start cadence
-  emitAuto5m();
-// [removed:number1-only] startAuto5mTimer() call removed
-}
-
-// Start 5-minute timer (popup flow)
-// [removed:number1-only] startAuto5mTimer() definition removed
-// Append one immediate summary row for a given window into the popup
-function appendInstantSummaryToPopup(minutes){
-  ensureSummaryPopup();
-  const now = Date.now();
-  const M = computeRollingMeans(now, minutes);
-  const d = new Date();
-  if (M){
-  } else {
-  }
-}
-
-// CSV export (popup)
-function exportPopupCSV(){
-  const table = document.getElementById("summaryPopupTable"); if (!table) return;
-  const rows = [SUMMARY_COLUMNS.join(",")];
-  table.querySelectorAll("tbody tr").forEach(tr=>{
-    const vals = Array.from(tr.children).slice(0, SUMMARY_COLUMNS.length).map(td=>{
-      const t = td.textContent.trim();
-      return /[",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
-    });
-    rows.push(vals.join(","));
-  });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([rows.join("\n")], {type:"text/csv;charset=utf-8"}));
-  a.download = "summary.csv"; document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
-}
-window.createSummaryPopupTable = createSummaryPopupTable;
-window.toggleAutoSummary = toggleAutoSummary;
-</script>
-<button class="ctrl-btn" id="backfillBtn">Backfill</button>
-<script>
-// Group note buttons by colour into separate rows (no colour/style changes)
-(function(){
-  function detectColour(btn){
-    // Prefer data-category if present
-    const dcat = btn.getAttribute('data-category');
-    if (dcat) return dcat.trim().toLowerCase();
-    // Try class pattern note-btn--{colour}
-    const cls = btn.className||'';
-    const m = cls.match(/note-btn--([a-z]+)/);
-    if (m) return m[1].toLowerCase();
-    // Fallback: look at inline style background-color to cluster; hash the value
-    const bg = btn.style && btn.style.backgroundColor ? btn.style.backgroundColor.trim() : '';
-    return bg || 'default';
-  }
-
-  function ensureRow(container, key, label){
-    let row = container.querySelector(`[data-row="${key}"]`);
-    if (!row){
-      row = document.createElement('div');
-      row.setAttribute('data-row', key);
-      row.style.display = 'flex';
-      row.style.flexWrap = 'wrap';
-      row.style.gap = '6px';
-      row.style.alignItems = 'center';
-      row.style.padding = '2px 0';
-
-      // Heading (keep neutral styling per user request)
-      const h = document.createElement('div');
-      h.textContent = label;
-      h.style.minWidth = '90px';
-      h.style.fontWeight = '600';
-      h.style.marginRight = '8px';
-      row.appendChild(h);
-
-      container.appendChild(row);
-    }
-    return row;
-  }
-
-  function titleCase(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-
-  document.addEventListener('DOMContentLoaded', function(){
-    const container = document.getElementById('noteButtonRows');
-    if (!container) return;
-
-    // Collect existing note buttons wherever they currently are
-    const btns = Array.from(document.querySelectorAll('.note-btn'));
-    if (!btns.length) return;
-
-    // Preferred order if present amongst buttons
-    const orderPref = ['red','orange','yellow','gold','green','blue','purple','pink','grey','gray','black','white','default'];
-
-    // Build a map colour -> buttons
-    const buckets = new Map();
-    btns.forEach(btn=>{
-      const key = detectColour(btn);
-      if (!buckets.has(key)) buckets.set(key, []);
-      buckets.get(key).push(btn);
-    });
-
-    // Sort keys by preferred order, then by name
-    const keys = Array.from(buckets.keys());
-    keys.sort((a,b)=>{
-      const ia = orderPref.indexOf(a), ib = orderPref.indexOf(b);
-      if (ia!==-1 || ib!==-1){
-        return (ia===-1?999:ia) - (ib===-1?999:ib);
-      }
-      return a.localeCompare(b);
-    });
-
-    // Move buttons into their colour rows (preserve existing button styles/handlers)
-    keys.forEach(k=>{
-      const row = ensureRow(container, k, titleCase(k));
-      buckets.get(k).forEach(btn=>{
-        // Ensure width/spacing remains tidy but do not alter colours
-        btn.style.margin = '0';
-        row.appendChild(btn);
-      });
-    });
-  });
-})();
-</script>
-<script>
-// === Statistical Analysis (5m) — popup + table, cloned from 5m Summary with extra columns ===
-// Columns: base SUMMARY_COLUMNS + Notes, Drug, QtySum (new; only for this summary)
-(function(){
-  // Fallbacks if base helpers are not in scope
-  const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
-    ? SUMMARY_COLUMNS.slice()
-    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
-  const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum"]);
-
-  function ensureStatAnalysisPopup(){
-    let popup = document.getElementById("statAnalysisPopup");
-    if (popup) return popup;
-    popup = document.createElement("div");
-    popup.id = "statAnalysisPopup";
-    Object.assign(popup.style, {
-      position:"fixed", top:"70px", right:"20px", background:"#fff", border:"1px solid #ccc",
-      borderRadius:"8px", boxShadow:"0 4px 16px rgba(0,0,0,0.2)", maxHeight:"70vh", overflow:"auto",
-      zIndex:"10000", padding:"10px"
-    });
-    const head = document.createElement("div");
-    Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
-    head.innerHTML = `<strong>Statistical Analysis (5m)</strong>`;
-    const controls = document.createElement("div");
-    const exportBtn = document.createElement("button");
-    exportBtn.textContent = "Export CSV";
-    exportBtn.onclick = exportStatCSV;
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "×";
-    closeBtn.style.marginLeft = "8px";
-    closeBtn.onclick = ()=>popup.remove();
-    controls.appendChild(exportBtn);
-    controls.appendChild(closeBtn);
-    head.appendChild(controls);
-    popup.appendChild(head);
-
-    const table = document.createElement("table");
-    table.id = "statAnalysisTable";
-    table.style.borderCollapse="collapse";
-    table.style.width="100%";
-    const thead = document.createElement("thead");
-    thead.innerHTML = `<tr>${STAT_COLUMNS.map(c=>`<th>${c}</th>`).join("")}</tr>`;
-    table.appendChild(thead);
-    table.appendChild(document.createElement("tbody"));
-    popup.appendChild(table);
-
-    document.body.appendChild(popup);
-    return popup;
-  }
-
-  function openStatAnalysis(){
-    ensureStatAnalysisPopup();
-    createStatAnalysisPopupTable();
-  }
-  window.openStatAnalysis = openStatAnalysis;
-
-  // Helpers copied/compatible with existing utilities
-  function minuteKey(d){
-    return d.getFullYear()
-      + String(d.getMonth()+1).padStart(2,"0")
-      + String(d.getDate()).padStart(2,"0")
-      + String(d.getHours()).padStart(2,"0")
-      + String(d.getMinutes()).padStart(2,"0");
-  }
-  function formatMinuteLabel(d){
-    const hh = String(d.getHours()).padStart(2,"0");
-    const mm = String(d.getMinutes()).padStart(2,"0");
-    return `${hh}:${mm} Average`;
-  }
-  // Read-only snapshot of main table rows with extra fields (Notes/Drug/Qty)
-
-function snapshotWithExtras(){
-    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
-    return rows.map(tr => {
-      const ts = +(tr.getAttribute('data-ts')||0);
-
-      // Case-insensitive value getter by data-col name(s)
-      const getValCI = (names) => {
-        const want = Array.isArray(names) ? names.map(n=>String(n).toLowerCase()) : [String(names).toLowerCase()];
-        const tds = tr.querySelectorAll('td[data-col]');
-        for (const td of tds){
-          const col = (td.getAttribute('data-col')||'').trim().toLowerCase();
-          if (want.includes(col)) return td.textContent.trim();
-        }
-
-  try { window.snapshotWithExtras = snapshotWithExtras; } catch(e){}
-      };
-
-      // Numeric extractor from a cell (handles "10 mg", "-2.5", etc.)
-      const numFrom = (names) => {
-        const raw = getValCI(names);
-        const m = (raw||"").match(/-?\d+(\.\d+)?/);
-        return m ? parseFloat(m[0]) : NaN;
-      };
-
-      const getSum = (field) => {
-        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
-        if (!td) return 0;
-        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
-        return Number.isFinite(v) ? v : 0;
-      };
-
-      return {
-        _ts: ts,
-        rush: getSum('rush'), mood: getSum('mood'), social: getSum('social'),
-        energy: getSum('energy'), focus: getSum('focus'), anxiety: getSum('anxiety'), impair: getSum('impair'),
-        // extras (case-insensitive header matching)
-        Notes: getValCI(["Notes","Note"]),
-        Drug: getValCI(["Drug"]),
-        Qty: numFrom(["Qty","QTY","Quantity"])
-      };
-    }).filter(o => o._ts>0);
-  }
-
-
-  function computeMeansForWindow(startMs, endMs){
-    const snap = snapshotWithExtras();
-    const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
-    if (!sel.length) return null;
-    const flds = ['rush','mood','social','energy','focus','anxiety','impair'];
-    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
-    sel.forEach(e => flds.forEach(f => sums[f] += (e[f]||0)));
-    const means = {}; flds.forEach(f => means[f] = +(sums[f]/sel.length));
-    return {means, sel};
-  }
-  function computeCompositeFromMeans(M){
-    if (!M) return null;
-    const m = M.means || M;
-    const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
-    const max = Math.max(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
-    const min = Math.min(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
-    const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
-    const fiveMax = [m.rush,m.mood,m.social,m.energy,m.focus].sort((a,b)=>b-a).slice(0,5).reduce((a,b)=>a+b,0);
-    return {score, max, min, weighted, fiveMax};
-  }
-
-  function aggregateExtras(sel){
-    // Notes: tokenise and include all tokens (including duplicates)
-    const tokenize = (s) => {
-      if (!s) return [];
-      // If a custom tokeniser exists, prefer it
-      if (typeof window.tokenizeNotes === 'function') {
-        try { return window.tokenizeNotes(s) || []; } catch(e){}
-      }
-      return (s.match(/[A-Za-z0-9_]+/g) || []).map(x=>x);
-    };
-    const notesTokens = [];
-    const drugs = [];
-    let qtySum = 0;
-    sel.forEach(e => {
-      tokenize(e.Notes).forEach(tok => notesTokens.push(tok));
-      if (e.Drug) drugs.push(e.Drug);
-      if (Number.isFinite(e.Qty)) qtySum += e.Qty;
-    });
-    return {
-      Notes: notesTokens.join(", "),
-      Drug: drugs.join(", "),
-      QtySum: Number.isFinite(qtySum) ? +qtySum : 0
-    };
-  }
-
-  function appendStatRowToTable(tableId, d, M, C, extras){
-    if (!M || !C) return;
-    const table = document.getElementById(tableId); if (!table) return;
-    const tbody = table.querySelector('tbody'); if (!tbody) return;
-    const row = [
       formatMinuteLabel(d) + " 5m Avg",
       M.means.rush, M.means.mood, M.means.social, M.means.energy, M.means.focus, M.means.anxiety, M.means.impair,
       C.score, C.max, C.min, C.weighted, C.fiveMax,
-      extras.Notes, extras.Drug, extras.QtySum
+      extras.Notes, extras.Drug, extras.QtySum, (function(){ try{return window._stsWeights.getWeightSource();}catch(e){return "Default app weights (no external source)";} })()
     ];
     const tr = document.createElement("tr");
     tr.innerHTML = row.map((v,i)=>{
@@ -2661,6 +2451,8 @@ function snapshotWithExtras(){
       const M = computeMeansForWindow(t, endMs);
       if (!M) continue;
       const C = computeCompositeFromMeans(M);
+      try { C.weighted = window._stsWeights.computeWeightedForSelection(M.sel); } catch(e){}
+      try { C.weighted = window._stsWeights.computeWeightedForSelection(M.sel); } catch(e){}
       const extras = aggregateExtras(M.sel);
       appendStatRowToTable('statAnalysisTable', d, M, C, extras);
       added++;
@@ -2672,6 +2464,7 @@ function snapshotWithExtras(){
     ensureStatAnalysisPopup();
     const tbody = document.querySelector('#statAnalysisTable tbody'); if (tbody) tbody.innerHTML='';
     backfillStatAnalysis();
+    try { const s = window._stsWeights.getWeightSource(); const el = document.getElementById('statWeightsSource'); if (el) el.textContent = 'Source: ' + s; } catch(e){}
     // Start cadence on 5m boundaries
     if (window._stat5mTimer) { clearInterval(window._stat5mTimer); window._stat5mTimer = null; }
     const schedule = ()=>{
@@ -2688,6 +2481,7 @@ function snapshotWithExtras(){
       const M = computeMeansForWindow(startMs, end.getTime());
       if (!M) return;
       const C = computeCompositeFromMeans(M);
+      try { C.weighted = window._stsWeights.computeWeightedForSelection(M.sel); } catch(e){}
       const extras = aggregateExtras(M.sel);
       appendStatRowToTable('statAnalysisTable', end, M, C, extras);
     }
@@ -2720,7 +2514,7 @@ function snapshotWithExtras(){
   const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
     ? SUMMARY_COLUMNS.slice()
     : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
-  const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum"]);
+  const STAT_COLUMNS = BASE_COLS.concat(["Notes","Drug","QtySum","WeightsSource"]);
 
   function ensureStatAnalysisHourPopup(){
     let popup = document.getElementById("statAnalysisHourPopup");
@@ -2735,15 +2529,11 @@ function snapshotWithExtras(){
     const head = document.createElement("div");
     Object.assign(head.style, {display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"6px"});
     head.innerHTML = `<strong>Statistical Analysis (60m)</strong>`;
-    const controls = document.createElement("div");
-    const exportBtn = document.createElement("button");
-    exportBtn.textContent = "Export CSV";
-    exportBtn.onclick = exportStatHourCSV;
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "×";
-    closeBtn.style.marginLeft = "8px";
-    closeBtn.onclick = ()=>popup.remove();
+    const srcSpan = document.createElement("span"); srcSpan.id = "statHourWeightsSource"; srcSpan.style.marginLeft = "8px"; srcSpan.style.fontSize = "11px"; srcSpan.style.opacity = "0.75";
+    const importBtn = document.createElement("button"); importBtn.textContent = "Import Weights"; importBtn.onclick = ()=>{ try{ window._stsWeights.openWeightsImportDialog(()=>{ try{ document.getElementById('statHourWeightsSource').textContent = 'Source: ' + window._stsWeights.getWeightSource(); }catch(e){}; try{ createStatAnalysisHourPopupTable(); }catch(e){}; }); }catch(e){} };
+    controls.appendChild(importBtn);
     controls.appendChild(exportBtn);
+    controls.appendChild(srcSpan);
     controls.appendChild(closeBtn);
     head.appendChild(controls);
     popup.appendChild(head);
@@ -2868,10 +2658,10 @@ function snapshotWithExtras(){
     const table = document.getElementById(tableId); if (!table) return;
     const tbody = table.querySelector('tbody'); if (!tbody) return;
     const row = [
-      formatHourLabel(d) + " 60m Avg",
+      formatMinuteLabel(d) + " 5m Avg",
       M.means.rush, M.means.mood, M.means.social, M.means.energy, M.means.focus, M.means.anxiety, M.means.impair,
       C.score, C.max, C.min, C.weighted, C.fiveMax,
-      extras.Notes, extras.Drug, extras.QtySum
+      extras.Notes, extras.Drug, extras.QtySum, (function(){ try{return window._stsWeights.getWeightSource();}catch(e){return "Default app weights (no external source)";} })()
     ];
     const tr = document.createElement("tr");
     tr.innerHTML = row.map((v,i)=>{
@@ -3228,7 +3018,7 @@ function snapshotWithExtras(){
       max: +max,
       min: +min,
       weighted: +weighted,
-      fiveMax: computeFiveMax(means)};
+      fiveMax: computeFiveMax(M)};
   }
   function fmt2(x){
     var n = Number(x);
@@ -3385,7 +3175,7 @@ function snapshotWithExtras(){
     var max=(M.rush+M.mood+M.social+M.energy+M.focus);
     var min=(M.anxiety+M.impair);
     var weighted=(((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
-    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:computeFiveMax(means)};
+    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:computeFiveMax(M)};
   }
   function slidingMeanAtIndex(snap, i){
     var start=Math.max(0,i-2), cnt=i-start+1;
@@ -4340,7 +4130,7 @@ window.addEventListener('load', function(){
       rows.forEach(function(r){ appendRow('#autoSliderCTable tbody', r); });
       var ro=snapshot(); if(ro){
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(M)};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_C, rows); appendRow('#autoSliderCTable tbody', r2);
       }
@@ -4357,7 +4147,7 @@ window.addEventListener('load', function(){
       try{
         var rows=loadCD(LS_KEY_D);
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(M)};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_D, rows); appendRow('#autoSliderDTable tbody', r2);
       }catch(e){}
@@ -5648,13 +5438,7 @@ function buildEmotionButtons() {
   function computeRollingMeans(endMs, minutes){
     return computeMeansForWindow(endMs - minutes*60*1000, endMs);
   }
-  function computeCompositeFromMeans(M){
-    const score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
-    const max   = Math.max(M.rush,M.mood,M.social,M.energy,M.focus);
-    const min   = Math.min(M.rush,M.mood,M.social,M.energy,M.focus);
-    const weighted = (((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
-    const fiveMax  = ((M.rush + M.mood + M.social + M.energy + M.focus - M.anxiety - M.impair) / 5) + 5;
-    return {score, max, min, weighted, fiveMax};
+  function computeCompositeFromMeans(M){ return STS_computeCompositeFromMeans(M); };
   }
 
   function appendSummaryRowToTable(tableId, d, M, C, labelSuffix){
@@ -5710,6 +5494,7 @@ function buildEmotionButtons() {
     const M = computeRollingMeans(end.getTime(), periodMin);
     if (!M) return;
     const C = computeCompositeFromMeans(M);
+      try { C.weighted = window._stsWeights.computeWeightedForSelection(M.sel); } catch(e){}
     appendSummaryRowToTable(tableId, end, M, C, `${periodMin}m Avg`);
   }
 
@@ -5940,7 +5725,7 @@ function buildEmotionButtons() {
     // Meta line
     if (meta){
       const n = visibleRows.length;
-      const when = new Date().toLocaleString('en-AU', { hour12:false });
+      const when = formatYMDHMS(new Date());
       meta.textContent = `Computed from ${n} visible row(s) in ${segments.length} segment(s) at ${when}.`;
     }
 
