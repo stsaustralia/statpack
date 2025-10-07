@@ -182,14 +182,7 @@
     #autoSummaryToggleBtn{ /* fixed removed */ }
 
 /* Horizontal layout for summary buttons at top-right */
-.summary-controls{
-  display:flex;
-  flex-direction:row;
-  align-items:center;
-  justify-content:flex-end;
-  gap:8px;
-  padding:8px 10px;
-}
+
 .summary-controls button{
   width:auto; /* allow natural width */
   white-space:nowrap;
@@ -217,20 +210,7 @@
 
 /* --- block --- */
 /* ==== Summary Controls Layout Override (spread horizontally) ==== */
-.summary-controls{
-position: fixed;
-top: 10px;
-left: 20px;
-right: 20px;
-display: grid;
-grid-template-columns: repeat(10, auto); /* at most 6 buttons across */
-grid-auto-rows: auto;
-align-items: center;
-justify-content: start; /* pack from the left */
-gap: 8px 11px;          /* row-gap, column-gap */
-z-index: 9999;
-pointer-events: auto;
-}
+
 .summary-controls button{
   position: static !important; /* cancel fixed on individual buttons */
   top: auto !important;
@@ -266,7 +246,7 @@ pointer-events: auto;
 #ratedPopupTable th,#ratedPopupTable td{border:1px solid #ccc; padding:8px; text-align:left; font-size:12px;}
 
 /* --- block --- */
-.badge{ display:inline-block; padding:3px 8px; border-radius:10px; font-weight:600; }
+
 .badge.none{ background:#eee; color:#000; }
 .badge.low{ background:red; color:#fff; }
 .badge.medium{ background:#ffeb3b; color:#000; }
@@ -288,7 +268,7 @@ pointer-events: auto;
 #ratedPopupTable td.cat.high, #allRatedPopupTable td.cat.high { background:rgba(0,128,0,0.5); color:#000; }
 #ratedPopupTable td.cat.veryhigh, #allRatedPopupTable td.cat.veryhigh { background:rgb(0,128,0); color:#fff; }
 /* Badge styling aligns with cell class but cell shading dominates */
-.badge{ display:inline-block; padding:3px 8px; border-radius:10px; font-weight:600; background:transparent; }
+
 
 /* --- block --- */
 #slidingAvgModal {
@@ -424,7 +404,7 @@ pointer-events: auto;
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.15.1 r2201</title>
+<title>statpack v1.15.2 r2203</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -1357,12 +1337,12 @@ if (!startTime)
         entry.valence = val;
         entry.scaleMood = entry.notes.split(/\s+/).includes('Good') ? 3 : 0;
         entry.scaleBad = entry.notes.split(/\s+/).includes('Bad') ? 3 : 0;
-        entry.scaleFocus = entry.notes.split(/\s+/).includes('Wired') ? 7 : 0;
-        entry.scaleFocus = entry.notes.split(/\s+/).includes('Plumes') ? 10 : 0;
-        entry.scaleFocus = entry.notes.split(/\s+/).includes('Billowing') ? 10 : 0;
-        entry.scaleFocus = entry.notes.split(/\s+/).includes('Rush') ? 10 : 0;
+        entry.scaleFocus = window.computeScaleFocusFromNotes(entry && entry.notes);
+        entry.scaleFocus = window.computeScaleFocusFromNotes(entry && entry.notes);
+        entry.scaleFocus = window.computeScaleFocusFromNotes(entry && entry.notes);
+        entry.scaleFocus = window.computeScaleFocusFromNotes(entry && entry.notes);
 entry.weighted = (((+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*4) - (+entry.impairSum*6)) / 10);
-    entry.fiveMax = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5) + 5;
+    entry.fiveMax = computeFiveMax({ rush: entry.rushSum, mood: entry.moodSum, social: entry.socialSum, energy: entry.energySum, focus: entry.focusSum, anxiety: entry.anxietySum, impair: entry.impairSum });
 entry.fiveMax = computeFiveMax({rush: entry.rushSum, mood: entry.moodSum, social: entry.socialSum, energy: entry.energySum, focus: entry.focusSum, anxiety: entry.anxietySum, impair: entry.impairSum});
 entry.goodSum = 0;
         logData.push(entry);
@@ -1376,7 +1356,7 @@ entry.goodSum = 0;
   // Replace mapping in-place
   window.BUTTON_LABELS_BY_METRIC = {
   }
-  try { Object.freeze(window.BUTTON_LABELS_BY_METRIC); } catch(e) {}
+  try { } catch(e) {}
 })();
 buildButtons();
         document.getElementById('addBtn').innerText = 'Add Entry';
@@ -1716,7 +1696,7 @@ function rowsToLogData(rows, mapped){
     entry.valence = 0; // cannot safely reconstruct; leave 0
     entry.scaleMood = 0;
     entry.scaleBad = 0;
-    entry.scaleFocus = 0;
+    entry.scaleFocus = window.computeScaleFocusFromNotes(entry && entry.notes);
     entry.weighted = (((+entry.rushSum*6) + (+entry.moodSum*4) + (+entry.socialSum*4) + (+entry.energySum*3) + (+entry.focusSum*3) - (+entry.anxietySum*4) - (+entry.impairSum*6)) / 10);
     entry.fiveMax = ((+entry.rushSum + +entry.moodSum + +entry.socialSum + +entry.energySum + +entry.focusSum - (+entry.anxietySum) - (+entry.impairSum)) / 5) + 5;
     entry.goodSum = 0;
@@ -2379,7 +2359,7 @@ function exportPopupCSV(){
 window.createSummaryPopupTable = createSummaryPopupTable;
 window.toggleAutoSummary = toggleAutoSummary;
 </script>
-<button class="ctrl-btn" id="backfillBtn">Backfill</button>
+<button class="ctrl-btn" id="backfillBtnGlobal">Backfill</button>
 <script>
 // Group note buttons by colour into separate rows (no colour/style changes)
 (function(){
@@ -5673,6 +5653,46 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
 })();
 </script>
 
+<script>
+document.addEventListener("click", function(e){
+  var t = e.target;
+  if (!t) return;
+  var id = (t.id || "");
+  if (id === "backfillBtnGlobal" || /^backfillBtn\d+$/.test(id)) {
+    if (typeof backfillAll === "function") { backfillAll(); }
+  }
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  var thead = document.querySelectorAll('#logTable thead th');
+  var rows = document.querySelectorAll('#logTable tbody tr');
+  rows.forEach(function(tr){
+    Array.from(tr.children).forEach(function(td, idx){
+      var h = thead[idx] ? String(thead[idx].textContent).trim() : "";
+      if (h) td.setAttribute('data-col', h);
+    });
+  });
+});
+</script>
+<script>
+(function(){
+  if (typeof window.computeScaleFocusFromNotes !== "function") {
+    window.computeScaleFocusFromNotes = function(notes){
+      try {
+        var text = (notes == null ? "" : String(notes));
+        var tokens = new Set(text.split(/\s+/));
+        var score = 0;
+        if (tokens.has("Wired")) score = Math.max(score, 7);
+        if (tokens.has("Plumes")) score = Math.max(score, 10);
+        if (tokens.has("Billowing")) score = Math.max(score, 10);
+        if (tokens.has("Rush")) score = Math.max(score, 10);
+        return score;
+      } catch (e) { return 0; }
+    };
+  }
+})();
+</script>
 </body>
 <script>
 function openEmotionModal() {
