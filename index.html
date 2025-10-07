@@ -423,7 +423,8 @@ pointer-events: auto;
 </style>
 
 <meta charset="utf-8"/>
-<title>statpack v1.14.2 r2165</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
+<title>statpack v1.15.1 r2201</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -778,13 +779,13 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 5.0: 'Extreme', 4.5: 'Intense/Frenzied', 4.0: 'Intense', 3.5: 'Strong/Uncontrollable', 3.0: 'Strong', 2.5: 'Some/Feel', 2.0: 'Some', 1.5: 'Slight/Mild', 1.0: 'Slight/Mild', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  mood: { 5.0: 'Autopilot', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear', 2.5: 'Some/Certain', 2.0: 'Some/Thought', 1.5: 'Slight', 1.0: 'Slight', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  social: { 5.0: 'Disinhibited', 4.5: 'Outgoing/Proactive', 4.0: 'Outgoing', 3.5: 'Social/Empathy', 3.0: 'Social/Empathy', 2.5: 'Desire/Urge', 2.0: 'Desire/Want', 1.5: 'Effective/Encourage', 1.0: 'Can/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Some/Definitely', 2.0: 'Some/Yes', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  focus: { 5.0: 'Wired', 4.5: 'Obsess/Very', 4.0: 'Obsessive', 3.5: 'Focus/Fixated', 3.0: 'Focused', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Capable/Think', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  anxiety: { 5.0: 'Terror', 4.5: 'Severe/Adverse', 4.0: 'Severe/Adverse', 3.5: 'Anxious/Impacted', 3.0: 'Anxious/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Low/Ignorable', 0.5: 'Maybe/Minimal', 0.0: 'None' },
-  impair: { 5.0: 'Severe/Crippled', 4.5: 'Severe/Worry', 4.0: 'Severe/Worry', 3.5: 'Behaviour/Impacted', 3.0: 'Behaviour/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Low/Ignorable', 0.5: 'Maybe/Minimal', 0.0: 'No' },
+  rush: { 5.0: 'Extreme', 4.5: 'Intense/Frenzied', 4.0: 'Intense', 3.5: 'Strong/Controllable', 3.0: 'Strong', 2.5: 'Some/Moderate', 2.0: 'Some/Feel', 1.5: 'Slight/Think', 1.0: 'Slight/Mild', 0.5: 'Maybe/Unsure', 0.0: 'None', 0.25: '+' },
+  mood: { 5.0: 'Euphoric', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear', 2.5: 'Some/Certain', 2.0: 'Some/Thought', 1.5: 'Slight', 1.0: 'Slight', 0.5: 'Maybe/Unsure', 0.0: 'No', 0.25: '+' },
+  social: { 5.0: 'Disinhibited', 4.5: 'Outgoing/Proactive', 4.0: 'Outgoing/Empathy', 3.5: 'Social/Proactive', 3.0: 'Social/Empathy', 2.5: 'Desire/Urge', 2.0: 'Desire/Want', 1.5: 'Effective/Encourage', 1.0: 'Can/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No', 0.25: '+' },
+  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Some/Definitely', 2.0: 'Some/Yes', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None', 0.25: '+' },
+  focus: { 5.0: 'Wired', 4.5: 'Obsess/Laser', 4.0: 'Obsessive', 3.5: 'Focus/Fixated', 3.0: 'Focused', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Capable/Think', 0.5: 'Maybe/Unsure', 0.0: 'No', 0.25: '+' },
+  anxiety: { 5.0: 'Terror', 4.5: 'Severe/Adverse', 4.0: 'Severe/Adverse', 3.5: 'Anxious/Impacted', 3.0: 'Anxious/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Low/Ignorable', 0.5: 'Maybe/Minimal', 0.0: 'None', 0.25: '+' },
+  impair: { 5.0: 'Severe/Crippled', 4.5: 'Severe/Worry', 4.0: 'Severe/Worry', 3.5: 'Behaviour/Impacted', 3.0: 'Behaviour/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Low/Ignorable', 0.5: 'Maybe/Minimal', 0.0: 'No', 0.25: '+' },
   change: { 5.00: 'Major', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Certain', 2.00: 'Thought', 1.50: 'Some', 1.00: 'Maybe', 0.50: 'Unsure', 0.00: 'None' },
   degree: { 5.00: 'Extreme', 4.50: 'Very High', 4.00: 'Higher', 3.50: 'High', 3.00: 'Mid High', 2.50: 'Mid', 2.00: 'Mid Low', 1.50: 'Low', 1.00: 'Lower', 0.50: 'Very Low', 0.00: 'None' },
   other: { 5.00: 'Now', 4.50: '30Seconds', 4.00: 'Last', 3.50: '1Minute', 3.00: 'Next', 2.50: '5Minutes', 2.00: 'Intake', 1.50: 'Plan', 1.00: 'Dose', 0.50: 'Hindsight', 0.00: 'Row' },
@@ -794,13 +795,13 @@ labels: {
   dopamine: { 5.00: 'Yes', 2.00: 'Some', 1.00: 'Maybe', 0.00: 'No' },
 }
 , rapidLabels: {
-  rush: { 5.0: 'Extreme', 4.5: 'Intense/Frenzied', 4.0: 'Intense', 3.5: 'Strong/Uncontrollable', 3.0: 'Strong', 2.5: 'Some/Feel', 2.0: 'Some', 1.5: 'Slight/Mild', 1.0: 'Slight/Mild', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  mood: { 5.0: 'Autopilot', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear', 2.5: 'Some/Certain', 2.0: 'Some/Thought', 1.5: 'Slight', 1.0: 'Slight', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  social: { 5.0: 'Disinhibited', 4.5: 'Outgoing/Proactive', 4.0: 'Outgoing', 3.5: 'Social/Empathy', 3.0: 'Social/Empathy', 2.5: 'Desire/Urge', 2.0: 'Desire/Want', 1.5: 'Effective/Encourage', 1.0: 'Can/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Some/Definitely', 2.0: 'Some/Yes', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  focus: { 5.0: 'Wired', 4.5: 'Obsess/Very', 4.0: 'Obsessive', 3.5: 'Focus/Fixated', 3.0: 'Focused', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Capable/Think', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  anxiety: { 5.0: 'Terror', 4.5: 'Severe/Adverse', 4.0: 'Severe/Adverse', 3.5: 'Anxious/Impacted', 3.0: 'Anxious/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Low/Ignorable', 0.5: 'Maybe/Minimal', 0.0: 'None' },
-  impair: { 5.0: 'Severe/Crippled', 4.5: 'Severe/Worry', 4.0: 'Severe/Worry', 3.5: 'Behaviour/Impacted', 3.0: 'Behaviour/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Low/Ignorable', 0.5: 'Maybe/Minimal', 0.0: 'No' },
+  rush: { 5.0: 'Extreme', 4.5: 'Intense/Frenzied', 4.0: 'Intense', 3.5: 'Strong/Controllable', 3.0: 'Strong', 2.5: 'Some/Moderate', 2.0: 'Some/Feel', 1.5: 'Slight/Think', 1.0: 'Slight/Mild', 0.5: 'Maybe/Unsure', 0.0: 'None', 0.25: '+' },
+  mood: { 5.0: 'Euphoric', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear', 2.5: 'Some/Certain', 2.0: 'Some/Thought', 1.5: 'Slight', 1.0: 'Slight', 0.5: 'Maybe/Unsure', 0.0: 'No', 0.25: '+' },
+  social: { 5.0: 'Disinhibited', 4.5: 'Outgoing/Proactive', 4.0: 'Outgoing/Empathy', 3.5: 'Social/Proactive', 3.0: 'Social/Empathy', 2.5: 'Desire/Urge', 2.0: 'Desire/Want', 1.5: 'Effective/Encourage', 1.0: 'Can/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No', 0.25: '+' },
+  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Some/Definitely', 2.0: 'Some/Yes', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None', 0.25: '+' },
+  focus: { 5.0: 'Wired', 4.5: 'Obsess/Laser', 4.0: 'Obsessive', 3.5: 'Focus/Fixated', 3.0: 'Focused', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Capable/Think', 0.5: 'Maybe/Unsure', 0.0: 'No', 0.25: '+' },
+  anxiety: { 5.0: 'Terror', 4.5: 'Severe/Adverse', 4.0: 'Severe/Adverse', 3.5: 'Anxious/Impacted', 3.0: 'Anxious/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Low/Ignorable', 0.5: 'Maybe/Minimal', 0.0: 'None', 0.25: '+' },
+  impair: { 5.0: 'Severe/Crippled', 4.5: 'Severe/Worry', 4.0: 'Severe/Worry', 3.5: 'Behaviour/Impacted', 3.0: 'Behaviour/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Some', 1.0: 'Low/Ignorable', 0.5: 'Maybe/Minimal', 0.0: 'No', 0.25: '+' },
   change: { 5.00: 'Major', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Certain', 2.00: 'Thought', 1.50: 'Some', 1.00: 'Maybe', 0.50: 'Unsure', 0.00: 'None' },
   degree: { 5.00: 'Extreme', 4.50: 'Very High', 4.00: 'Higher', 3.50: 'High', 3.00: 'Mid High', 2.50: 'Mid', 2.00: 'Mid Low', 1.50: 'Low', 1.00: 'Lower', 0.50: 'Very Low', 0.00: 'None' },
   other: { 5.00: 'Now', 4.50: '30Seconds', 4.00: 'Last', 3.50: '1Minute', 3.00: 'Next', 2.50: '5Minutes', 2.00: 'Intake', 1.50: 'Plan', 1.00: 'Dose', 0.50: 'Hindsight', 0.00: 'Row' },
@@ -812,17 +813,17 @@ labels: {
   buttonLabelsByMetric: {}},
   buttons: {
     perMetricButtons: {
-      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25],
+      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25],
+      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25],
+      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25],
+      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25],
+      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25],
+      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25],
       confidence:[5,4,3,2,1,0],
-      auto:[5,4,3,2,1,0],
-      jitter:[5,4,3,2,1,0],
-      dopamine:[5,4,3,2,1,0],
+      auto:[5,2,1,0],
+      jitter:[5,2,1,0],
+      dopamine:[5,2,1,0],
       change:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
       degree:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
       other: [5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0]
@@ -1953,8 +1954,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (["0", "1", "2", "3", "4", "5"].includes(val)) {
             btn.style.height = '40px';
         }
-    });
-});
+  });
 </script>
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 <script>
@@ -2247,7 +2247,7 @@ function toggleAutoSummary(){
     const msToNext = (60 - now.getSeconds())*1000 - now.getMilliseconds();
     setTimeout(()=>{
       emitAuto1m();
-      auto1mIntervalId = setInterval(emitAuto1m, 60000);
+      auto1mIntervalId = setInterval(function(){ try{ if (typeof emitAuto1m==='function') emitAuto1m(); }catch(e){} }, 60000);
     }, Math.max(0, msToNext));
   } else {
     if (btn1) btn1.textContent = 'Auto (Off)';
@@ -2458,8 +2458,7 @@ window.toggleAutoSummary = toggleAutoSummary;
         // Ensure width/spacing remains tidy but do not alter colours
         btn.style.margin = '0';
         row.appendChild(btn);
-      });
-    });
+  });
   });
 })();
 </script>
@@ -3228,7 +3227,7 @@ function snapshotWithExtras(){
       max: +max,
       min: +min,
       weighted: +weighted,
-      fiveMax: computeFiveMax(means)};
+      fiveMax: computeFiveMax(M)};
   }
   function fmt2(x){
     var n = Number(x);
@@ -3317,8 +3316,7 @@ function snapshotWithExtras(){
           var col = td.getAttribute('data-col') || td.textContent.trim();
           var val = parseFloat(td.getAttribute('data-value')||td.textContent)||NaN;
           data[col] = val;
-        });
-      });
+  });
     }catch(e){}
   }
   // Run after openAutoSlider* calls by hooking them lightly (no-op safe)
@@ -3385,7 +3383,7 @@ function snapshotWithExtras(){
     var max=(M.rush+M.mood+M.social+M.energy+M.focus);
     var min=(M.anxiety+M.impair);
     var weighted=(((M.rush*6) + (M.mood*4) + (M.social*4) + (M.energy*3) + (M.focus*3) - (M.anxiety*4) - (M.impair*6)) / 10);
-    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax:computeFiveMax(means)};
+    return {score:+score, max:+max, min:+min, weighted:+weighted, fiveMax: computeFiveMax(M)};
   }
   function slidingMeanAtIndex(snap, i){
     var start=Math.max(0,i-2), cnt=i-start+1;
@@ -3497,7 +3495,7 @@ function snapshotWithExtras(){
       lastAuto=cur;
     }
   }
-  setInterval(emitAuto1m, 60000);
+  setInterval(function(){ try{ if (typeof emitAuto1m==='function') emitAuto1m(); }catch(e){} }, 60000);
   try{ if (window.autoSummaryActive) startAutoSliderA(); }catch(e){}
   try{ ['A','B'].forEach(function(k){ var rows=loadRows(k); rows.forEach(function(r){ appendRowToModalTable(k, r); }); }); }catch(e){}
 })();
@@ -3613,8 +3611,7 @@ function snapshotWithExtras(){
           btn.textContent = `${valueStr}`;
         }
         btn.dataset.value = valueStr; // ensure stored
-      });
-    });
+  });
   }
 
   // Wrap original buildButtons so we can re-label after render without touching core logic
@@ -3788,8 +3785,7 @@ function snapshotWithExtras(){
         else if (typeof LABEL_OVERRIDES === 'object' && LABEL_OVERRIDES[metric] && LABEL_OVERRIDES[metric].hasOwnProperty(v)) source = 'defaultOverride';
         else if (labelMappings && labelMappings[metric] && labelMappings[metric].hasOwnProperty(v)) source = 'defaultMap';
         rows.push([metric, v, label, source]);
-      });
-    });
+  });
     const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
     const blob = new Blob([`version=1\n` + csv], {type:'text/csv'});
     const a = document.createElement('a');
@@ -4340,7 +4336,7 @@ window.addEventListener('load', function(){
       rows.forEach(function(r){ appendRow('#autoSliderCTable tbody', r); });
       var ro=snapshot(); if(ro){
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax: computeFiveMax(M)};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_C, rows); appendRow('#autoSliderCTable tbody', r2);
       }
@@ -4357,7 +4353,7 @@ window.addEventListener('load', function(){
       try{
         var rows=loadCD(LS_KEY_D);
         var M={rush:ro.means.rush,mood:ro.means.mood,social:ro.means.social,energy:ro.means.energy,focus:ro.means.focus,anxiety:ro.means.anxiety,impair:ro.means.impair};
-        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax:computeFiveMax(means)};
+        var C={score:ro.comp.score,max:ro.comp.max,min:ro.comp.min,weighted:ro.comp.weighted,fiveMax: computeFiveMax(M)};
         var r2={timeLabel:(typeof timeLabel==='function'? timeLabel(ro.ms)+' avg('+ro.n+')' : timeNow()), M:M, C:C};
         rows.push(r2); saveCD(LS_KEY_D, rows); appendRow('#autoSliderDTable tbody', r2);
       }catch(e){}
@@ -5550,6 +5546,133 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
 })();
 </script>
 
+
+<!-- All Rated 5‑Minute (/10) Popup Modal -->
+<div id="allRated5MinutesOutOf10PopupModal" style="display:none; position:fixed; inset:0; z-index:10000;">
+  <div id="allRated5MinutesOutOf10PopupBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
+  <div id="allRated5MinutesOutOf10PopupCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+      <h2>All Rated 5‑Minute (/10)</h2>
+      <button aria-label="Close" onclick="closeAllRated5MinutesOutOf10Popup()">Close</button>
+    </div>
+    <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">Averages per 5‑minute block mapped to a 0–10 scale (×2), then categorised (Very&nbsp;Low → Very&nbsp;High)</div>
+    <table id="allRated5MinutesOutOf10PopupTable">
+      <thead>
+        <tr>
+          <th>Offset</th>
+          <th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// Self-contained renderer for "All Rated 5‑Minute (/10)" to avoid coupling
+(function(){
+  function ensureTB(){ var tb = document.querySelector('#allRated5MinutesOutOf10PopupTable tbody'); if (!tb && document.getElementById('allRated5MinutesOutOf10PopupTable')) { tb = document.createElement('tbody'); document.getElementById('allRated5MinutesOutOf10PopupTable').appendChild(tb);} return tb; }
+  function cat10(v){ // Very Low(<=2), Low(<=4), Medium(<=6), High(<=8), Very High(>8)
+    var x = Number(v); if (!isFinite(x)) x = 0;
+    if (x <= 2)  return {cls:'verylow',  label:'Very Low'};
+    if (x <= 4)  return {cls:'low',      label:'Low'};
+    if (x <= 6)  return {cls:'medium',   label:'Medium'};
+    if (x <= 8)  return {cls:'high',     label:'High'};
+    return {cls:'veryhigh', label:'Very High'};
+  }
+  function cell(v){
+    var c = cat10(v);
+    return '<td class="cat '+c.cls+'"><span class="badge '+c.cls+'">'+c.label+'</span> <span style="opacity:.6">('+ (Number(v).toFixed(2)) +')</span></td>';
+  }
+  function fiveMinBucketsLocal(){
+    var src = Array.isArray(window.logData) ? window.logData : []; if(!src.length) return [];
+    var res = {};
+    var t0  = src[0] && src[0].timestamp ? new Date(src[0].timestamp).getTime() : Date.now();
+    src.forEach(function(r){
+      var ts = r.timestamp ? new Date(r.timestamp).getTime() : t0;
+      var idx = Math.max(1, Math.floor((ts - t0)/300000)); // 5m bins, 1-based
+      (res[idx] = res[idx] || []).push(r);
+    });
+    var out = [];
+    Object.keys(res).sort(function(a,b){return a-b;}).forEach(function(k){
+      var list = res[k], agg = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+      list.forEach(function(r){
+        agg.rush+=r.rushSum||0; agg.mood+=r.moodSum||0; agg.social+=r.socialSum||0; agg.energy+=r.energySum||0;
+        agg.focus+=r.focusSum||0; agg.anxiety+=r.anxietySum||0; agg.impair+=r.impairSum||0;
+      });
+      for (var f in agg){ agg[f] = list.length ? (agg[f]/list.length) : 0; } // 0..5
+      out.push({offset:+k, values:agg});
+    });
+    return out;
+  }
+  function render(){
+    var tb = ensureTB(); if (!tb) return;
+    var rows = [];
+    fiveMinBucketsLocal().forEach(function(b){
+      var offStr = String(b.offset*5).padStart(2,'0')+':00';
+      // Map 0..5 → 0..10 by ×2 (no +5 shift)
+      rows.push('<tr><td>+'+offStr+'</td>'
+        + cell((b.values.rush||0)*2)
+        + cell((b.values.mood||0)*2)
+        + cell((b.values.social||0)*2)
+        + cell((b.values.energy||0)*2)
+        + cell((b.values.focus||0)*2)
+        + cell((b.values.anxiety||0)*2)
+        + cell((b.values.impair||0)*2)
+        + '</tr>');
+    });
+    tb.innerHTML = rows.join('');
+  }
+  window.openAllRated5MinutesOutOf10Popup = function(){
+    try{ render(); }catch(e){ console.warn(e); }
+    var m = document.getElementById('allRated5MinutesOutOf10PopupModal'); if (m) m.style.display='block';
+    var bd = document.getElementById('allRated5MinutesOutOf10PopupBackdrop'); if (bd) bd.onclick = closeAllRated5MinutesOutOf10Popup;
+  };
+  window.closeAllRated5MinutesOutOf10Popup = function(){
+    var m = document.getElementById('allRated5MinutesOutOf10PopupModal'); if (m) m.style.display='none';
+  };
+})();
+</script>
+
+<script>
+(function(){
+  try {
+    if (typeof window.openAutoSliderC !== 'function') {
+      window.openAutoSliderC = function(){
+        var m = document.getElementById('autoSliderCModal'); if (m) m.style.display='block';
+        if (typeof refreshAutoSliderC === 'function') try { refreshAutoSliderC(); } catch(e){}
+      };
+    }
+    if (typeof window.openAutoSliderD !== 'function') {
+      window.openAutoSliderD = function(){
+        var m = document.getElementById('autoSliderDModal'); if (m) m.style.display='block';
+        if (typeof startAutoD === 'function') try { startAutoD(); } catch(e){}
+      };
+    }
+  } catch(e){}
+})();
+</script>
+
+<script>
+(function(){
+  // Harden createSummaryPopupTable to avoid earlier partial blocks
+  try {
+    window.createSummaryPopupTable = function(){
+      if (typeof ensureSummaryPopup === 'function') ensureSummaryPopup();
+      try {
+        var endMs = Date.now();
+        var M = (typeof computeRollingMeans==='function') ? computeRollingMeans(endMs, (typeof SUMMARY_WINDOW_MINUTES!=='undefined'? SUMMARY_WINDOW_MINUTES : 5)) : null;
+        var C = M && (typeof computeCompositeFromMeans==='function') ? computeCompositeFromMeans(M) : null;
+        var d = new Date();
+        if (M && typeof appendSummaryRowToTable === 'function') {
+          appendSummaryRowToTable('summaryPopupTable', d, M, C, {bold:false, labelSuffix:' '+(typeof SUMMARY_WINDOW_MINUTES!=='undefined'? SUMMARY_WINDOW_MINUTES : 5)+'m Now'});
+        }
+      } catch(e){ console.warn(e); }
+    };
+  } catch(e){}
+})();
+</script>
+
 </body>
 <script>
 function openEmotionModal() {
@@ -6535,8 +6658,6 @@ function closeAllRatedPopup(){
       const tds = table.querySelectorAll(`td[data-col="${CSS.escape(col)}"]`);
       tds.forEach(td => td.style.display = hide ? 'none' : '');
     });
-});
-    });
   }
 
   function buildChooser(){
@@ -6559,8 +6680,7 @@ function closeAllRatedPopup(){
         if (div.querySelector('input').checked){ h.delete(col); } else { h.add(col); }
         saveHidden(Array.from(h));
         applyHidden(table, Array.from(h));
-      });
-    });
+  });
   }
 
   function initChooser(){
