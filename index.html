@@ -404,7 +404,7 @@
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.15.2 r2206</title>
+<title>statpack v1.15.3 r2211</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -4333,7 +4333,21 @@ window.addEventListener('load', function(){
   function rowsFromMain(){ var trs=Array.from(document.querySelectorAll('#logTable tbody tr')); return trs.map(function(tr){ function num(f){ var td=tr.querySelector('td[data-field=\"'+f+'Sum\"]'); if(!td) return 0; var v=parseFloat(td.getAttribute('data-value')||td.textContent||'0'); return Number.isFinite(v)?v:0; } var ts=+(tr.getAttribute('data-ts')||0); return { ts:ts, rush:num('rush'), mood:num('mood'), social:num('social'), energy:num('energy'), focus:num('focus'), anxiety:num('anxiety'), impair:num('impair') }; }).filter(function(r){return r.ts>0;}).sort(function(a,b){return a.ts-b.ts;}); }
   function basicStats(vals){ var a=vals.filter(function(v){return Number.isFinite(v);}); var n=a.length; if(!n) return {count:0,sum:0,mean:0,median:0,mode:null,stdev:0}; var sum=a.reduce(function(s,x){return s+x;},0), mean=sum/n; var sorted=a.slice().sort(function(x,y){return x-y;}); var median=(n%2? sorted[(n-1)/2] : (sorted[n/2-1]+sorted[n/2])/2); var freq={}; a.forEach(function(x){freq[x]=(freq[x]||0)+1;}); var mode=null, mf=0; Object.keys(freq).forEach(function(k){ var f=freq[k]; if(f>mf){ mf=f; mode=+k; } }); var stdev=Math.sqrt(a.reduce(function(s,x){return s+(x-mean)*(x-mean);},0)/n); return {count:n,sum:sum,mean:mean,median:median,mode:mode,stdev:stdev}; }
   function renderStats(rows){ var html='<h4 style=\"margin:10px 0 6px 0;\">Per-Metric Statistics</h4>'; html+='<table class=\"striped\" style=\"width:100%; border-collapse:collapse;\"><thead><tr><th>Metric</th><th>COUNT</th><th>SUM</th><th>MEAN</th><th>MODE</th><th>MEDIAN</th><th>STDEV</th></tr></thead><tbody>'; var metrics=['rush','mood','social','energy','focus','anxiety','impair']; metrics.forEach(function(m){ var s=basicStats(rows.map(function(r){return r[m];})); html+='<tr><td>'+m+'</td><td>'+s.count+'</td><td>'+s.sum.toFixed(2)+'</td><td>'+s.mean.toFixed(2)+'</td><td>'+(s.mode??'')+'</td><td>'+s.median.toFixed(2)+'</td><td>'+s.stdev.toFixed(2)+'</td></tr>'; }); html+='</tbody></table>'; return html; }
-  function findDoseEvents(rows){ var ev=[]; for(var i=1;i<rows.length;i++){ if(rows[i].ts<=rows[i-1].ts){ ev.push(i); } } return ev; }
+  function findDoseEvents(rows){
+  const ev = [];
+  const readSD = (r) => {
+    if (r && Object.prototype.hasOwnProperty.call(r, 'sincedose')) return Number(r.sincedose);
+    if (r && Object.prototype.hasOwnProperty.call(r, 'Since Dose')) return Number(r['Since Dose']);
+    return NaN;
+  };
+  for (let i = 1; i < rows.length; i++){
+    const prev = readSD(rows[i-1]);
+    const curr = readSD(rows[i]);
+    if (!Number.isFinite(prev) || !Number.isFinite(curr)) continue;
+    if (curr < prev) ev.push(i);
+  }
+  return ev;
+}
   function windowAfter(rows, idx, ms){ var start=rows[idx].ts, end=start+ms; var out=[]; for(var i=idx;i<rows.length;i++){ if(rows[i].ts<=end) out.push(rows[i]); else break; } return out; }
   function renderDoseWindows(rows, idxs){ var html='<h4 style=\"margin:10px 0 6px 0;\">5-minute Summaries after Each Dose Event</h4>'; html+='<table class=\"striped\" style=\"width:100%; border-collapse:collapse;\"><thead><tr><th>#</th><th>Start Time</th><th>Rows</th><th>Duration (s)</th><th>Rush μ</th><th>Mood μ</th><th>Social μ</th><th>Energy μ</th><th>Focus μ</th><th>Anxiety μ</th><th>Impair μ</th></tr></thead><tbody>'; idxs.forEach(function(i,k){ var win=windowAfter(rows,i,5*60*1000); var dur=win.length?(win[win.length-1].ts-win[0].ts)/1000:0; function meanOf(f){ var a=win.map(f).filter(function(v){return Number.isFinite(v);}); return a.length? a.reduce(function(s,x){return s+x;},0)/a.length : 0; } html+='<tr><td>'+(k+1)+'</td><td>'+new Date(rows[i].ts).toLocaleTimeString('en-AU',{hour12:false})+'</td><td>'+win.length+'</td><td>'+dur.toFixed(0)+'</td><td>'+meanOf(function(r){return r.rush;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.mood;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.social;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.energy;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.focus;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.anxiety;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.impair;}).toFixed(2)+'</td></tr>'; }); html+='</tbody></table>'; return html; }
   function stretches(rows){ var out=[], start=0; for(var i=1;i<rows.length;i++){ if(rows[i].ts<=rows[i-1].ts){ out.push({i0:start,i1:i-1}); start=i; } } out.push({i0:start,i1:rows.length-1}); return out; }
@@ -5681,6 +5695,28 @@ document.addEventListener("DOMContentLoaded", function(){
   }
 })();
 </script>
+
+<div id="statAnalysisDailyModal" class="modal" style="display:none;">
+  <div class="modal-content" style="max-width: 1100px;">
+    <span class="close" onclick="closeStatAnalysisDaily()">&times;</span>
+    <h3>Statistical Analysis Daily</h3>
+    <p>Summary statistics computed per calendar day over visible rows at open time.</p>
+    <div id="statAnalysisDailyMeta" style="margin:6px 0; font-size:12px; opacity:0.75;"></div>
+    <table id="statAnalysisDailyTable" class="table compact">
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>n</th>
+          <th>Rush μ</th><th>Mood μ</th><th>Social μ</th><th>Energy μ</th><th>Focus μ</th><th>Anxiety μ</th><th>Impair μ</th>
+          <th>Rush σ</th><th>Mood σ</th><th>Social σ</th><th>Energy σ</th><th>Focus σ</th><th>Anxiety σ</th><th>Impair σ</th>
+          <th>Rush min</th><th>Mood min</th><th>Social min</th><th>Energy min</th><th>Focus min</th><th>Anxiety min</th><th>Impair min</th>
+          <th>Rush max</th><th>Mood max</th><th>Social max</th><th>Energy max</th><th>Focus max</th><th>Anxiety max</th><th>Impair max</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 </body>
 <script>
 function openEmotionModal() {
@@ -6141,36 +6177,45 @@ function buildEmotionButtons() {
   }
 
   // --- Segment rows by "Since Dose" resets (== 0 starts a new segment) ---
-  function segmentBySinceDose(visibleRows){
-    const segments = [];
-    let cur = [];
-    let segIndex = 0;
+  
+function segmentBySinceDose(visibleRows){
+  const segments = [];
+  let cur = [];
+  let segIndex = 0;
 
-    const pushCur = () => {
-      if (cur.length){
-        segIndex += 1;
-        segments.push({ index: segIndex, rows: cur });
-        cur = [];
-      }
-    };
+  const readSD = (r) => {
+    if (r && Object.prototype.hasOwnProperty.call(r, 'Since Dose')) return Number(r['Since Dose']);
+    if (r && Object.prototype.hasOwnProperty.call(r, 'sincedose')) return Number(r['sincedose']);
+    return NaN;
+  };
 
-    for (let i=0;i<visibleRows.length;i++){
-      const r = visibleRows[i];
-      // Start a new segment when Since Dose is exactly 0 (or null->continue in current if empty)
-      if (r["Since Dose"] === 0){
-        // Finish previous
+  const pushCur = () => {
+    if (cur.length){
+      segments.push({ index: ++segIndex, rows: cur });
+      cur = [];
+    }
+  };
+
+  for (let i = 0; i < visibleRows.length; i++){
+    const r = visibleRows[i];
+    if (i > 0){
+      const prev = readSD(visibleRows[i-1]);
+      const curr = readSD(r);
+      if (Number.isFinite(prev) && Number.isFinite(curr) && curr < prev){
+        // start new segment at this row because Since Dose decreased
         pushCur();
       }
-      cur.push(r);
     }
-    // Push last
-    pushCur();
-    // If no segment was created (e.g., no 0 found), make a single segment with all rows
-    if (!segments.length && visibleRows.length){
-      segments.push({ index: 1, rows: visibleRows.slice() });
-    }
-    return segments;
+    cur.push(r);
   }
+  pushCur();
+
+  if (!segments.length && visibleRows.length){
+    segments.push({ index: 1, rows: visibleRows.slice() });
+  }
+  return segments;
+}
+
 
   function buildSummaryRowsFor(rows){
     const cols = {};
@@ -6398,35 +6443,97 @@ function buildEmotionButtons() {
 
 // === Rated Popup ===
 
+
+const RATING_CONFIG = {
+  rush: [
+    { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
+    { test: v => v >= 4 && v <= 4.5, label: 'Very Strong', cls: 'veryhigh' },
+    { test: v => v >= 3 && v < 4, label: 'Strong', cls: 'high' },
+    { test: v => v >= 2 && v < 3, label: 'Moderate', cls: 'medium' },
+    { test: v => v > 0 && v < 2, label: 'Some', cls: 'low' },
+    { test: v => v === 0, label: 'No', cls: 'none' }
+  ],
+  mood: [
+    { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
+    { test: v => v >= 4 && v <= 4.5, label: 'Very High', cls: 'veryhigh' },
+    { test: v => v >= 3 && v < 4, label: 'High', cls: 'high' },
+    { test: v => v >= 2 && v < 3, label: 'Moderate', cls: 'medium' },
+    { test: v => v > 0 && v < 2, label: 'Some', cls: 'low' },
+    { test: v => v === 0, label: 'None', cls: 'none' }
+  ],
+  social: [
+    { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
+    { test: v => v >= 4 && v <= 4.5, label: 'Very High', cls: 'veryhigh' },
+    { test: v => v >= 3 && v < 4, label: 'High', cls: 'high' },
+    { test: v => v >= 2 && v < 3, label: 'Moderate', cls: 'medium' },
+    { test: v => v > 0 && v < 2, label: 'Some', cls: 'low' },
+    { test: v => v === 0, label: 'No', cls: 'none' }
+  ],
+  energy: [
+    { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
+    { test: v => v >= 4 && v <= 4.5, label: 'Very High', cls: 'veryhigh' },
+    { test: v => v >= 3 && v < 4, label: 'High', cls: 'high' },
+    { test: v => v >= 2 && v < 3, label: 'Moderate', cls: 'medium' },
+    { test: v => v > 0 && v < 2, label: 'Some', cls: 'low' },
+    { test: v => v === 0, label: 'Low', cls: 'none' }
+  ],
+  focus: [
+    { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
+    { test: v => v >= 4 && v <= 4.5, label: 'Very Strong', cls: 'veryhigh' },
+    { test: v => v >= 3 && v < 4, label: 'Strong', cls: 'high' },
+    { test: v => v >= 2 && v < 3, label: 'Moderate', cls: 'medium' },
+    { test: v => v > 0 && v < 2, label: 'Some', cls: 'low' },
+    { test: v => v === 0, label: 'Low', cls: 'none' }
+  ],
+  anxiety: [
+    { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
+    { test: v => v >= 4 && v <= 4.5, label: 'Very High', cls: 'veryhigh' },
+    { test: v => v >= 3 && v < 4, label: 'High', cls: 'high' },
+    { test: v => v > 2 && v < 3, label: 'Moderate', cls: 'medium' },
+    { test: v => v >= 1 && v <= 2, label: 'Some', cls: 'low' },
+    { test: v => v >= 0 && v < 1, label: 'Low/None', cls: 'none' }
+  ],
+  impair: [
+    { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
+    { test: v => v >= 4 && v <= 4.5, label: 'Very High', cls: 'veryhigh' },
+    { test: v => v >= 3 && v < 4, label: 'High', cls: 'high' },
+    { test: v => v > 2 && v < 3, label: 'Moderate', cls: 'medium' },
+    { test: v => v >= 1 && v <= 2, label: 'Some', cls: 'low' },
+    { test: v => v >= 0 && v < 1, label: 'Low/None', cls: 'none' }
+  ]
+};
+
+function normaliseMetricKey(m){
+  if (!m) return '';
+  const s = String(m).toLowerCase();
+  if (s.startsWith('rush')) return 'rush';
+  if (s.startsWith('mood')) return 'mood';
+  if (s.startsWith('soc'))  return 'social';
+  if (s.startsWith('ener')) return 'energy';
+  if (s.startsWith('foc'))  return 'focus';
+  if (s.startsWith('anx'))  return 'anxiety';
+  if (s.startsWith('imp'))  return 'impair';
+  if (s.startsWith('impair')) return 'impair';
+  return s;
+}
+
+
 function computeRatingCategory(metricOrVal, maybeVal){
-  // Flexible signature: (val) or (metric, val)
   let metric = '', val;
   if (typeof metricOrVal === 'string'){
-    metric = String(metricOrVal).toLowerCase();
+    metric = normaliseMetricKey(metricOrVal);
     val = Number(maybeVal);
   } else {
     val = Number(metricOrVal);
   }
-  if (!Number.isFinite(val) || val === 0) return { label:'None', cls:'none' };
-
-  // Metric‑specific thresholds
-  if (metric === 'asd' || metric === 'dsa'){
-    if (val > 0 && val <= 0.5)      return { label:'Very Low',  cls:'verylow' };
-    if (val > 0.5 && val <= 2.5)      return { label:'Low',       cls:'low' };
-    if (val > 2.5 && val < 4)       return { label:'Medium',    cls:'medium' };
-    if (val >= 4 && val < 4.5)      return { label:'High',      cls:'high' };
-    /* val >= 4 */
-    return { label:'Very High', cls:'veryhigh' };
+  if (!Number.isFinite(val)) return { label:'None', cls:'none' };
+  const cfg = RATING_CONFIG[metric] || RATING_CONFIG['rush'];
+  for (const rule of cfg){
+    if (rule.test(val)) return { label: rule.label, cls: rule.cls };
   }
-
-  // Default thresholds for other metrics
-  if (val > 0 && val <= 0.5)        return { label:'Very Low',  cls:'verylow' };
-  if (val > 0.5 && val <= 2.5)        return { label:'Low',       cls:'low' };
-  if (val > 2.5 && val < 4)         return { label:'Medium',    cls:'medium' };
-  if (val >= 4 && val < 4.5)        return { label:'High',      cls:'high' };
-  /* val >= 5 */
-  return { label:'Very High', cls:'veryhigh' };
+  return { label:'None', cls:'none' };
 }
+
 
 function currentMaxFor(metric){
   try{
@@ -6871,4 +6978,171 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   } catch(e){}
 });
+
+// Inserted: All Rated 5-Minute renderer using CSV-derived thresholds
+
+function openAllRated5MinutesPopup(){
+  try{
+    renderAllRated5MinutesPopup();
+    const modal = document.getElementById('allRated5MinutesPopupModal');
+    if (modal) modal.style.display = 'block';
+  }catch(e){
+    console.error(e);
+    alert("All Rated 5-Minute failed: " + e.message);
+  }
+}
+function closeAllRated5MinutesPopup(){
+  const modal = document.getElementById('allRated5MinutesPopupModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function renderAllRated5MinutesPopup(){
+  const tbl = document.querySelector('#allRated5MinutesPopupTable tbody');
+  if (!tbl) return;
+  tbl.innerHTML = '';
+
+  const rows = Array.isArray(window.logData) ? window.logData.slice() : [];
+  if (!rows.length) return;
+
+  // Bucket into 5-minute bins
+  const buckets = (function(){
+    const map = new Map();
+    for (const r of rows){
+      const t = +new Date(r.ts || r.time || r.timestamp || r.date || r['Time'] || r['Timestamp']);
+      if (!Number.isFinite(t)) continue;
+      const b = Math.floor(t / (5*60*1000)) * (5*60*1000);
+      if (!map.has(b)) map.set(b, []);
+      map.get(b).push(r);
+    }
+    const arr = Array.from(map.entries()).map(([t,rs]) => ({ t, rows: rs }));
+    arr.sort((a,b)=>a.t-b.t);
+    return arr;
+  })();
+
+  const metrics = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
+
+  for (const b of buckets){
+    const avg = {};
+    for (const m of metrics){
+      let sum = 0, n = 0;
+      for (const r of b.rows){
+        let v = r[m];
+        if (v == null) v = r[m.toLowerCase()];
+        v = Number(v);
+        if (Number.isFinite(v)){ sum += v; n++; }
+      }
+      avg[m] = n ? (sum/n) : null;
+    }
+
+    const tr = document.createElement('tr');
+    const tstr = new Date(b.t).toLocaleString('en-AU', { hour12:false });
+    let html = `<td>${tstr}</td>`;
+    for (const m of metrics){
+      const v = avg[m];
+      if (v == null){
+        html += `<td><span class="badge none">No Data</span></td>`;
+      }else{
+        const cat = computeRatingCategory(m, v);
+        html += `<td><span class="badge ${cat.cls}" title="${v.toFixed(2)}">${cat.label}</span></td>`;
+      }
+    }
+    tr.innerHTML = html;
+    tbl.appendChild(tr);
+  }
+}
+
+// Inserted: Statistical Analysis Daily
+
+function openStatAnalysisDaily(){
+  try{
+    renderStatAnalysisDaily();
+    const modal = document.getElementById('statAnalysisDailyModal');
+    if (modal) modal.style.display = 'block';
+  }catch(e){
+    console.error(e);
+    alert("Statistical Analysis Daily failed: " + e.message);
+  }
+}
+function closeStatAnalysisDaily(){
+  const modal = document.getElementById('statAnalysisDailyModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function renderStatAnalysisDaily(){
+  const tbody = document.querySelector('#statAnalysisDailyTable tbody');
+  const meta  = document.getElementById('statAnalysisDailyMeta');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  // Prefer visible rows from main table
+  let rows = [];
+  try { rows = rowsFromMain(); } catch(_){}
+  if (!rows || !rows.length){
+    rows = Array.isArray(window.logData) ? window.logData.slice() : [];
+  }
+  if (!rows.length) return;
+
+  const dayMap = new Map();
+  for (const r of rows){
+    const t = +new Date(r.ts || r.time || r.timestamp || r.date || r['Time'] || r['Timestamp']);
+    if (!Number.isFinite(t)) continue;
+    const d = new Date(t);
+    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if (!dayMap.has(key)) dayMap.set(key, []);
+    dayMap.get(key).push(r);
+  }
+  const days = Array.from(dayMap.keys()).sort();
+
+  const METRICS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
+  const pick = (r,k) => {
+    if (r.hasOwnProperty(k)) return Number(r[k]);
+    const low = k.toLowerCase();
+    if (r.hasOwnProperty(low)) return Number(r[low]);
+    return NaN;
+  };
+  const mean = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : NaN;
+  const stdv = arr => {
+    if (arr.length < 2) return 0;
+    const m = mean(arr);
+    const v = arr.reduce((acc,x)=>acc+(x-m)*(x-m),0)/(arr.length-1);
+    return Math.sqrt(v);
+  };
+  const minv = arr => arr.length ? Math.min(...arr) : NaN;
+  const maxv = arr => arr.length ? Math.max(...arr) : NaN;
+
+  let totalRows = 0;
+  for (const day of days){
+    const dr = dayMap.get(day);
+    totalRows += dr.length;
+    const tr = document.createElement('tr');
+    let html = `<td>${day}</td><td>${dr.length}</td>`;
+    for (const m of METRICS){
+      const vals = dr.map(r => pick(r,m)).filter(Number.isFinite);
+      const mv = mean(vals);
+      html += `<td>${Number.isFinite(mv) ? mv.toFixed(2) : ''}</td>`;
+    }
+    for (const m of METRICS){
+      const vals = dr.map(r => pick(r,m)).filter(Number.isFinite);
+      html += `<td>${Number.isFinite(stdv(vals)) ? stdv(vals).toFixed(2) : ''}</td>`;
+    }
+    for (const m of METRICS){
+      const vals = dr.map(r => pick(r,m)).filter(Number.isFinite);
+      const v = minv(vals);
+      html += `<td>${Number.isFinite(v) ? v.toFixed(2) : ''}</td>`;
+    }
+    for (const m of METRICS){
+      const vals = dr.map(r => pick(r,m)).filter(Number.isFinite);
+      const v = maxv(vals);
+      html += `<td>${Number.isFinite(v) ? v.toFixed(2) : ''}</td>`;
+    }
+    tr.innerHTML = html;
+    tbody.appendChild(tr);
+  }
+
+  if (meta){
+    const when = new Date().toLocaleString('en-AU', { hour12:false });
+    meta.textContent = `Computed from ${totalRows} row(s) across ${days.length} day(s) at ${when}.`;
+  }
+}
 </script>
+
