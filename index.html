@@ -404,7 +404,7 @@
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.15.3 r2211</title>
+<title>statpack v1.15.4 r2217</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -486,11 +486,13 @@ function computeFiveMax(obj){
 <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
 <button id="slidingAvgBtn" onclick="openSlidingAverage()">Sliding Average</button>
 <button id="doseReviewsBtn" onclick="openDoseReviews()">Dose Reviews</button>
+<button id="allRated5mBtn" onclick="openAllRated5MinutesPopup()">All Rated 5-Minute</button>
 <button id="autoSliderABtn" onclick="openAutoSliderA()">Auto Slider A</button>
 <button id="autoSliderBBtn" onclick="openAutoSliderB()">Auto Slider B</button>
 <button id="significant5mBtn" onclick="openSignificant5m()">Summary Significant 5m</button>
 <button id="statAnalysisBtn" onclick="openStatAnalysis()">Statistical Analysis</button>
 <button id="statAnalysisHourBtn" onclick="openStatAnalysisHourly()">Statistical Analysis (60m)</button>
+<button id="statAnalysisDailyBtn" onclick="openStatAnalysisDaily()">Statistical Analysis Daily</button>
 <button id="autoSummaryToggleBtn" onclick="toggleAutoSummary()">Auto</button>
 
 <button id="autoSliderA2Btn" onclick="openAutoSliderA2()">Auto Slider A2</button>
@@ -1923,6 +1925,8 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.style.height = '40px';
         }
   });
+
+});
 </script>
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 <script>
@@ -5696,27 +5700,24 @@ document.addEventListener("DOMContentLoaded", function(){
 })();
 </script>
 
-<div id="statAnalysisDailyModal" class="modal" style="display:none;">
-  <div class="modal-content" style="max-width: 1100px;">
-    <span class="close" onclick="closeStatAnalysisDaily()">&times;</span>
-    <h3>Statistical Analysis Daily</h3>
-    <p>Summary statistics computed per calendar day over visible rows at open time.</p>
-    <div id="statAnalysisDailyMeta" style="margin:6px 0; font-size:12px; opacity:0.75;"></div>
-    <table id="statAnalysisDailyTable" class="table compact">
-      <thead>
-        <tr>
-          <th>Day</th>
-          <th>n</th>
-          <th>Rush μ</th><th>Mood μ</th><th>Social μ</th><th>Energy μ</th><th>Focus μ</th><th>Anxiety μ</th><th>Impair μ</th>
-          <th>Rush σ</th><th>Mood σ</th><th>Social σ</th><th>Energy σ</th><th>Focus σ</th><th>Anxiety σ</th><th>Impair σ</th>
-          <th>Rush min</th><th>Mood min</th><th>Social min</th><th>Energy min</th><th>Focus min</th><th>Anxiety min</th><th>Impair min</th>
-          <th>Rush max</th><th>Mood max</th><th>Social max</th><th>Energy max</th><th>Focus max</th><th>Anxiety max</th><th>Impair max</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
+<script>
+(function(){
+  function applyDockPadding(){
+    try{
+      var dock = document.querySelector('.summary-controls');
+      if(!dock) return;
+      var h = dock.offsetHeight || 0;
+      document.body.style.paddingTop = (h ? (h + 10) : 0) + 'px';
+    }catch(e){}
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', applyDockPadding);
+  }else{
+    applyDockPadding();
+  }
+  window.addEventListener('resize', applyDockPadding);
+})();
+</script>
 </body>
 <script>
 function openEmotionModal() {
@@ -6978,171 +6979,5 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   } catch(e){}
 });
-
-// Inserted: All Rated 5-Minute renderer using CSV-derived thresholds
-
-function openAllRated5MinutesPopup(){
-  try{
-    renderAllRated5MinutesPopup();
-    const modal = document.getElementById('allRated5MinutesPopupModal');
-    if (modal) modal.style.display = 'block';
-  }catch(e){
-    console.error(e);
-    alert("All Rated 5-Minute failed: " + e.message);
-  }
-}
-function closeAllRated5MinutesPopup(){
-  const modal = document.getElementById('allRated5MinutesPopupModal');
-  if (modal) modal.style.display = 'none';
-}
-
-function renderAllRated5MinutesPopup(){
-  const tbl = document.querySelector('#allRated5MinutesPopupTable tbody');
-  if (!tbl) return;
-  tbl.innerHTML = '';
-
-  const rows = Array.isArray(window.logData) ? window.logData.slice() : [];
-  if (!rows.length) return;
-
-  // Bucket into 5-minute bins
-  const buckets = (function(){
-    const map = new Map();
-    for (const r of rows){
-      const t = +new Date(r.ts || r.time || r.timestamp || r.date || r['Time'] || r['Timestamp']);
-      if (!Number.isFinite(t)) continue;
-      const b = Math.floor(t / (5*60*1000)) * (5*60*1000);
-      if (!map.has(b)) map.set(b, []);
-      map.get(b).push(r);
-    }
-    const arr = Array.from(map.entries()).map(([t,rs]) => ({ t, rows: rs }));
-    arr.sort((a,b)=>a.t-b.t);
-    return arr;
-  })();
-
-  const metrics = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
-
-  for (const b of buckets){
-    const avg = {};
-    for (const m of metrics){
-      let sum = 0, n = 0;
-      for (const r of b.rows){
-        let v = r[m];
-        if (v == null) v = r[m.toLowerCase()];
-        v = Number(v);
-        if (Number.isFinite(v)){ sum += v; n++; }
-      }
-      avg[m] = n ? (sum/n) : null;
-    }
-
-    const tr = document.createElement('tr');
-    const tstr = new Date(b.t).toLocaleString('en-AU', { hour12:false });
-    let html = `<td>${tstr}</td>`;
-    for (const m of metrics){
-      const v = avg[m];
-      if (v == null){
-        html += `<td><span class="badge none">No Data</span></td>`;
-      }else{
-        const cat = computeRatingCategory(m, v);
-        html += `<td><span class="badge ${cat.cls}" title="${v.toFixed(2)}">${cat.label}</span></td>`;
-      }
-    }
-    tr.innerHTML = html;
-    tbl.appendChild(tr);
-  }
-}
-
-// Inserted: Statistical Analysis Daily
-
-function openStatAnalysisDaily(){
-  try{
-    renderStatAnalysisDaily();
-    const modal = document.getElementById('statAnalysisDailyModal');
-    if (modal) modal.style.display = 'block';
-  }catch(e){
-    console.error(e);
-    alert("Statistical Analysis Daily failed: " + e.message);
-  }
-}
-function closeStatAnalysisDaily(){
-  const modal = document.getElementById('statAnalysisDailyModal');
-  if (modal) modal.style.display = 'none';
-}
-
-function renderStatAnalysisDaily(){
-  const tbody = document.querySelector('#statAnalysisDailyTable tbody');
-  const meta  = document.getElementById('statAnalysisDailyMeta');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-
-  // Prefer visible rows from main table
-  let rows = [];
-  try { rows = rowsFromMain(); } catch(_){}
-  if (!rows || !rows.length){
-    rows = Array.isArray(window.logData) ? window.logData.slice() : [];
-  }
-  if (!rows.length) return;
-
-  const dayMap = new Map();
-  for (const r of rows){
-    const t = +new Date(r.ts || r.time || r.timestamp || r.date || r['Time'] || r['Timestamp']);
-    if (!Number.isFinite(t)) continue;
-    const d = new Date(t);
-    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    if (!dayMap.has(key)) dayMap.set(key, []);
-    dayMap.get(key).push(r);
-  }
-  const days = Array.from(dayMap.keys()).sort();
-
-  const METRICS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
-  const pick = (r,k) => {
-    if (r.hasOwnProperty(k)) return Number(r[k]);
-    const low = k.toLowerCase();
-    if (r.hasOwnProperty(low)) return Number(r[low]);
-    return NaN;
-  };
-  const mean = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : NaN;
-  const stdv = arr => {
-    if (arr.length < 2) return 0;
-    const m = mean(arr);
-    const v = arr.reduce((acc,x)=>acc+(x-m)*(x-m),0)/(arr.length-1);
-    return Math.sqrt(v);
-  };
-  const minv = arr => arr.length ? Math.min(...arr) : NaN;
-  const maxv = arr => arr.length ? Math.max(...arr) : NaN;
-
-  let totalRows = 0;
-  for (const day of days){
-    const dr = dayMap.get(day);
-    totalRows += dr.length;
-    const tr = document.createElement('tr');
-    let html = `<td>${day}</td><td>${dr.length}</td>`;
-    for (const m of METRICS){
-      const vals = dr.map(r => pick(r,m)).filter(Number.isFinite);
-      const mv = mean(vals);
-      html += `<td>${Number.isFinite(mv) ? mv.toFixed(2) : ''}</td>`;
-    }
-    for (const m of METRICS){
-      const vals = dr.map(r => pick(r,m)).filter(Number.isFinite);
-      html += `<td>${Number.isFinite(stdv(vals)) ? stdv(vals).toFixed(2) : ''}</td>`;
-    }
-    for (const m of METRICS){
-      const vals = dr.map(r => pick(r,m)).filter(Number.isFinite);
-      const v = minv(vals);
-      html += `<td>${Number.isFinite(v) ? v.toFixed(2) : ''}</td>`;
-    }
-    for (const m of METRICS){
-      const vals = dr.map(r => pick(r,m)).filter(Number.isFinite);
-      const v = maxv(vals);
-      html += `<td>${Number.isFinite(v) ? v.toFixed(2) : ''}</td>`;
-    }
-    tr.innerHTML = html;
-    tbody.appendChild(tr);
-  }
-
-  if (meta){
-    const when = new Date().toLocaleString('en-AU', { hour12:false });
-    meta.textContent = `Computed from ${totalRows} row(s) across ${days.length} day(s) at ${when}.`;
-  }
-}
 </script>
 
