@@ -404,7 +404,7 @@
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.15.4 r2218</title>
+<title>statpack v1.15.4 r2221</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -466,6 +466,27 @@ function computeFiveMax(obj){
 
 
 
+
+    <script>
+    // Injected helper: derive a crude scaleFocus from notes keywords.
+    function computeScaleFocusFromNotes(notes){
+      try{
+        const s = String(notes||'').toLowerCase();
+        if (!s) return 0;
+        const hits = [
+          [/focus|concentrat|wired|laser|obsess/, 3],
+          [/distract|scatter|confus/, -1],
+          [/calm|steady|clear/, 2]
+        ];
+        let score = 0;
+        for (const [rx, val] of hits){
+          if (rx.test(s)) score += val;
+        }
+        return Math.max(-3, Math.min(5, score));
+      }catch(e){ return 0; }
+    }
+    </script>
+    
 </head>
 <body>
 
@@ -503,7 +524,7 @@ function computeFiveMax(obj){
 <button id="rollingAvgBtn" onclick="openRollingAverage()">Rolling Average</button>
 <button id="allRatedRowsBtn" onclick="openAllRatedPopup()">All Rated (Rows)</button>
 <button id="allRatedOutOf10Btn" onclick="openAllRatedOutOf10Popup()">All Rated /10</button>
-<button id="allRated5mBtn" onclick="openAllRated5MinutesPopup()">All Rated 5m</button>
+
 <button id="allRated5m10Btn" onclick="openAllRated5MinutesOutOf10Popup()">All Rated 5m /10</button>
 
 <button id="ratedPopupBtn" onclick="openRatedPopup()">Rated Popup</button>
@@ -618,41 +639,7 @@ function computeFiveMax(obj){
 <div id="timer" style="margin-top: 10px;">Time: 00:00:00</div>
 <table id="logTable">
 <thead>
-<tr>
-<th data-col="Select">Select</th>
-<th data-col="Timestamp">Timestamp</th>
-<th data-col="Since">Since</th>
-<th data-col="Elapsed">Elapsed</th>
-<th data-col="Phase">Phase</th>
-<th data-col="Scale">Scale</th>
-<th data-col="Drug">Drug</th>
-<th data-col="QTY">QTY</th>
-<th data-col="ROA">ROA</th>
-<th data-col="Rush">Rush</th>
-<th data-col="Rush">Rush</th>
-<th data-col="Mood">Mood</th>
-<th data-col="Mood">Mood</th>
-<th data-col="Social">Social</th>
-<th data-col="Social">Social</th>
-<th data-col="Energy">Energy</th>
-<th data-col="Energy">Energy </th>
-<th data-col="Focus">Focus</th>
-<th data-col="Focus">Focus</th>
-<th data-col="Anxiety">Anxiety</th>
-<th data-col="Anxiety">Anxiety</th>
-<th data-col="Impair">Impair</th>
-<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
-<th data-col="Confidence">Confidence</th><th data-col="Confidence">Confidence</th><th data-col="Auto">Auto</th><th data-col="Auto">Auto</th><th data-col="Jitter">Jitter</th><th data-col="Jitter">Jitter</th><th data-col="Dopamine">Dopamine</th><th data-col="Dopamine">Dopamine</th><th data-col="Score">Score</th>
-<th data-col="Max">Max</th>
-<th data-col="Min">Min</th>
-<th data-col="VL">VL</th>
-<th data-col="sM">sM</th>
-<th data-col="sB">sB</th>
-<th data-col="sF">sF</th>
-<th data-col="Last">Last</th>
-<th data-col="Notes">Notes</th>
-<th data-col="Weighted">Weighted</th><th data-col="5Max">5Max</th><th data-col="GS">GS</th>
-</tr>
+<tr><thead><tr><th data-col="Select">Select</th><th data-col="Timestamp">Timestamp</th><th data-col="Since">Since</th><th data-col="Elapsed">Elapsed</th><th data-col="Phase">Phase</th><th data-col="Scale">Scale</th><th data-col="Drug">Drug</th><th data-col="QTY">QTY</th><th data-col="ROA">ROA</th><th data-col="Rush">Rush</th><th data-col="Rush Label">Rush Label</th><th data-col="Mood">Mood</th><th data-col="Mood Label">Mood Label</th><th data-col="Social">Social</th><th data-col="Social Label">Social Label</th><th data-col="Energy">Energy</th><th data-col="Energy Label">Energy Label</th><th data-col="Focus">Focus</th><th data-col="Focus Label">Focus Label</th><th data-col="Anxiety">Anxiety</th><th data-col="Anxiety Label">Anxiety Label</th><th data-col="Impair">Impair</th><th data-col="Impair Label">Impair Label</th><th data-col="Score">Score</th><th data-col="Max">Max</th><th data-col="Min">Min</th><th data-col="VL">VL</th><th data-col="sM">sM</th><th data-col="sB">sB</th><th data-col="sF">sF</th><th data-col="Last">Last</th><th data-col="Notes">Notes</th><th data-col="Weighted">Weighted</th><th data-col="5Max">5Max</th><th data-col="GS">GS</th></tr></thead></tr>
 </thead>
 <tbody></tbody>
 </table>
@@ -762,35 +749,35 @@ const CONFIG = Object.freeze({
 labels: {
   labelMappings: {
   rush: { 5.0: 'Extreme', 4.5: 'Intense/Frenzied', 4.0: 'Intense', 3.5: 'Strong/Controllable', 3.0: 'Strong', 2.5: 'Some/Moderate', 2.0: 'Some/Feel', 1.5: 'Slight/Think', 1.0: 'Slight/Mild', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  mood: { 5.0: 'Euphoric', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear', 2.5: 'Some/Certain', 2.0: 'Some/Thought', 1.5: 'Slight', 1.0: 'Slight', 0.5: 'Maybe/Unsure', 0.0: 'No' },
+  mood: { 5.0: 'Euphoria', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear', 2.5: 'Some/Certain', 2.0: 'Some/Thought', 1.5: 'Slight', 1.0: 'Slight', 0.5: 'Maybe/Unsure', 0.0: 'No' },
   social: { 5.0: 'Disinhibited', 4.5: 'Outgoing/Proactive', 4.0: 'Outgoing/Empathy', 3.5: 'Social/Proactive', 3.0: 'Social/Empathy', 2.5: 'Desire/Urge', 2.0: 'Desire/Want', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Significant/Active', 3.0: 'Significant', 2.5: 'Some/Push', 2.0: 'Some/Yes', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  focus: { 5.0: 'Wired', 4.5: 'Obsess/Laser', 4.0: 'Obsessive', 3.5: 'Focused/Very', 3.0: 'Focused', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Capable/Think', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  anxiety: { 5.0: 'Panic', 4.5: 'Severe/Worry', 4.0: 'Severe/Worry', 3.5: 'Anxious/Impacted', 3.0: 'Anxious/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Ignorable', 1.0: 'Low/Ignorable', 0.5: 'Low/Minimal', 0.0: 'None' },
-  impair: { 5.0: 'Crippled', 4.5: 'Severe/Adverse', 4.0: 'Severe/Adverse', 3.5: 'Behaviour/Impacted', 3.0: 'Behaviour/Affected', 2.5: 'Impeded/Hindered', 2.0: 'Impeded/Ignorable', 1.5: 'Some/Overthinking', 1.0: 'Some/Ignorable', 0.5: 'Low/Minimal', 0.0: 'No' },
-  change: { 5.00: 'Major', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Certain', 2.00: 'Thought', 1.50: 'Some', 1.00: 'Maybe', 0.50: 'Unsure', 0.00: 'None' },
-  degree: { 5.00: 'Extreme', 4.50: 'Very High', 4.00: 'Higher', 3.50: 'High', 3.00: 'Mid High', 2.50: 'Mid', 2.00: 'Mid Low', 1.50: 'Low', 1.00: 'Lower', 0.50: 'Very Low', 0.00: 'None' },
-  other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Next', 2.00: 'Intake', 1.00: 'Dose', 0.00: 'Row' },
-  confidence: { 0: 'Struggle', 1: 'Effort', 2: 'Capable', 3: 'Effective', 4: 'Natural', 5: 'Excellent', 2.5: 'Midpoint' },
-  auto: { 3.00: 'Auto', 2.00: 'Dopamine', 1.00: 'Maybe', 0.00: 'No' },
-  jitter: { 3.00: 'Yes', 2.00: 'Some', 1.00: 'Maybe', 0.00: 'No' },
-  dopamine: { 3.00: 'Yes', 2.00: 'Some', 1.00: 'Maybe', 0.00: 'No' },
+  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Some/Push', 2.0: 'Some/Yes', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None' },
+  focus: { 5.0: 'Wired', 4.5: 'Obsess/Laser', 4.0: 'Obsessive', 3.5: 'Focused/Very', 3.0: 'Focused', 2.5: 'Yes/Fixated', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Capable/Think', 0.5: 'Maybe/Unsure', 0.0: 'No' },
+  anxiety: { 5.0: 'Panic', 4.5: 'Severe/Worry', 4.0: 'Severe/Worry', 3.5: 'Anxious/Impacted', 3.0: 'Anxious/Affected', 2.5: 'Moderate/Hindered', 2.0: 'Moderate/Present', 1.5: 'Low/Ignorable', 1.0: 'Low/Ignorable', 0.5: 'Low/Minimal', 0.0: 'None' },
+  impair: { 5.0: 'Crippled', 4.5: 'Severe/Adverse', 4.0: 'Severe/Adverse', 3.5: 'Behaviour/Impacted', 3.0: 'Behaviour/Affected', 2.5: 'Impeded/Moderate', 2.0: 'Impeded/Moderate', 1.5: 'Some/Overthinking', 1.0: 'Some/Ignorable', 0.5: 'Low/Minimal', 0.0: 'No' },
+  change: { 0: 'None', 1: 'Maybe', 2: 'Thought', 3: 'Clear', 4: 'Obvious', 5: 'Major' },
+  degree: { 0: 'None', 1: 'Low', 2: 'Mid', 3: 'High', 4: 'Very High', 5: 'Extreme' },
+  other: { 0: 'Row', 1: 'About To', 2: 'Doing', 3: 'Just Did', 4: 'Late', 5: 'Now' },
+  confidence: { 0: 'Struggle', 1: 'Effort', 2: 'Capable', 3: 'Effective', 4: 'Natural', 5: 'Excellent' },
+  auto: { 0: 'No', 1: 'Maybe', 2: 'Dopamine', 3: 'Auto' },
+  jitter: { 0: 'No', 1: 'Maybe', 2: 'Some', 3: 'Yes' },
+  dopamine: { 0: 'No', 1: 'Maybe', 2: 'Serotonin', 3: 'Dopamine' },
 }
 , rapidLabels: {
   rush: { 5.0: 'Extreme', 4.5: 'Intense/Frenzied', 4.0: 'Intense', 3.5: 'Strong/Controllable', 3.0: 'Strong', 2.5: 'Some/Moderate', 2.0: 'Some/Feel', 1.5: 'Slight/Think', 1.0: 'Slight/Mild', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  mood: { 5.0: 'Euphoric', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear', 2.5: 'Some/Certain', 2.0: 'Some/Thought', 1.5: 'Slight', 1.0: 'Slight', 0.5: 'Maybe/Unsure', 0.0: 'No' },
+  mood: { 5.0: 'Euphoria', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Distinct', 3.0: 'Clear', 2.5: 'Some/Certain', 2.0: 'Some/Thought', 1.5: 'Slight', 1.0: 'Slight', 0.5: 'Maybe/Unsure', 0.0: 'No' },
   social: { 5.0: 'Disinhibited', 4.5: 'Outgoing/Proactive', 4.0: 'Outgoing/Empathy', 3.5: 'Social/Proactive', 3.0: 'Social/Empathy', 2.5: 'Desire/Urge', 2.0: 'Desire/Want', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Significant/Active', 3.0: 'Significant', 2.5: 'Some/Push', 2.0: 'Some/Yes', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  focus: { 5.0: 'Wired', 4.5: 'Obsess/Laser', 4.0: 'Obsessive', 3.5: 'Focused/Very', 3.0: 'Focused', 2.5: 'Yes/Some', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Capable/Think', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  anxiety: { 5.0: 'Panic', 4.5: 'Severe/Worry', 4.0: 'Severe/Worry', 3.5: 'Anxious/Impacted', 3.0: 'Anxious/Affected', 2.5: 'Present/Hindered', 2.0: 'Present/Ignorable', 1.5: 'Low/Ignorable', 1.0: 'Low/Ignorable', 0.5: 'Low/Minimal', 0.0: 'None' },
-  impair: { 5.0: 'Crippled', 4.5: 'Severe/Adverse', 4.0: 'Severe/Adverse', 3.5: 'Behaviour/Impacted', 3.0: 'Behaviour/Affected', 2.5: 'Impeded/Hindered', 2.0: 'Impeded/Ignorable', 1.5: 'Some/Overthinking', 1.0: 'Some/Ignorable', 0.5: 'Low/Minimal', 0.0: 'No' },
-  change: { 5.00: 'Major', 4.50: 'Blatant', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Certain', 2.00: 'Thought', 1.50: 'Some', 1.00: 'Maybe', 0.50: 'Unsure', 0.00: 'None' },
-  degree: { 5.00: 'Extreme', 4.50: 'Very High', 4.00: 'Higher', 3.50: 'High', 3.00: 'Mid High', 2.50: 'Mid', 2.00: 'Mid Low', 1.50: 'Low', 1.00: 'Lower', 0.50: 'Very Low', 0.00: 'None' },
-  other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Next', 2.00: 'Intake', 1.00: 'Dose', 0.00: 'Row' },
-  confidence: { 0: 'Struggle', 1: 'Effort', 2: 'Capable', 3: 'Effective', 4: 'Natural', 5: 'Excellent', 2.5: 'Midpoint' },
-  auto: { 3.00: 'Auto', 2.00: 'Dopamine', 1.00: 'Maybe', 0.00: 'No' },
-  jitter: { 3.00: 'Yes', 2.00: 'Some', 1.00: 'Maybe', 0.00: 'No' },
-  dopamine: { 3.00: 'Yes', 2.00: 'Some', 1.00: 'Maybe', 0.00: 'No' },
+  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Significant/Active', 3.0: 'Significant/Inactive', 2.5: 'Some/Push', 2.0: 'Some/Yes', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None' },
+  focus: { 5.0: 'Wired', 4.5: 'Obsess/Laser', 4.0: 'Obsessive', 3.5: 'Focused/Very', 3.0: 'Focused', 2.5: 'Yes/Fixated', 2.0: 'Yes/Some', 1.5: 'Effective', 1.0: 'Capable/Think', 0.5: 'Maybe/Unsure', 0.0: 'No' },
+  anxiety: { 5.0: 'Panic', 4.5: 'Severe/Worry', 4.0: 'Severe/Worry', 3.5: 'Anxious/Impacted', 3.0: 'Anxious/Affected', 2.5: 'Moderate/Hindered', 2.0: 'Moderate/Present', 1.5: 'Low/Ignorable', 1.0: 'Low/Ignorable', 0.5: 'Low/Minimal', 0.0: 'None' },
+  impair: { 5.0: 'Crippled', 4.5: 'Severe/Adverse', 4.0: 'Severe/Adverse', 3.5: 'Behaviour/Impacted', 3.0: 'Behaviour/Affected', 2.5: 'Impeded/Moderate', 2.0: 'Impeded/Moderate', 1.5: 'Some/Overthinking', 1.0: 'Some/Ignorable', 0.5: 'Low/Minimal', 0.0: 'No' },
+  change: { 0: 'None', 1: 'Maybe', 2: 'Thought', 3: 'Clear', 4: 'Obvious', 5: 'Major' },
+  degree: { 0: 'None', 1: 'Low', 2: 'Mid', 3: 'High', 4: 'Very High', 5: 'Extreme' },
+  other: { 0: 'Row', 1: 'About To', 2: 'Doing', 3: 'Just Did', 4: 'Late', 5: 'Now' },
+  confidence: { 0: 'Struggle', 1: 'Effort', 2: 'Capable', 3: 'Effective', 4: 'Natural', 5: 'Excellent' },
+  auto: { 0: 'No', 1: 'Maybe', 2: 'Dopamine', 3: 'Auto' },
+  jitter: { 0: 'No', 1: 'Maybe', 2: 'Some', 3: 'Yes' },
+  dopamine: { 0: 'No', 1: 'Maybe', 2: 'Serotonin', 3: 'Dopamine' },
   },
   buttonLabelsByMetric: {}},
   buttons: {
@@ -802,12 +789,12 @@ labels: {
       focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
       anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
       impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      confidence:[5,4,3,2.5,2,1,0],
+      confidence:[5,4,3,2,1,0],
       auto:[3,2,1,0],
       jitter:[3,2,1,0],
       dopamine:[3,2,1,0],
-      change:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
-      degree:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      change:[5,4,3,2,1,0],
+      degree:[5,4,3,2,1,0],
       other: [5,4,3,2,1,0]
     },
     rapidValues: [5,4,3,2,1,0],
