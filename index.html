@@ -404,7 +404,7 @@
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.15.4 r2221</title>
+<title>statpack v1.15.5 r2222</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -466,27 +466,6 @@ function computeFiveMax(obj){
 
 
 
-
-    <script>
-    // Injected helper: derive a crude scaleFocus from notes keywords.
-    function computeScaleFocusFromNotes(notes){
-      try{
-        const s = String(notes||'').toLowerCase();
-        if (!s) return 0;
-        const hits = [
-          [/focus|concentrat|wired|laser|obsess/, 3],
-          [/distract|scatter|confus/, -1],
-          [/calm|steady|clear/, 2]
-        ];
-        let score = 0;
-        for (const [rx, val] of hits){
-          if (rx.test(s)) score += val;
-        }
-        return Math.max(-3, Math.min(5, score));
-      }catch(e){ return 0; }
-    }
-    </script>
-    
 </head>
 <body>
 
@@ -524,7 +503,7 @@ function computeFiveMax(obj){
 <button id="rollingAvgBtn" onclick="openRollingAverage()">Rolling Average</button>
 <button id="allRatedRowsBtn" onclick="openAllRatedPopup()">All Rated (Rows)</button>
 <button id="allRatedOutOf10Btn" onclick="openAllRatedOutOf10Popup()">All Rated /10</button>
-
+<button id="allRated5mBtn" onclick="openAllRated5MinutesPopup()">All Rated 5m</button>
 <button id="allRated5m10Btn" onclick="openAllRated5MinutesOutOf10Popup()">All Rated 5m /10</button>
 
 <button id="ratedPopupBtn" onclick="openRatedPopup()">Rated Popup</button>
@@ -639,7 +618,41 @@ function computeFiveMax(obj){
 <div id="timer" style="margin-top: 10px;">Time: 00:00:00</div>
 <table id="logTable">
 <thead>
-<tr><thead><tr><th data-col="Select">Select</th><th data-col="Timestamp">Timestamp</th><th data-col="Since">Since</th><th data-col="Elapsed">Elapsed</th><th data-col="Phase">Phase</th><th data-col="Scale">Scale</th><th data-col="Drug">Drug</th><th data-col="QTY">QTY</th><th data-col="ROA">ROA</th><th data-col="Rush">Rush</th><th data-col="Rush Label">Rush Label</th><th data-col="Mood">Mood</th><th data-col="Mood Label">Mood Label</th><th data-col="Social">Social</th><th data-col="Social Label">Social Label</th><th data-col="Energy">Energy</th><th data-col="Energy Label">Energy Label</th><th data-col="Focus">Focus</th><th data-col="Focus Label">Focus Label</th><th data-col="Anxiety">Anxiety</th><th data-col="Anxiety Label">Anxiety Label</th><th data-col="Impair">Impair</th><th data-col="Impair Label">Impair Label</th><th data-col="Score">Score</th><th data-col="Max">Max</th><th data-col="Min">Min</th><th data-col="VL">VL</th><th data-col="sM">sM</th><th data-col="sB">sB</th><th data-col="sF">sF</th><th data-col="Last">Last</th><th data-col="Notes">Notes</th><th data-col="Weighted">Weighted</th><th data-col="5Max">5Max</th><th data-col="GS">GS</th></tr></thead></tr>
+<tr>
+<th data-col="Select">Select</th>
+<th data-col="Timestamp">Timestamp</th>
+<th data-col="Since">Since</th>
+<th data-col="Elapsed">Elapsed</th>
+<th data-col="Phase">Phase</th>
+<th data-col="Scale">Scale</th>
+<th data-col="Drug">Drug</th>
+<th data-col="QTY">QTY</th>
+<th data-col="ROA">ROA</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Rush">Rush</th>
+<th data-col="Mood">Mood</th>
+<th data-col="Mood">Mood</th>
+<th data-col="Social">Social</th>
+<th data-col="Social">Social</th>
+<th data-col="Energy">Energy</th>
+<th data-col="Energy">Energy </th>
+<th data-col="Focus">Focus</th>
+<th data-col="Focus">Focus</th>
+<th data-col="Anxiety">Anxiety</th>
+<th data-col="Anxiety">Anxiety</th>
+<th data-col="Impair">Impair</th>
+<th data-col="Impair">Impair</th><th data-col="change">change</th><th data-col="Change">Change</th><th data-col="Deg">Deg</th><th data-col="D2">D2</th><th data-col="Oth">Oth</th><th data-col="O2">O2</th>
+<th data-col="Confidence">Confidence</th><th data-col="Confidence">Confidence</th><th data-col="Auto">Auto</th><th data-col="Auto">Auto</th><th data-col="Jitter">Jitter</th><th data-col="Jitter">Jitter</th><th data-col="Dopamine">Dopamine</th><th data-col="Dopamine">Dopamine</th><th data-col="Score">Score</th>
+<th data-col="Max">Max</th>
+<th data-col="Min">Min</th>
+<th data-col="VL">VL</th>
+<th data-col="sM">sM</th>
+<th data-col="sB">sB</th>
+<th data-col="sF">sF</th>
+<th data-col="Last">Last</th>
+<th data-col="Notes">Notes</th>
+<th data-col="Weighted">Weighted</th><th data-col="5Max">5Max</th><th data-col="GS">GS</th>
+</tr>
 </thead>
 <tbody></tbody>
 </table>
