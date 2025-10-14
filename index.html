@@ -408,7 +408,7 @@
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.15.6 r2234</title>
+<title>statpack v1.15.6 r2242</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -765,36 +765,36 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 5.0: 'Extreme', 4.5: 'Frenzied', 4.0: 'Intense', 3.5: 'Strong/Uncontrollable', 3.0: 'Strong', 2.5: 'Moderate/Feel', 2.0: 'Moderate', 1.5: 'Sligh/Physical', 1.0: 'Slight/Thought', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  mood: { 5.0: 'Euphoric/Autopilot', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Good', 3.0: 'Clear/Distinct', 2.5: 'Some/Motivated', 2.0: 'Some/Moderate', 1.5: 'Slight/Fair', 1.0: 'Slight/Change', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  social: { 5.0: 'Disinhibited', 4.5: 'Outgoing/Proactive', 4.0: 'Outgoing/Empathy', 3.5: 'Social/Proactive', 3.0: 'Social/Empathy', 2.5: 'Desire/Urge', 2.0: 'Desire/Want', 1.5: 'Effective/Encourage', 1.0: 'Capable/Want', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Energetic/Positive', 3.0: 'Energetic', 2.5: 'Significant/Push', 2.0: 'Some/Push', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  focus: { 5.0: 'Wired', 4.5: 'Laser/Strong', 4.0: 'Obsess/Strong', 3.5: 'Fixated/Productive', 3.0: 'Focused/Present', 2.5: 'Yes/Fixated', 2.0: 'Yes/Some', 1.5: 'Effective/Alert', 1.0: 'Capable/Attentive', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  anxiety: { 5.0: 'Terror', 4.5: 'Panic/Paranoia', 4.0: 'Panic', 3.5: 'Anxious/Controlling', 3.0: 'Anxious/Controlling', 2.5: 'Anxiety/Affected', 2.0: 'Anxiety/Tolerable', 1.5: 'Noticeable', 1.0: 'Ignorable', 0.5: 'Low/Negligible', 0.0: 'None' },
-  impair: { 5.0: 'Severely/Crippled', 4.5: 'Crippled/Danger', 4.0: 'Crippled', 3.5: 'Behaviour/Controlled', 3.0: 'Behaviour/Impacted', 2.5: 'Impaired/Negative', 2.0: 'Affected/Maskable', 1.5: 'Ignorable/Tremors', 1.0: 'Ignorable/Minor', 0.5: 'Low/Negligible', 0.0: 'None' },
-  change: { 0: 'None', 1: 'Maybe/Unsure', 2: 'Ease/Close', 3: 'Mask/Near', 4: 'Obvious/Public', 5: 'Onlookers' },
-  degree: { 0: 'None', 1: 'Low', 2: 'Medium', 3: 'High', 4: 'Very High', 5: 'Extreme' },
-  other: { 0: 'Row', 1: 'About To', 2: 'Row', 3: 'Next', 4: 'Last', 5: 'Now' },
-  confidence: { 0: 'Struggle', 1: 'Effort', 2: 'Capable', 3: 'Effective', 4: 'Natural', 5: 'Excellent' },
-  auto: { 0: 'No', 1: 'Minimal', 2: 'Maybe', 3: 'Low', 4: 'Some', 5: 'Yes' },
-  jitter: { 0: 'No/Low', 1: 'Tremor', 2: 'Ignoreable', 3: 'Clear', 4: 'Affecting', 5: 'Severe' },
-  dopamine: { 0: 'No', 1: 'Maybe', 2: 'Tremors', 3: 'Sick', 4: 'Serotonin', 5: 'Dopamine' },
+  rush: { 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Intense', 3.50: 'Strong/Uncontrollable', 3.00: 'Strong', 2.50: 'Moderate/Feel', 2.00: 'Moderate', 1.50: 'Sligh/Physical', 1.00: 'Slight/Thought', 0.50: 'Maybe/Unsure', 0.00: 'None' },
+  mood: { 5.00: 'Euphoric/Autopilot', 4.50: 'Obvious/Euphoric', 4.00: 'Obvious', 3.50: 'Clear/Good', 3.00: 'Clear/Distinct', 2.50: 'Some/Motivated', 2.00: 'Some/Moderate', 1.50: 'Slight/Fair', 1.00: 'Slight/Change', 0.50: 'Maybe/Unsure', 0.00: 'No' },
+  social: { 5.00: 'Disinhibited', 4.50: 'Outgoing/Proactive', 4.00: 'Outgoing/Empathy', 3.50: 'Social/Proactive', 3.00: 'Social/Empathy', 2.50: 'Desire/Urge', 2.00: 'Desire/Want', 1.50: 'Effective/Encourage', 1.00: 'Capable/Want', 0.50: 'Maybe/Unsure', 0.00: 'No' },
+  energy: { 5.00: 'Manic', 4.50: 'Hyper/Frantic', 4.00: 'Hyper', 3.50: 'Very/Energetic', 3.00: 'Energetic', 2.50: 'Significant/Push', 2.00: 'Some/Push', 1.50: 'Effective/Encourage', 1.00: 'Capable', 0.50: 'Maybe/Unsure', 0.00: 'None' },
+  focus: { 5.00: 'Wired', 4.50: 'Laser', 4.00: 'Obsessive', 3.50: 'Strong', 3.00: 'Focused', 2.50: 'Fixated', 2.00: 'Some', 1.50: 'Effective/Alert', 1.00: 'Attentive', 0.50: 'Maybe/Unsure', 0.00: 'No' },
+  anxiety: { 5.00: 'Terror', 4.50: 'Panic/Paranoia', 4.00: 'Panic', 3.50: 'Anxious/Controlling', 3.00: 'Anxious/Controlling', 2.50: 'Anxiety/Affected', 2.00: 'Anxiety/Tolerable', 1.50: 'Noticeable', 1.00: 'Ignorable', 0.50: 'Low/Negligible', 0.00: 'None' },
+  impair: { 5.00: 'Severely/Crippled', 4.50: 'Crippled/Danger', 4.00: 'Crippled', 3.50: 'Behaviour/Controlled', 3.00: 'Behaviour/Impacted', 2.50: 'Impaired/Negative', 2.00: 'Affected/Maskable', 1.50: 'Ignorable/Effort', 1.00: 'Ignorable/Tremor', 0.50: 'Low/Negligible', 0.00: 'None' },
+  change: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Moderate', 1.00: 'Low', 0.00: 'None' },
+  degree: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
+  other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Dose', 2.00: 'Hit', 1.00: 'Drug', 0.00: 'Next' },
+  confidence: { 5.00: 'Excellent', 4.00: 'Natural', 3.00: 'Effective', 2.00: 'Effort', 1.00: 'Struggle', 0.00: 'No' },
+  auto: { 5.00: 'Yes/Auto', 4.00: 'Hindsight', 3.00: 'Flow/Zone', 2.00: 'Distractable', 1.00: 'Maybe', 0.00: 'No' },
+  jitter: { 5.00: 'Adverse', 4.00: 'Obvoius', 3.00: 'Significant', 2.00: 'Minor', 1.00: 'Ignoreable', 0.00: 'No/Low' },
+  dopamine: { 5.00: 'Yes', 4.00: 'Strong', 3.00: 'Physical', 2.00: 'Some', 1.00: 'Maybe', 0.00: 'No' },
 }
 , rapidLabels: {
-  rush: { 5.0: 'Extreme', 4.5: 'Frenzied', 4.0: 'Intense', 3.5: 'Strong/Uncontrollable', 3.0: 'Strong', 2.5: 'Moderate/Feel', 2.0: 'Moderate', 1.5: 'Sligh/Physical', 1.0: 'Slight/Thought', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  mood: { 5.0: 'Euphoric/Autopilot', 4.5: 'Obvious/Euphoric', 4.0: 'Obvious', 3.5: 'Clear/Good', 3.0: 'Clear/Distinct', 2.5: 'Some/Motivated', 2.0: 'Some/Moderate', 1.5: 'Slight/Fair', 1.0: 'Slight/Change', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  social: { 5.0: 'Disinhibited', 4.5: 'Outgoing/Proactive', 4.0: 'Outgoing/Empathy', 3.5: 'Social/Proactive', 3.0: 'Social/Empathy', 2.5: 'Desire/Urge', 2.0: 'Desire/Want', 1.5: 'Effective/Encourage', 1.0: 'Capable/Want', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  energy: { 5.0: 'Manic', 4.5: 'Hyper/Frantic', 4.0: 'Hyper/Energetic', 3.5: 'Energetic/Positive', 3.0: 'Energetic', 2.5: 'Significant/Push', 2.0: 'Some/Push', 1.5: 'Effective/Encourage', 1.0: 'Capable/Effort', 0.5: 'Maybe/Unsure', 0.0: 'None' },
-  focus: { 5.0: 'Wired', 4.5: 'Laser/Strong', 4.0: 'Obsess/Strong', 3.5: 'Fixated/Productive', 3.0: 'Focused/Present', 2.5: 'Yes/Fixated', 2.0: 'Yes/Some', 1.5: 'Effective/Alert', 1.0: 'Capable/Attentive', 0.5: 'Maybe/Unsure', 0.0: 'No' },
-  anxiety: { 5.0: 'Terror', 4.5: 'Panic/Paranoia', 4.0: 'Panic', 3.5: 'Anxious/Controlling', 3.0: 'Anxious/Controlling', 2.5: 'Anxiety/Affected', 2.0: 'Anxiety/Tolerable', 1.5: 'Noticeable', 1.0: 'Ignorable', 0.5: 'Low/Negligible', 0.0: 'None' },
-  impair: { 5.0: 'Severely/Crippled', 4.5: 'Crippled/Danger', 4.0: 'Crippled', 3.5: 'Behaviour/Controlled', 3.0: 'Behaviour/Impacted', 2.5: 'Impaired/Negative', 2.0: 'Affected/Maskable', 1.5: 'Ignorable/Tremors', 1.0: 'Ignorable/Minor', 0.5: 'Low/Negligible', 0.0: 'None' },
-  change: { 0: 'None', 1: 'Maybe/Unsure', 2: 'Ease/Close', 3: 'Mask/Near', 4: 'Obvious/Public', 5: 'Onlookers' },
-  degree: { 0: 'None', 1: 'Low', 2: 'Medium', 3: 'High', 4: 'Very High', 5: 'Extreme' },
-  other: { 0: 'Row', 1: 'About To', 2: 'Row', 3: 'Next', 4: 'Last', 5: 'Now' },
-  confidence: { 0: 'Struggle', 1: 'Effort', 2: 'Capable', 3: 'Effective', 4: 'Natural', 5: 'Excellent' },
-  auto: { 0: 'No', 1: 'Minimal', 2: 'Maybe', 3: 'Low', 4: 'Some', 5: 'Yes' },
-  jitter: { 0: 'No/Low', 1: 'Tremor', 2: 'Ignoreable', 3: 'Clear', 4: 'Affecting', 5: 'Severe' },
-  dopamine: { 0: 'No', 1: 'Maybe', 2: 'Tremors', 3: 'Sick', 4: 'Serotonin', 5: 'Dopamine' },
+  rush: { 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Intense', 3.50: 'Strong/Uncontrollable', 3.00: 'Strong', 2.50: 'Moderate/Feel', 2.00: 'Moderate', 1.50: 'Sligh/Physical', 1.00: 'Slight/Thought', 0.50: 'Maybe/Unsure', 0.00: 'None' },
+  mood: { 5.00: 'Euphoric/Autopilot', 4.50: 'Obvious/Euphoric', 4.00: 'Obvious', 3.50: 'Clear/Good', 3.00: 'Clear/Distinct', 2.50: 'Some/Motivated', 2.00: 'Some/Moderate', 1.50: 'Slight/Fair', 1.00: 'Slight/Change', 0.50: 'Maybe/Unsure', 0.00: 'No' },
+  social: { 5.00: 'Disinhibited', 4.50: 'Outgoing/Proactive', 4.00: 'Outgoing/Empathy', 3.50: 'Social/Proactive', 3.00: 'Social/Empathy', 2.50: 'Desire/Urge', 2.00: 'Desire/Want', 1.50: 'Effective/Encourage', 1.00: 'Capable/Want', 0.50: 'Maybe/Unsure', 0.00: 'No' },
+  energy: { 5.00: 'Manic', 4.50: 'Hyper/Frantic', 4.00: 'Hyper', 3.50: 'Very/Energetic', 3.00: 'Energetic', 2.50: 'Significant/Push', 2.00: 'Some/Push', 1.50: 'Effective/Encourage', 1.00: 'Capable', 0.50: 'Maybe/Unsure', 0.00: 'None' },
+  focus: { 5.00: 'Wired', 4.50: 'Laser', 4.00: 'Obsessive', 3.50: 'Strong', 3.00: 'Focused', 2.50: 'Fixated', 2.00: 'Some', 1.50: 'Effective/Alert', 1.00: 'Attentive', 0.50: 'Maybe/Unsure', 0.00: 'No' },
+  anxiety: { 5.00: 'Terror', 4.50: 'Panic/Paranoia', 4.00: 'Panic', 3.50: 'Anxious/Controlling', 3.00: 'Anxious/Controlling', 2.50: 'Anxiety/Affected', 2.00: 'Anxiety/Tolerable', 1.50: 'Noticeable', 1.00: 'Ignorable', 0.50: 'Low/Negligible', 0.00: 'None' },
+  impair: { 5.00: 'Severely/Crippled', 4.50: 'Crippled/Danger', 4.00: 'Crippled', 3.50: 'Behaviour/Controlled', 3.00: 'Behaviour/Impacted', 2.50: 'Impaired/Negative', 2.00: 'Affected/Maskable', 1.50: 'Ignorable/Effort', 1.00: 'Ignorable/Tremor', 0.50: 'Low/Negligible', 0.00: 'None' },
+  change: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Moderate', 1.00: 'Low', 0.00: 'None' },
+  degree: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
+  other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Dose', 2.00: 'Hit', 1.00: 'Drug', 0.00: 'Next' },
+  confidence: { 5.00: 'Excellent', 4.00: 'Natural', 3.00: 'Effective', 2.00: 'Effort', 1.00: 'Struggle', 0.00: 'No' },
+  auto: { 5.00: 'Yes/Auto', 4.00: 'Hindsight', 3.00: 'Flow/Zone', 2.00: 'Distractable', 1.00: 'Maybe', 0.00: 'No' },
+  jitter: { 5.00: 'Adverse', 4.00: 'Obvoius', 3.00: 'Significant', 2.00: 'Minor', 1.00: 'Ignoreable', 0.00: 'No/Low' },
+  dopamine: { 5.00: 'Yes', 4.00: 'Strong', 3.00: 'Physical', 2.00: 'Some', 1.00: 'Maybe', 0.00: 'No' },
   },
   buttonLabelsByMetric: {}},
   buttons: {
@@ -815,7 +815,7 @@ labels: {
       degree:[5,4,3,2,1,0],
       other: [5,4,3,2,1,0]
     },
-    rapidValues: [-0.5,5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5],
+    rapidValues: [5,4,3,2,1,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
@@ -5241,12 +5241,29 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
     return {label:'Very High',cls:'veryhigh'};
   }
   // ---- OutOf10 ----
-  function renderAllRatedOutOf10Popup(){
-    const tb = ensureTableBody('#allRatedOutOf10PopupTable tbody'); if(!tb) return;
-    const rows=[];
-    (Array.isArray(logData)?logData:[]).forEach(r=>{
-      const t=(r.timestamp||'');
-      rows.push(`<tr><td>${t}</td>`+
+  
+function renderAllRatedOutOf10Popup(){
+  window.syncLogDataFromTable && window.syncLogDataFromTable();
+  var tb = document.querySelector('#allRatedOutOf10PopupTable tbody');
+  if (!tb) return;
+  var src = Array.isArray(window.logData) ? window.logData : [];
+  var rows = [];
+  src.forEach(function(r){
+    var t = r.timestamp || r.Time || r.DateTime || r['Date/Time'] || '';
+    var cells = [];
+    if (typeof computeCat10 === 'function'){
+      cells = computeCat10(r); // existing per-metric categoriser
+    }else{
+      ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min','Weighted','5Max'].forEach(function(k){
+        cells.push('<td>'+ (r[k] != null ? r[k] : '') +'</td>');
+      });
+    }
+    rows.push('<tr><td>'+t+'</td>'+cells.join('')+'</tr>');
+  });
+  tb.innerHTML = rows.join('');
+}
+
+</td>`+
         rowHtml(computeCat10(r.rushSum*2))+
         rowHtml(computeCat10(r.moodSum*2))+
         rowHtml(computeCat10(r.socialSum*2))+
@@ -5268,9 +5285,37 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
   };
 
   // ---- 5‑Minute ----
-  function fiveMinBuckets(){
-    const src = Array.isArray(logData)?logData:[]; if(!src.length) return [];
-    const res = {};
+  
+function fiveMinBuckets(){
+  window.syncLogDataFromTable && window.syncLogDataFromTable();
+  var src = Array.isArray(window.logData) ? window.logData.slice() : [];
+  if (!src.length) return [];
+
+  var map = new Map();
+  for (var i=0;i<src.length;i++){
+    var r = src[i] || {};
+    var ts = parseTimestamp(r.timestamp);
+    var bin = window.bucket5min(ts);
+    if (bin == null){
+      // try alternate fields
+      var alt = r.Time || r.DateTime || r['Date/Time'] || r.ts || r.time || '';
+      ts = parseTimestamp(alt);
+      bin = window.bucket5min(ts);
+    }
+    if (bin == null) continue; // cannot place this row
+
+    if (!map.has(bin)) map.set(bin, []);
+    map.get(bin).push(r);
+  }
+
+  // Convert to sorted bucket array
+  var out = Array.from(map.entries()).sort(function(a,b){return a[0]-b[0];}).map(function(e){
+    return { bin: e[0], rows: e[1] };
+  });
+  return out;
+}
+
+;
     const startT = new Date(src[0].timestamp||0).getTime();
     src.forEach(r=>{
       const ts = new Date(r.timestamp||0).getTime();
@@ -5289,12 +5334,39 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
     });
     return out;
   }
-  function renderAllRated5MinutesPopup(){
-    const tb = ensureTableBody('#allRated5MinutesPopupTable tbody'); if(!tb) return;
-    const rows=[];
-    fiveMinBuckets().forEach(b=>{
-      const offStr = String(b.offset*5).padStart(2,'0')+':00';
-      rows.push(`<tr><td>+${offStr}</td>`+
+  
+function renderAllRated5MinutesPopup(){
+  window.syncLogDataFromTable && window.syncLogDataFromTable();
+  var tb = document.querySelector('#allRated5MinutesPopupTable tbody');
+  if (!tb) return;
+  var buckets = fiveMinBuckets();
+  var rows = [];
+  buckets.forEach(function(b){
+    // header row for bucket (optional)
+    var startEpoch = b.bin * 300000; // ms
+    var endEpoch = startEpoch + 299999;
+    var startStr = new Date(startEpoch).toLocaleString();
+    var endStr = new Date(endEpoch).toLocaleString();
+    rows.push('<tr class="bucket"><td colspan="99">5‑min bucket: '+startStr+' – '+endStr+' ('+b.rows.length+' rows)</td></tr>');
+    b.rows.forEach(function(r){
+      var t = r.timestamp || r.Time || r.DateTime || r['Date/Time'] || '';
+      // Build cells for rated metrics (existing compute function if present)
+      var cells = [];
+      if (typeof computeCategoryCells === 'function'){
+        cells = computeCategoryCells(r); // project-specific; if exists
+      }else{
+        // fallback: dump known ratings if present
+        ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min','Weighted','5Max'].forEach(function(k){
+          cells.push('<td>'+ (r[k] != null ? r[k] : '') +'</td>');
+        });
+      }
+      rows.push('<tr><td>'+t+'</td>'+cells.join('')+'</tr>');
+    });
+  });
+  tb.innerHTML = rows.join('');
+}
+
+</td>`+
         rowHtml(computeCat10(b.values.rush+5))+
         rowHtml(computeCat10(b.values.mood+5))+
         rowHtml(computeCat10(b.values.social+5))+
@@ -5306,11 +5378,14 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
     });
     tb.innerHTML = rows.join('');
   }
-  window.openAllRated5MinutesPopup = function(){
-    renderAllRated5MinutesPopup();
-    const m=document.getElementById('allRated5MinutesPopupModal');if(m)m.style.display='block';
-    const bd=document.getElementById('allRated5MinutesPopupBackdrop');if(bd)bd.onclick=closeAllRated5MinutesPopup;
-  };
+  
+window.openAllRated5MinutesPopup = function(){
+  renderAllRated5MinutesPopup();
+  var modal = document.getElementById('allRated5MinutesPopupModal');
+  if (modal) modal.style.display = 'block';
+};
+
+;
   window.closeAllRated5MinutesPopup = function(){
     const m=document.getElementById('allRated5MinutesPopupModal');if(m)m.style.display='none';
   };
@@ -5722,6 +5797,171 @@ document.addEventListener("DOMContentLoaded", function(){
   }
   window.addEventListener('resize', applyDockPadding);
 })();
+</script>
+
+<script>
+
+// === Timestamp parsing & bucketing helpers (robust for Safari/WebKit) ===
+(function(){
+  // Parse a timestamp string into a local epoch milliseconds number.
+  // Accepts ISO, 'YYYY/MM/DD HH:MM:SS', 'YYYY-MM-DD HH:MM:SS', 'DD/MM/YYYY HH:MM:SS' (best effort).
+  window.parseTimestamp = function(ts){
+    if (ts == null) return NaN;
+    if (typeof ts === 'number') return Number.isFinite(ts) ? ts : NaN;
+    if (typeof ts !== 'string') return NaN;
+    var s = ts.trim();
+    if (!s) return NaN;
+
+    // 1) Native Date first
+    var t = new Date(s).getTime();
+    if (!Number.isNaN(t)) return t;
+
+    // 2) Replace slash with dash and add 'T' if space separator
+    var s2 = s.replace(/\//g,'-').replace(/(\d)\s+(\d)/,'$1T$2');
+    t = new Date(s2).getTime();
+    if (!Number.isNaN(t)) return t;
+
+    // 3) Explicit regex for YYYY/MM/DD HH:MM:SS or YYYY-MM-DD HH:MM:SS
+    var m = s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (m){
+      var Y = +m[1], Mo = +m[2]-1, D = +m[3], h = +m[4], mi = +m[5], se = +(m[6]||0);
+      var d = new Date(Y, Mo, D, h, mi, se, 0);
+      return d.getTime();
+    }
+
+    // 4) DD/MM/YYYY HH:MM:SS (common CSV)
+    m = s.match(/^(\d{1,2})[\/](\d{1,2})[\/](\d{4})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (m){
+      var Dd = +m[1], Mm = +m[2]-1, Yy = +m[3], hh = +m[4], mm = +m[5], ss = +(m[6]||0);
+      var d2 = new Date(Yy, Mm, Dd, hh, mm, ss, 0);
+      return d2.getTime();
+    }
+
+    return NaN;
+  };
+
+  window.bucket5min = function(epochMs){
+    if (!Number.isFinite(epochMs)) return null;
+    return Math.floor(epochMs / 300000); // absolute 5-min bin from epoch
+  };
+  window.bucket10min = function(epochMs){
+    if (!Number.isFinite(epochMs)) return null;
+    return Math.floor(epochMs / 600000); // absolute 10-min bin from epoch
+  };
+})();
+
+</script>
+
+<script>
+
+// === Unify data source for popups ===
+window.syncLogDataFromTable = function(){
+  try{
+    if (typeof rowsFromMain === 'function'){
+      var rows = rowsFromMain();
+      if (Array.isArray(rows) && rows.length){
+        // Map to logData shape minimally: timestamp + raw metrics
+        window.logData = rows.map(function(r){
+          var t = r.ts || r.timestamp || r.Time || r.time || '';
+          var out = Object.assign({}, r);
+          out.timestamp = (typeof t === 'number') ? t : t;
+          return out;
+        });
+        return;
+      }
+    }
+  }catch(e){ /* fall through */ }
+
+  // Fallback DOM extraction from #logTable
+  var tbl = document.querySelector('#logTable');
+  if (!tbl) return;
+  var hs = Array.from(tbl.querySelectorAll('thead th')).map(function(th){
+    var k = th.getAttribute('data-col') || th.textContent || '';
+    return (k||'').trim();
+  });
+  var rows = [];
+  Array.from(tbl.querySelectorAll('tbody tr')).forEach(function(tr){
+    if (tr.offsetParent === null) return; // skip hidden
+    var obj = {};
+    Array.from(tr.children).forEach(function(td, i){
+      var key = hs[i] || ('col'+i);
+      obj[key] = td.textContent.trim();
+    });
+    // normalise timestamp keys
+    obj.timestamp = obj['Timestamp'] || obj['Time'] || obj['DateTime'] || obj['Date/Time'] || obj['ts'] || obj['time'] || obj.timestamp || '';
+    rows.push(obj);
+  });
+  if (rows.length){
+    window.logData = rows;
+  }
+};
+
+</script>
+
+<script>
+
+function tenMinBuckets(){
+  window.syncLogDataFromTable && window.syncLogDataFromTable();
+  var src = Array.isArray(window.logData) ? window.logData.slice() : [];
+  if (!src.length) return [];
+
+  var map = new Map();
+  for (var i=0;i<src.length;i++){
+    var r = src[i] || {};
+    var ts = parseTimestamp(r.timestamp);
+    var bin = window.bucket10min(ts);
+    if (bin == null){
+      var alt = r.Time || r.DateTime || r['Date/Time'] || r.ts || r.time || '';
+      ts = parseTimestamp(alt);
+      bin = window.bucket10min(ts);
+    }
+    if (bin == null) continue;
+    if (!map.has(bin)) map.set(bin, []);
+    map.get(bin).push(r);
+  }
+  var out = Array.from(map.entries()).sort(function(a,b){return a[0]-b[0];}).map(function(e){
+    return { bin: e[0], rows: e[1] };
+  });
+  return out;
+}
+
+</script>
+
+<script>
+
+function renderAllRated10MinutesPopup(){
+  window.syncLogDataFromTable && window.syncLogDataFromTable();
+  var tb = document.querySelector('#allRated10MinutesPopupTable tbody');
+  if (!tb) return;
+  var buckets = tenMinBuckets();
+  var rows = [];
+  buckets.forEach(function(b){
+    var startEpoch = b.bin * 600000; // ms
+    var endEpoch = startEpoch + 599999;
+    var startStr = new Date(startEpoch).toLocaleString();
+    var endStr = new Date(endEpoch).toLocaleString();
+    rows.push('<tr class="bucket"><td colspan="99">10‑min bucket: '+startStr+' – '+endStr+' ('+b.rows.length+' rows)</td></tr>');
+    b.rows.forEach(function(r){
+      var t = r.timestamp || r.Time || r.DateTime || r['Date/Time'] || '';
+      var cells = [];
+      if (typeof computeCategoryCells === 'function'){
+        cells = computeCategoryCells(r);
+      }else{
+        ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min','Weighted','5Max'].forEach(function(k){
+          cells.push('<td>'+ (r[k] != null ? r[k] : '') +'</td>');
+        });
+      }
+      rows.push('<tr><td>'+t+'</td>'+cells.join('')+'</tr>');
+    });
+  });
+  tb.innerHTML = rows.join('');
+}
+window.openAllRated10MinutesPopup = function(){
+  renderAllRated10MinutesPopup();
+  var modal = document.getElementById('allRated10MinutesPopupModal');
+  if (modal) modal.style.display = 'block';
+};
+
 </script>
 </body>
 <script>
