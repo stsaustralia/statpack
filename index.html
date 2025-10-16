@@ -66,8 +66,8 @@
         width: 140px;
         height: 30px;
  */
-        width: 130px;
-        height: 25px;
+        width: 125px;
+        height: 22px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -108,8 +108,8 @@
 
     .note-btn {
         width: 80px;
-        height: 20px;
-        font-size: 12px;
+        height: 15px;
+        font-size: 11px;
         padding: 0;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -408,7 +408,7 @@
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16 r2270</title>
+<title>statpack v1.16.1 r2271</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -761,8 +761,8 @@ const CONFIG = Object.freeze({
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
     noShadeCols: [],
     shadeCap: {
-      'Score': 30,
-      'Max': 30,
+      'Score': 25,
+      'Max': 25,
       'Min': 10,
       'Weighted': 10,
       '5Max': 10
@@ -814,14 +814,15 @@ labels: {
   buttons: {
     perMetricButtons: {
 //       rush:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1],
-//       rush:[6,5,4.5,4,'',3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5],
-      rush:[6,5,4.5,4,'',3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5],
-      mood:[6,5,4.5,4,'',3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5],
-      social:[6,5,4.5,4,'',3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5],
-      energy:[6,5,4.5,4,'',3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5],
-      focus:[6,5,4.5,4,'',3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5],
-      anxiety:[6,5,4.5,4,'',3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5],
-      impair:[6,5,4.5,4,'',3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5],
+//       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
+//       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
+      rush:[5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'',''-0.5,-1,'',0.2,0.3],
+      mood:[5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'',''-0.5,-1,'',0.2,0.3],
+      social:[5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'',''-0.5,-1,'',0.2,0.3],
+      energy:[5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'',''-0.5,-1,'',0.2,0.3],
+      focus:[5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'',''-0.5,-1,'',0.2,0.3],
+      anxiety:[5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'',''-0.5,-1,'',0.2,0.3],
+      impair:[5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'',''-0.5,-1,'',0.2,0.3],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -830,7 +831,7 @@ labels: {
       degree:[5,4,3,2,1,0],
       other: [5,4,3,2,1,0]
     },
-    rapidValues: [5,4,3,2,1,0,'','',-0.5],
+    rapidValues: [5,4,3,2,1,0,'',-0.5],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
@@ -839,7 +840,7 @@ labels: {
   },
   notes: {
     extra: ['Correlate', 'Flag', 'Now', 'Then', 'Next', 'Last', 'Changes', 'Note', 'Context', 'Associate', 'Plan', 'Review', 'Hindsight', 'Redose', 'Hit', 'Continue', 'Food', 'Drink', 'Sleep', 'LastRow', 'LastDose', 'LastHit', 'Single', 'Multiple', 'DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'MaybeUsable', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', 'Scales', 'HardToSee', 'LightRoom', 'DarkRoom', 'Less', 'More', 'Somewhat', 'Lots'],
-    dark: [ 'Observe', 'Follow', 'Adaptive', 'Rock', 'Fast', 'Slowly', 'Roll', 'Rapid', 'Spin', 'SideToSide', 'CoatBowl', 'LargeRoll', 'SmallRoll', 'ManyHits', 'OneHit', 'MeltFirst', 'Burned'],
+    dark: [ 'Observe', 'Follow', 'Adaptive', 'Rock', 'Fast', 'Slowly', 'Roll', 'Rapid', 'Spin', 'SideToSide', 'CoatBowl', 'LargeRoll', 'SmallRoll', 'ManyHits', 'OneHit', 'MeltFirst', 'Burned', 'SuddenDrop'],
     blue: ['Plumes', 'Billowing', 'Vapour', 'Visible', 'Invisible', 'LotsOfVapour', 'SoftVapour', 'ThickVapour', 'WarmAir', 'BackPressure', 'Smoke', 'HalfBurned', 'NiceSmell', 'NiceTaste', 'Irritant', 'Pressure', 'Ignition', 'BurnedSmell', 'DarkVapour'],
     red: ['Minor', 'Some', 'Slight', 'SideEffects', 'WideEyes', 'Headache', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Visceral', 'Feel',  'Chills', 'Sweat', 'Tremor', 'Shakes', 'Nausea', 'AfterEffects', 'DayAfter', 'Hangover', 'JustWoke', 'MorningAfter', 'EarsRinging', 'ChestPain'],
     green: [ '555Hold', 'DeepBreath', 'ShallowBreath', 'Diaphragm', 'HoldBreath', 'MultipleBreath', 'Sucked', 'SuckedHard', 'Gentle', 'Aggressive', 'OneBreath', 'LipSeal', 'HalfSealed', 'NotSealed', 'MouthOpen', 'ThroatBreath', 'Irritant','SuctionDistance', 'HighHeat', 'LowHeat'],
@@ -6888,7 +6889,7 @@ function closeAllRatedPopup(){
     const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
     const max   = Math.max(+m.rush, +m.mood, +m.social, +m.energy, +m.focus);
     const min   = Math.min(+m.rush, +m.mood, +m.social, +m.energy, +m.focus);
-    const weighted = (((+m.rush*6) + (+m.mood*4) + (+m.social*4) + (+m.energy*3) + (+m.focus*3) - (+m.anxiety*4) - (+m.impair*6)) / 10);
+    const weighted = (((+m.rush*6) + (+m.mood*4) + (+m.social*4) + (+m.energy*4) + (+m.focus*4) - (+m.anxiety*4) - (+m.impair*4)) / 10);
     const fiveMax  = ((+m.rush + +m.mood + +m.social + +m.energy + +m.focus - (+m.anxiety) - (+m.impair)) / 5) + 5;
     return {score, max, min, weighted, fiveMax};
   }
