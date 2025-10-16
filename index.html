@@ -1,3 +1,37 @@
+<script>
+/* Central config for popups/windows (non-breaking defaults) */
+window.CONFIG = window.CONFIG || {};
+CONFIG.popups = Object.assign({
+  rollingAverage: {
+    intervalMs: 15000,
+    windowRows: 5
+  },
+  autoEntries: {
+    intervalMs: 15000
+  },
+  autoSliderC: {
+    refreshMs: 15000,
+    windowRows: 5
+  },
+  autoSliderD: {
+    intervalMs: 30000,
+    windowRows: 2
+  },
+  summary: {
+    windowMinutes: 5,
+    emitEveryMinute: true
+  },
+  significant5m: {
+    intervalMs: 5 * 60000,
+    alignToBoundary: true
+  },
+  roamingAverage: {
+    intervalMs: 15000,
+    windowSeconds: 15
+  }
+}, CONFIG.popups || {});
+</script>
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -66,7 +100,7 @@
         width: 140px;
         height: 30px;
  */
-        width: 135px;
+        width: 140px;
         height: 25px;
         margin: 1px;
         border-radius: 6px;
@@ -408,7 +442,7 @@
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.1 r2273</title>
+<title>statpack v1.16.1 r2275</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -563,7 +597,10 @@ function computeWeighted(obj){
 
             <select id="drugSelect">
 <option value="">--Select--</option>
-<option value="AboutToRedose">AboutToRedose</option>
+<option value="Hit">Hit</option>
+<option value="Redose">Redose</option>
+<option value="Between">Between</option>
+<option value="Finished">Finished</option>
 <option value="JustRedosed">JustRedosed</option>
 <option value="MidRedose">MidRedose</option>
 <option value="MD-PiHP">MD-PiHP</option>
@@ -1024,10 +1061,11 @@ function getSum(arr) {
 // if (v === 7.02) customLabel = 'Ultra Extreme';
 if (v === -111) customLabel = '-';
 if (v === 6) customLabel = 'Overdrive';
-if (v === 10) customLabel = 'Perfect';
-if (v === 3.99) customLabel = 'High';
-if (v === 2.66) customLabel = 'Medium';
+if (v === 0.1) customLabel = 'Minimal';
 if (v === 1.33) customLabel = 'Low';
+if (v === 2.66) customLabel = 'Medium';
+if (v === 3.99) customLabel = 'High';
+if (v === 4.99) customLabel = 'Extreme';
 //else if (v === 6) customLabel = 'Extra/Moderate';
 else customLabel = getMetricLabel(f, v);
 b.innerText = `${v}: ${customLabel}`;
@@ -1958,7 +1996,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <script>
 // === Summary Core (revised to read ONLY from main table) ===
 
-let SUMMARY_WINDOW_MINUTES = 5;
+let SUMMARY_WINDOW_MINUTES = (window.CONFIG && CONFIG.popups && CONFIG.popups.summary && CONFIG.popups.summary.windowMinutes) || 5;
 function setSummaryWindowAndOpen(mins){ SUMMARY_WINDOW_MINUTES = mins; createSummaryPopupTable(); }
 
 
@@ -3137,7 +3175,7 @@ function snapshotWithExtras(){
       const msToNext = (5 - (now.getMinutes()%5))*60000 - now.getSeconds()*1000 - now.getMilliseconds();
       setTimeout(()=>{
         appendLatest();
-        window._significant5mTimer = setInterval(appendLatest, 5*60000);
+        window._significant5mTimer = setInterval(appendLatest, (window.CONFIG && CONFIG.popups && CONFIG.popups.significant5m && CONFIG.popups.significant5m.intervalMs) || 5*60000);
       }, Math.max(0, msToNext));
     };
     function appendLatest(){
@@ -4188,7 +4226,8 @@ function computeAndAppendAutoD(){
   var col = getLogTableColumnMap();
   var rows = getLogRows().map(function(tr){ return rowToObj(tr, col); });
   if (rows.length < 2){ return; }
-  var last2 = rows.slice(-2);
+  var dRows = (window.CONFIG && CONFIG.popups && CONFIG.popups.autoSliderD && CONFIG.popups.autoSliderD.windowRows) || 2;
+  var last2 = rows.slice(-dRows);
   function mean(arr){ if (!arr.length) return 0; return arr.reduce((a,b)=>a+b,0)/arr.length; }
   var mRush = mean(last2.map(r=>r.Rush));
   var mMood = mean(last2.map(r=>r.Mood));
@@ -4217,7 +4256,7 @@ function computeAndAppendAutoD(){
 
 function startAutoD(){
   if (autoDTimer) clearInterval(autoDTimer);
-  autoDTimer = setInterval(computeAndAppendAutoD, 30000); // every 30s
+  autoDTimer = setInterval(computeAndAppendAutoD, (window.CONFIG && CONFIG.popups && CONFIG.popups.autoSliderD && CONFIG.popups.autoSliderD.intervalMs) || 30000); // every 30s
 }
 
 // Hook up buttons and auto-refreshes
@@ -4225,7 +4264,7 @@ window.addEventListener('load', function(){
   var btnC = document.getElementById('autoCRefreshBtn');
   if (btnC) btnC.addEventListener('click', refreshAutoSliderC);
   // also refresh C every 15s
-  setInterval(refreshAutoSliderC, 15000);
+  setInterval(refreshAutoSliderC, (window.CONFIG && CONFIG.popups && CONFIG.popups.autoSliderC && CONFIG.popups.autoSliderC.refreshMs) || 15000);
 
   var btnD = document.getElementById('autoDForceAppend');
   if (btnD) btnD.addEventListener('click', computeAndAppendAutoD);
@@ -4417,7 +4456,20 @@ window.addEventListener('load', function(){
 <div id="rollingAverageModal" class="modal" style="display:none;">
   <div class="modal-content" style="max-width: 95vw;">
     <span class="close" data-close="#rollingAverageModal">&times;</span>
-    <h2>Rolling Average (last 5 rows, every 15s)</h2>
+    <h2>Rolling Average (last <span id="raWinRows"></span> rows, every <span id="raInterval"></span>)</h2>
+<script>
+(function(){
+  try{
+    var w = (window.CONFIG && CONFIG.popups && CONFIG.popups.rollingAverage && CONFIG.popups.rollingAverage.windowRows) || 5;
+    var ms = (window.CONFIG && CONFIG.popups && CONFIG.popups.rollingAverage && CONFIG.popups.rollingAverage.intervalMs) || 15000;
+    var s = Math.round(ms/1000);
+    var winEl = document.getElementById('raWinRows');
+    var intEl = document.getElementById('raInterval');
+    if (winEl) winEl.textContent = String(w);
+    if (intEl) intEl.textContent = s + 's';
+  }catch(e){}
+})();
+</script>
     <div class="as-toolbar" style="margin: 8px 0;">
       <button onclick="exportRollingAverageCSV()">Export CSV</button>
       <button onclick="clearRollingAverage()">Clear</button>
@@ -4860,7 +4912,7 @@ function(){
   function updateStatus(){
     const st = document.getElementById('roamingAverageStatus');
     if (!st) return;
-    st.textContent = timer ? 'averaging every 15 s' : 'stopped';
+    st.textContent = timer ? ('averaging every ' + Math.round(((window.CONFIG && CONFIG.popups && CONFIG.popups.roamingAverage && CONFIG.popups.roamingAverage.intervalMs) || 15000)/1000) + ' s') : 'stopped';
   }
 
   function buildColumns(){ return ["Time"].concat(METRICS, EXTRA_COLS).filter(c => window.STS_isColVisible("roamingAverage", c)); }
@@ -6652,7 +6704,7 @@ function segmentBySinceDose(visibleRows){
     var col = getLogTableColumnMap();
     var rs = getLogRows().map(function(tr){ return rowToObj(tr, col); });
     if (rs.length < 1) return null;
-    var windowSize = 5;
+    var windowSize = (CONFIG && CONFIG.popups && CONFIG.popups.rollingAverage && CONFIG.popups.rollingAverage.windowRows) || 5;
     var slice = rs.slice(-windowSize);
     function mean(k){ return slice.reduce(function(a,r){return a+(+r[k]||0);},0) / slice.length; }
     return {
