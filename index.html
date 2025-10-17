@@ -103,7 +103,7 @@ CONFIG.popups = Object.assign({
         width: 140px;
         height: 30px;
  */
-        width: 135px;
+        width: 140px;
         height: 30px;
         margin: 1px;
         border-radius: 6px;
@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.2 r2292</title>
+<title>statpack v1.16.2 r2296</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -866,13 +866,13 @@ labels: {
 //       rush:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
-      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
+      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -2142,9 +2142,13 @@ function computeCompositeFromMeans(M){
     try { if (typeof applyPopupFilter === 'function') applyPopupFilter(); } catch(e){}
   }
   document.addEventListener('DOMContentLoaded', function(){
-    const btn = document.getElementById('backfillBtn');
-    if (btn){ btn.addEventListener('click', backfillAll); }
-  });
+  const btn = document.getElementById('backfillBtn');
+  if (btn){
+    btn.addEventListener('click', function(ev){
+      if (typeof window.backfillAll === 'function') window.backfillAll(ev);
+    });
+  }
+});
 })();
 // ============================================================================
 
@@ -2208,9 +2212,13 @@ function computeCompositeFromMeans(M){
     // Optional: toast could be added; for now console-only per user's request
   }
   document.addEventListener('DOMContentLoaded', function(){
-    const btn = document.getElementById('backfillBtn');
-    if (btn){ btn.addEventListener('click', backfillAll); }
-  });
+  const btn = document.getElementById('backfillBtn');
+  if (btn){
+    btn.addEventListener('click', function(ev){
+      if (typeof window.backfillAll === 'function') window.backfillAll(ev);
+    });
+  }
+});
 })();
 // ============================================================================
 
@@ -4606,6 +4614,7 @@ function readCurrentSelections(){
   }
 
 
+</script>
 <script>
 function(){
   function setDToLast3(){
