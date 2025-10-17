@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.2 r2288</title>
+<title>statpack v1.16.2 r2292</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -6128,7 +6128,15 @@ window.openAllRated10MinutesPopup = function(){
   window.openRushMode = function(){
     try{
       buildRushModeButtons();
-      const m = document.getElementById('rushModeModal'); if (m) m.style.display = 'block';
+      var m = document.getElementById('rushModeModal');
+      if (!m) return;
+      try{
+        if (m.parentElement !== document.body){
+          document.body.appendChild(m);
+        }
+        m.style.zIndex = '10000';
+      }catch(e){}
+      m.style.display = 'block';
     }catch(e){ console.warn(e); }
   };
   window.closeRushMode = function(){
@@ -6189,7 +6197,8 @@ window.openAllRated10MinutesPopup = function(){
       window._rapidInputSource = 'RushMode';
       if (typeof addEntry === 'function') addEntry('rushMode');
       finalizeRushEntryAsRushMode();
-      window._rapidInputSource = 'Main';
+      window.clearRushModeSelections();
+      window._rapidInputSource = \'Main\';
     }catch(e){ console.warn(e); }
   };
 
@@ -6204,18 +6213,39 @@ window.openAllRated10MinutesPopup = function(){
       window._rapidInputSource = 'RushMode';
       if (typeof addEntry === 'function') addEntry('rushMode');
       finalizeRushEntryAsRushMode();
-      window._rapidInputSource = 'Main';
+      window.clearRushModeSelections();
+      window._rapidInputSource = \'Main\';
       try{ buildRushModeButtons(); }catch(e){}
       try{ const m=document.getElementById('rushModeModal'); if (m) m.style.display='block'; }catch(e){}
     }catch(e){ console.warn(e); }
   };
-})();
-</script>
+  // Clear Rush Mode selections and UI state
+  window.clearRushModeSelections = function(){
+    try{
+      Object.keys(rushModeSelections).forEach(k => { rushModeSelections[k] = []; });
+      // Also clear global selections for Rush metrics to avoid carry-over
+      try{
+        if (typeof selections === 'object' && selections){
+          ['rush','mood','social','energy','focus','anxiety','impair'].forEach(f=>{
+            selections[f] = [];
+          });
+        }
+      }catch(e){}
+      // If modal is open, remove visual selection state
+      const modal = document.getElementById('rushModeModal');
+      if (modal && modal.style.display !== 'none'){
+        const btns = modal.querySelectorAll('.score-column button.selected-score');
+        btns.forEach(b => b.classList.remove('selected-score'));
+      }
+    }catch(e){ console.warn(e); }
+  };
+
+})();</script>
 
 
 
 <!-- Rush Mode launcher (you can reposition this anywhere in your toolbar) -->
-<button id="rushModeBtn" onclick="openRushMode()">Rush Mode</button>
+<button id="rushModeBtn" onclick="openRushMode()" type="button">Rush Mode</button>
 
 <!-- Scoped button sizing for Rush Mode modal -->
 <style id="rush-mode-size-override">
@@ -6380,6 +6410,22 @@ document.addEventListener('DOMContentLoaded', function(){
     };
   })(window.buildDoseReviewModal);
 })();
+</script>
+
+
+<script id="rush-mode-delegated-open">
+document.addEventListener('click', function(ev){
+  try{
+    const t = ev.target.closest('#rushModeBtn,[data-open="rushMode"]');
+    if (!t) return;
+    ev.preventDefault();
+    if (typeof window.openRushMode === 'function'){
+      window.openRushMode();
+    } else {
+      console.warn('openRushMode not available yet');
+    }
+  }catch(e){ console.warn(e); }
+}, true);
 </script>
 
 </body>
