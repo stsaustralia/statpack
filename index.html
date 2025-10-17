@@ -104,7 +104,7 @@ CONFIG.popups = Object.assign({
         height: 30px;
  */
         width: 135px;
-        height: 25px;
+        height: 30px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.1 r2280</title>
+<title>statpack v1.16.2 r2288</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -520,6 +520,16 @@ function computeWeighted(obj){
 
 
 
+
+
+<style id="rapid-scores-size-override">
+  /* Scoped size overrides for Rapid Scores modal buttons only */
+  #rapidScoresModal .score-column button {
+    width: 150px;
+    height: 36px;
+    font-size: 13px;
+  }
+</style>
 
 </head>
 <body>
@@ -856,13 +866,13 @@ labels: {
 //       rush:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
-      rush:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1,-2],
-      mood:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1,-2],
-      social:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1,-2],
-      energy:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1,-2],
-      focus:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1,-2],
-      anxiety:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1,-2],
-      impair:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1,-2],
+      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
+      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
+      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
+      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
+      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
+      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
+      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -6039,6 +6049,339 @@ window.openAllRated10MinutesPopup = function(){
 };
 
 </script>
+
+
+<!-- Rush Mode Modal (injected) -->
+<div id="rushModeModal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000;">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+    <div style="font-weight:700; font-size:18px;">Rush Mode</div>
+    <button aria-label="Close" onclick="closeRushMode()">Close</button>
+  </div>
+  <div class="score-columns" id="rushModeButtons"></div>
+  <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+    <button onclick="applyRushMode()">Apply</button>
+    <button onclick="applyRushModeAndAdd()">Apply & Add Entry</button>
+    <button onclick="applyRushModeAndAddStay()">Apply, Add & Stay</button>
+  </div>
+</div>
+
+
+
+<script id="rush-mode-logic">
+(function(){
+  // Configure which metrics/values Rush Mode shows (independent of Rapid)
+  const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
+  const RUSH_MODE_VALUES  = [5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0];
+
+  // Local, Rush-Mode-only selections
+  const rushModeSelections = Object.create(null);
+
+  function getRushModeLabel(metric, value){
+    try{
+      const key = String(value);
+      if (typeof RAPID_LABEL_OVERRIDES !== 'undefined' &&
+          RAPID_LABEL_OVERRIDES && RAPID_LABEL_OVERRIDES[metric] &&
+          RAPID_LABEL_OVERRIDES[metric][key] != null){
+        return RAPID_LABEL_OVERRIDES[metric][key];
+      }
+      if (typeof labelMappings !== 'undefined' && labelMappings[metric]){
+        return labelMappings[metric][value] || '';
+      }
+    }catch(e){}
+    return '';
+  }
+
+  window.buildRushModeButtons = function(){
+    try{
+      const container = document.getElementById('rushModeButtons');
+      if (!container) return;
+      container.innerHTML = '';
+      RUSH_MODE_METRICS.forEach(metric=>{
+        const col = document.createElement('div');
+        col.className = 'score-column';
+        const t = document.createElement('strong');
+        t.innerText = metric.charAt(0).toUpperCase() + metric.slice(1);
+        col.appendChild(t);
+        RUSH_MODE_VALUES.forEach(v=>{
+          const b = document.createElement('button');
+          const label = getRushModeLabel(metric, v);
+          b.innerText = `${v}: ${label}`;
+          b.onclick = ()=>{
+            if (!Array.isArray(rushModeSelections[metric])) rushModeSelections[metric] = [];
+            const i = rushModeSelections[metric].indexOf(v);
+            if (i < 0){ rushModeSelections[metric].push(v); b.classList.add('selected-score'); }
+            else { rushModeSelections[metric].splice(i,1); b.classList.remove('selected-score'); }
+          };
+          // Preselect already chosen values
+          try{
+            if (Array.isArray(rushModeSelections[metric]) && rushModeSelections[metric].includes(v)){
+              b.classList.add('selected-score');
+            }
+          }catch(e){}
+          col.appendChild(b);
+        });
+        container.appendChild(col);
+      });
+    }catch(e){ console.warn(e); }
+  };
+
+  window.openRushMode = function(){
+    try{
+      buildRushModeButtons();
+      const m = document.getElementById('rushModeModal'); if (m) m.style.display = 'block';
+    }catch(e){ console.warn(e); }
+  };
+  window.closeRushMode = function(){
+    try{
+      const m = document.getElementById('rushModeModal'); if (m) m.style.display = 'none';
+    }catch(e){ console.warn(e); }
+  };
+
+  function normalizeRushModeSelections(){
+    try{
+      RUSH_MODE_METRICS.forEach(f=>{
+        if (!Array.isArray(rushModeSelections[f])) rushModeSelections[f] = [];
+        rushModeSelections[f] = Array.from(new Set(rushModeSelections[f])).sort((a,b)=>b-a);
+      });
+    }catch(e){}
+  }
+
+  // Apply into your existing global selections object so addEntry() uses them
+  window.applyRushMode = function(){
+    try{
+      normalizeRushModeSelections();
+      if (typeof selections === 'object' && selections){
+        RUSH_MODE_METRICS.forEach(f=>{
+          selections[f] = rushModeSelections[f] ? rushModeSelections[f].slice() : [];
+        });
+      }
+      closeRushMode();
+      try { if (typeof buildButtons==='function') buildButtons(); } catch(e){}
+    }catch(e){ console.warn(e); }
+  };
+
+  function finalizeRushEntryAsRushMode(){
+    try{
+      if (!Array.isArray(logData) || !logData.length) return;
+      const entry = logData[logData.length - 1];
+      entry.inputSource = 'RushMode';
+      ['rush','energy','focus','anxiety','mood','social','impair','anxiety'].forEach(m=>{
+        try{
+          const arr = Array.isArray(entry[m]) ? entry[m] : [];
+          const labs = [];
+          const vals = Array.from(new Set(arr.slice().sort((a,b)=>b-a)));
+          vals.forEach(v=>{
+            const L = getRushModeLabel(m, v);
+            if (L) labs.push(L);
+          });
+          entry[m + 'Label'] = labs.join(', ');
+        }catch(e){}
+      });
+      try { setTripLogDebounced(logData); } catch(e){}
+      try { renderTable(); } catch(e){}
+    }catch(e){ console.warn(e); }
+  }
+
+  window.applyRushModeAndAdd = function(){
+    try{
+      applyRushMode(); // normalises + copies selections, closes modal
+      window._rapidLabelMode = false;
+      window._rapidInputSource = 'RushMode';
+      if (typeof addEntry === 'function') addEntry('rushMode');
+      finalizeRushEntryAsRushMode();
+      window._rapidInputSource = 'Main';
+    }catch(e){ console.warn(e); }
+  };
+
+  window.applyRushModeAndAddStay = function(){
+    try{
+      normalizeRushModeSelections();
+      if (typeof selections === 'object' && selections){
+        RUSH_MODE_METRICS.forEach(f=>{
+          selections[f] = rushModeSelections[f] ? rushModeSelections[f].slice() : [];
+        });
+      }
+      window._rapidInputSource = 'RushMode';
+      if (typeof addEntry === 'function') addEntry('rushMode');
+      finalizeRushEntryAsRushMode();
+      window._rapidInputSource = 'Main';
+      try{ buildRushModeButtons(); }catch(e){}
+      try{ const m=document.getElementById('rushModeModal'); if (m) m.style.display='block'; }catch(e){}
+    }catch(e){ console.warn(e); }
+  };
+})();
+</script>
+
+
+
+<!-- Rush Mode launcher (you can reposition this anywhere in your toolbar) -->
+<button id="rushModeBtn" onclick="openRushMode()">Rush Mode</button>
+
+<!-- Scoped button sizing for Rush Mode modal -->
+<style id="rush-mode-size-override">
+  #rushModeModal .score-column button {
+    width: 150px;
+    height: 36px;
+    font-size: 13px;
+  }
+</style>
+
+
+
+<script id="rush-mode-position">
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    const rushBtn  = document.getElementById('rushModeBtn');
+    if (!rushBtn) return;
+
+    const candidates = [
+      document.getElementById('rapidScoresBtn'),
+      document.querySelector('button[onclick*="openRapidScores"]'),
+      document.querySelector('button[data-target="#rapidScoresModal"]'),
+      document.querySelector('#rapidScoresModal')?.closest('div,section,form')?.querySelector('button')
+    ].filter(Boolean);
+
+    if (candidates.length){
+      const rapidBtn = candidates[0];
+      // Try to mirror classes for consistent size/spacing if Rapid button has classes
+      try{ if (rapidBtn.className && rapidBtn.className.length) rushBtn.className = rapidBtn.className; }catch(e){}
+      rapidBtn.insertAdjacentElement('afterend', rushBtn);
+      return;
+    }
+
+    // Fallback: append to a toolbar-like container
+    const toolbars = document.querySelectorAll('.toolbar, .controls, header, nav');
+    for (const tb of toolbars){
+      if (tb.querySelector('button')){ tb.appendChild(rushBtn); return; }
+    }
+  }catch(e){ console.warn(e); }
+});
+</script>
+
+
+<script id="dose-review-segmentation">
+(function(){
+  function getDrugValue(row){
+    const v = (row && (row.drug ?? row.Drug ?? row.DRUG ?? '')).toString().trim();
+    return v;
+  }
+  function getTimerKeys(sampleRow){
+    if (!sampleRow || typeof sampleRow !== 'object') return [];
+    const keys = Object.keys(sampleRow);
+    const sinceKeys = keys.filter(k => /^since/i.test(k));
+    return sinceKeys;
+  }
+  function num(x){
+    const n = (typeof x === 'string') ? parseFloat(x) : (typeof x === 'number' ? x : NaN);
+    return Number.isFinite(n) ? n : NaN;
+  }
+  function timersReset(prev, curr, timerKeys){
+    try{
+      for (const k of timerKeys){
+        const p = num(prev?.[k]);
+        const c = num(curr?.[k]);
+        if (Number.isFinite(p) && Number.isFinite(c) && c < p) return true;
+        if (Number.isFinite(p) && p > 0 && Number.isFinite(c) && c === 0) return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  window.segmentByTimerResetAndDrug = function(rows){
+    const data = Array.isArray(rows) ? rows.slice() : [];
+    const segments = [];
+    if (!data.length) return segments;
+    const timerKeys = getTimerKeys(data.find(r => r && typeof r === 'object'));
+    let segStart = -1;
+    function pushSeg(endIdx){
+      if (segStart >= 0 && endIdx >= segStart){
+        segments.push({
+          startIndex: segStart,
+          endIndex: endIdx,
+          rows: data.slice(segStart, endIdx + 1)
+        });
+      }
+    }
+    for (let i = 0; i < data.length && segStart < 0; i++){
+      if (getDrugValue(data[i]).length){ segStart = i; }
+    }
+    if (segStart < 0){
+      segments.push({ startIndex: 0, endIndex: data.length - 1, rows: data.slice() });
+      return segments;
+    }
+    for (let i = segStart + 1; i < data.length; i++){
+      const prev = data[i - 1];
+      const curr = data[i];
+      const drug = getDrugValue(curr);
+      const reset = timersReset(prev, curr, timerKeys);
+      const hasDrug = drug.length > 0;
+      if (reset && hasDrug){
+        pushSeg(i - 1);
+        segStart = i;
+      }
+    }
+    pushSeg(data.length - 1);
+    return segments;
+  };
+
+  // Optional alias to preserve old call sites:
+  window.segmentRowsBySince = window.segmentByTimerResetAndDrug;
+
+  // Integration wrapper: prefer new segmentation when building Dose Review
+  window.buildDoseReviewModal = (function(orig){
+    return function(){
+      try{
+        const rows = (typeof getLogDataSorted === 'function')
+          ? getLogDataSorted()
+          : (Array.isArray(window.logData) ? window.logData.slice().sort((a,b)=> (a.timestamp||0)-(b.timestamp||0)) : []);
+        const segments = window.segmentByTimerResetAndDrug(rows);
+
+        const modal = document.getElementById('doseReviewModal');
+        const tbody = modal?.querySelector('tbody');
+        if (tbody) tbody.innerHTML = '';
+
+        if (tbody){
+          segments.forEach((seg, idx)=>{
+            const trH = document.createElement('tr');
+            const tdH = document.createElement('td');
+            tdH.colSpan = 99;
+            const firstTs = seg.rows[0]?.timestamp ?? '';
+            const lastTs  = seg.rows[seg.rows.length-1]?.timestamp ?? '';
+            tdH.textContent = `Segment ${idx+1} — rows ${seg.startIndex}..${seg.endIndex} — ${firstTs} → ${lastTs}`;
+            tdH.style.fontWeight = '700';
+            trH.appendChild(tdH);
+            tbody.appendChild(trH);
+
+            seg.rows.forEach(r=>{
+              const tr = document.createElement('tr');
+              const cols = [
+                r.timestamp ?? '',
+                getDrugValue(r),
+                (r.qty ?? r.quantity ?? ''),
+                (r.roa ?? ''),
+                (r.rush ?? ''),
+                (r.energy ?? ''),
+                (r.focus ?? ''),
+                (r.anxiety ?? ''),
+              ];
+              cols.forEach(c=>{
+                const td = document.createElement('td');
+                td.textContent = (c==null?'':c);
+                tr.appendChild(td);
+              });
+              tbody.appendChild(tr);
+            });
+          });
+        }
+        if (modal) modal.style.display = 'block';
+      }catch(e){
+        console.warn('Dose Review build failed:', e);
+        if (typeof orig === 'function') try{ return orig(); }catch(_) {}
+      }
+    };
+  })(window.buildDoseReviewModal);
+})();
+</script>
+
 </body>
 <script>
 function openEmotionModal() {
@@ -7302,3 +7645,4 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
+	
