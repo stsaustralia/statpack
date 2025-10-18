@@ -103,7 +103,7 @@ CONFIG.popups = Object.assign({
         width: 140px;
         height: 30px;
  */
-        width: 135px;
+        width: 140px;
         height: 28px;
         margin: 1px;
         border-radius: 6px;
@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.3 r2305</title>
+<title>statpack v1.16.3 r2307</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -866,13 +866,13 @@ labels: {
 //       rush:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
-      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5]
-      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
-      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',-0.5,-1,-1.5],
+      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
+      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -6259,8 +6259,8 @@ window.openAllRated10MinutesPopup = function(){
 <!-- Scoped button sizing for Rush Mode modal -->
 <style id="rush-mode-size-override">
   #rushModeModal .score-column button {
-    width: 160px;
-    height: 35px;
+    width: 150px;
+    height: 36px;
     font-size: 13px;
   }
 </style>
@@ -6811,6 +6811,267 @@ document.addEventListener('click', function(ev){
   };
 })();
 </script>
+
+<!-- ===== STS Five-Minute Time-Weighted Averager (auto-insert rows) ===== -->
+<script>
+(function(){
+  // ---- Config ----
+  window.CONFIG = window.CONFIG || {};
+  CONFIG.popups = CONFIG.popups || {};
+  CONFIG.popups.fiveMinuteAverager = Object.assign({
+    enabled: true,                 // master toggle
+    intervalMs: 5 * 60 * 1000,     // run every 5 minutes
+    lookbackMs: 5 * 60 * 1000,     // average the previous 5 minutes
+    alignToBoundary: true,         // :00, :05, :10, ...
+    label: '5mAvg',                // Phase label for synthetic rows
+    minCoverageRatio: 0.5,         // require >= 50% coverage of samples within the window
+    targetTableId: 'logTable',     // table id
+    targetTbodyId: 'autoCBody'     // tbody id
+  }, CONFIG.popups.fiveMinuteAverager || {});
+
+  const COL = { // column indices for #logTable (0-based)
+    Timestamp: 1,
+    Phase: 4,
+    Rush: 9,
+    Mood: 11,
+    Social: 13,
+    Energy: 15,
+    Focus: 17,
+    Anxiety: 19,
+    Impair: 21,
+    Score: 37,
+    Weighted: 46,
+    FiveMax: 47
+  };
+
+  function floorToFiveMinuteBoundary(d) {
+    const five = 5 * 60 * 1000;
+    return new Date(Math.floor(d.getTime() / five) * five);
+  }
+  function formatTsYYYYMMDD_HHMMSS(d) {
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+  // Robust AU timestamp parser: handles 'DD/MM/YYYY, HH:MM:SS' and 'YYYY/MM/DD HH:MM:SS'
+  function parseTimestampAU(s) {
+    if (!s) return null;
+    s = String(s).trim();
+    // Remove comma if present (en-AU toLocaleString often returns 'DD/MM/YYYY, HH:MM:SS')
+    s = s.replace(',', '');
+    // Try YYYY/MM/DD HH:MM:SS
+    let m = s.match(/^(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (m) {
+      const [_, Y,M,D,h,mi,se] = m;
+      return new Date(Number(Y), Number(M)-1, Number(D), Number(h), Number(mi), Number(se||'0'));
+    }
+    // Try DD/MM/YYYY HH:MM:SS
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{2}):(\d{2})(?::(\d{2}))?$/);
+    if (m) {
+      const [_, D,M,Y,h,mi,se] = m;
+      return new Date(Number(Y), Number(M)-1, Number(D), Number(h), Number(mi), Number(se||'0'));
+    }
+    // Fallback: Date constructor
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
+  }
+
+  function getNumeric(td) {
+    if (!td) return null;
+    const v = Number(String(td.textContent || '').replace(/[^\d.\-]/g,''));
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function getRowsFromDOM() {
+    const tbody = document.getElementById(CONFIG.popups.fiveMinuteAverager.targetTbodyId);
+    if (!tbody) return [];
+    const rows = [];
+    const trs = tbody.querySelectorAll('tr');
+    for (const tr of trs) {
+      const tds = tr.children;
+      const phase = (tds[COL.Phase]?.textContent || '').trim();
+      // Exclude synthetic 5m rows (to avoid feedback), but include all other phases
+      if (/5mAvg/i.test(phase)) continue;
+      const tsText = tds[COL.Timestamp]?.textContent || '';
+      const ts = parseTimestampAU(tsText);
+      if (!(ts instanceof Date) || isNaN(ts)) continue;
+      const row = {
+        ts,
+        rush:   getNumeric(tds[COL.Rush]),
+        mood:   getNumeric(tds[COL.Mood]),
+        social: getNumeric(tds[COL.Social]),
+        energy: getNumeric(tds[COL.Energy]),
+        focus:  getNumeric(tds[COL.Focus]),
+        anxiety:getNumeric(tds[COL.Anxiety]),
+        impair: getNumeric(tds[COL.Impair])
+      };
+      rows.push(row);
+    }
+    rows.sort((a,b)=>a.ts - b.ts);
+    return rows;
+  }
+
+  function clip(a, lo, hi) { return Math.max(lo, Math.min(hi, a)); }
+
+  // Time-weighted average over (T-5m, T]
+  function timeWeightedAverage(windowEnd, rows, lookbackMs) {
+    const windowStart = new Date(windowEnd.getTime() - lookbackMs);
+    let coveredMs = 0;
+    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    if (!rows.length) return {avg:null, coverage:0};
+
+    // Build segments by pairing each sample with the next timestamp (or windowEnd)
+    for (let i=0;i<rows.length;i++) {
+      const cur = rows[i];
+      const nextTs = (i < rows.length-1) ? rows[i+1].ts : windowEnd;
+      // segment the sample's influence
+      const segStart = new Date(Math.max(cur.ts.getTime(), windowStart.getTime()));
+      const segEnd   = new Date(Math.min(nextTs.getTime(), windowEnd.getTime()));
+      const dur = segEnd.getTime() - segStart.getTime();
+      if (dur <= 0) continue;
+
+      // Only if sample actually overlaps window
+      // Accumulate time-weighted contributions (zero if metric is null/NaN)
+      for (const k of Object.keys(sums)) {
+        const v = cur[k];
+        if (typeof v === 'number' && isFinite(v)) {
+          sums[k] += v * dur;
+        }
+      }
+      coveredMs += dur;
+    }
+
+    if (coveredMs <= 0) return {avg:null, coverage:0};
+    const avg = {};
+    for (const k of Object.keys(sums)) avg[k] = sums[k] / coveredMs;
+    return {avg, coverage: coveredMs / lookbackMs};
+  }
+
+  function recomputeDerived(avgBase) {
+    // Use app's existing calculators if present
+    const base = {
+      rush: avgBase.rush || 0,
+      mood: avgBase.mood || 0,
+      social: avgBase.social || 0,
+      energy: avgBase.energy || 0,
+      focus: avgBase.focus || 0,
+      anxiety: avgBase.anxiety || 0,
+      impair: avgBase.impair || 0
+    };
+    let weighted = null, fiveMax = null;
+    try { if (typeof window.computeWeighted === 'function') weighted = window.computeWeighted(base); } catch(e){}
+    try { if (typeof window.computeFiveMax === 'function') fiveMax = window.computeFiveMax(base); } catch(e){}
+    return { weighted, fiveMax };
+  }
+
+  function insertAveragedRow(boundary, avgBase, derived) {
+    const tbody = document.getElementById(CONFIG.popups.fiveMinuteAverager.targetTbodyId);
+    if (!tbody) return;
+
+    const tr = document.createElement('tr');
+    const td = (txt='') => { const c=document.createElement('td'); c.textContent = txt; return c; };
+
+    // Build cells in the same order the table expects (fill blanks for unrelated columns).
+    // 0 Select
+    tr.appendChild(td(''));
+    // 1 Timestamp
+    tr.appendChild(td(formatTsYYYYMMDD_HHMMSS(boundary)));
+    // 2 Since
+    tr.appendChild(td(''));
+    // 3 Elapsed
+    tr.appendChild(td(''));
+    // 4 Phase
+    tr.appendChild(td(CONFIG.popups.fiveMinuteAverager.label || '5mAvg'));
+    // 5 Scale
+    tr.appendChild(td(''));
+    // 6-8 Drug/Qty/ROA
+    tr.appendChild(td(''));
+    tr.appendChild(td(''));
+    tr.appendChild(td(''));
+
+    // Ensure we have at least COL.Impair*2 + 1 cells before metric block due to duplicates in the layout
+    while (tr.children.length < COL.Rush) tr.appendChild(td(''));
+
+    // Metrics pairs (value + label-duplicate column pattern)
+    function addMetricPair(val) {
+      tr.appendChild(td(Number.isFinite(val) ? val.toFixed(2) : ''));
+      tr.appendChild(td(Number.isFinite(val) ? val.toFixed(2) : ''));
+    }
+    addMetricPair(avgBase.rush);
+    addMetricPair(avgBase.mood);
+    addMetricPair(avgBase.social);
+    addMetricPair(avgBase.energy);
+    addMetricPair(avgBase.focus);
+    addMetricPair(avgBase.anxiety);
+    addMetricPair(avgBase.impair);
+
+    // Pad up to Score column
+    while (tr.children.length < COL.Score) tr.appendChild(td(''));
+    tr.appendChild(td('')); // Score (you may compute your own Score if you want)
+
+    // Pad up to Weighted & 5Max
+    while (tr.children.length < COL.Weighted) tr.appendChild(td(''));
+    tr.appendChild(td(Number.isFinite(derived.weighted) ? derived.weighted.toFixed(2) : ''));
+    tr.appendChild(td(Number.isFinite(derived.fiveMax) ? derived.fiveMax.toFixed(2) : ''));
+
+    tbody.appendChild(tr);
+
+    // If your app has shading logic, call it
+    if (typeof window.STS_applyShading === 'function') window.STS_applyShading(tr);
+  }
+
+  function setupScheduler(){
+    const cfg = CONFIG.popups.fiveMinuteAverager;
+    if (!cfg?.enabled) return;
+
+    const emitted = new Set(); // boundary ISO strings
+
+    function emitIfDue(boundary){
+      const key = boundary.toISOString();
+      if (emitted.has(key)) return;
+      const all = getRowsFromDOM();
+      const {avg, coverage} = timeWeightedAverage(boundary, all, cfg.lookbackMs);
+      if (!avg) return;
+      if (coverage < (cfg.minCoverageRatio || 0)) return;
+      const derived = recomputeDerived(avg);
+      insertAveragedRow(boundary, avg, derived);
+      emitted.add(key);
+    }
+
+    function schedule(){
+      const now = new Date();
+      const five = cfg.intervalMs;
+      const boundary = cfg.alignToBoundary ? floorToFiveMinuteBoundary(now) : now;
+      // compute next boundary
+      const next = new Date(boundary.getTime() + five);
+      const delay = Math.max(0, next.getTime() - now.getTime());
+
+      // On first run: if exactly on boundary, emit immediately; else wait until next boundary
+      if (cfg.alignToBoundary && (now - boundary < 1000)) {
+        emitIfDue(boundary);
+      }
+      setTimeout(function onBoundary(){
+        const b = cfg.alignToBoundary ? floorToFiveMinuteBoundary(new Date()) : new Date();
+        emitIfDue(b);
+        setInterval(() => {
+          const bb = cfg.alignToBoundary ? floorToFiveMinuteBoundary(new Date()) : new Date();
+          emitIfDue(bb);
+        }, five);
+      }, delay);
+    }
+
+    schedule();
+  }
+
+  // Defer until DOM is ready
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setupScheduler();
+  } else {
+    document.addEventListener('DOMContentLoaded', setupScheduler);
+  }
+})();
+</script>
+<!-- ===== End Five-Minute Averager ===== -->
+
 </body>
 <script>
 function openEmotionModal() {
