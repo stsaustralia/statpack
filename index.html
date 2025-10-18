@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.2 r2297</title>
+<title>statpack v1.16.3 r2300</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -6207,7 +6207,7 @@ window.openAllRated10MinutesPopup = function(){
       if (typeof addEntry === 'function') addEntry('rushMode');
       finalizeRushEntryAsRushMode();
       window.clearRushModeSelections();
-      window._rapidInputSource = \'Main\';
+      window._rapidInputSource = 'Main';
     }catch(e){ console.warn(e); }
   };
 
@@ -6223,7 +6223,7 @@ window.openAllRated10MinutesPopup = function(){
       if (typeof addEntry === 'function') addEntry('rushMode');
       finalizeRushEntryAsRushMode();
       window.clearRushModeSelections();
-      window._rapidInputSource = \'Main\';
+      window._rapidInputSource = 'Main';
       try{ buildRushModeButtons(); }catch(e){}
       try{ const m=document.getElementById('rushModeModal'); if (m) m.style.display='block'; }catch(e){}
     }catch(e){ console.warn(e); }
@@ -6437,6 +6437,251 @@ document.addEventListener('click', function(ev){
 }, true);
 </script>
 
+
+<!-- Running Average: dynamic toolbar button injection -->
+<script>
+// Timestamp: 2025/10/18 00:00:00
+(function(){
+  function ensureRunningAverageButton(){
+    if (document.getElementById('runningAverageBtn')) return;
+    var btn = document.createElement('button');
+    btn.id = 'runningAverageBtn';
+    btn.type = 'button';
+    btn.textContent = 'Running Average';
+    btn.title = 'Open Running Average logger';
+    btn.onclick = function(){ if (typeof openRunningAverage === 'function') openRunningAverage(); };
+    btn.className = (btn.className || '') + ' sts-btn';
+    // Try common containers
+    var targets = [
+      document.querySelector('.summary-controls'),
+      document.querySelector('#summaryControls'),
+      document.querySelector('#toolbar'),
+      document.querySelector('.toolbar'),
+      document.querySelector('.controls'),
+      document.querySelector('#controls'),
+      document.querySelector('header'),
+      document.body
+    ];
+    for (var i=0;i<targets.length;i++){
+      if (targets[i]){ targets[i].appendChild(btn); return; }
+    }
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', ensureRunningAverageButton);
+  } else {
+    ensureRunningAverageButton();
+  }
+})();
+</script>
+
+
+<!-- ======================== Running Average Modal ======================== -->
+<div id="runningAverageModal" style="display:none; position:fixed; inset:0; z-index:10003;">
+  <div style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
+  <div style="position:relative; margin:6vh auto; width:min(1200px,94vw); max-height:88vh; overflow:auto; background:#fff; border:2px solid #007aff; border-radius:12px; box-shadow:0 10px 34px rgba(0,0,0,0.25); padding:14px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
+      <div style="font-weight:700; font-size:18px;">Running Average (5-minute mean, 1-minute cadence)</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="runningAvgStartBtn" onclick="runningAverageStart()">Start</button>
+        <button id="runningAvgStopBtn"  onclick="runningAverageStop()">Stop</button>
+        <button id="runningAvgExportBtn" onclick="exportRunningAverageCSV()">Export CSV</button>
+        <button id="runningAvgClearBtn"  onclick="clearRunningAverage()">Clear</button>
+        <button id="runningAvgCloseBtn"  onclick="closeRunningAverage()">Close</button>
+      </div>
+    </div>
+
+    <div id="runningAverageMeta" style="font-size:11px; opacity:0.7; margin-bottom:6px;">
+      Cadence: every 1 minute (aligned to :00). Window: last 5 minutes ending at the label minute.
+    </div>
+
+    <table id="runningAverageTable" style="width:100%; border-collapse:collapse; background:#fff;">
+      <thead>
+        <tr id="runningHeadRow">
+          <th>Time</th>
+          <th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th>
+          <th>Anxiety</th><th>Impair</th>
+          <th>Score</th><th>Max</th><th>Min</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div style="font-size:11px; opacity:0.65; margin-top:6px;">
+      Source: visible rows from the main table only.
+    </div>
+  </div>
+</div>
+<!-- ====================== /Running Average Modal ======================== -->
+
+
+<!-- STS: Running Average (5-minute rolling means, 1-minute cadence) -->
+<script>
+// Timestamp: 2025/10/18 00:00:00 (Australia/Sydney)
+(function(){
+  const TABLE_ID = 'runningAverageTable';
+  const MODAL_ID = 'runningAverageModal';
+  const LS_KEY   = 'STS_RUNNING_AVG_v1';
+
+  const METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
+  const COLS = ['Time','Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min'];
+
+  // Format "YYYY/MM/DD HH:MM:SS"
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmtStamp(d){
+    return d.getFullYear() + '/' + pad(d.getMonth()+1) + '/' + pad(d.getDate()) + ' ' +
+           pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  function minuteLabel(d){ return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' Average'; }
+
+  // Snapshot main table (reads *only* main log rows)
+  function snapshotMain(){
+    const trs = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return trs.map(tr=>{
+      const ts = +(tr.getAttribute('data-ts') || 0);
+      function get(field){
+        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
+        if (!td) return 0;
+        const v = parseFloat(td.getAttribute('data-value') || td.textContent || '0');
+        return Number.isFinite(v) ? v : 0;
+      }
+      return {
+        _ts: ts,
+        rush: get('rush'), mood: get('mood'), social: get('social'),
+        energy: get('energy'), focus: get('focus'), anxiety: get('anxiety'), impair: get('impair')
+      };
+    }).filter(o => o._ts > 0);
+  }
+
+  // Means over [startMs, endMs)
+  function meansForWindow(startMs, endMs){
+    const snap = snapshotMain();
+    const sel  = snap.filter(e => e._ts >= startMs && e._ts < endMs);
+    if (!sel.length) return null;
+    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+    sel.forEach(e => METRICS.forEach(k => sums[k] += (e[k]||0)));
+    const out = {}; METRICS.forEach(k => out[k] = +(sums[k]/sel.length));
+    return out;
+  }
+
+  // Derived fields from means
+  function extrasFromMeans(M){
+    if (!M) return {Score:null, Max:null, Min:null};
+    const pos = [M.rush,M.mood,M.social,M.energy,M.focus].map(Number).filter(Number.isFinite);
+    const Score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+    const Max   = pos.length ? Math.max(...pos) : null;
+    const Min   = pos.length ? Math.min(...pos) : null;
+    return {Score, Max, Min};
+  }
+
+  // Render helpers
+  function assembleCells(ts, M, X){
+    const d = new Date(ts);
+    const row = {
+      Time: minuteLabel(d) + ' 5m Avg',
+      Rush: M.rush, Mood: M.mood, Social: M.social, Energy: M.energy, Focus: M.focus,
+      Anxiety: M.anxiety, Impair: M.impair,
+      Score: X.Score, Max: X.Max, Min: X.Min
+    };
+    return row;
+  }
+  function renderRows(rows){
+    const tb = document.querySelector('#'+TABLE_ID+' tbody'); if (!tb) return;
+    tb.innerHTML = '';
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = COLS.map(c=>{
+        const v = r[c]; if (c==='Time') return `<td>${v??''}</td>`;
+        const n = Number(v); const txt = Number.isFinite(n) ? n.toFixed(2) : '';
+        return `<td>${txt}</td>`;
+      }).join('');
+      try{ window.STS_applyShading?.(tr); }catch(e){}
+      tb.appendChild(tr);
+    });
+  }
+
+  // Persistence
+  function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch(e){ return []; } }
+  function save(rows){ try{ localStorage.setItem(LS_KEY, JSON.stringify(rows||[])); }catch(e){} }
+
+  // Emission (aligned to minute)
+  let _timer = null;
+
+  function emitOne(){
+    const end = new Date(); end.setSeconds(0,0);   // align to :00
+    const endMs = end.getTime();
+    const startMs = endMs - 5*60000;               // last 5 minutes
+    const M = meansForWindow(startMs, endMs);
+    if (!M) return;
+    const X = extrasFromMeans(M);
+    const row = assembleCells(endMs, M, X);
+    const rows = load();
+    rows.push(row);
+    save(rows);
+    const visible = document.getElementById(MODAL_ID)?.style.display !== 'none';
+    if (visible) renderRows(rows);
+  }
+
+  function startTimer(){
+    if (_timer) return;
+    const now = new Date();
+    const delay = (60 - now.getSeconds())*1000 - now.getMilliseconds();
+    setTimeout(()=>{
+      emitOne();
+      _timer = setInterval(emitOne, 60000);
+    }, Math.max(0, delay));
+  }
+  function stopTimer(){
+    if (_timer){ clearInterval(_timer); _timer = null; }
+  }
+
+  // Public API
+  window.openRunningAverage = function(){
+    const modal = document.getElementById(MODAL_ID);
+    const rows = load();
+    renderRows(rows);
+    modal.style.display = 'block';
+  };
+  window.closeRunningAverage = function(){
+    const modal = document.getElementById(MODAL_ID);
+    modal.style.display = 'none';
+  };
+  window.runningAverageStart = function(){
+    emitOne(); // emit immediately once
+    startTimer();
+    const s = document.getElementById('runningAvgStartBtn'); if (s) s.disabled = true;
+    const t = document.getElementById('runningAvgStopBtn');  if (t) t.disabled = false;
+  };
+  window.runningAverageStop = function(){
+    stopTimer();
+    const s = document.getElementById('runningAvgStartBtn'); if (s) s.disabled = false;
+    const t = document.getElementById('runningAvgStopBtn');  if (t) t.disabled = true;
+  };
+  window.exportRunningAverageCSV = function(){
+    const rows = load();
+    const header = COLS.join(',');
+    const lines = [header].concat(rows.map(r=>COLS.map(c=>{
+      const v = r[c];
+      const s = (c==='Time') ? String(v||'') : (Number.isFinite(+v) ? (+v).toFixed(2) : '');
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+    }).join(',')));
+    const blob = new Blob([lines.join('\n')+'\n'], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'running_average_5m_1m.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 250);
+  };
+  window.clearRunningAverage = function(){
+    localStorage.removeItem(LS_KEY);
+    const tb = document.querySelector('#'+TABLE_ID+' tbody'); if (tb) tb.innerHTML = '';
+  };
+
+  // Optional: pause in background to avoid drift
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) stopTimer();
+  });
+})();
+</script>
+<!-- /STS: Running Average -->
 </body>
 <script>
 function openEmotionModal() {
