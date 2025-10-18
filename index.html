@@ -47,7 +47,7 @@ CONFIG.popups = Object.assign({
 /* 
   max-height: calc(20 * 42px); /* ~40px per row incl. padding/border
  */
-  max-height: calc(25 * 30px); /* ~40px per row incl. padding/border
+  max-height: calc(25 * 42px); /* ~40px per row incl. padding/border
  */
 
   overflow-y: auto;
@@ -103,8 +103,8 @@ CONFIG.popups = Object.assign({
         width: 140px;
         height: 30px;
  */
-        width: 140px;
-        height: 30px;
+        width: 135px;
+        height: 25px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -144,9 +144,9 @@ CONFIG.popups = Object.assign({
     }
 
     .note-btn {
-        width: 80px;
+        width: 88px;
         height: 20px;
-        font-size: 11px;
+        font-size: 12px;
         padding: 0;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.2 r2296</title>
+<title>statpack v1.16.2 r2297</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -525,8 +525,8 @@ function computeWeighted(obj){
 <style id="rapid-scores-size-override">
   /* Scoped size overrides for Rapid Scores modal buttons only */
   #rapidScoresModal .score-column button {
-    width: 162px;
-    height: 32px;
+    width: 160px;
+    height: 30px;
     font-size: 13px;
   }
 </style>
@@ -808,7 +808,7 @@ function computeWeighted(obj){
 const CONFIG = Object.freeze({
   ui: {
 //     hideInUi: ['VL','sM','sB','sF','GS','change',	'Change'	,'Deg'	,'D2'	,'Oth',	'O2','Weighted','5Max'],
-    hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
+    hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth','Confidence','Auto','Jitter','Dopamine'],
     noShadeCols: [],
     shadeCap: {
       'Score': 25,
