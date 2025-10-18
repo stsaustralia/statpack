@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.3 r2300</title>
+<title>statpack v1.16.3 r2302</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -6682,6 +6682,135 @@ document.addEventListener('click', function(ev){
 })();
 </script>
 <!-- /STS: Running Average -->
+
+<!-- Patch: Expose global Backfill and unify callers -->
+<script>
+// Timestamp: 2025/10/18 00:00:00
+(function(){
+  if (typeof window.backfillAll !== 'function') {
+    window.backfillAll = function(){
+      try {
+        if (typeof window.backfillAllImpl === 'function') {
+          return window.backfillAllImpl();
+        }
+        var helper = (typeof window.backfillWindow === 'function') ? window.backfillWindow
+                   : (typeof backfillWindow === 'function') ? backfillWindow
+                   : null;
+        if (!helper) { console.warn('No backfillWindow available'); return; }
+        var ids = ["summary5Table", "summary15Table", "summary60Table"];
+        var addedTotal = 0;
+        ids.forEach(function(id){
+          try { var added = helper(null, id); addedTotal += (added||0); } catch(e){}
+        });
+        console.log('[Backfill] total added rows:', addedTotal);
+        return addedTotal;
+      } catch (e) {
+        console.error('backfillAll failed:', e);
+      }
+    };
+  }
+  document.addEventListener('click', function(ev){
+    try{
+      var el = ev.target;
+      if (!el || !el.id) return;
+      if (el.id === 'backfillBtnGlobal' || el.id === 'backfillBtn' || /^backfillBtn\d+$/.test(el.id)) {
+        if (typeof window.backfillAll === 'function') window.backfillAll();
+      }
+    }catch(e){}
+  }, true);
+})();
+</script>
+
+<!-- Statistical Analysis Daily Modal -->
+<div id="statAnalysisDailyModal" style="display:none; position:fixed; inset:0; z-index:10000;">
+  <div id="statAnalysisDailyBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
+  <div id="statAnalysisDailyCard" style="position:relative; margin:40px auto; max-width:960px; background:#fff; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+      <h2>Statistical Analysis — Daily</h2>
+      <button aria-label="Close" onclick="closeStatAnalysisDaily()">Close</button>
+    </div>
+    <div style="font-size:11px; opacity:0.7; margin-bottom:6px;">Daily averages of rated metrics.</div>
+    <table id="statAnalysisDailyTable" style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="text-align:left;">Date</th>
+          <th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
+          <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// Timestamp: 2025/10/18 00:00:00
+(function(){
+  function safeNum(v){
+    if (v == null) return null;
+    var n = parseFloat(String(v).replace(/[^0-9.+-]/g,''));
+    return isFinite(n) ? n : null;
+  }
+  function tsFromRow(r){
+    try{
+      if (typeof parseTimestamp === 'function') {
+        var raw = r.Time || r.DateTime || r['Date/Time'] || r.ts || r.time || '';
+        var t = parseTimestamp(raw);
+        if (!isNaN(t)) return t;
+      }
+      var raw2 = r.Time || r.DateTime || r['Date/Time'] || r.ts || r.time || '';
+      var s2 = String(raw2).replace(/\//g,'-').replace(/(\d)\s+(\d)/,'$1T$2');
+      var t2 = new Date(s2).getTime();
+      return isNaN(t2) ? NaN : t2;
+    }catch(e){ return NaN; }
+  }
+  function groupByISODate(rows){
+    var map = new Map();
+    rows.forEach(function(r){
+      var t = tsFromRow(r);
+      if (isNaN(t)) return;
+      var d = new Date(t);
+      var key = d.toISOString().slice(0,10); // YYYY-MM-DD
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(r);
+    });
+    return map;
+  }
+  function avg(list, key){
+    var vals = list.map(function(r){ return safeNum(r[key]); }).filter(function(n){ return n!=null; });
+    if (!vals.length) return '';
+    var s = vals.reduce(function(a,b){ return a+b; }, 0);
+    return (s/vals.length).toFixed(2);
+  }
+  function getSource(){
+    if (typeof window.syncLogDataFromTable === 'function') { try{ window.syncLogDataFromTable(); }catch(e){} }
+    var src = Array.isArray(window.logData) ? window.logData : [];
+    return src;
+  }
+  function renderStatAnalysisDaily(){
+    var src = getSource();
+    var map = groupByISODate(src);
+    var days = Array.from(map.keys()).sort();
+    var tb = document.querySelector('#statAnalysisDailyTable tbody'); if (!tb) return;
+    var MET = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min','Weighted','5Max'];
+    var lines = [];
+    days.forEach(function(day){
+      var list = map.get(day);
+      var tds = MET.map(function(k){ return '<td>'+avg(list,k)+'</td>'; }).join('');
+      lines.push('<tr><td style="text-align:left;">'+day+'</td>'+tds+'</tr>');
+    });
+    tb.innerHTML = lines.join('');
+  }
+  window.openStatAnalysisDaily = function(){
+    renderStatAnalysisDaily();
+    var m = document.getElementById('statAnalysisDailyModal'); if (m) m.style.display = 'block';
+    var bd = document.getElementById('statAnalysisDailyBackdrop'); if (bd) bd.onclick = closeStatAnalysisDaily;
+  };
+  window.closeStatAnalysisDaily = function(){
+    var m = document.getElementById('statAnalysisDailyModal'); if (m) m.style.display = 'none';
+  };
+})();
+</script>
 </body>
 <script>
 function openEmotionModal() {
