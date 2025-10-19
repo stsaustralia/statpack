@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.16.4 r2323</title>
+<title>statpack v1.16.4 r2327</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -526,7 +526,7 @@ function computeWeighted(obj){
   /* Scoped size overrides for Rapid Scores modal buttons only */
   #rapidScoresModal .score-column button {
     width: 162px;
-    height: 32px;
+    height: 27px;
     font-size: 13px;
   }
 </style>
@@ -866,13 +866,13 @@ labels: {
 //       rush:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
-      rush:[6,5,4.5,'',4.25,4,3.75,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,0],
-      mood:[6,5,4.5,'',4.25,4,3.75,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,0],
-      social:[6,5,4.5,'',4.25,4,3.75,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,0],
-      energy:[6,5,4.5,'',4.25,4,3.75,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,0],
-      focus:[6,5,4.5,'',4.25,4,3.75,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,0],
-      anxiety:[6,5,4.5,'',4.25,4,3.75,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,0],
-      impair:[6,5,4.5,'',4.25,4,3.75,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,0],
+      rush:[5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,'',0.25,-0.25],
+      mood:[5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,'',0.25,-0.25],
+      social:[5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,'',0.25,-0.25],
+      energy:[5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,'',0.25,-0.25],
+      focus:[5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,'',0.25,-0.25],
+      anxiety:[5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,'',0.25,-0.25],
+      impair:[5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'','',-0.5,-1,'',0.25,-0.25],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -881,7 +881,7 @@ labels: {
       degree:[5,4,3,2,1,0],
       other: [5,4,3,2,1,0]
     },
-    rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
+    rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'',0.25,-0.25],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
@@ -1073,11 +1073,11 @@ function getSum(arr) {
                 let customLabel = '';
 // if (v === 7.02) customLabel = 'Ultra Extreme';
 if (v === -111) customLabel = '-';
-if (v === 6) customLabel = 'Overdrive';
-if (v === 0.1) customLabel = 'Minimal';
-if (v === 1.33) customLabel = 'Low';
-if (v === 2.66) customLabel = 'Medium';
-if (v === 3.99) customLabel = 'High';
+if (v === -0.25) customLabel = '-';
+if (v === -0.75) customLabel = '-';
+if (v === -0.5) customLabel = '-';
+if (v === 0.25) customLabel = '+';
+if (v === 0.75) customLabel = '+';
 if (v === 4.99) customLabel = 'Extreme';
 //else if (v === 6) customLabel = 'Extra/Moderate';
 else customLabel = getMetricLabel(f, v);
@@ -6080,7 +6080,7 @@ window.openAllRated10MinutesPopup = function(){
 (function(){
   // Configure which metrics/values Rush Mode shows (independent of Rapid)
   const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const RUSH_MODE_VALUES  = [5,4,3,2,1,0,'',-0.5,-1];
+  const RUSH_MODE_VALUES  = [5,4,3,2,1,0,'',0.25,-0.25,1.25,-1.25];
 
   // Local, Rush-Mode-only selections
   const rushModeSelections = Object.create(null);
@@ -6259,8 +6259,8 @@ window.openAllRated10MinutesPopup = function(){
 <!-- Scoped button sizing for Rush Mode modal -->
 <style id="rush-mode-size-override">
   #rushModeModal .score-column button {
-    width: 166px;
-    height: 36px;
+    width: 175px;
+    height: 30px;
     font-size: 13px;
   }
 </style>
