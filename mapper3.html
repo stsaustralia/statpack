@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spreadsheet Editor → labels { labelMappings, rapidLabels }</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #0f172a;
+    --muted: #94a3b8;
+    --text: #e5e7eb;
+    --accent: #2dd4bf;
+    --accent-2: #60a5fa;
+    --danger: #ef4444;
+    --ok: #22c55e;
+    --border: #24324d;
+    --grid-even: #0e1a33;
+    --grid-odd: #0b152a;
+    --input-bg: #0b1327;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    background: var(--bg);
+    color: var(--text);
+  }
+  h1 { font-size: 18px; margin: 0 0 8px; }
+  .muted { color: var(--muted); font-size: 12px; }
+
+  .bar {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0 12px 0;
+  }
+  .btn {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn.primary { background: linear-gradient(180deg, #1f6feb, #1b5fd1); border-color: #134d9c; }
+  .btn.good { background: linear-gradient(180deg, #11a97a, #0e8e67); border-color: #0c7354; }
+  .btn.warn { background: linear-gradient(180deg, #eab308, #ca8a04); border-color: #a16207; }
+  .btn.danger { background: #7f1d1d; border-color: #b91c1c; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .wrap {
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .section-title { font-size: 14px; margin: 0 0 10px; }
+
+  .switcher { display:flex; gap:8px; margin-bottom: 10px; }
+  .switcher .toggle {
+    padding: 6px 10px; border:1px solid var(--border);
+    background: #0b1327; color: var(--text); border-radius: 8px; cursor: pointer;
+  }
+  .switcher .toggle.active { outline: 2px solid var(--accent-2); }
+
+  .metric-list { display: grid; gap: 6px; }
+  .metric {
+    display:flex; justify-content: space-between; align-items:center;
+    padding: 8px 10px; border:1px solid var(--border); border-radius:10px;
+    background:#0c1631; cursor:pointer;
+  }
+  .metric.active { outline: 2px solid var(--accent); }
+  .metric .name { font-weight: 600; }
+  .metric .count { color: var(--muted); font-size: 12px; }
+
+  .grid-controls { display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap: wrap; }
+  .grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    table-layout: fixed;
+  }
+  .grid th, .grid td {
+    border: 1px solid var(--border);
+    padding: 6px 8px;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .grid th {
+    background: #0a1430;
+    text-align: left;
+    font-weight: 600;
+  }
+  .grid tr:nth-child(even) td { background: var(--grid-even); }
+  .grid tr:nth-child(odd) td { background: var(--grid-odd); }
+  .grid td[contenteditable="true"] {
+    background: var(--input-bg);
+    outline: none;
+  }
+  .grid .col-narrow { width: 120px; }
+  .grid .col-wide { width: auto; }
+
+  .kv {
+    display:grid; grid-template-columns: 1fr 1fr; gap:8px;
+  }
+  .kv textarea {
+    width: 100%; min-height: 90px; background: var(--input-bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px; padding: 8px;
+  }
+
+  pre.output {
+    background: #0b1327; color: #e5e7eb; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; font-size: 12px; overflow: auto;
+    white-space: pre;
+  }
+
+  .footer { margin-top: 8px; color: var(--muted); font-size: 11px; }
+  .pill { display:inline-block; padding:2px 6px; border:1px solid var(--border); border-radius: 999px; margin-left:6px; font-size:11px; background:#0b1327; }
+  .help { font-size: 12px; color: var(--muted); line-height: 1.35; }
+  .row-actions { display:flex; gap:6px; }
+  .row-btn { padding: 2px 6px; border: 1px solid var(--border); border-radius: 6px; background: #102142; color: var(--text); cursor: pointer; font-size: 11px;}
+  .row-btn.del { background: #3b0a0a; border-color: #6b0f0f; }
+</style>
+</head>
+<body>
+  <h1>Spreadsheet Editor → <code>labels</code> ({ <code>labelMappings</code>, <code>rapidLabels</code> })</h1>
+  <div class="muted">Edit metric → numeric value → label in a spreadsheet-like grid. Add/remove rows, sort by value, then copy or download the generated JS.</div>
+
+  <div class="wrap">
+    <!-- Left: dataset toggle and metric picker -->
+    <div class="card">
+      <div class="section-title">Dataset</div>
+      <div class="switcher" id="datasetSwitch">
+        <button class="toggle active" data-set="labelMappings">labelMappings</button>
+        <button class="toggle" data-set="rapidLabels">rapidLabels</button>
+      </div>
+
+      <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Metrics</span>
+        <span class="muted" id="metricInfo"></span>
+      </div>
+      <div id="metricList" class="metric-list"></div>
+
+      <div class="card" style="margin-top:12px;">
+        <div class="section-title">Import / Export helpers</div>
+        <div class="kv">
+          <div>
+            <div class="muted">Paste TSV/CSV (two columns: value, label). Empty lines ignored.</div>
+            <textarea id="pasteArea" placeholder="5.00\tExtreme&#10;4.50\tFrenzied&#10;…"></textarea>
+            <div class="bar">
+              <button class="btn" id="btnPasteInto">Import into current metric</button>
+              <button class="btn" id="btnClearPaste">Clear box</button>
+            </div>
+          </div>
+          <div>
+            <div class="muted">Quick copy: current metric as TSV</div>
+            <textarea id="tsvOut" readonly></textarea>
+            <div class="bar">
+              <button class="btn" id="btnCopyTSV">Copy TSV</button>
+            </div>
+          </div>
+        </div>
+        <div class="help" style="margin-top:6px">
+          Tip: You can also edit directly in the grid on the right. Values should be numeric (e.g., 5.00); labels are free text.
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: grid + output -->
+    <div class="card">
+      <div class="section-title" id="currentContext">Editing: <code>labelMappings</code> • <code>rush</code></div>
+
+      <div class="grid-controls">
+        <button class="btn" id="btnAddRow">Add row</button>
+        <button class="btn" id="btnSortDesc">Sort by value ↓</button>
+        <button class="btn" id="btnSortAsc">Sort by value ↑</button>
+        <button class="btn warn" id="btnNormalize">Normalize to 2 decimals</button>
+        <button class="btn danger" id="btnClearMetric">Clear metric</button>
+        <span class="pill" id="rowCount">0 rows</span>
+      </div>
+
+      <table class="grid" id="grid">
+        <thead>
+          <tr>
+            <th class="col-narrow">Value (numeric)</th>
+            <th class="col-wide">Label (text)</th>
+            <th class="col-narrow">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="gridBody"></tbody>
+      </table>
+
+      <div class="bar" style="margin-top:10px; justify-content:flex-end">
+        <button class="btn" id="btnCopyJS">Copy JS</button>
+        <button class="btn primary" id="btnDownloadJS">Download labels.js</button>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">Generated JavaScript</div>
+      <pre id="jsOut" class="output"></pre>
+      <div class="footer" id="footerInfo"></div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Default Data (your provided maps) ----------
+  const DEFAULT_MAP = {
+    rush: { 5.00:'Extreme',4.50:'Frenzied',4.00:'Obvious/Intense',3.50:'Intense/Strong',3.00:'Clear/Distinct',2.50:'Controllable/High',2.00:'Moderate/Felt',1.50:'Some/Thought',1.00:'Mild/Low',0.50:'Maybe',0.00:'None' },
+    mood: { 5.00:'Autopilot',4.50:'Obvious/Euphoric',4.00:'Euphoric',3.50:'Distinct/Good',3.00:'Clear/Certain',2.50:'Significant',2.00:'Some/Motivated',1.50:'Fair/Some',1.00:'OK/Capable',0.50:'Unsure',0.00:'No' },
+    social: { 5.00:'Disinhibited',4.50:'Strong/Empathy',4.00:'Outgoing',3.50:'Social/Empathy',3.00:'Social/Active',2.50:'Empathy',2.00:'Mid/Somewhat',1.50:'Want/Push',1.00:'Capable',0.50:'Effort',0.00:'No' },
+    energy: { 5.00:'Manic',4.50:'Very/Frantic',4.00:'Hyperactive',3.50:'Very/Actve',3.00:'Energetic',2.50:'Significant/Push',2.00:'Some/Push',1.50:'Encourage',1.00:'Capable',0.50:'Functional',0.00:'None' },
+    focus: { 5.00:'Wired',4.50:'Laser/Tiunnel',4.00:'Obsessive',3.50:'Strong',3.00:'Focused',2.50:'Fixed/Locked',2.00:'Some/Good',1.50:'Effective',1.00:'Attentive',0.50:'Alert',0.00:'No' },
+    anxiety: { 5.00:'Panic',4.50:'Paranoia',4.00:'Controlling',3.50:'Impacted',3.00:'Adverse/Imact',2.50:'Noticeable',2.00:'Affected',1.50:'Ignorable',1.00:'Forgettable',0.50:'Negligible',0.00:'None' },
+    impair: { 5.00:'Severe',4.50:'Dominated',4.00:'Crippled',3.50:'Controlled',3.00:'Impacted',2.50:'Affected',2.00:'Excess/Physical',1.50:'Ignorable/Side',1.00:'Minor/Tremors',0.50:'Negligible',0.00:'No' },
+    change: { 5.00:'Blatant',4.00:'Obvious',3.00:'Clear',2.00:'Thought',1.00:'Maybe',0.00:'None' },
+    degree: { 5.00:'Extreme',4.00:'Very High',3.00:'High',2.00:'Medium',1.00:'Low',0.00:'None' },
+    other: { 5.00:'Now',4.00:'Last',3.00:'Next',2.00:'Hit',1.00:'Dose',0.00:'After' },
+    confidence: { 5.00:'Productive',4.00:'Noticed',3.00:'Positive',2.00:'Up',1.00:'None',0.00:'Down' },
+    auto: { 5.00:'Hindsight',4.00:'Autopilot',3.00:'Some/Flow',2.00:'Distractable',1.00:'Unsure',0.00:'No/Minimal' },
+    jitter: { 5.00:'Severe',4.00:'Obvious',3.00:'Impaired',2.00:'Tremors',1.00:'Forgettable',0.00:'No/Minimal' },
+    dopamine: { 5.00:'Dopamine',4.00:'Serotonin',3.00:'Physical',2.00:'Productive',1.00:'Motivated',0.00:'No/Minimal' }
+  };
+
+  function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+  const state = {
+    datasetKey: "labelMappings", // "labelMappings" | "rapidLabels"
+    metricKey: "rush",
+    labels: {
+      labelMappings: deepClone(DEFAULT_MAP),
+      rapidLabels: deepClone(DEFAULT_MAP)
+    }
+  };
+
+  // ---------- DOM ----------
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const metricListEl = $("#metricList");
+  const datasetSwitch = $("#datasetSwitch");
+  const gridBody = $("#gridBody");
+  const currentContext = $("#currentContext");
+  const rowCount = $("#rowCount");
+  const jsOut = $("#jsOut");
+  const footerInfo = $("#footerInfo");
+  const pasteArea = $("#pasteArea");
+  const tsvOut = $("#tsvOut");
+
+  // ---------- Metrics ----------
+  const METRICS = [
+    "rush","mood","social","energy","focus","anxiety","impair","change","degree","other","confidence","auto","jitter","dopamine"
+  ];
+
+  // ---------- Rendering helpers ----------
+  function fmtDec2(x){
+    const n = Number(x);
+    return isFinite(n) ? n.toFixed(2) : String(x);
+  }
+
+  function nowStamp(){
+    const d = new Date();
+    const pad = n => String(n).padStart(2,"0");
+    const yyyy = d.getFullYear();
+    const MM = pad(d.getMonth()+1);
+    const dd = pad(d.getDate());
+    const HH = pad(d.getHours());
+    const mm = pad(d.getMinutes());
+    const ss = pad(d.getSeconds());
+    return `${yyyy}/${MM}/${dd} ${HH}:${mm}:${ss}`;
+  }
+
+  function sortPairsDesc(pairs){
+    pairs.sort((a,b)=> Number(b[0]) - Number(a[0]));
+  }
+  function sortPairsAsc(pairs){
+    pairs.sort((a,b)=> Number(a[0]) - Number(b[0]));
+  }
+
+  function metricPairs(dsKey, mKey){
+    const obj = state.labels[dsKey][mKey] || {};
+    // Convert to [value,label] array
+    return Object.keys(obj).map(k => [k, obj[k]]);
+  }
+
+  function setMetricPairs(dsKey, mKey, pairs){
+    const out = {};
+    for(const [k,v] of pairs){
+      const key = String(k);
+      const val = String(v);
+      if(key.trim().length===0 || val.trim().length===0) continue;
+      out[key] = val;
+    }
+    state.labels[dsKey][mKey] = out;
+  }
+
+  function rebuildMetricList(){
+    metricListEl.innerHTML = "";
+    METRICS.forEach(m=>{
+      const div = document.createElement("div");
+      div.className = "metric" + (m===state.metricKey ? " active" : "");
+      const count = Object.keys(state.labels[state.datasetKey][m]||{}).length;
+      div.innerHTML = `<span class="name">${m}</span><span class="count">${count} entries</span>`;
+      div.addEventListener("click", ()=>{
+        state.metricKey = m;
+        rebuildMetricList();
+        renderGrid();
+        renderContext();
+        refreshTSV();
+      });
+      metricListEl.appendChild(div);
+    });
+    $("#metricInfo").textContent = `${METRICS.length} metrics`;
+  }
+
+  function renderContext(){
+    currentContext.innerHTML = `Editing: <code>${state.datasetKey}</code> • <code>${state.metricKey}</code>`;
+  }
+
+  function renderGrid(){
+    const pairs = metricPairs(state.datasetKey, state.metricKey);
+    gridBody.innerHTML = "";
+    pairs.forEach(([val,label], idx)=>{
+      gridBody.appendChild(buildRow(val, label, idx));
+    });
+    rowCount.textContent = `${pairs.length} rows`;
+    refreshJS();
+  }
+
+  function buildRow(val, label, rowIndex){
+    const tr = document.createElement("tr");
+
+    const tdVal = document.createElement("td");
+    tdVal.contentEditable = "true";
+    tdVal.textContent = String(val);
+    tdVal.dataset.role = "value";
+    tdVal.addEventListener("input", onCellEdit);
+
+    const tdLabel = document.createElement("td");
+    tdLabel.contentEditable = "true";
+    tdLabel.textContent = String(label);
+    tdLabel.dataset.role = "label";
+    tdLabel.addEventListener("input", onCellEdit);
+
+    const tdAct = document.createElement("td");
+    const act = document.createElement("div");
+    act.className = "row-actions";
+    const up = document.createElement("button");
+    up.className = "row-btn";
+    up.textContent = "↑";
+    up.title = "Move up";
+    up.addEventListener("click", ()=> moveRow(rowIndex, -1));
+    const down = document.createElement("button");
+    down.className = "row-btn";
+    down.textContent = "↓";
+    down.title = "Move down";
+    down.addEventListener("click", ()=> moveRow(rowIndex, +1));
+    const del = document.createElement("button");
+    del.className = "row-btn del";
+    del.textContent = "Delete";
+    del.addEventListener("click", ()=> deleteRow(rowIndex));
+    act.appendChild(up); act.appendChild(down); act.appendChild(del);
+    tdAct.appendChild(act);
+
+    tr.appendChild(tdVal);
+    tr.appendChild(tdLabel);
+    tr.appendChild(tdAct);
+    return tr;
+  }
+
+  function gridToPairs(){
+    const rows = Array.from(gridBody.querySelectorAll("tr"));
+    const pairs = [];
+    for(const r of rows){
+      const tds = r.querySelectorAll("td");
+      const val = (tds[0]?.textContent ?? "").trim();
+      const label = (tds[1]?.textContent ?? "").trim();
+      if(val.length || label.length){
+        pairs.push([val, label]);
+      }
+    }
+    return pairs;
+  }
+
+  function onCellEdit(){
+    const pairs = gridToPairs();
+    setMetricPairs(state.datasetKey, state.metricKey, pairs);
+    rowCount.textContent = `${pairs.length} rows`;
+    refreshTSV();
+    refreshJS();
+  }
+
+  function addRow(){
+    const tr = buildRow("", "", gridBody.children.length);
+    gridBody.appendChild(tr);
+    gridBody.querySelector("tr:last-child td[contenteditable]").focus();
+    onCellEdit();
+  }
+
+  function deleteRow(idx){
+    const tr = gridBody.children[idx];
+    if(tr){ tr.remove(); onCellEdit(); }
+  }
+
+  function moveRow(idx, delta){
+    const rows = Array.from(gridBody.children);
+    const target = idx + delta;
+    if(target < 0 || target >= rows.length) return;
+    const node = rows[idx];
+    const ref = delta > 0 ? rows[target].nextSibling : rows[target];
+    gridBody.insertBefore(node, ref);
+    onCellEdit();
+  }
+
+  function sortCurrent(desc=true){
+    const pairs = gridToPairs();
+    (desc ? sortPairsDesc : sortPairsAsc)(pairs);
+    setMetricPairs(state.datasetKey, state.metricKey, pairs);
+    renderGrid();
+    refreshTSV();
+  }
+
+  function normalizeDecimals(){
+    const pairs = gridToPairs().map(([v,l])=>[fmtDec2(v), l]);
+    setMetricPairs(state.datasetKey, state.metricKey, pairs);
+    renderGrid();
+    refreshTSV();
+  }
+
+  function clearMetric(){
+    if(!confirm(`Clear all rows in ${state.datasetKey} → ${state.metricKey}?`)) return;
+    setMetricPairs(state.datasetKey, state.metricKey, []);
+    renderGrid();
+    refreshTSV();
+  }
+
+  // ---------- TSV helpers ----------
+  function pairsToTSV(pairs){
+    return pairs.map(([v,l])=>`${v}\t${l}`).join("\n");
+  }
+  function tsvToPairs(text){
+    const lines = text.replace(/\r/g,"").split("\n");
+    const out = [];
+    for(const line of lines){
+      const t = line.trim();
+      if(!t) continue;
+      const parts = t.split(/\t|,/); // allow tab or comma
+      const v = (parts[0] ?? "").trim();
+      const l = (parts[1] ?? "").trim();
+      if(v || l) out.push([v,l]);
+    }
+    return out;
+  }
+
+  function refreshTSV(){
+    const pairs = metricPairs(state.datasetKey, state.metricKey);
+    tsvOut.value = pairsToTSV(pairs);
+  }
+
+  // ---------- JS Output ----------
+  function buildJS(){
+    // Ensure numeric-like keys are emitted as literals when safe
+    function keyOut(k){
+      return /^-?\d+(?:\.\d+)?$/.test(k) ? k : JSON.stringify(k);
+    }
+    function emitMap(obj){
+      const entries = Object.keys(obj).map(k=>`${keyOut(k)}: ${JSON.stringify(String(obj[k]))}`);
+      return `{ ${entries.join(", ")} }`;
+    }
+
+    const parts = [];
+    parts.push("const labels = {");
+    parts.push("  labelMappings: {");
+    METRICS.forEach((m, i)=>{
+      const map = state.labels.labelMappings[m] || {};
+      parts.push(`    ${m}: ${emitMap(map)}${i < METRICS.length-1 ? "," : ""}`);
+    });
+    parts.push("  },");
+    parts.push("  rapidLabels: {");
+    METRICS.forEach((m, i)=>{
+      const map = state.labels.rapidLabels[m] || {};
+      parts.push(`    ${m}: ${emitMap(map)}${i < METRICS.length-1 ? "," : ""}`);
+    });
+    parts.push("  },");
+    parts.push("};");
+    return parts.join("\n");
+  }
+
+  function refreshJS(){
+    const code = buildJS();
+    jsOut.textContent = code;
+    footerInfo.textContent = `Rows in ${state.datasetKey}/${state.metricKey}: ${Object.keys(state.labels[state.datasetKey][state.metricKey]||{}).length} • Generated: ${nowStamp()}`;
+  }
+
+  // ---------- Dataset switch ----------
+  datasetSwitch.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".toggle");
+    if(!btn) return;
+    $$(".switcher .toggle").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    state.datasetKey = btn.dataset.set;
+    rebuildMetricList();
+    renderContext();
+    renderGrid();
+    refreshTSV();
+  });
+
+  // ---------- Buttons ----------
+  $("#btnAddRow").addEventListener("click", addRow);
+  $("#btnSortDesc").addEventListener("click", ()=> sortCurrent(true));
+  $("#btnSortAsc").addEventListener("click", ()=> sortCurrent(false));
+  $("#btnNormalize").addEventListener("click", normalizeDecimals);
+  $("#btnClearMetric").addEventListener("click", clearMetric);
+
+  $("#btnCopyJS").addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(jsOut.textContent);
+      alert("JS copied to clipboard.");
+    }catch{
+      alert("Copy failed.");
+    }
+  });
+
+  $("#btnDownloadJS").addEventListener("click", ()=>{
+    const blob = new Blob([jsOut.textContent], {type:"application/javascript"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "labels.js";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  });
+
+  $("#btnPasteInto").addEventListener("click", ()=>{
+    const pairs = tsvToPairs(pasteArea.value);
+    if(!pairs.length){ alert("Nothing to import. Paste TSV/CSV first."); return; }
+    setMetricPairs(state.datasetKey, state.metricKey, pairs);
+    renderGrid();
+    refreshTSV();
+  });
+
+  $("#btnClearPaste").addEventListener("click", ()=> { pasteArea.value = ""; });
+
+  $("#btnCopyTSV").addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(tsvOut.value);
+      alert("TSV copied.");
+    }catch{
+      alert("Copy failed.");
+    }
+  });
+
+  // ---------- Init ----------
+  rebuildMetricList();
+  renderContext();
+  renderGrid();
+  refreshTSV();
+})();
+</script>
+</body>
+</html>
