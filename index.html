@@ -102,9 +102,10 @@ CONFIG.popups = Object.assign({
 /* 
         width: 140px;
         height: 30px;
+        BOOKMARK
  */
-        width: 142px;
-        height: 26px;
+        width: 150px;
+        height: 25px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -445,7 +446,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.18.2 r2356</title>
+<title>statpack v1.18.3 r2361</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -523,10 +524,10 @@ function computeWeighted(obj){
 
 
 <style id="rapid-scores-size-override">
-  /* Scoped size overrides for Rapid Scores modal buttons only */
+  /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
-    width: 162px;
-    height: 27px;
+    width: 150px;
+    height: 30px;
     font-size: 13px;
   }
 </style>
@@ -812,8 +813,8 @@ const CONFIG = Object.freeze({
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth','Confidence','Auto','Jitter','Dopamine'],
     noShadeCols: [],
     shadeCap: {
-      'Score': 30,
-      'Max': 30,
+      'Score': 25,
+      'Max': 25,
       'Min': 10,
       'Weighted': 10,
       '5Max': 10
@@ -867,13 +868,13 @@ labels: {
 //       rush:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
-      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0.25,0,-0.25,-0.5,-1,-2],
-      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0.25,0,-0.25,-0.5,-1,-2],
-      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0.25,0,-0.25,-0.5,-1,-2],
-      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0.25,0,-0.25,-0.5,-1,-2],
-      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0.25,0,-0.25,-0.5,-1,-2],
-      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0.25,0,-0.25,-0.5,-1,-2],
-      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0.25,0,-0.25,-0.5,-1,-2],
+      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
+      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
+      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
+      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
+      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
+      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
+      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -882,7 +883,7 @@ labels: {
       degree:[5,4,3,2,1,0],
       other: [5,4,3,2,1,0]
     },
-    rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
+    rapidValues: [6,5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'',0.5,-0.5],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
@@ -951,7 +952,7 @@ function cellBgFor(colName, value) {
   if (NO_SHADE.has(colName)) return '';
   const num = Number(value);
   if (!Number.isFinite(num)) return '';
-  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 6;
+  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 5;
   const opacity = Math.min(Math.max(num, 0), cap) / cap;
   if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
   if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
@@ -6086,7 +6087,7 @@ window.openAllRated10MinutesPopup = function(){
 (function(){
   // Configure which metrics/values Rush Mode shows (independent of Rapid)
   const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const RUSH_MODE_VALUES  = [6,5,4,3,2,1,0,'',0.5,-0.5];
+  const RUSH_MODE_VALUES  = [5,4,3,2,1,0,'',0.5,-0.5];
 
   // Local, Rush-Mode-only selections
   const rushModeSelections = Object.create(null);
@@ -6265,8 +6266,8 @@ window.openAllRated10MinutesPopup = function(){
 <!-- Scoped button sizing for Rush Mode modal -->
 <style id="rush-mode-size-override">
   #rushModeModal .score-column button {
-    width: 175px;
-    height: 30px;
+    width: 162px;
+    height: 32px;
     font-size: 13px;
   }
 </style>
@@ -8942,3 +8943,317 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 	
+
+<!-- === STS: Shading Parity + Auto Slider C/D (injected 2025/10/21 12:00:00) === -->
+<script>
+(function(){
+  // Timestamp util
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function tsLabel(ms){
+    var d = new Date(ms||Date.now());
+    return d.getFullYear()+"/"+pad(d.getMonth()+1)+"/"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes())+":"+pad(d.getSeconds());
+  }
+
+  // Tag a row's cells with data-col names using table's THEAD
+  function tagCellsFromHeader(tr){
+    try{
+      var table = tr.closest('table'); if (!table) return;
+      var ths = Array.from(table.querySelectorAll('thead th'));
+      Array.from(tr.children).forEach(function(td, idx){
+        var name = ths[idx] ? (ths[idx].textContent||"").trim() : "";
+        if (name) td.setAttribute('data-col', name);
+        // If numeric, store data-value for shading to use machine value
+        var num = parseFloat((td.textContent||"").replace(/[^0-9\.\-]+/g,''));
+        if (!Number.isNaN(num)) td.setAttribute('data-value', String(num));
+      });
+    }catch(e){}
+  }
+
+  // Shade last row of a given table id
+  function shadeLastRow(tableId){
+    try{
+      var tbl = document.getElementById(tableId);
+      if (!tbl) return;
+      var rows = tbl.querySelectorAll('tbody tr');
+      if (!rows || !rows.length) return;
+      var tr = rows[rows.length-1];
+      tagCellsFromHeader(tr);
+      try { if (typeof applyRowShading === 'function') applyRowShading(tr); } catch(e){}
+      try { if (typeof applyUiColumnVisibility === 'function') applyUiColumnVisibility(); } catch(e) {}
+    }catch(e){}
+  }
+  window._stsShadeLastRow = shadeLastRow;
+
+  // Wrap helpers: after append, tag & shade
+  function wrapAppender(fnName, tableArgIndex){
+    try{
+      var orig = window[fnName];
+      if (typeof orig !== 'function') return;
+      if (orig._stsWrapped) return;
+      window[fnName] = function(){
+        var res = orig.apply(this, arguments);
+        try {
+          var tid = arguments[tableArgIndex];
+          if (typeof tid === 'string') shadeLastRow(tid);
+        } catch(e){}
+        return res;
+      };
+      window[fnName]._stsWrapped = true;
+    }catch(e){}
+  }
+
+  // Known appenders in this build
+  wrapAppender('appendSummaryRowToTable', 0);
+  wrapAppender('appendStatRowToTable', 0);
+  wrapAppender('appendStatHourRowToTable', 0);
+  wrapAppender('appendSignificantRow', 0);
+
+  // Also post-process any existing rows in those tables on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function(){
+    ['autoSummaryTable','summary5Table','summary15Table','summary60Table',
+     'statAnalysisTable','statAnalysisHourTable','significant5mTable','doseReviewsTable'
+    ].forEach(function(id){
+      var tbl = document.getElementById(id);
+      if (!tbl) return;
+      Array.from(tbl.querySelectorAll('tbody tr')).forEach(function(tr){
+        tagCellsFromHeader(tr);
+        try { if (typeof applyRowShading === 'function') applyRowShading(tr); } catch(e){}
+      });
+    });
+  });
+
+  // ===== Auto Slider C / D =====
+  // UI: add minimal modals if missing
+  function ensureModal(id, title){
+    var modal = document.getElementById(id);
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = id;
+    Object.assign(modal.style, {display:'none', position:'fixed', top:'8%', left:'50%', transform:'translateX(-50%)',
+      background:'#fff', color:'#000', padding:'16px', border:'2px solid #007aff', borderRadius:'8px',
+      boxShadow:'0 4px 8px rgba(0,0,0,0.2)', zIndex:'10003', maxHeight:'80%', overflow:'auto', minWidth:'72%'});
+    modal.innerHTML = ''
+      + '<div class="as-toolbar">'
+      +   '<button onclick="window._stsExportC()">Export CSV</button>'
+      +   '<button onclick="window._stsClearC()">Clear</button>'
+      +   '<button onclick="document.getElementById(\''+id+'\').style.display=\'none\'">Close</button>'
+      + '</div>'
+      + '<h3 style="margin:6px 0;">'+title+'</h3>'
+      + '<table id="'+id.replace('Modal','Table')+'">'
+      +   '<thead><tr><th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th><th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th></tr></thead>'
+      +   '<tbody></tbody>'
+      + '</table>';
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  // Snapshot core sums from main table
+  function _snap(){
+    var rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
+    return rows.map(function(tr){
+      var ts = +(tr.getAttribute('data-ts')||0);
+      function get(field){
+        var td = tr.querySelector('td[data-field="'+field+'Sum"]');
+        if(!td) return 0;
+        var v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
+        return Number.isFinite(v) ? v : 0;
+      }
+      return {_ts:ts,
+        rush:get('rush'), mood:get('mood'), social:get('social'), energy:get('energy'),
+        focus:get('focus'), anxiety:get('anxiety'), impair:get('impair')};
+    }).filter(function(o){ return o._ts>0; });
+  }
+
+  // Compute parity composites (real Score/Max/Min + Weighted + 5Max)
+  function _composites(M){
+    var score = (M.rush+M.mood+M.social+M.energy+M.focus) - (M.anxiety+M.impair);
+    var max   = (M.rush+M.mood+M.social+M.energy+M.focus);
+    var min   = (M.anxiety+M.impair);
+    var weighted = (typeof computeWeighted==='function') ? computeWeighted(M) : 0;
+    var fiveMax  = (typeof computeFiveMax==='function') ? computeFiveMax(M) : ((score/5)+5);
+    return {score:+score, max:+max, min:+min, weighted:+(+weighted), fiveMax:+(+fiveMax)};
+  }
+
+  function _fmt2(x){ var n=Number(x); return Number.isFinite(n)? n.toFixed(2):""; }
+
+  function _appendTo(id, ms, means, comp){
+    var tb = document.querySelector('#'+id+' tbody'); if (!tb) return;
+    var tr = document.createElement('tr');
+    function td(col, val){
+      var c = document.createElement('td'); c.textContent = val; c.setAttribute('data-col', col);
+      var num = parseFloat(val); if (!Number.isNaN(num)) c.setAttribute('data-value', String(num));
+      return c;
+    }
+    tr.appendChild(td('Time', tsLabel(ms)));
+    ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'].forEach(function(col){
+      var lc = col.toLowerCase(); tr.appendChild(td(col, _fmt2(means[lc])));
+    });
+    tr.appendChild(td('Score', _fmt2(comp.score)));
+    tr.appendChild(td('Max', _fmt2(comp.max)));
+    tr.appendChild(td('Min', _fmt2(comp.min)));
+    tr.appendChild(td('Weighted', _fmt2(comp.weighted)));
+    tr.appendChild(td('5Max', _fmt2(comp.fiveMax)));
+    try { if (typeof applyRowShading==='function') applyRowShading(tr); } catch(e){}
+    try { if (typeof applyUiColumnVisibility==='function') applyUiColumnVisibility(); } catch(e){}
+    tb.appendChild(tr);
+  }
+
+  // ===== Auto Slider C =====
+  (function(){
+    var LS_KEY = 'autoSliderC_rows';
+    function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch(e){ return []; } }
+    function save(rows){ try{ localStorage.setItem(LS_KEY, JSON.stringify(rows)); }catch(e){} }
+
+    window.openAutoSliderC = function(){
+      ensureModal('autoSliderCModal','Auto Slider C (windowRows mean)');
+      var rows = load();
+      var tb = document.querySelector('#autoSliderCTable tbody'); if (tb) { tb.innerHTML=''; rows.forEach(function(r){ _appendTo('autoSliderCTable', r.ms, r.means, r.comp); }); }
+      document.getElementById('autoSliderCModal').style.display='block';
+    };
+
+    function computeAtTail(){
+      var snap = _snap(); if (!snap.length) return null;
+      var N = (window.CONFIG && CONFIG.popups && CONFIG.popups.autoSliderC && +CONFIG.popups.autoSliderC.windowRows) || 5;
+      var start = Math.max(0, snap.length - N);
+      var cnt = snap.length - start;
+      var sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+      for (var j=start; j<snap.length; j++){
+        var r = snap[j];
+        sums.rush+=r.rush; sums.mood+=r.mood; sums.social+=r.social; sums.energy+=r.energy;
+        sums.focus+=r.focus; sums.anxiety+=r.anxiety; sums.impair+=r.impair;
+      }
+      var means = {rush:sums.rush/cnt, mood:sums.mood/cnt, social:sums.social/cnt, energy:sums.energy/cnt,
+                   focus:sums.focus/cnt, anxiety:sums.anxiety/cnt, impair:sums.impair/cnt};
+      return { ms: snap[snap.length-1]._ts, means: means, comp: _composites(means), n: cnt };
+    }
+
+    // Hook addEntry to emit C row when Auto is ON (parity with B behaviour)
+    try{
+      var _origAdd = window.addEntry;
+      if (typeof _origAdd === 'function') {
+        window.addEntry = function(){
+          var res = _origAdd.apply(this, arguments);
+          try {
+            if (window.autoSummaryActive){
+              var row = computeAtTail();
+              if (row){
+                var rows = load(); rows.push(row); save(rows);
+                ensureModal('autoSliderCModal','Auto Slider C (windowRows mean)');
+                _appendTo('autoSliderCTable', row.ms, row.means, row.comp);
+              }
+            }
+          } catch(e){}
+          return res;
+        };
+      }
+    }catch(e){}
+
+    window._stsExportC = function(){
+      var rows = load();
+      var header = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max","N"];
+      var lines = [header.join(",")];
+      rows.forEach(function(r){
+        lines.push([tsLabel(r.ms), r.means.rush, r.means.mood, r.means.social, r.means.energy, r.means.focus, r.means.anxiety, r.means.impair,
+                    r.comp.score, r.comp.max, r.comp.min, r.comp.weighted, r.comp.fiveMax, r.n]
+                   .map(function(x){ var s=String(Number.isFinite(+x)?(+x).toFixed(2):x); return '"'+s.replace(/"/g,'""')+'"'; }).join(","));
+      });
+      var blob = new Blob([lines.join("\n")], {type:"text/csv"});
+      var url = URL.createObjectURL(blob), a=document.createElement('a');
+      a.href=url; a.download = "auto_slider_C.csv"; a.click(); URL.revokeObjectURL(url);
+    };
+    window._stsClearC = function(){
+      save([]);
+      var tb = document.querySelector('#autoSliderCTable tbody'); if (tb) tb.innerHTML='';
+    };
+  })();
+
+  // ===== Auto Slider D =====
+  (function(){
+    var LS_KEY = 'autoSliderD_rows';
+    function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch(e){ return []; } }
+    function save(rows){ try{ localStorage.setItem(LS_KEY, JSON.stringify(rows)); }catch(e){} }
+
+    window.openAutoSliderD = function(){
+      ensureModal('autoSliderDModal','Auto Slider D (last N rows mean; real Score/Max/Min)');
+      var rows = load();
+      var tb = document.querySelector('#autoSliderDTable tbody'); if (tb) { tb.innerHTML=''; rows.forEach(function(r){ _appendTo('autoSliderDTable', r.ms, r.means, r.comp); }); }
+      document.getElementById('autoSliderDModal').style.display='block';
+    };
+
+    function computeAtTail(){
+      var snap = _snap(); if (!snap.length) return null;
+      var N = (window.CONFIG && CONFIG.popups && CONFIG.popups.autoSliderD && +CONFIG.popups.autoSliderD.windowRows) || 2;
+      var start = Math.max(0, snap.length - N);
+      var cnt = snap.length - start;
+      var sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
+      for (var j=start; j<snap.length; j++){
+        var r = snap[j];
+        sums.rush+=r.rush; sums.mood+=r.mood; sums.social+=r.social; sums.energy+=r.energy;
+        sums.focus+=r.focus; sums.anxiety+=r.anxiety; sums.impair+=r.impair;
+      }
+      var means = {rush:sums.rush/cnt, mood:sums.mood/cnt, social:sums.social/cnt, energy:sums.energy/cnt,
+                   focus:sums.focus/cnt, anxiety:sums.anxiety/cnt, impair:sums.impair/cnt};
+      return { ms: snap[snap.length-1]._ts, means: means, comp: _composites(means), n: cnt };
+    }
+
+    // Emit on 30 s aligned cadence when Auto is ON
+    var timer = null;
+    function kick(){
+      try{
+        var row = computeAtTail();
+        if (row){
+          var rows = load(); rows.push(row); save(rows);
+          ensureModal('autoSliderDModal','Auto Slider D (last N rows mean; real Score/Max/Min)');
+          _appendTo('autoSliderDTable', row.ms, row.means, row.comp);
+        }
+      }catch(e){}
+    }
+    function start(){
+      if (timer) return;
+      var interval = (window.CONFIG && CONFIG.popups && CONFIG.popups.autoSliderD && +CONFIG.popups.autoSliderD.intervalMs) || 30000;
+      // align on interval
+      var now = Date.now();
+      var delay = interval - (now % interval);
+      timer = setTimeout(function t(){ kick(); timer = setInterval(kick, interval); }, delay);
+    }
+    function stop(){
+      if (timer && typeof timer==='number'){ clearTimeout(timer); }
+      if (timer && typeof timer==='object'){ clearInterval(timer); }
+      timer = null;
+    }
+
+    // Track autoSummaryActive
+    var last = !!window.autoSummaryActive;
+    setInterval(function(){
+      var cur = !!window.autoSummaryActive;
+      if (cur !== last){
+        if (cur) start(); else stop();
+        last = cur;
+      }
+    }, 1000);
+
+    window._stsExportD = function(){
+      var rows = load();
+      var header = ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max","N"];
+      var lines = [header.join(",")];
+      rows.forEach(function(r){
+        lines.push([tsLabel(r.ms), r.means.rush, r.means.mood, r.means.social, r.means.energy, r.means.focus, r.means.anxiety, r.means.impair,
+                    r.comp.score, r.comp.max, r.comp.min, r.comp.weighted, r.comp.fiveMax, r.n]
+                   .map(function(x){ var s=String(Number.isFinite(+x)?(+x).toFixed(2):x); return '"'+s.replace(/"/g,'""')+'"'; }).join(","));
+      });
+      var blob = new Blob([lines.join("\n")], {type:"text/csv"});
+      var url = URL.createObjectURL(blob), a=document.createElement('a');
+      a.href=url; a.download = "auto_slider_D.csv"; a.click(); URL.revokeObjectURL(url);
+    };
+    window._stsClearD = function(){
+      save([]);
+      var tb = document.querySelector('#autoSliderDTable tbody'); if (tb) tb.innerHTML='';
+    };
+  })();
+
+  // Public for potential future hooks
+  window._stsTagCellsFromHeader = tagCellsFromHeader;
+
+})();
+</script>
+<!-- === /STS inject === -->
