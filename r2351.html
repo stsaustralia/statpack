@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.18.2 r2356</title>
+<title>statpack v1.18 r2352</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -547,7 +547,6 @@ function computeWeighted(obj){
 
 <div class="summary-controls">
 <button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
-<button id="unlockedModeBtn" type="button" title="Open Unlocked Mode">Unlocked Mode</button>
 <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
 <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
 <button id="slidingAvgBtn" onclick="openSlidingAverage()">Sliding Average</button>
@@ -882,7 +881,7 @@ labels: {
       degree:[5,4,3,2,1,0],
       other: [5,4,3,2,1,0]
     },
-    rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
+    rapidValues: [6,5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
@@ -7256,75 +7255,16 @@ document.addEventListener('click', function(ev){
   function openModal(){ ensureModal(); document.getElementById(MODAL_ID).style.display='block'; setStatus('Ready.'); }
   function closeModal(){ const el=document.getElementById(MODAL_ID); if (el) el.style.display='none'; }
 
-  function buildMetricRows() {
-    const host = document.getElementById('umMetrics');
-    if (!host) return;
-    host.innerHTML = '';
-
-    // Container: vertical stack of metric sections (like Rush Mode)
-    host.style.display = 'flex';
-    host.style.flexDirection = 'column';
-    host.style.gap = '10px';
-
-    for (const m of METRICS) {
-      // Section wrapper
-      const section = document.createElement('div');
-      section.style.display = 'flex';
-      section.style.flexDirection = 'column';
-      section.style.padding = '8px 10px';
-      section.style.border = '1px solid #eee';
-      section.style.borderRadius = '8px';
-      section.style.background = '#fff';
-
-      // Metric label
-      const label = document.createElement('div');
-      label.textContent = m.label;
-      label.style.fontWeight = '600';
-      label.style.marginBottom = '6px';
-      section.appendChild(label);
-
-      // Column of numeric buttons
-      const col = document.createElement('div');
-      col.style.display = 'flex';
-      col.style.flexDirection = 'column';
-      col.style.gap = '6px';
-      section.appendChild(col);
-
-      // Build buttons in required order; render null as a divider/spacer
-      VALUES.forEach((v) => {
-        if (v === null) {
-          const divider = document.createElement('div');
-          divider.style.height = '6px';
-          divider.style.borderTop = '1px dashed #ddd';
-          divider.style.margin = '2px 0';
-          col.appendChild(divider);
-          return;
-        }
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.dataset.field = m.field;
-        b.dataset.val = String(v);
-        b.textContent = String(v); // numbers visible, as requested
-        // Button visuals to match Rush Mode’s stacked style
-        b.style.display = 'block';
-        b.style.width = '100%';
-        b.style.textAlign = 'center';
-        b.style.padding = '8px 10px';
-        b.style.minHeight = '34px';
-        b.style.cursor = 'pointer';
-        b.style.border = '1px solid #ddd';
-        b.style.borderRadius = '8px';
-        b.style.background = '#fafafa';
-        b.style.userSelect = 'none';
-        b.style.fontWeight = '500';
-        b.addEventListener('click', () => onValueClick(b, m.field, v));
-        col.appendChild(b);
-      });
-
-      host.appendChild(section);
-    }
-  }
-const b=document.createElement('button');
+  function buildMetricRows(){
+    const host = document.getElementById('umMetrics'); if (!host) return; host.innerHTML='';
+    for (const m of METRICS){
+      const row = document.createElement('div');
+      row.style.display='grid'; row.style.gridTemplateColumns='160px repeat(17, minmax(0, 1fr))';
+      row.style.alignItems='center'; row.style.gap='6px'; row.style.marginBottom='6px';
+      const label = document.createElement('div'); label.textContent=m.label; label.style.fontWeight='600'; row.appendChild(label);
+      VALUES.forEach(v=>{
+        if (v===null){ const spacer=document.createElement('div'); spacer.style.width='100%'; spacer.style.height='32px'; row.appendChild(spacer); return; }
+        const b=document.createElement('button');
         b.type='button'; b.dataset.field=m.field; b.dataset.val=String(v); b.textContent=String(v);
         b.style.padding='6px 0'; b.style.minHeight='32px'; b.style.cursor='pointer';
         b.style.border='1px solid #ddd'; b.style.borderRadius='6px'; b.style.background='#fafafa'; b.style.userSelect='none';
@@ -7439,245 +7379,6 @@ const b=document.createElement('button');
 })();
 </script>
 
-
-<!-- BEGIN: ChatGPT patch 2025/10/21 05:01:46 -->
-<script>
-(function(){{"use strict";
-  // ===== A) Backfill: canonical implementation & safe handler =====
-  function alignToBoundary(ms, stepMin){{
-    const d = new Date(ms);
-    d.setSeconds(0,0);
-    if (stepMin===60) {{
-      d.setMinutes(0,0,0);
-    }} else if (stepMin===15 || stepMin===5) {{
-      const m = d.getMinutes();
-      d.setMinutes(m - (m % stepMin), 0, 0);
-    }}
-    return d.getTime();
-  }}
-  function getEarliestSnapshotMs(){{
-    try {{
-      const rows = document.querySelectorAll('#logTable tbody tr');
-      if (!rows.length) return null;
-      // assume first column contains a time label we can parse; fall back to row dataset.timestamp if present
-      for (const tr of rows) {{
-        let t = null;
-        if (tr.dataset && tr.dataset.timestamp) {{
-          const v = Number(tr.dataset.timestamp);
-          if (!Number.isNaN(v) && v>0) return v;
-        }}
-        const td0 = tr.querySelector('td');
-        if (td0) {{
-          const txt = td0.textContent.trim();
-          // Try parse HH:MM prefixed label
-          const m = txt.match(/(\d{{1,2}}):(\d{{2}})/);
-          if (m) {{
-            const d = new Date();
-            d.setSeconds(0,0);
-            d.setMinutes(parseInt(m[2],10));
-            d.setHours(parseInt(m[1],10));
-            t = d.getTime();
-          }}
-        }}
-        if (t) return t;
-      }}
-      return Date.now();
-    }} catch(e) {{
-      console.warn('[Backfill] getEarliestSnapshotMs failed:', e);
-      return Date.now();
-    }}
-  }}
-  function formatMinuteLabel(d){{
-    // Keep existing label convention "HH:MM Average"
-    const h = String(d.getHours()).padStart(2,'0');
-    const m = String(d.getMinutes()).padStart(2,'0');
-    return h + ':' + m + ' Average';
-  }}
-  function hasRowWithLabel(tableId,label){{
-    const table = document.getElementById(tableId);
-    if (!table) return false;
-    const firstCol = table.querySelectorAll('tbody tr td:first-child');
-    for (const td of firstCol) {{
-      const t = (td.textContent||'').trim();
-      if (t.startsWith(label)) return true;
-    }}
-    return false;
-  }}
-  function snapshotFromMainTable(){{
-    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
-    return rows.map(tr => {{
-      const obj = {{ }};
-      obj.ts = (tr.dataset && tr.dataset.timestamp) ? Number(tr.dataset.timestamp) : Date.now();
-      const fields = ['RushSum','MoodSum','SocialSum','EnergySum','FocusSum','AnxietySum','ImpairSum'];
-      for (const f of fields){{
-        const td = tr.querySelector(`td[data-field="{{}}" ]`.replace("{{}}", f));
-        let v = null;
-        if (td) {{
-          if (td.hasAttribute('data-value')) {{
-            v = Number(td.getAttribute('data-value'));
-          }} else {{
-            v = Number((td.textContent||'').replace(/[^0-9.+-]/g,''));
-          }}
-        }}
-        obj[f] = Number.isFinite(v) ? v : 0;
-      }}
-      return obj;
-    }});
-  }}
-  function computeMeansForWindow(startMs, endMs){{
-    const snap = snapshotFromMainTable();
-    const win = snap.filter(r => r.ts >= startMs && r.ts < endMs);
-    if (!win.length) return null;
-    const acc = {{RushSum:0,MoodSum:0,SocialSum:0,EnergySum:0,FocusSum:0,AnxietySum:0,ImpairSum:0}};
-    for (const r of win){{
-      acc.RushSum += r.RushSum;
-      acc.MoodSum += r.MoodSum;
-      acc.SocialSum += r.SocialSum;
-      acc.EnergySum += r.EnergySum;
-      acc.FocusSum += r.FocusSum;
-      acc.AnxietySum += r.AnxietySum;
-      acc.ImpairSum += r.ImpairSum;
-    }}
-    const n = win.length;
-    for (const k in acc) acc[k] = acc[k]/n;
-    return acc;
-  }}
-  function computeRollingMeans(endMs, minutes){{
-    const startMs = endMs - minutes*60*1000;
-    return computeMeansForWindow(startMs, endMs);
-  }}
-  function computeCompositeFromMeans(M){{
-    if (!M) return null;
-    const positives = [M.RushSum,M.MoodSum,M.SocialSum,M.EnergySum,M.FocusSum];
-    const negatives = [M.AnxietySum,M.ImpairSum];
-    const score = positives.reduce((a,b)=>a+b,0) - negatives.reduce((a,b)=>a+b,0);
-    const maxPos = Math.max.apply(null, positives);
-    const minPos = Math.min.apply(null, positives);
-    return {{ Score: score, Max: maxPos, Min: minPos }};
-  }}
-  function appendSummaryRowToTable(tableId, boundary, M, C, opts){{
-    const table = document.getElementById(tableId);
-    if (!table) return;
-    const tbody = table.tBodies[0] || table.appendChild(document.createElement('tbody'));
-    const tr = document.createElement('tr');
-    const label = formatMinuteLabel(boundary) + (opts && opts.labelSuffix ? opts.labelSuffix : '');
-    const cells = [
-      label,
-      M.RushSum, M.MoodSum, M.SocialSum, M.EnergySum, M.FocusSum, M.AnxietySum, M.ImpairSum,
-      C ? C.Score : '', C ? C.Max : '', C ? C.Min : ''
-    ];
-    for (const v of cells){{
-      const td = document.createElement('td');
-      td.textContent = (typeof v === 'number' && Number.isFinite(v)) ? String(v) : String(v||'');
-      tr.appendChild(td);
-    }}
-    if (opts && opts.bold) tr.style.fontWeight = '600';
-    tbody.appendChild(tr);
-  }}
-  function backfillWindow(stepMin, tableId){{
-    const startMs0 = getEarliestSnapshotMs();
-    if (startMs0==null) return 0;
-    const nowMs = Date.now();
-    const stepMs = stepMin*60*1000;
-    let t = alignToBoundary(startMs0, stepMin);
-    let added = 0;
-    while (t <= nowMs){{
-      const boundary = new Date(t);
-      const endMs   = boundary.getTime() + 60*1000;
-      const M = computeRollingMeans(endMs, stepMin);
-      const C = M ? computeCompositeFromMeans(M) : null;
-      const label = formatMinuteLabel(boundary);
-      if (M && !hasRowWithLabel(tableId, label)){{
-        appendSummaryRowToTable(tableId, boundary, M, C, {{bold:false, labelSuffix:''}});
-        added++;
-      }}
-      t += stepMs;
-    }}
-    return added;
-  }}
-  function backfillAll(){{
-    const added5  = backfillWindow(5,  'summary5Table');
-    const added15 = backfillWindow(15, 'summary15Table');
-    const added60 = backfillWindow(60, 'summary60Table');
-    console.log(`[Backfill] added rows — 5m:${{added5}}  15m:${{added15}}  60m:${{added60}}`);
-  }}
-  // Assign globally to override any legacy wrapper
-  window.backfillAll = backfillAll;
-  // Bind button safely
-  document.addEventListener('DOMContentLoaded', function(){{
-    const btn = document.getElementById('backfillBtn');
-    if (btn && !btn._bfBound) {{
-      btn.addEventListener('click', function(ev){{ if (window.backfillAll) window.backfillAll(ev); }} , {{ passive: true }});
-      btn._bfBound = true;
-    }}
-  }});
-
-  // ===== B) Unlocked Mode: ensure button beside Rush Mode =====
-  (function(){{
-    const BTN_ID = 'unlockedModeBtn';
-    function openUnlockedModal(){{
-      // Assume existing modal open function if present
-      if (typeof window.openUnlockedMode === 'function') return window.openUnlockedMode();
-      alert('Unlocked Mode modal: existing implementation not found; please wire openUnlockedMode().');
-    }}
-    function ensureToolbar(){{
-      const selectors = ['.summary-controls','#summaryControls','#toolbar','.toolbar','#topbar','#appToolbarHost','header','nav'];
-      for (const s of selectors) {{
-        const el = document.querySelector(s);
-        if (el) return el;
-      }}
-      const host = document.createElement('div');
-      host.id = 'appToolbarHost';
-      host.style.display = 'flex';
-      host.style.flexWrap = 'wrap';
-      host.style.gap = '8px';
-      host.style.padding = '8px';
-      host.style.borderBottom = '1px solid #ddd';
-      document.body.prepend(host);
-      return host;
-    }}
-    });
-      const bar = ensureToolbar();
-      const rushBtn = document.getElementById('rushModeBtn') || document.querySelector('button#rushMode') || null;
-      if (rushBtn && rushBtn.parentElement) {{
-        rushBtn.insertAdjacentElement('afterend', btn);
-      }} else {{
-        bar.appendChild(btn);
-      }}
-    }}
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectUnlocked);
-    else injectUnlocked();
-    const mo = new MutationObserver(injectUnlocked);
-    mo.observe(document.documentElement, {{ childList: true, subtree: true }});
-  }})();
-
-  // ===== C) Running Average: idempotent button placement beside Rush/Rapid =====
-  (function(){{
-    function ensureRunningAverageButton(){{
-      if (document.getElementById('runningAverageBtn')) return;
-      const btn = document.createElement('button');
-      btn.id = 'runningAverageBtn';
-      btn.type = 'button';
-      btn.textContent = 'Running Average';
-      btn.title = 'Open Running Average logger';
-      btn.addEventListener('click', function(){{
-        if (typeof window.openRunningAverage === 'function') window.openRunningAverage();
-        else alert('Running Average modal opener (openRunningAverage) not found.');
-      }}, {{ passive: true }});
-      const ref = document.getElementById('rushModeBtn') || document.querySelector('button[onclick*="openRapidScores"]');
-      if (ref && ref.parentElement) {{
-        ref.insertAdjacentElement('afterend', btn);
-      }} else {{
-        const bar = document.querySelector('.summary-controls, #summaryControls, #toolbar, .toolbar, header, nav') || document.body;
-        bar.appendChild(btn);
-      }}
-    }}
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureRunningAverageButton);
-    else ensureRunningAverageButton();
-  }})();
-}})();
-</script>
-<!-- END: ChatGPT patch 2025/10/21 05:01:46 -->
 </body>
 <script>
 function openEmotionModal() {

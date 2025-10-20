@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.18.2 r2356</title>
+<title>statpack v1.18 r2345</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -547,7 +547,6 @@ function computeWeighted(obj){
 
 <div class="summary-controls">
 <button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
-<button id="unlockedModeBtn" type="button" title="Open Unlocked Mode">Unlocked Mode</button>
 <button id="summary15Btn" onclick="setSummaryWindowAndOpen(15)">Summary 15m</button>
 <button id="summary5Btn" onclick="setSummaryWindowAndOpen(5)">Summary 5m</button>
 <button id="slidingAvgBtn" onclick="openSlidingAverage()">Sliding Average</button>
@@ -882,7 +881,7 @@ labels: {
       degree:[5,4,3,2,1,0],
       other: [5,4,3,2,1,0]
     },
-    rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
+    rapidValues: [6,5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
@@ -7153,13 +7152,16 @@ document.addEventListener('click', function(ev){
   } catch(e) { console.warn('[UI] Canonicalisation failed:', e); }
 })();
 </script>
-<!-- Unlocked Mode Module (2025/10/21 15:50:00) -->
+<!-- Unlocked Mode Module (2025/10/21 15:15:00) -->
 <script>
 (() => {
   'use strict';
+
+  // ----- Config -----
   const MODAL_ID = 'unlockedModeModal';
   const BTN_ID = 'unlockedModeBtn';
   const TITLE = 'Unlocked Mode';
+  // 7 primary Sum metrics in order
   const METRICS = [
     { field: 'rushSum',    label: 'Rush Sum' },
     { field: 'moodSum',    label: 'Mood Sum' },
@@ -7169,19 +7171,30 @@ document.addEventListener('click', function(ev){
     { field: 'anxietySum', label: 'Anxiety Sum' },
     { field: 'impairSum',  label: 'Impair Sum' }
   ];
+
+  // Visible numeric buttons (with spacers = null)
   const VALUES = [6, 5, null, 4.5, 4, null, 3.5, 3, null, 2.5, 2, null, 1.5, 1, null, 0.5, 0];
+
+  // Fallback notes if we cannot scrape existing yellow note buttons
   const FALLBACK_NOTES = [
     'Correlate','Flag','Now','Then','Next','Last','Changes','Note','Context','Associate','Plan','Review',
     'Hindsight','Redose','Hit','Continue','Food','Drink','Sleep','LastRow','LastDose','LastHit','Single','Multiple',
     'DrugAdded','NothingAdded','UsingRemains','LeftRemains','MaybeUsable','LotsUsable','Weighed','Eyeballed','Guessed',
     'Estimate','Scales','HardToSee','LightRoom','DarkRoom','Less','More','Somewhat','Lots'
   ];
-  const selection = new Map();
+
+  // ----- State -----
+  const selection = new Map(); // field -> value
   const selectedNotes = new Set();
 
+  // ----- Toolbar targeting -----
   function ensureToolbar() {
     const selectors = ['.summary-controls', '#summaryControls', '#toolbar', '.toolbar', '#topbar', '#appToolbarHost'];
-    for (const sel of selectors) { const el = document.querySelector(sel); if (el) return el; }
+    for (const sel of selectors) {
+      const el = document.querySelector(sel);
+      if (el) return el;
+    }
+    // Fallback host
     let host = document.getElementById('appToolbarHost');
     if (!host) {
       host = document.createElement('div');
@@ -7205,18 +7218,25 @@ document.addEventListener('click', function(ev){
     btn.style.padding = '6px 10px';
     btn.style.cursor = 'pointer';
     btn.addEventListener('click', openModal);
-    const bar = ensureToolbar();
+    // Try to place next to Rush Mode button if present
     const rushBtn = document.getElementById('rushModeBtn') || document.querySelector('button#rushMode') || null;
-    if (rushBtn && rushBtn.parentElement === bar) rushBtn.insertAdjacentElement('afterend', btn);
-    else bar.appendChild(btn);
+    const bar = ensureToolbar();
+    if (rushBtn && rushBtn.parentElement === bar) {
+      rushBtn.insertAdjacentElement('afterend', btn);
+    } else {
+      bar.appendChild(btn);
+    }
   }
 
   function watchLateToolbar() {
     const mo = new MutationObserver(() => injectButton());
     mo.observe(document.documentElement, { childList: true, subtree: true });
-    const iv = setInterval(() => { if (document.getElementById(BTN_ID)) { mo.disconnect(); clearInterval(iv); } }, 500);
+    const iv = setInterval(() => {
+      if (document.getElementById(BTN_ID)) { mo.disconnect(); clearInterval(iv); }
+    }, 500);
   }
 
+  // ----- Modal -----
   function ensureModal() {
     if (document.getElementById(MODAL_ID)) return;
     const html = `
@@ -7250,434 +7270,248 @@ document.addEventListener('click', function(ev){
     document.getElementById('umCloseBtn').addEventListener('click', closeModal);
     document.getElementById('umSubmitBtn').addEventListener('click', submitEntry);
     document.getElementById('umResetBtn').addEventListener('click', resetAll);
-    buildMetricRows(); buildNotes();
+    buildMetricRows();
+    buildNotes();
   }
 
-  function openModal(){ ensureModal(); document.getElementById(MODAL_ID).style.display='block'; setStatus('Ready.'); }
-  function closeModal(){ const el=document.getElementById(MODAL_ID); if (el) el.style.display='none'; }
+  function openModal() {
+    ensureModal();
+    document.getElementById(MODAL_ID).style.display = 'block';
+    setStatus('Ready.');
+  }
+  function closeModal() {
+    const el = document.getElementById(MODAL_ID);
+    if (el) el.style.display = 'none';
+  }
 
+  // ----- Metrics UI -----
   function buildMetricRows() {
     const host = document.getElementById('umMetrics');
     if (!host) return;
     host.innerHTML = '';
-
-    // Container: vertical stack of metric sections (like Rush Mode)
-    host.style.display = 'flex';
-    host.style.flexDirection = 'column';
-    host.style.gap = '10px';
-
     for (const m of METRICS) {
-      // Section wrapper
-      const section = document.createElement('div');
-      section.style.display = 'flex';
-      section.style.flexDirection = 'column';
-      section.style.padding = '8px 10px';
-      section.style.border = '1px solid #eee';
-      section.style.borderRadius = '8px';
-      section.style.background = '#fff';
+      const row = document.createElement('div');
+      row.style.display = 'grid';
+      row.style.gridTemplateColumns = '160px repeat(17, minmax(0, 1fr))';
+      row.style.alignItems = 'center';
+      row.style.gap = '6px';
+      row.style.marginBottom = '6px';
 
-      // Metric label
       const label = document.createElement('div');
       label.textContent = m.label;
       label.style.fontWeight = '600';
-      label.style.marginBottom = '6px';
-      section.appendChild(label);
+      row.appendChild(label);
 
-      // Column of numeric buttons
-      const col = document.createElement('div');
-      col.style.display = 'flex';
-      col.style.flexDirection = 'column';
-      col.style.gap = '6px';
-      section.appendChild(col);
-
-      // Build buttons in required order; render null as a divider/spacer
-      VALUES.forEach((v) => {
+      VALUES.forEach((v, idx) => {
         if (v === null) {
-          const divider = document.createElement('div');
-          divider.style.height = '6px';
-          divider.style.borderTop = '1px dashed #ddd';
-          divider.style.margin = '2px 0';
-          col.appendChild(divider);
+          const spacer = document.createElement('div');
+          spacer.style.width = '100%';
+          spacer.style.height = '32px';
+          row.appendChild(spacer);
           return;
         }
         const b = document.createElement('button');
         b.type = 'button';
         b.dataset.field = m.field;
         b.dataset.val = String(v);
-        b.textContent = String(v); // numbers visible, as requested
-        // Button visuals to match Rush Mode’s stacked style
-        b.style.display = 'block';
-        b.style.width = '100%';
-        b.style.textAlign = 'center';
-        b.style.padding = '8px 10px';
-        b.style.minHeight = '34px';
+        b.textContent = String(v); // keep numbers visible
+        b.style.padding = '6px 0';
+        b.style.minHeight = '32px';
         b.style.cursor = 'pointer';
         b.style.border = '1px solid #ddd';
-        b.style.borderRadius = '8px';
+        b.style.borderRadius = '6px';
         b.style.background = '#fafafa';
         b.style.userSelect = 'none';
-        b.style.fontWeight = '500';
         b.addEventListener('click', () => onValueClick(b, m.field, v));
-        col.appendChild(b);
+        row.appendChild(b);
       });
 
-      host.appendChild(section);
-    }
-  }
-const b=document.createElement('button');
-        b.type='button'; b.dataset.field=m.field; b.dataset.val=String(v); b.textContent=String(v);
-        b.style.padding='6px 0'; b.style.minHeight='32px'; b.style.cursor='pointer';
-        b.style.border='1px solid #ddd'; b.style.borderRadius='6px'; b.style.background='#fafafa'; b.style.userSelect='none';
-        b.addEventListener('click', ()=>onValueClick(b,m.field,v)); row.appendChild(b);
-      });
       host.appendChild(row);
     }
   }
 
-  function onValueClick(btn, field, value){
+  function onValueClick(btn, field, value) {
+    // Mark selection per metric; only one value active per field
     selection.set(field, value);
+    // Reset buttons in this metric row
     const row = btn.parentElement;
-    row.querySelectorAll('button[data-field="'+field+'"]').forEach(b=>{ b.style.background='#fafafa'; b.style.borderColor='#ddd'; b.style.fontWeight='400'; });
-    btn.style.background='#e8f5ff'; btn.style.borderColor='#57a9ff'; btn.style.fontWeight='600';
-    setStatus(field+' = '+value);
+    row.querySelectorAll('button[data-field="'+field+'"]').forEach(b => {
+      b.style.background = '#fafafa';
+      b.style.borderColor = '#ddd';
+      b.style.fontWeight = '400';
+    });
+    // Activate this one
+    btn.style.background = '#e8f5ff';
+    btn.style.borderColor = '#57a9ff';
+    btn.style.fontWeight = '600';
+    setStatus(field + ' = ' + value);
   }
 
-  function buildNotes(){
-    const host=document.getElementById('umNotes'); if (!host) return; host.innerHTML='';
+  // ----- Notes UI -----
+  function buildNotes() {
+    const host = document.getElementById('umNotes');
+    if (!host) return;
+    host.innerHTML = '';
     const labels = scrapeExistingNotes() || FALLBACK_NOTES;
-    for (const lbl of labels){
-      const b=document.createElement('button'); b.type='button'; b.textContent=lbl; b.dataset.note=lbl;
-      b.style.padding='6px 8px'; b.style.minHeight='28px'; b.style.cursor='pointer';
-      b.style.border='1px solid #e6c200'; b.style.borderRadius='6px'; b.style.background='#ffef8a'; b.style.userSelect='none';
-      b.addEventListener('click',()=>{
-        if (selectedNotes.has(lbl)){ selectedNotes.delete(lbl); b.style.opacity='1'; b.style.outline='none'; }
-        else { selectedNotes.add(lbl); b.style.opacity='0.7'; b.style.outline='2px solid #caa800'; }
+    for (const lbl of labels) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = lbl;
+      b.dataset.note = lbl;
+      b.style.padding = '6px 8px';
+      b.style.minHeight = '28px';
+      b.style.cursor = 'pointer';
+      b.style.border = '1px solid #e6c200';
+      b.style.borderRadius = '6px';
+      b.style.background = '#ffef8a'; // yellow style
+      b.style.userSelect = 'none';
+      b.addEventListener('click', () => {
+        if (selectedNotes.has(lbl)) {
+          selectedNotes.delete(lbl);
+          b.style.opacity = '1';
+          b.style.outline = 'none';
+        } else {
+          selectedNotes.add(lbl);
+          b.style.opacity = '0.7';
+          b.style.outline = '2px solid #caa800';
+        }
       });
       host.appendChild(b);
     }
   }
 
-  function scrapeExistingNotes(){
+  function scrapeExistingNotes() {
+    // Try to detect existing "yellow note" buttons in the main UI
     const candidates = Array.from(document.querySelectorAll('button[data-note], .note-yellow, button.note, .yellow-note, [data-notelabel]'));
-    const labels=new Set(); for (const el of candidates){ const t=(el.getAttribute('data-note')||el.getAttribute('data-notelabel')||el.textContent||'').trim(); if (t) labels.add(t); }
+    const labels = new Set();
+    for (const el of candidates) {
+      const t = (el.getAttribute('data-note') || el.getAttribute('data-notelabel') || el.textContent || '').trim();
+      if (t) labels.add(t);
+    }
     return labels.size ? Array.from(labels) : null;
   }
 
-  function submitEntry(){
-    const payload={}; for (const m of METRICS){ if (selection.has(m.field)) payload[m.field]=selection.get(m.field); }
-    const notes=Array.from(selectedNotes); if (notes.length) payload.notes=notes;
-    let committed=false;
-    try{ if (typeof window.addEntry==='function'){ window.addEntry(payload,{source:'UnlockedMode'}); committed=true; } }catch(e){}
-    if (!committed){ try{ if (typeof window.addEntry==='function'){ window.addEntry(payload); committed=true; } }catch(e){} }
-    if (!committed){ try{
-      for (const [k,v] of Object.entries(payload)){ const input=document.querySelector(`[data-field="${k}"] input, [name="${k}"]`); if (input){ input.value=v; input.dispatchEvent(new Event('input',{bubbles:true})); } }
-      const addBtn=document.getElementById('addEntryBtn')||document.querySelector('button.add-entry'); if (addBtn){ addBtn.click(); committed=true; }
-    }catch(e){}}
-    if (!committed){ try{
-      const tbody=document.querySelector('#logTable tbody'); if (tbody){ const tr=document.createElement('tr'); const ts=Date.now(); tr.setAttribute('data-ts',String(ts));
-        const tc=document.createElement('td'); tc.textContent=new Date(ts).toISOString(); tr.appendChild(tc);
-        for (const m of METRICS){ const td=document.createElement('td'); td.setAttribute('data-field',m.field); const v=payload[m.field];
-          if (typeof v==='number'){ td.setAttribute('data-value',String(v)); td.textContent=String(v); } else { td.textContent=''; } tr.appendChild(td); }
-        const tdN=document.createElement('td'); tdN.textContent=(notes||[]).join(' '); tr.appendChild(tdN); tbody.appendChild(tr); committed=true; }
-    }catch(e){}}
-    if (committed){ setStatus('Entry added.'); resetAll(); } else { setStatus('Could not add entry.'); console.warn('UnlockedMode: commit failed', payload); }
+  // ----- Commit -----
+  function submitEntry() {
+    const payload = {};
+    for (const m of METRICS) {
+      if (selection.has(m.field)) payload[m.field] = selection.get(m.field);
+    }
+    const notes = Array.from(selectedNotes);
+    if (notes.length) payload.notes = notes;
+
+    // Try multiple integration strategies to use the app's normal pipeline.
+    let committed = false;
+    // 1) window.addEntry(payload, meta)
+    try {
+      if (typeof window.addEntry === 'function') {
+        window.addEntry(payload, { source: 'UnlockedMode' });
+        committed = true;
+      }
+    } catch (e) { /* continue */ }
+    // 2) window.addEntry(payload)
+    if (!committed) {
+      try {
+        if (typeof window.addEntry === 'function') {
+          window.addEntry(payload);
+          committed = true;
+        }
+      } catch (e) { /* continue */ }
+    }
+    // 3) Fill form fields by data-field and click Add button
+    if (!committed) {
+      try {
+        for (const [k, v] of Object.entries(payload)) {
+          const input = document.querySelector(`[data-field="${k}"] input, [name="${k}"]`);
+          if (input) { input.value = v; input.dispatchEvent(new Event('input', { bubbles: true })); }
+        }
+        const addBtn = document.getElementById('addEntryBtn') || document.querySelector('button.add-entry');
+        if (addBtn) { addBtn.click(); committed = true; }
+      } catch (e) { /* continue */ }
+    }
+    // 4) Append a synthetic row to #logTable as a last resort
+    if (!committed) {
+      try {
+        const tbody = document.querySelector('#logTable tbody');
+        if (tbody) {
+          const tr = document.createElement('tr');
+          const ts = Date.now();
+          tr.setAttribute('data-ts', String(ts));
+          // First cell timestamp if table has first col time
+          const timeCell = document.createElement('td');
+          timeCell.textContent = new Date(ts).toISOString();
+          tr.appendChild(timeCell);
+          // Create cells for metrics if columns exist; otherwise append generic cells
+          for (const m of METRICS) {
+            const td = document.createElement('td');
+            td.setAttribute('data-field', m.field);
+            const v = payload[m.field];
+            if (typeof v === 'number') {
+              td.setAttribute('data-value', String(v));
+              td.textContent = String(v);
+            } else {
+              td.textContent = '';
+            }
+            tr.appendChild(td);
+          }
+          const tdNotes = document.createElement('td');
+          tdNotes.textContent = notes.join(' ');
+          tr.appendChild(tdNotes);
+          tbody.appendChild(tr);
+          committed = true;
+        }
+      } catch (e) { /* continue */ }
+    }
+
+    if (committed) {
+      setStatus('Entry added.');
+      resetAll();
+    } else {
+      setStatus('Could not add entry via existing pipeline. Check console.');
+      console.warn('UnlockedMode: failed to commit payload', payload);
+    }
   }
 
-  function resetAll(){
-    selection.clear(); selectedNotes.clear();
-    document.querySelectorAll('#'+CSS.escape(MODAL_ID)+' button[data-field]').forEach(b=>{ b.style.background='#fafafa'; b.style.borderColor='#ddd'; b.style.fontWeight='400'; });
-    document.querySelectorAll('#umNotes button').forEach(b=>{ b.style.opacity='1'; b.style.outline='none'; });
+  function resetAll() {
+    selection.clear();
+    selectedNotes.clear();
+    // Reset metric buttons
+    document.querySelectorAll('#'+CSS.escape(MODAL_ID)+' button[data-field]').forEach(b => {
+      b.style.background = '#fafafa';
+      b.style.borderColor = '#ddd';
+      b.style.fontWeight = '400';
+    });
+    // Reset notes buttons
+    document.querySelectorAll('#umNotes button').forEach(b => {
+      b.style.opacity = '1';
+      b.style.outline = 'none';
+    });
     setStatus('Reset.');
   }
 
-  function setStatus(msg){ const el=document.getElementById('umStatus'); if (el) el.textContent=msg; }
+  function setStatus(msg) {
+    const el = document.getElementById('umStatus');
+    if (el) el.textContent = msg;
+  }
 
-  function boot(){ ensureModal(); injectButton(); watchLateToolbar(); console.debug('UnlockedMode: booted'); }
+  // ----- Boot -----
+  function boot() {
+    ensureModal();
+    injectButton();
+    watchLateToolbar();
+    console.debug('UnlockedMode: booted');
+  }
+
   window.UnlockedMode = { open: openModal, submit: submitEntry, reset: resetAll };
-  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
-})();
-</script>
 
-<!-- Backfill Fix Module (2025/10/21 15:50:00) -->
-<script>
-(() => {
-  'use strict';
-
-  function canonicalBackfillAll(){
-    const helper = window.backfillWindow || (typeof backfillWindow==='function' ? backfillWindow : null);
-    if (!helper) { console.warn('[Backfill] backfillWindow not found'); return 0; }
-    const plan = [[5,'summary5Table'], [15,'summary15Table'], [60,'summary60Table']];
-    let total = 0;
-    for (const [mins, tableId] of plan){
-      try { const n = helper(mins, tableId) || 0; total += n; }
-      catch (e){ console.error('[Backfill] error on', mins, tableId, e); }
-    }
-    console.log('[Backfill] added rows total:', total);
-    return total;
-  }
-
-  // Force our implementation
-  Object.defineProperty(window, 'backfillAll', { configurable: true, writable: true, value: canonicalBackfillAll });
-
-  function cloneAndRebindBackfill(){
-    let btn = document.getElementById('backfillBtn') || document.querySelector('[data-action="backfill"], button#backfill');
-    if (!btn) return;
-    // Drop existing listeners by cloning
-    const newBtn = btn.cloneNode(true);
-    btn.replaceWith(newBtn);
-    newBtn.addEventListener('click', (ev)=>{
-      try { ev && ev.preventDefault(); window.backfillAll(); }
-      catch(e){ console.error('[Backfill] run failed', e); }
-    }, { capture: true }); // capture to pre-empt bubbling handlers
-  }
-
-  if (document.readyState==='loading') {
-    document.addEventListener('DOMContentLoaded', cloneAndRebindBackfill);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
   } else {
-    cloneAndRebindBackfill();
+    boot();
   }
 })();
 </script>
 
-
-<!-- BEGIN: ChatGPT patch 2025/10/21 05:01:46 -->
-<script>
-(function(){{"use strict";
-  // ===== A) Backfill: canonical implementation & safe handler =====
-  function alignToBoundary(ms, stepMin){{
-    const d = new Date(ms);
-    d.setSeconds(0,0);
-    if (stepMin===60) {{
-      d.setMinutes(0,0,0);
-    }} else if (stepMin===15 || stepMin===5) {{
-      const m = d.getMinutes();
-      d.setMinutes(m - (m % stepMin), 0, 0);
-    }}
-    return d.getTime();
-  }}
-  function getEarliestSnapshotMs(){{
-    try {{
-      const rows = document.querySelectorAll('#logTable tbody tr');
-      if (!rows.length) return null;
-      // assume first column contains a time label we can parse; fall back to row dataset.timestamp if present
-      for (const tr of rows) {{
-        let t = null;
-        if (tr.dataset && tr.dataset.timestamp) {{
-          const v = Number(tr.dataset.timestamp);
-          if (!Number.isNaN(v) && v>0) return v;
-        }}
-        const td0 = tr.querySelector('td');
-        if (td0) {{
-          const txt = td0.textContent.trim();
-          // Try parse HH:MM prefixed label
-          const m = txt.match(/(\d{{1,2}}):(\d{{2}})/);
-          if (m) {{
-            const d = new Date();
-            d.setSeconds(0,0);
-            d.setMinutes(parseInt(m[2],10));
-            d.setHours(parseInt(m[1],10));
-            t = d.getTime();
-          }}
-        }}
-        if (t) return t;
-      }}
-      return Date.now();
-    }} catch(e) {{
-      console.warn('[Backfill] getEarliestSnapshotMs failed:', e);
-      return Date.now();
-    }}
-  }}
-  function formatMinuteLabel(d){{
-    // Keep existing label convention "HH:MM Average"
-    const h = String(d.getHours()).padStart(2,'0');
-    const m = String(d.getMinutes()).padStart(2,'0');
-    return h + ':' + m + ' Average';
-  }}
-  function hasRowWithLabel(tableId,label){{
-    const table = document.getElementById(tableId);
-    if (!table) return false;
-    const firstCol = table.querySelectorAll('tbody tr td:first-child');
-    for (const td of firstCol) {{
-      const t = (td.textContent||'').trim();
-      if (t.startsWith(label)) return true;
-    }}
-    return false;
-  }}
-  function snapshotFromMainTable(){{
-    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
-    return rows.map(tr => {{
-      const obj = {{ }};
-      obj.ts = (tr.dataset && tr.dataset.timestamp) ? Number(tr.dataset.timestamp) : Date.now();
-      const fields = ['RushSum','MoodSum','SocialSum','EnergySum','FocusSum','AnxietySum','ImpairSum'];
-      for (const f of fields){{
-        const td = tr.querySelector(`td[data-field="{{}}" ]`.replace("{{}}", f));
-        let v = null;
-        if (td) {{
-          if (td.hasAttribute('data-value')) {{
-            v = Number(td.getAttribute('data-value'));
-          }} else {{
-            v = Number((td.textContent||'').replace(/[^0-9.+-]/g,''));
-          }}
-        }}
-        obj[f] = Number.isFinite(v) ? v : 0;
-      }}
-      return obj;
-    }});
-  }}
-  function computeMeansForWindow(startMs, endMs){{
-    const snap = snapshotFromMainTable();
-    const win = snap.filter(r => r.ts >= startMs && r.ts < endMs);
-    if (!win.length) return null;
-    const acc = {{RushSum:0,MoodSum:0,SocialSum:0,EnergySum:0,FocusSum:0,AnxietySum:0,ImpairSum:0}};
-    for (const r of win){{
-      acc.RushSum += r.RushSum;
-      acc.MoodSum += r.MoodSum;
-      acc.SocialSum += r.SocialSum;
-      acc.EnergySum += r.EnergySum;
-      acc.FocusSum += r.FocusSum;
-      acc.AnxietySum += r.AnxietySum;
-      acc.ImpairSum += r.ImpairSum;
-    }}
-    const n = win.length;
-    for (const k in acc) acc[k] = acc[k]/n;
-    return acc;
-  }}
-  function computeRollingMeans(endMs, minutes){{
-    const startMs = endMs - minutes*60*1000;
-    return computeMeansForWindow(startMs, endMs);
-  }}
-  function computeCompositeFromMeans(M){{
-    if (!M) return null;
-    const positives = [M.RushSum,M.MoodSum,M.SocialSum,M.EnergySum,M.FocusSum];
-    const negatives = [M.AnxietySum,M.ImpairSum];
-    const score = positives.reduce((a,b)=>a+b,0) - negatives.reduce((a,b)=>a+b,0);
-    const maxPos = Math.max.apply(null, positives);
-    const minPos = Math.min.apply(null, positives);
-    return {{ Score: score, Max: maxPos, Min: minPos }};
-  }}
-  function appendSummaryRowToTable(tableId, boundary, M, C, opts){{
-    const table = document.getElementById(tableId);
-    if (!table) return;
-    const tbody = table.tBodies[0] || table.appendChild(document.createElement('tbody'));
-    const tr = document.createElement('tr');
-    const label = formatMinuteLabel(boundary) + (opts && opts.labelSuffix ? opts.labelSuffix : '');
-    const cells = [
-      label,
-      M.RushSum, M.MoodSum, M.SocialSum, M.EnergySum, M.FocusSum, M.AnxietySum, M.ImpairSum,
-      C ? C.Score : '', C ? C.Max : '', C ? C.Min : ''
-    ];
-    for (const v of cells){{
-      const td = document.createElement('td');
-      td.textContent = (typeof v === 'number' && Number.isFinite(v)) ? String(v) : String(v||'');
-      tr.appendChild(td);
-    }}
-    if (opts && opts.bold) tr.style.fontWeight = '600';
-    tbody.appendChild(tr);
-  }}
-  function backfillWindow(stepMin, tableId){{
-    const startMs0 = getEarliestSnapshotMs();
-    if (startMs0==null) return 0;
-    const nowMs = Date.now();
-    const stepMs = stepMin*60*1000;
-    let t = alignToBoundary(startMs0, stepMin);
-    let added = 0;
-    while (t <= nowMs){{
-      const boundary = new Date(t);
-      const endMs   = boundary.getTime() + 60*1000;
-      const M = computeRollingMeans(endMs, stepMin);
-      const C = M ? computeCompositeFromMeans(M) : null;
-      const label = formatMinuteLabel(boundary);
-      if (M && !hasRowWithLabel(tableId, label)){{
-        appendSummaryRowToTable(tableId, boundary, M, C, {{bold:false, labelSuffix:''}});
-        added++;
-      }}
-      t += stepMs;
-    }}
-    return added;
-  }}
-  function backfillAll(){{
-    const added5  = backfillWindow(5,  'summary5Table');
-    const added15 = backfillWindow(15, 'summary15Table');
-    const added60 = backfillWindow(60, 'summary60Table');
-    console.log(`[Backfill] added rows — 5m:${{added5}}  15m:${{added15}}  60m:${{added60}}`);
-  }}
-  // Assign globally to override any legacy wrapper
-  window.backfillAll = backfillAll;
-  // Bind button safely
-  document.addEventListener('DOMContentLoaded', function(){{
-    const btn = document.getElementById('backfillBtn');
-    if (btn && !btn._bfBound) {{
-      btn.addEventListener('click', function(ev){{ if (window.backfillAll) window.backfillAll(ev); }} , {{ passive: true }});
-      btn._bfBound = true;
-    }}
-  }});
-
-  // ===== B) Unlocked Mode: ensure button beside Rush Mode =====
-  (function(){{
-    const BTN_ID = 'unlockedModeBtn';
-    function openUnlockedModal(){{
-      // Assume existing modal open function if present
-      if (typeof window.openUnlockedMode === 'function') return window.openUnlockedMode();
-      alert('Unlocked Mode modal: existing implementation not found; please wire openUnlockedMode().');
-    }}
-    function ensureToolbar(){{
-      const selectors = ['.summary-controls','#summaryControls','#toolbar','.toolbar','#topbar','#appToolbarHost','header','nav'];
-      for (const s of selectors) {{
-        const el = document.querySelector(s);
-        if (el) return el;
-      }}
-      const host = document.createElement('div');
-      host.id = 'appToolbarHost';
-      host.style.display = 'flex';
-      host.style.flexWrap = 'wrap';
-      host.style.gap = '8px';
-      host.style.padding = '8px';
-      host.style.borderBottom = '1px solid #ddd';
-      document.body.prepend(host);
-      return host;
-    }}
-    });
-      const bar = ensureToolbar();
-      const rushBtn = document.getElementById('rushModeBtn') || document.querySelector('button#rushMode') || null;
-      if (rushBtn && rushBtn.parentElement) {{
-        rushBtn.insertAdjacentElement('afterend', btn);
-      }} else {{
-        bar.appendChild(btn);
-      }}
-    }}
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectUnlocked);
-    else injectUnlocked();
-    const mo = new MutationObserver(injectUnlocked);
-    mo.observe(document.documentElement, {{ childList: true, subtree: true }});
-  }})();
-
-  // ===== C) Running Average: idempotent button placement beside Rush/Rapid =====
-  (function(){{
-    function ensureRunningAverageButton(){{
-      if (document.getElementById('runningAverageBtn')) return;
-      const btn = document.createElement('button');
-      btn.id = 'runningAverageBtn';
-      btn.type = 'button';
-      btn.textContent = 'Running Average';
-      btn.title = 'Open Running Average logger';
-      btn.addEventListener('click', function(){{
-        if (typeof window.openRunningAverage === 'function') window.openRunningAverage();
-        else alert('Running Average modal opener (openRunningAverage) not found.');
-      }}, {{ passive: true }});
-      const ref = document.getElementById('rushModeBtn') || document.querySelector('button[onclick*="openRapidScores"]');
-      if (ref && ref.parentElement) {{
-        ref.insertAdjacentElement('afterend', btn);
-      }} else {{
-        const bar = document.querySelector('.summary-controls, #summaryControls, #toolbar, .toolbar, header, nav') || document.body;
-        bar.appendChild(btn);
-      }}
-    }}
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureRunningAverageButton);
-    else ensureRunningAverageButton();
-  }})();
-}})();
-</script>
-<!-- END: ChatGPT patch 2025/10/21 05:01:46 -->
 </body>
 <script>
 function openEmotionModal() {
