@@ -103,8 +103,11 @@ CONFIG.popups = Object.assign({
         width: 140px;
         height: 30px;
  */
-        width: 142px;
-        height: 26px;
+/* 
+BOOKMARK
+ */
+        width: 140px;
+        height: 25px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -445,7 +448,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.17.0.5A20 r2331</title>
+<title>statpack v1.17.1 r2337</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -524,9 +527,12 @@ function computeWeighted(obj){
 
 <style id="rapid-scores-size-override">
   /* Scoped size overrides for Rapid Scores modal buttons only */
+/* 
+  BOOKMARK
+ */
   #rapidScoresModal .score-column button {
-    width: 162px;
-    height: 27px;
+    width: 145px;
+    height: 25px;
     font-size: 13px;
   }
 </style>
@@ -6257,6 +6263,268 @@ window.openAllRated10MinutesPopup = function(){
 <button id="rushModeBtn" onclick="openRushMode()" type="button">Rush Mode</button>
 
 <!-- Scoped button sizing for Rush Mode modal -->
+<!-- Unlocked Mode Modal (injected) -->
+<div id="unlockedModeModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#fff; color:#000; border:1px solid #888; border-radius:10px; z-index:99999; width: min(95vw, 1100px); box-shadow:0 10px 30px rgba(0,0,0,.25);">
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid #ddd;">
+    <div style="font-weight:700; font-size:18px;">Unlocked Mode</div>
+    <button aria-label="Close" onclick="closeUnlockedMode()">Close</button>
+  </div>
+  <div style="padding:10px;">
+    <div id="unlockedModeButtons" class="score-columns"></div>
+    <h4 style="margin:10px 0 6px 0;">Notes</h4>
+    <div id="unlockedNotesGrid" class="unlocked-notes-grid"></div>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button onclick="applyUnlockedMode()">Apply</button>
+      <button onclick="applyUnlockedModeAndAdd()">Apply & Add Entry</button>
+      <button onclick="applyUnlockedModeAndAddStay()">Apply, Add & Stay</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scoped button sizing for Unlocked Mode modal -->
+<!-- 
+BOOKMARK
+ -->
+<style id="unlocked-mode-size-override">
+  #unlockedModeModal .score-column button {
+    width: 145px; height: 25px; font-size: 13px; margin: 2px 0;
+  }
+  #unlockedModeModal .score-column .spacer {
+    visibility: hidden; pointer-events: none; width: 175px; height: 30px; margin: 2px 0;
+  }
+  #unlockedModeModal .score-column .selected-score {
+    outline: 2px solid #1e88e5;
+  }
+  #unlockedModeModal .unlocked-notes-grid { display:grid; grid-template-columns:repeat(10, minmax(0,1fr)); gap:6px; }
+  #unlockedModeModal .unlocked-note-btn.selected-note { outline:2px solid #333; }
+</style>
+
+<script>
+(function(){
+  'use strict';
+
+  const UNLOCKED_METRICS = ['rushSum','moodSum','socialSum','energySum','focusSum','anxietySum','impairSum'];
+  const UNLOCKED_TO_BASE = { rushSum:'rush', moodSum:'mood', socialSum:'social', energySum:'energy', focusSum:'focus', anxietySum:'anxiety', impairSum:'impair' };
+  const UNLOCKED_SCALE = [6,5,null,4.5,4,null,3.5,3,null,2.5,2,null,1.5,1,null,0.5,0];
+
+  // local state: single selection per metric + note set
+  const unlockedModeSelection = Object.create(null); // base metric -> value (number) or undefined
+  let unlockedModeNotes = new Set();
+
+  function getUnlockedLabel(metricBase, value){
+    try{
+      if (value==null || value==='') return '';
+      if (typeof RAPID_LABEL_OVERRIDES !== 'undefined' && RAPID_LABEL_OVERRIDES[metricBase] && RAPID_LABEL_OVERRIDES[metricBase][String(value)] != null)
+        return RAPID_LABEL_OVERRIDES[metricBase][String(value)];
+      if (typeof labelMappings !== 'undefined' && labelMappings[metricBase] && labelMappings[metricBase][String(value)] != null)
+        return labelMappings[metricBase][String(value)];
+    }catch(e){}
+    return '';
+  }
+
+  window.buildUnlockedModeButtons = function(){
+    try{
+      const container = document.getElementById('unlockedModeButtons');
+      if (!container) return;
+      container.innerHTML = '';
+      // build columns per metric
+      UNLOCKED_METRICS.forEach(sumKey=>{
+        const base = UNLOCKED_TO_BASE[sumKey];
+        const col = document.createElement('div');
+        col.className = 'score-column';
+        const title = document.createElement('div');
+        title.className = 'score-title';
+        title.textContent = (sumKey.replace('Sum','').toUpperCase()) + ' (Sum)';
+        col.appendChild(title);
+
+        UNLOCKED_SCALE.forEach(val=>{
+          if (val===null){
+            const sp = document.createElement('div');
+            sp.className = 'spacer';
+            col.appendChild(sp);
+            return;
+          }
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = (getUnlockedLabel(base, val) || String(val));
+          b.setAttribute('data-metric', base);
+          b.setAttribute('data-value', String(val));
+          if (unlockedModeSelection[base] === val) b.classList.add('selected-score');
+          b.onclick = ()=>{
+            // single-selection per metric
+            const metric = b.getAttribute('data-metric');
+            const value = parseFloat(b.getAttribute('data-value'));
+            // clear previous selection in column
+            const siblings = col.querySelectorAll('button[data-metric="'+metric+'"]');
+            siblings.forEach(x=>x.classList.remove('selected-score'));
+            unlockedModeSelection[metric] = value;
+            b.classList.add('selected-score');
+          };
+          col.appendChild(b);
+        });
+
+        container.appendChild(col);
+      });
+
+      // Build yellow notes grid
+      const grid = document.getElementById('unlockedNotesGrid');
+      if (grid){
+        grid.innerHTML = '';
+        const labels = (typeof CONFIG!=='undefined' && CONFIG.notes && CONFIG.notes.yellow) ? CONFIG.notes.yellow : [];
+        labels.forEach(lbl=>{
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'unlocked-note-btn note-btn'; // reuse note styles
+          btn.textContent = lbl;
+          btn.setAttribute('data-note', lbl);
+          btn.setAttribute('aria-pressed', unlockedModeNotes.has(lbl)?'true':'false');
+          if (unlockedModeNotes.has(lbl)) btn.classList.add('selected-note');
+          btn.onclick = ()=>{
+            if (unlockedModeNotes.has(lbl)){
+              unlockedModeNotes.delete(lbl);
+              btn.classList.remove('selected-note');
+              btn.setAttribute('aria-pressed','false');
+            } else {
+              unlockedModeNotes.add(lbl);
+              btn.classList.add('selected-note');
+              btn.setAttribute('aria-pressed','true');
+            }
+          };
+          grid.appendChild(btn);
+        });
+      }
+
+    }catch(e){ console.warn(e); }
+  };
+
+  window.openUnlockedMode = function(){
+    try{
+      const modal = document.getElementById('unlockedModeModal');
+      if (!modal) return;
+      if (!modal.parentNode) document.body.appendChild(modal);
+      buildUnlockedModeButtons();
+      modal.style.display = 'block';
+      modal.focus && modal.focus();
+    }catch(e){ console.warn(e); }
+  };
+  window.closeUnlockedMode = function(){
+    try{
+      const modal = document.getElementById('unlockedModeModal');
+      if (modal) modal.style.display = 'none';
+    }catch(e){ console.warn(e); }
+  };
+
+  function applyUnlockedSelectionToGlobal(){
+    try{
+      if (typeof selections !== 'object') return;
+      // copy into global selections for the base metrics
+      Object.keys(UNLOCKED_TO_BASE).forEach(sumKey=>{
+        const base = UNLOCKED_TO_BASE[sumKey];
+        const v = unlockedModeSelection[base];
+        if (!Array.isArray(selections[base])) selections[base] = [];
+        selections[base] = (v==null ? [] : [v]);
+      });
+    }catch(e){ console.warn(e); }
+  }
+
+  function clearUnlockedModeState(){
+    try{
+      Object.values(UNLOCKED_TO_BASE).forEach(base=>{
+        delete unlockedModeSelection[base];
+        if (Array.isArray(selections[base])) selections[base] = [];
+      });
+      unlockedModeNotes.clear();
+      // clear visual states if modal is open
+      const modal = document.getElementById('unlockedModeModal');
+      if (modal){
+        modal.querySelectorAll('.selected-score').forEach(n=>n.classList.remove('selected-score'));
+        modal.querySelectorAll('.selected-note').forEach(n=>n.classList.remove('selected-note'));
+        modal.querySelectorAll('.unlocked-note-btn').forEach(n=>n.setAttribute('aria-pressed','false'));
+      }
+    }catch(e){ console.warn(e); }
+  }
+
+  window.applyUnlockedMode = function(){
+    try{
+      applyUnlockedSelectionToGlobal();
+      closeUnlockedMode();
+      try { if (typeof buildButtons==='function') buildButtons(); } catch(e){}
+    }catch(e){ console.warn(e); }
+  };
+  window.applyUnlockedModeAndAdd = function(){
+    try{
+      applyUnlockedSelectionToGlobal();
+      if (typeof addEntry==='function') addEntry('unlockedMode');
+      finalizeUnlockedEntryAsUnlockedMode();
+      clearUnlockedModeState(); // reset notes and selections after adding entry
+    }catch(e){ console.warn(e); }
+  };
+  window.applyUnlockedModeAndAddStay = function(){
+    try{
+      applyUnlockedSelectionToGlobal();
+      if (typeof addEntry==='function') addEntry('unlockedMode');
+      finalizeUnlockedEntryAsUnlockedMode();
+      clearUnlockedModeState(); // reset notes and selections after adding entry
+      // rebuild and keep open
+      buildUnlockedModeButtons();
+      openUnlockedMode();
+    }catch(e){ console.warn(e); }
+  };
+
+  window.finalizeUnlockedEntryAsUnlockedMode = function(){
+    try{
+      if (!Array.isArray(logData) || !logData.length) return;
+      const entry = logData[logData.length - 1];
+      entry.inputSource = 'UnlockedMode';
+      // Derive labels for the selected base metrics, single value each
+      Object.values(UNLOCKED_TO_BASE).forEach(base=>{
+        try{
+          const arr = Array.isArray(entry[base]) ? entry[base] : [];
+          const v = arr.length ? arr[0] : null;
+          const L = (v==null ? '' : getUnlockedLabel(base, v));
+          entry[base + 'Label'] = (L || (v==null ? '' : String(v)));
+        }catch(e){}
+      });
+      // Append notes to the row (preserve existing)
+      try{
+        const existing = (entry.notes || '').trim();
+        const add = Array.from(unlockedModeNotes);
+        const merged = (existing ? (existing + ' ') : '') + add.join(' ');
+        entry.notes = merged.trim();
+      }catch(e){}
+      try { setTripLogDebounced(logData); } catch(e){}
+      try { renderTable(); } catch(e){}
+    }catch(e){ console.warn(e); }
+  };
+
+  // Place the Unlocked Mode button next to the Rush Mode button
+  window.addEventListener('DOMContentLoaded', function(){
+    try{
+      const rushBtn = document.getElementById('rushModeBtn');
+      if (rushBtn){
+        const btn = document.createElement('button');
+        btn.id = 'unlockedModeBtn';
+        btn.type = 'button';
+        btn.textContent = 'Unlocked Mode';
+        btn.className = rushBtn.className;
+        btn.onclick = function(){ openUnlockedMode(); };
+        rushBtn.parentNode.insertBefore(btn, rushBtn.nextSibling);
+      }
+    }catch(e){ console.warn(e); }
+  });
+
+  // delegated open (for dynamically cloned toolbars)
+  document.addEventListener('click', function(ev){
+    try{
+      const t = ev.target.closest('#unlockedModeBtn,[data-open="unlockedMode"]');
+      if (!t) return;
+      ev.preventDefault();
+      if (typeof window.openUnlockedMode === 'function'){ window.openUnlockedMode(); }
+    }catch(e){ console.warn(e); }
+  });
+})();
+</script>
+
 <style id="rush-mode-size-override">
   #rushModeModal .score-column button {
     width: 175px;
