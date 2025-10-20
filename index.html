@@ -445,7 +445,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.17.0.5A20 r2330</title>
+<title>statpack v1.17.0.5A20 r2331</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -839,7 +839,7 @@ labels: {
   change: { 6.00: 'x', 5.00: 'Extreme', 4.00: 'Obvious', 3.00: 'Clear', 2.00: 'Thought', 1.00: 'Maybe', 0.00: 'None' },
   degree: { 6.00: 'x', 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
   other: { 6.00: 'x', 5.00: 'Now', 4.00: 'Last', 3.00: 'Next', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
-  confidence: { 6.00: 'x', 5.00: 'Excellent', 4.00: 'Flow', 3.00: 'Natural', 2.00: 'Effective', 1.00: 'Effort', 0.00: 'Struggle' },
+  confidence: { 6.00: 'Plumes', 5.00: 'Vapour', 4.00: 'State Change', 3.00: 'Visible', 2.00: 'Inhale', 1.00: 'High Heat', 0.00: 'Dose' },
   auto: { 6.00: 'x', 5.00: 'Overdrive', 4.00: 'Forced', 3.00: 'Aroused', 2.00: 'Unaffected', 1.00: 'Scattered', 0.00: 'Neglecting' },
   jitter: { 6.00: 'x', 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Impaired', 2.00: 'Tremors', 1.00: 'Forgettable', 0.00: 'None' },
   dopamine: { 6.00: 'x', 5.00: 'Dopamine', 4.00: 'Serotonin', 3.00: 'Physical', 2.00: 'Some', 1.00: 'Unsure', 0.00: 'No' },
@@ -855,7 +855,7 @@ labels: {
   change: { 6.00: 'x', 5.00: 'Extreme', 4.00: 'Obvious', 3.00: 'Clear', 2.00: 'Thought', 1.00: 'Maybe', 0.00: 'None' },
   degree: { 6.00: 'x', 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
   other: { 6.00: 'x', 5.00: 'Now', 4.00: 'Last', 3.00: 'Next', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
-  confidence: { 6.00: 'x', 5.00: 'Excellent', 4.00: 'Flow', 3.00: 'Natural', 2.00: 'Effective', 1.00: 'Effort', 0.00: 'Struggle' },
+  confidence: { 6.00: 'Plumes', 5.00: 'Vapour', 4.00: 'State Change', 3.00: 'Visible', 2.00: 'Inhale', 1.00: 'High Heat', 0.00: 'Dose' },
   auto: { 6.00: 'x', 5.00: 'Overdrive', 4.00: 'Forced', 3.00: 'Aroused', 2.00: 'Unaffected', 1.00: 'Scattered', 0.00: 'Neglecting' },
   jitter: { 6.00: 'x', 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Impaired', 2.00: 'Tremors', 1.00: 'Forgettable', 0.00: 'None' },
   dopamine: { 6.00: 'x', 5.00: 'Dopamine', 4.00: 'Serotonin', 3.00: 'Physical', 2.00: 'Some', 1.00: 'Unsure', 0.00: 'No' },
@@ -6080,7 +6080,7 @@ window.openAllRated10MinutesPopup = function(){
 (function(){
   // Configure which metrics/values Rush Mode shows (independent of Rapid)
   const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const RUSH_MODE_VALUES  = [5,4,3,2,1,0,'',-0.5];
+  const RUSH_MODE_VALUES  = [6,5,4,3,2,1,0];
 
   // Local, Rush-Mode-only selections
   const rushModeSelections = Object.create(null);
