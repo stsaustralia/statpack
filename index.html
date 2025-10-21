@@ -104,8 +104,8 @@ CONFIG.popups = Object.assign({
         height: 30px;
         BOOKMARK
  */
-        width: 150px;
-        height: 25px;
+        width: 162px;
+        height: 28px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -446,7 +446,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.18.3 r2361</title>
+<title>statpack v1.18.4 r2379</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -526,8 +526,8 @@ function computeWeighted(obj){
 <style id="rapid-scores-size-override">
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
-    width: 150px;
-    height: 30px;
+    width: 162px;
+    height: 32px;
     font-size: 13px;
   }
 </style>
@@ -831,36 +831,36 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 5.00: 'Extreme + Overwhelm', 4.50: 'Obvious + Bliss', 4.00: 'Intense + Frenzied', 3.50: 'Uncontrollable', 3.00: 'Strong + Euphoic', 2.50: 'Clear + Contained', 2.00: 'Feel + Physical', 1.50: 'Noticed + Mental', 1.00: 'Noticed + Mental', 0.50: '+', 0.00: 'None' },
-  mood: { 5.00: 'Autopilot + Bliss', 4.50: 'Strong + Euphoria', 4.00: 'Strong + Euphoria', 3.50: 'Obvious + Euphoric', 3.00: 'Obvious + Euphoric', 2.50: 'Clear + Distinct', 2.00: 'Clear + Distinct', 1.50: 'Prominent + Definite', 1.00: 'Thought + Noticed', 0.50: '+', 0.00: 'None' },
-  social: { 5.00: 'Perfect + Auto', 4.50: 'Disinhibited', 4.00: 'Euphoric/Natural', 3.50: 'Euphoric / Natural', 3.00: 'Social + Outgoing', 2.50: 'Proactive + Effective', 2.00: 'Empathy + Feel', 1.50: 'Motivated / Aroused', 1.00: 'Want + Somewhat', 0.50: '+', 0.00: 'None' },
-  energy: { 5.00: 'Overdrive + Danger', 4.50: 'Hyper + Manic', 4.00: 'Hyper + Manic', 3.50: 'Very High + Active', 3.00: 'Very High + Active', 2.50: 'Energetic + Inactive', 2.00: 'Energetic + Inactive', 1.50: 'Alert + Capable', 1.00: 'Alert + Capable', 0.50: '+', 0.00: 'None' },
-  focus: { 5.00: 'Wired + Laser', 4.50: 'Wired', 4.00: 'Physical + Strong', 3.50: 'Fixated / Tunnel', 3.00: 'Strong / Obsessive', 2.50: 'Focused + Effective', 2.00: 'Focused + Effective', 1.50: 'Attentive', 1.00: 'Some / Forced', 0.50: '+', 0.00: 'None' },
-  anxiety: { 5.00: 'Panic', 4.50: 'Controling Actions', 4.00: 'Controling Actions', 3.50: 'Dominating', 3.00: 'Anxious / Neglect', 2.50: 'Distinct / Worry', 2.00: 'Adverse + Worry', 1.50: 'Excess / Tolerable', 1.00: 'Minimal / Think', 0.50: '+', 0.00: 'None' },
-  impair: { 5.00: 'Severe', 4.50: 'Controlled', 4.00: 'Controlled', 3.50: 'Obvious + Worrying', 3.00: 'Impact / Behaviour', 2.50: 'Clear / Adverse', 2.00: 'Affected / Effort', 1.50: 'Noticeable / Shaking', 1.00: 'Ignorable / Tremor', 0.50: '+', 0.00: 'None' },
-  change: { 6.00: 'x', 5.00: 'Extreme', 4.00: 'Obvious', 3.00: 'Clear', 2.00: 'Thought', 1.00: 'Maybe', 0.00: 'None' },
-  degree: { 6.00: 'x', 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
-  other: { 6.00: 'x', 5.00: 'Now', 4.00: 'Last', 3.00: 'Next', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
-  confidence: { 6.00: 'Plumes', 5.00: 'Vapour', 4.00: 'State Change', 3.00: 'Visible', 2.00: 'Inhale', 1.00: 'High Heat', 0.00: 'Dose' },
-  auto: { 6.00: 'x', 5.00: 'Overdrive', 4.00: 'Forced', 3.00: 'Aroused', 2.00: 'Unaffected', 1.00: 'Scattered', 0.00: 'Neglecting' },
-  jitter: { 6.00: 'x', 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Impaired', 2.00: 'Tremors', 1.00: 'Forgettable', 0.00: 'None' },
-  dopamine: { 6.00: 'x', 5.00: 'Dopamine', 4.00: 'Serotonin', 3.00: 'Physical', 2.00: 'Some', 1.00: 'Unsure', 0.00: 'No' },
+  rush: { 5.0: 'Extreme', 4.5: 'Obvious+Bliss', 4.0: 'Intense/Frenzied', 3.5: 'Uncontrollable', 3.0: 'Strong/Euphoric', 2.5: 'Clear+Contained', 2.0: 'Feel/Physical', 1.5: 'Noticed/Mental', 1.0: 'Noticed/Mental', 0.5: '+', 0.0: 'None' },
+  mood: { 5.0: 'Autopilot+Bliss', 4.5: 'Strong/Euphoria', 4.0: 'Strong/Euphoria', 3.5: 'Obvious/Euphoric', 3.0: 'Obvious/Euphoric', 2.5: 'Clear/Distinct', 2.0: 'Clear/Distinct', 1.5: 'Prominent+Definite', 1.0: 'Thought/Noticed', 0.5: '+', 0.0: 'No Change' },
+  social: { 5.0: 'Perfect/Auto', 4.5: 'Disinhibited', 4.0: 'Euphoric/Natural', 3.5: 'Euphoric / Natural', 3.0: 'Social/Outgoing', 2.5: 'Proactive+Effective', 2.0: 'Empathy/Feel', 1.5: 'Motive/Aroused', 1.0: 'Want+Somewhat', 0.5: '+', 0.0: 'No' },
+  energy: { 5.0: 'Overdrive/Danger', 4.5: 'Hyper/Manic', 4.0: 'Hyper/Manic', 3.5: 'VeryHigh/Active', 3.0: 'VeryHigh/Active', 2.5: 'Energetic/Inactive', 2.0: 'Energetic/Inactive', 1.5: 'Alert+Capable', 1.0: 'Alert+Capable', 0.5: '+', 0.0: 'None / TIred' },
+  focus: { 5.0: 'Wired/Laser', 4.5: 'Wired', 4.0: 'Physical/Strong', 3.5: 'Fixated / Tunnel', 3.0: 'Strong/Obsessive', 2.5: 'Focused+Effective', 2.0: 'Focused/Effective', 1.5: 'Attentive', 1.0: 'Some/Forced', 0.5: '+', 0.0: 'No' },
+  anxiety: { 5.0: 'Panic', 4.5: 'Veyr/Paranoid', 4.0: 'Controling', 3.5: 'Dominating', 3.0: 'Anxious/Adverse', 2.5: 'Distinct / Worried', 2.0: 'Hinderance', 1.5: 'Noticeable', 1.0: 'Ignorable', 0.5: '+', 0.0: 'None' },
+  impair: { 5.0: 'Severe', 4.0: 'Controlled', 3.5: 'Obvious+Worrying', 3.0: 'Impact/Behaviour', 2.5: 'Clear/Adverse', 2.0: 'Affected/Effort', 1.5: 'Noticeable/Shakes', 1.0: 'Ignorable/Tremor', 0.5: '+', 0.0: 'No' },
+  change: { 5.0: 'Extreme', 4.0: 'Obvious', 3.0: 'Clear', 2.0: 'Thought', 1.0: 'Maybe', 0.0: 'None' },
+  degree: { 5.0: '+++++', 4.0: '++++', 3.0: '+++', 2.0: '++', 1.0: '+', 0.0: '0.0' },
+  other: { 5.0: 'Now', 4.0: 'Last', 3.0: 'Next', 2.0: 'Hit', 1.0: 'Dose', 0.0: 'After' },
+  confidence: { 5.0: 'Vapour', 4.0: 'State Change', 3.0: 'Visible', 2.0: 'Inhale', 1.0: 'High Heat', 0.0: 'Dose' },
+  auto: { 5.0: 'Overdrive', 4.0: 'Forced', 3.0: 'Aroused', 2.0: 'Unaffected', 1.0: 'Scattered', 0.0: 'Neglecting' },
+  jitter: { 5.0: 'Severe', 4.0: 'Obvious', 3.0: 'Impaired', 2.0: 'Tremors', 1.0: 'Forgettable', 0.0: 'None' },
+  dopamine: { 5.0: 'Dopamine', 4.0: 'Serotonin', 3.0: 'Physical', 2.0: 'Some', 1.0: 'Unsure', 0.0: 'No' },
     }
 , rapidLabels: {
-  rush: { 5.00: 'Extreme + Overwhelm', 4.50: 'Obvious + Bliss', 4.00: 'Intense + Frenzied', 3.50: 'Uncontrollable', 3.00: 'Strong + Euphoic', 2.50: 'Clear + Contained', 2.00: 'Feel + Physical', 1.50: 'Noticed + Mental', 1.00: 'Noticed + Mental', 0.50: '+', 0.00: 'None' },
-  mood: { 5.00: 'Autopilot + Bliss', 4.50: 'Strong + Euphoria', 4.00: 'Strong + Euphoria', 3.50: 'Obvious + Euphoric', 3.00: 'Obvious + Euphoric', 2.50: 'Clear + Distinct', 2.00: 'Clear + Distinct', 1.50: 'Prominent + Definite', 1.00: 'Thought + Noticed', 0.50: '+', 0.00: 'None' },
-  social: { 5.00: 'Perfect + Auto', 4.50: 'Disinhibited', 4.00: 'Euphoric/Natural', 3.50: 'Euphoric / Natural', 3.00: 'Social + Outgoing', 2.50: 'Proactive + Effective', 2.00: 'Empathy + Feel', 1.50: 'Motivated / Aroused', 1.00: 'Want + Somewhat', 0.50: '+', 0.00: 'None' },
-  energy: { 5.00: 'Overdrive + Danger', 4.50: 'Hyper + Manic', 4.00: 'Hyper + Manic', 3.50: 'Very High + Active', 3.00: 'Very High + Active', 2.50: 'Energetic + Inactive', 2.00: 'Energetic + Inactive', 1.50: 'Alert + Capable', 1.00: 'Alert + Capable', 0.50: '+', 0.00: 'None' },
-  focus: { 5.00: 'Wired + Laser', 4.50: 'Wired', 4.00: 'Physical + Strong', 3.50: 'Fixated / Tunnel', 3.00: 'Strong / Obsessive', 2.50: 'Focused + Effective', 2.00: 'Focused + Effective', 1.50: 'Attentive', 1.00: 'Some / Forced', 0.50: '+', 0.00: 'None' },
-  anxiety: { 5.00: 'Panic', 4.50: 'Controling Actions', 4.00: 'Controling Actions', 3.50: 'Dominating', 3.00: 'Anxious / Neglect', 2.50: 'Distinct / Worry', 2.00: 'Adverse + Worry', 1.50: 'Excess / Tolerable', 1.00: 'Minimal / Think', 0.50: '+', 0.00: 'None' },
-  impair: { 5.00: 'Severe', 4.50: 'Controlled', 4.00: 'Controlled', 3.50: 'Obvious + Worrying', 3.00: 'Impact / Behaviour', 2.50: 'Clear / Adverse', 2.00: 'Affected / Effort', 1.50: 'Noticeable / Shaking', 1.00: 'Ignorable / Tremor', 0.50: '+', 0.00: 'None' },
-  change: { 6.00: 'x', 5.00: 'Extreme', 4.00: 'Obvious', 3.00: 'Clear', 2.00: 'Thought', 1.00: 'Maybe', 0.00: 'None' },
-  degree: { 6.00: 'x', 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
-  other: { 6.00: 'x', 5.00: 'Now', 4.00: 'Last', 3.00: 'Next', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
-  confidence: { 6.00: 'Plumes', 5.00: 'Vapour', 4.00: 'State Change', 3.00: 'Visible', 2.00: 'Inhale', 1.00: 'High Heat', 0.00: 'Dose' },
-  auto: { 6.00: 'x', 5.00: 'Overdrive', 4.00: 'Forced', 3.00: 'Aroused', 2.00: 'Unaffected', 1.00: 'Scattered', 0.00: 'Neglecting' },
-  jitter: { 6.00: 'x', 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Impaired', 2.00: 'Tremors', 1.00: 'Forgettable', 0.00: 'None' },
-  dopamine: { 6.00: 'x', 5.00: 'Dopamine', 4.00: 'Serotonin', 3.00: 'Physical', 2.00: 'Some', 1.00: 'Unsure', 0.00: 'No' },
+  rush: { 5.0: 'Extreme', 4.5: 'Obvious+Bliss', 4.0: 'Intense/Frenzied', 3.5: 'Uncontrollable', 3.0: 'Strong/Euphoric', 2.5: 'Clear+Contained', 2.0: 'Feel/Physical', 1.5: 'Noticed/Mental', 1.0: 'Noticed/Mental', 0.5: '+', 0.0: 'None' },
+  mood: { 5.0: 'Autopilot+Bliss', 4.5: 'Strong/Euphoria', 4.0: 'Strong/Euphoria', 3.5: 'Obvious/Euphoric', 3.0: 'Obvious/Euphoric', 2.5: 'Clear/Distinct', 2.0: 'Clear/Distinct', 1.5: 'Prominent+Definite', 1.0: 'Thought/Noticed', 0.5: '+', 0.0: 'No Change' },
+  social: { 5.0: 'Perfect/Auto', 4.5: 'Disinhibited', 4.0: 'Euphoric/Natural', 3.5: 'Euphoric / Natural', 3.0: 'Social/Outgoing', 2.5: 'Proactive+Effective', 2.0: 'Empathy/Feel', 1.5: 'Motive/Aroused', 1.0: 'Want+Somewhat', 0.5: '+', 0.0: 'No' },
+  energy: { 5.0: 'Overdrive/Danger', 4.5: 'Hyper/Manic', 4.0: 'Hyper/Manic', 3.5: 'VeryHigh/Active', 3.0: 'VeryHigh/Active', 2.5: 'Energetic/Inactive', 2.0: 'Energetic/Inactive', 1.5: 'Alert+Capable', 1.0: 'Alert+Capable', 0.5: '+', 0.0: 'None / TIred' },
+  focus: { 5.0: 'Wired/Laser', 4.5: 'Wired', 4.0: 'Physical/Strong', 3.5: 'Fixated / Tunnel', 3.0: 'Strong/Obsessive', 2.5: 'Focused+Effective', 2.0: 'Focused/Effective', 1.5: 'Attentive', 1.0: 'Some/Forced', 0.5: '+', 0.0: 'No' },
+  anxiety: { 5.0: 'Panic', 4.5: 'Veyr/Paranoid', 4.0: 'Controling', 3.5: 'Dominating', 3.0: 'Anxious/Adverse', 2.5: 'Distinct / Worried', 2.0: 'Hinderance', 1.5: 'Noticeable', 1.0: 'Ignorable', 0.5: '+', 0.0: 'None' },
+  impair: { 5.0: 'Severe', 4.0: 'Controlled', 3.5: 'Obvious+Worrying', 3.0: 'Impact/Behaviour', 2.5: 'Clear/Adverse', 2.0: 'Affected/Effort', 1.5: 'Noticeable/Shakes', 1.0: 'Ignorable/Tremor', 0.5: '+', 0.0: 'No' },
+  change: { 5.0: 'Extreme', 4.0: 'Obvious', 3.0: 'Clear', 2.0: 'Thought', 1.0: 'Maybe', 0.0: 'None' },
+  degree: { 5.0: '+++++', 4.0: '++++', 3.0: '+++', 2.0: '++', 1.0: '+', 0.0: '0.0' },
+  other: { 5.0: 'Now', 4.0: 'Last', 3.0: 'Next', 2.0: 'Hit', 1.0: 'Dose', 0.0: 'After' },
+  confidence: { 5.0: 'Vapour', 4.0: 'State Change', 3.0: 'Visible', 2.0: 'Inhale', 1.0: 'High Heat', 0.0: 'Dose' },
+  auto: { 5.0: 'Overdrive', 4.0: 'Forced', 3.0: 'Aroused', 2.0: 'Unaffected', 1.0: 'Scattered', 0.0: 'Neglecting' },
+  jitter: { 5.0: 'Severe', 4.0: 'Obvious', 3.0: 'Impaired', 2.0: 'Tremors', 1.0: 'Forgettable', 0.0: 'None' },
+  dopamine: { 5.0: 'Dopamine', 4.0: 'Serotonin', 3.0: 'Physical', 2.0: 'Some', 1.0: 'Unsure', 0.0: 'No' },
       },
   buttonLabelsByMetric: {}},
   buttons: {
@@ -868,13 +868,13 @@ labels: {
 //       rush:[5,4,3,2,1,0,'',4.5,3.5,2.5,1.5,0.5,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
 //       rush:[5,4,3,2,1,0,'','',4.5,3.5,2.5,1.5,0.5,'','',0.2,0.3,'',-0.5,-1],
-      rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
-      mood:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
-      social:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
-      energy:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
-      focus:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
-      anxiety:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
-      impair:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.5,-0.5,-1],
+      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.5,-0.5,-1],
+      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.5,-0.5,-1],
+      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.5,-0.5,-1],
+      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.5,-0.5,-1],
+      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.5,-0.5,-1],
+      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.5,-0.5,-1],
+      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.5,-0.5,-1],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -883,7 +883,7 @@ labels: {
       degree:[5,4,3,2,1,0],
       other: [5,4,3,2,1,0]
     },
-    rapidValues: [6,5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0,'',0.5,-0.5],
+    rapidValues: [6,5,4.5,4,null,3.5,3,2.5,null,2,1.5,1,0.5,0,'',-0.25,0.25],
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
   },
@@ -1807,11 +1807,19 @@ function mergeAppendDedupeSort(existing, incoming){
 // Helper: determine if a row (log entry) is effectively empty/blank (all key numbers 0/NaN/absent)
 function isNonEmptyLogRow(r){
   if (!r) return false;
+
+  // Keep explicit dose markers even if metrics are zero
+  const doseToken = (s) => !!(s && /(hit|redose|dose|finished|md-?pihp|2me-?pihp|a-?pihp|3f-?pihp|a-?php|a-?pvp|cathinone|meth|mdma|2-?mmc|3-?mmc|4-?mmc|mephedrone|dust|speed|cocaine|crack|thc|weed|alcohol|benzodiazepine|diazepam|alprazolam|bromazolam|lsd)/i.test(String(s)));
+  if ((r.drug && String(r.drug).trim() !== '') || doseToken(r.notes) || doseToken(r.info)) {
+    return true;
+  }
+
   const numericVals = [
     r.rushSum, r.moodSum, r.socialSum, r.energySum, r.focusSum,
     r.anxietySum, r.impairSum, r.score, r.max, r.min, r.weighted,
     r.maxPercent, r.minPercent
   ].map(v => Number(v));
+
   return numericVals.some(v => Number.isFinite(v) && v !== 0);
 }
 
@@ -7679,6 +7687,455 @@ const b=document.createElement('button');
 }})();
 </script>
 <!-- END: ChatGPT patch 2025/10/21 05:01:46 -->
+
+<!-- === Begin: Dose Reviews Segment-Aware Patch (injected) === -->
+<script>
+// ===== Dose Review Segmentation: helpers =====
+(function(){
+  // Parse "HH:MM:SS" -> seconds (number) or null
+  function parseSinceHMS(s){
+    if (!s) return null;
+    try {
+      const m = String(s).trim().match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+      if (!m) return null;
+      const h = +m[1], mi = +m[2], se = +m[3];
+      if (!Number.isFinite(h) || !Number.isFinite(mi) || !Number.isFinite(se)) return null;
+      return (h*3600) + (mi*60) + se;
+    } catch(e){ return null; }
+  }
+
+  // Date from AU timestamp "dd/mm/yyyy, HH:MM:SS" OR "dd/mm/yyyy HH:MM:SS"
+  function parseAUDateTime(ts){
+    if (!ts) return null;
+    try {
+      const s = String(ts).replace(',', ' ').trim();
+      const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
+      if (!m) return null;
+      const d = +m[1], mo = +m[2], y = +m[3], h = +m[4], mi = +m[5], se = +m[6];
+      const dt = new Date(y, mo-1, d, h, mi, se);
+      if (isNaN(dt.getTime())) return null;
+      return dt;
+    } catch(e){ return null; }
+  }
+
+  function isDoseEvent(drugStr){
+    if (!drugStr) return false;
+    return String(drugStr).trim() !== '';
+  }
+
+  function byTimeAsc(a,b){
+    const ta = (a && a._ts) ? a._ts : (parseAUDateTime(a && a.timestamp) || 0);
+    const tb = (b && b._ts) ? b._ts : (parseAUDateTime(b && b.timestamp) || 0);
+    const va = (typeof ta==='number') ? ta : (ta? ta.getTime():0);
+    const vb = (typeof tb==='number') ? tb : (tb? tb.getTime():0);
+    return va - vb;
+  }
+
+  function medianOf(arr){
+    const xs = arr.slice().filter(v => Number.isFinite(+v)).map(Number).sort((x,y)=>x-y);
+    if (!xs.length) return 0;
+    const mid = Math.floor(xs.length/2);
+    if (xs.length % 2 === 0) return (xs[mid-1] + xs[mid]) / 2;
+    return xs[mid];
+  }
+
+  function statsOf(arr){
+    if (!arr || !arr.length) return {avg:0, med:0, min:0, max:0};
+    const n = arr.length;
+    let sum = 0, lo = +arr[0], hi = +arr[0];
+    for (let i=0;i<n;i++){
+      const v = +arr[i];
+      if (!Number.isFinite(v)) continue;
+      sum += v;
+      if (v < lo) lo = v;
+      if (v > hi) hi = v;
+    }
+    return {
+      avg: sum / n,
+      med: medianOf(arr),
+      min: lo,
+      max: hi
+    };
+  }
+
+  // Compute segments from logData
+  function computeDoseSegments(data){
+    const rows = (Array.isArray(data) ? data.slice() : []).sort(byTimeAsc);
+    const segments = [];
+    let current = [];
+    let prevSince = null;
+
+    for (const r of rows){
+      const sinceS = parseSinceHMS(r && r.sincedose);
+      const drugStr = r && r.drug;
+      const newSeg =
+        (isDoseEvent(drugStr)) ||
+        (prevSince != null && sinceS != null && sinceS < prevSince) ||
+        doseToken(r && r.notes) || doseToken(r && r.info);
+
+      if (newSeg && current.length){
+        segments.push(current);
+        current = [];
+      }
+      current.push(r);
+      if (sinceS != null) prevSince = sinceS;
+    }
+    if (current.length) segments.push(current);
+    return segments;
+  }
+
+  function safeNum(x){ const n = +x; return Number.isFinite(n) ? n : 0; }
+
+  function segmentRowToMetrics(r){
+    return {
+      rush:    safeNum(r && r.rushSum),
+      mood:    safeNum(r && r.moodSum),
+      social:  safeNum(r && r.socialSum),
+      energy:  safeNum(r && r.energySum),
+      focus:   safeNum(r && r.focusSum),
+      anxiety: safeNum(r && r.anxietySum),
+      impair:  safeNum(r && r.impairSum),
+      score:   safeNum(r && r.score),
+      max:     safeNum(r && r.max),
+      min:     safeNum(r && r.min),
+      weighted:safeNum(r && r.weighted),
+      fiveMax: safeNum(r && r.fiveMax)
+    };
+  }
+
+  function summariseSegment(seg){
+    const t0 = seg[0], tN = seg[seg.length-1];
+    const tsStart = t0 && t0.timestamp ? String(t0.timestamp) : '';
+    const tsEnd   = tN && tN.timestamp ? String(tN.timestamp) : '';
+    const cols = {rush:[],mood:[],social:[],energy:[],focus:[],anxiety:[],impair:[],score:[],max:[],min:[],weighted:[],fiveMax:[]};
+    for (const r of seg){
+      const m = segmentRowToMetrics(r);
+      Object.keys(cols).forEach(k => cols[k].push(m[k]));
+    }
+    const S = {};
+    Object.keys(cols).forEach(k => { S[k] = statsOf(cols[k]); });
+    return { start: tsStart, end: tsEnd, n: seg.length, S };
+  }
+
+  function fmt2(n){ return Number.isFinite(+n) ? (+n).toFixed(2) : ''; }
+
+  function pickStat(label){
+    const L = String(label).toLowerCase();
+    if (L.startsWith('med')) return 'med';
+    if (L.startsWith('min')) return 'min';
+    if (L.startsWith('max')) return 'max';
+    return 'avg';
+  }
+
+  function pushSummaryRow(tbody, label, segIdx, segMeta){
+    const which = pickStat(label);
+    const tr = document.createElement('tr');
+    const vals = {
+      rush:     segMeta.S.rush[which],
+      mood:     segMeta.S.mood[which],
+      social:   segMeta.S.social[which],
+      energy:   segMeta.S.energy[which],
+      focus:    segMeta.S.focus[which],
+      anxiety:  segMeta.S.anxiety[which],
+      impair:   segMeta.S.impair[which],
+      score:    segMeta.S.score[which],
+      max:      segMeta.S.max[which],
+      min:      segMeta.S.min[which],
+      weighted: segMeta.S.weighted[which],
+      fiveMax:  segMeta.S.fiveMax[which]
+    };
+    const headers = ["Label","Segment","Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+    const cells = [
+      label,
+      String(segIdx),
+      `${segMeta.start} → ${segMeta.end}`,
+      fmt2(vals.rush), fmt2(vals.mood), fmt2(vals.social), fmt2(vals.energy), fmt2(vals.focus),
+      fmt2(vals.anxiety), fmt2(vals.impair),
+      fmt2(vals.score), fmt2(vals.max), fmt2(vals.min), fmt2(vals.weighted), fmt2(vals.fiveMax)
+    ];
+    for (let i=0;i<headers.length;i++){
+      const td = document.createElement('td');
+      td.textContent = cells[i] != null ? String(cells[i]) : '';
+      td.setAttribute('data-col', headers[i]);
+      tr.appendChild(td);
+    }
+    try { window.STS_applyShading(tr); } catch(e){}
+    tbody.appendChild(tr);
+  }
+
+  function buildDoseReviewsExportRows(){
+    const rows = [];
+    const table = document.getElementById('doseReviewsTable');
+    if (!table) return rows;
+    const header = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+    rows.push(header.join(','));
+    const bodyRows = table.querySelectorAll('tbody tr');
+    bodyRows.forEach(tr => {
+      const cols = Array.from(tr.children).map(td => {
+        const raw = td.textContent.replace(/"/g,'""');
+        return `"${raw}"`;
+      });
+      rows.push(cols.join(','));
+    });
+    return rows;
+  }
+
+  // Override: openDoseReviews with segment awareness
+  window.openDoseReviews = function(){
+    try {
+      const modal = document.getElementById('doseReviewsModal');
+      const tbody = document.querySelector('#doseReviewsTable tbody');
+      const meta  = document.getElementById('doseReviewsMeta');
+      if (!modal || !tbody){ alert('Dose Reviews UI not found.'); return; }
+
+      const data = Array.isArray(window.logData) ? window.logData.slice() : [];
+      if (!data.length){ alert('No log data to review.'); return; }
+
+      const segments = computeDoseSegments(data);
+      tbody.innerHTML = '';
+      let totalRows = 0;
+
+      segments.forEach((seg, idx) => {
+        const segIdx = idx + 1;
+        const segMeta = summariseSegment(seg);
+        pushSummaryRow(tbody, 'Average', segIdx, segMeta);
+        pushSummaryRow(tbody, 'Median',  segIdx, segMeta);
+        pushSummaryRow(tbody, 'Minimum', segIdx, segMeta);
+        pushSummaryRow(tbody, 'Maximum', segIdx, segMeta);
+        totalRows += 4;
+      });
+
+      if (meta) meta.textContent = `Detected ${segments.length} segment(s); summarised ${totalRows} rows (${segments.length} × 4). Source: current log data at open time.`;
+      modal.style.display = 'block';
+    } catch(err){
+      console.error(err);
+      alert('Dose Reviews failed: ' + err.message);
+    }
+  };
+
+  // Override: exportDoseReviewsCsv to export the visible segmented table
+  window.exportDoseReviewsCsv = function(){
+    try{
+      const lines = buildDoseReviewsExportRows();
+      if (!lines.length){ alert('Nothing to export.'); return; }
+      const blob = new Blob([lines.join('\\n')], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dose_reviews_segments.csv';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    } catch(err){
+      console.error(err);
+      alert('Export failed: ' + err.message);
+    }
+  };
+
+  if (!window.closeDoseReviews){
+    window.closeDoseReviews = function(){
+      const modal = document.getElementById('doseReviewsModal');
+      if (modal) modal.style.display = 'none';
+    };
+  }
+})();
+</script>
+<!-- === End: Dose Reviews Segment-Aware Patch (injected) === -->
+
+<!-- === Begin: Backfill Consolidation + Toast + Popup Sync Patch === -->
+<style>
+#stsToast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 100000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+#stsToast.show { opacity: 1; }
+</style>
+<div id="stsToast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  // Toast helper
+  function showToast(msg, ms){
+    try{
+      const el = document.getElementById('stsToast');
+      if (!el) return;
+      el.textContent = String(msg || '');
+      el.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>{ el.classList.remove('show'); }, Math.max(800, ms||2200));
+    }catch(e){ console.warn(e); }
+  }
+
+  // Insert "Backfill popups too" toggle next to the Manual Backfill area
+  function ensureBackfillToggle(){
+    try{
+      const row = document.getElementById('backfillRow');
+      if (!row) return;
+      if (document.getElementById('backfillPopupsToggle')) return;
+      const label = document.createElement('label');
+      label.style.marginLeft = '10px';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = 'backfillPopupsToggle';
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(' Backfill popups too'));
+      row.appendChild(label);
+    }catch(e){ console.warn(e); }
+  }
+
+  // Copy summary table rows into popup tables when present (best-effort)
+  function syncPopups(){
+    try{
+      const map = [
+        {src:'#summary5Table',  dsts:['#summary5PopupTable','#summaryPopupTable5']},
+        {src:'#summary15Table', dsts:['#summary15PopupTable','#summaryPopupTable15']},
+        {src:'#summary60Table', dsts:['#summary60PopupTable','#summaryPopupTable60']},
+      ];
+      for (const {src, dsts} of map){
+        const s = document.querySelector(src);
+        if (!s) continue;
+        const sBody = s.tBodies && s.tBodies[0];
+        if (!sBody) continue;
+        const html = sBody.innerHTML;
+        for (const dSel of dsts){
+          const d = document.querySelector(dSel);
+          if (d && d.tBodies && d.tBodies[0]){
+            d.tBodies[0].innerHTML = html;
+          }
+        }
+      }
+    }catch(e){ console.warn(e); }
+  }
+
+  // Unified backfill window using existing app hooks where possible
+  function doBackfillWindow(stepMin, tableId){
+    // Prefer existing app implementation if present
+    if (typeof window.backfillWindow === 'function'){
+      return window.backfillWindow(stepMin, tableId);
+    }
+    // Fallback minimal implementation using expected helpers
+    try{
+      if (typeof window.computeRollingMeans !== 'function' || typeof window.appendSummaryRowToTable !== 'function'){
+        console.warn('Backfill fallback missing dependencies.');
+        return 0;
+      }
+      // Build from earliest visible row in main table
+      const main = document.querySelector('#logTable tbody');
+      if (!main || !main.rows || !main.rows.length) return 0;
+      // parse AU time "dd/mm/yyyy, HH:MM:SS" from first cell in the row (Timestamp column index may vary; we rely on data attribute if present)
+      function parseTs(tr){
+        const tsCell = tr.cells[1] || null; // 0=Select, 1=Timestamp in current layouts
+        if (!tsCell) return null;
+        const s = tsCell.textContent.trim().replace(',', ' ');
+        const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
+        if (!m) return null;
+        const d = new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5], +m[6]);
+        return d.getTime();
+      }
+      const firstRow = main.rows[0];
+      const startMs0 = parseTs(firstRow);
+      if (!startMs0) return 0;
+      // align to boundary
+      function align(ms, step){
+        const d = new Date(ms);
+        d.setSeconds(0,0);
+        const m = d.getMinutes();
+        const alignedM = Math.floor(m / step) * step;
+        d.setMinutes(alignedM);
+        return d.getTime();
+      }
+      const step = stepMin;
+      let t = align(startMs0, step);
+      const now = Date.now();
+      const tbody = document.querySelector(tableId ? ('#'+tableId) : null) || document.querySelector('#summary' + step + 'Table');
+      if (!tbody) return 0;
+      const body = tbody.tBodies && tbody.tBodies[0];
+      if (!body) return 0;
+
+      // check if a label exists in first column matching date/time string
+      function labelExists(dt){
+        const d = new Date(dt);
+        const lab = d.toLocaleString('en-AU', {hour12:false});
+        for (const tr of Array.from(body.rows)){
+          const cell = tr.cells[0];
+          if (cell && cell.textContent.indexOf(lab) !== -1) return true;
+        }
+        return false;
+      }
+
+      let added = 0;
+      while (t <= now){
+        const M = window.computeRollingMeans(t, step);
+        if (M){
+          const C = (typeof window.computeCompositeFromMeans === 'function') ? window.computeCompositeFromMeans(M) : null;
+          const d = new Date(t);
+          if (!labelExists(t)){
+            window.appendSummaryRowToTable(body.parentElement.id, d, M, C, {});
+            added++;
+          }
+        }
+        t += step * 60000;
+      }
+      return added;
+    }catch(e){
+      console.warn(e);
+      return 0;
+    }
+  }
+
+  // Canonical backfill-all
+  function backfillAllCanonical(){
+    const add5  = doBackfillWindow(5,  'summary5Table');
+    const add15 = doBackfillWindow(15, 'summary15Table');
+    const add60 = doBackfillWindow(60, 'summary60Table');
+
+    // Popup sync if toggled
+    const popups = document.getElementById('backfillPopupsToggle');
+    if (popups && popups.checked){
+      syncPopups();
+    }
+
+    showToast(`Backfill: 5m +${add5}, 15m +${add15}, 60m +${add60}`, 2200);
+    return {add5, add15, add60};
+  }
+
+  // Bind button safely: replace any legacy handlers
+  function bindBackfillButton(){
+    try{
+      const btn = document.getElementById('backfillBtn');
+      if (!btn) return;
+      // clone to drop existing listeners
+      const clone = btn.cloneNode(true);
+      clone.addEventListener('click', backfillAllCanonical);
+      btn.replaceWith(clone);
+      clone.id = 'backfillBtn';
+      window.backfillAll = backfillAllCanonical; // force alias
+    }catch(e){ console.warn(e); }
+  }
+
+  // Init after DOM ready
+  function init(){
+    ensureBackfillToggle();
+    bindBackfillButton();
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init, {once:true});
+  } else {
+    init();
+  }
+})();
+</script>
+<!-- === End: Backfill Consolidation + Toast + Popup Sync Patch === -->
 </body>
 <script>
 function openEmotionModal() {
