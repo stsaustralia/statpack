@@ -104,7 +104,7 @@ CONFIG.popups = Object.assign({
         height: 30px;
         BOOKMARK
  */
-        width: 160px;
+        width: 150px;
         height: 24px;
         margin: 1px;
         border-radius: 6px;
@@ -446,7 +446,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.18.5 r2397</title>
+<title>statpack v1.19 r2400</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -539,7 +539,7 @@ BOOKMARK
 <style id="unlocked-scores-size-override">
   /* Scoped size overrides for Unlocked Mode modal buttons only */
   #unlockedModeModal .score-column button {
-    width: 170px;
+    width: 150px;
     height: 36;
     font-size: 13px;
   }
@@ -842,8 +842,8 @@ const CONFIG = Object.freeze({
     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth','Confidence','Auto','Jitter','Dopamine'],
     noShadeCols: [],
     shadeCap: {
-      'Score': 25,
-      'Max': 25,
+      'Score': 30,
+      'Max': 30,
       'Min': 10,
       'Weighted': 10,
       '5Max': 10
@@ -871,7 +871,7 @@ labels: {
   degree: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None', "Degree": 'Degree' },
   other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Next', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After', "Other": 'Other' },
   confidence: { 5.00: 'Vapour', 4.00: 'Change', 3.00: 'Fast', 2.00: 'Inhale', "Confidence": 'Confidence', 1.00: 'Heat', 0.00: 'Dose' },
-  auto: { "High": 'High', "Medium": 'Medium', "Low": 'Low', "None": 'None', "Auto": 'Auto', 5.00: '5.00', 4.00: '4.00', 3.00: '3.00', 2.00: '2.00', 1.00: '1.00', 0.00: '0.00' },
+  auto: { 5.00: 'Autopilot', 3.00: 'Noticed', 1.00: 'Think', 0.00: 'Neglect', "Auto": 'Auto', 4.00: 'Heartbeat', 2.00: 'Feel' },
   jitter: { 5.00: 'Severe', 3.00: 'Impaired', 1.00: 'Forgettable', 0.00: 'None', "Jitter": 'Jitter', 4.00: 'Obvious', 2.00: 'Tremors' },
   dopamine: { 5.00: 'Dopamine', 3.00: 'Physical', 1.00: 'Unsure', 0.00: 'No', "Dopamine": 'Dopamine', 4.00: 'Serotonin', 2.00: 'Some' },
     }
@@ -887,7 +887,7 @@ labels: {
   degree: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None', "Degree": 'Degree' },
   other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Next', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After', "Other": 'Other' },
   confidence: { 5.00: 'Vapour', 4.00: 'Change', 3.00: 'Fast', 2.00: 'Inhale', "Confidence": 'Confidence', 1.00: 'Heat', 0.00: 'Dose' },
-  auto: { "High": 'High', "Medium": 'Medium', "Low": 'Low', "None": 'None', "Auto": 'Auto', 5.00: '5.00', 4.00: '4.00', 3.00: '3.00', 2.00: '2.00', 1.00: '1.00', 0.00: '0.00' },
+  auto: { 5.00: 'Autopilot', 3.00: 'Noticed', 1.00: 'Think', 0.00: 'Neglect', "Auto": 'Auto', 4.00: 'Heartbeat', 2.00: 'Feel' },
   jitter: { 5.00: 'Severe', 3.00: 'Impaired', 1.00: 'Forgettable', 0.00: 'None', "Jitter": 'Jitter', 4.00: 'Obvious', 2.00: 'Tremors' },
   dopamine: { 5.00: 'Dopamine', 3.00: 'Physical', 1.00: 'Unsure', 0.00: 'No', "Dopamine": 'Dopamine', 4.00: 'Serotonin', 2.00: 'Some' },
       },
@@ -895,13 +895,13 @@ labels: {
   buttons: {
     perMetricButtons: {
 //       rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.3,0.2,0.1],
-      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,-0.5,-1,-2],
-      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,-0.5,-1,-2],
-      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,-0.5,-1,-2],
-      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,-0.5,-1,-2],
-      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,-0.5,-1,-2],
-      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,-0.5,-1,-2],
-      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,-0.5,-1,-2],
+      rush:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
+      mood:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
+      social:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
+      energy:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
+      focus:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
+      anxiety:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
+      impair:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
       confidence:[5,3,1,0],
       auto:[5,3,1,0],
       jitter:[5,3,1,0],
@@ -911,7 +911,7 @@ labels: {
       other: [5,4,3,2,1,0]
     },
 //     rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
-    rapidValues: [6,5,4,3,2,1,0,'',4.5,3.5,2.5,1.5],
+    rapidValues: [6,5,4,3,2,1,0,'',0.25,-0.25,'',4.5,3.5,2.5,1.5,0.5],
 
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
@@ -981,7 +981,7 @@ function cellBgFor(colName, value) {
   if (NO_SHADE.has(colName)) return '';
   const num = Number(value);
   if (!Number.isFinite(num)) return '';
-  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 5;
+  const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 6;
   const opacity = Math.min(Math.max(num, 0), cap) / cap;
   if (GREEN_SET.has(colName)) return `rgba(0,255,0,${opacity})`;
   if (GOLD_SET.has(colName))  return `rgba(255,215,0,${opacity})`;
@@ -6125,7 +6125,7 @@ window.openAllRated10MinutesPopup = function(){
 // BOOKMARK
   // Configure which metrics/values Rush Mode shows (independent of Rapid)
   const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const RUSH_MODE_VALUES  = [6,5,4,3,2,1,0,'',0.25,-0.5];
+  const RUSH_MODE_VALUES  = [6,5,4,3,2,1,0,'',0.25,-0.25];
 
   // Local, Rush-Mode-only selections
   const rushModeSelections = Object.create(null);
