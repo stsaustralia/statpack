@@ -105,7 +105,7 @@ CONFIG.popups = Object.assign({
         BOOKMARK
  */
         width: 150px;
-        height: 24px;
+        height: 25px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -446,7 +446,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.19 r2400</title>
+<title>statpack v1.19.1 r2401</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -530,7 +530,7 @@ BOOKMARK
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
     width: 150px;
-    height: 30px;
+    height: 25px;
     font-size: 13px;
   }
 </style>
@@ -540,7 +540,7 @@ BOOKMARK
   /* Scoped size overrides for Unlocked Mode modal buttons only */
   #unlockedModeModal .score-column button {
     width: 150px;
-    height: 36;
+    height: 30;
     font-size: 13px;
   }
 </style>
@@ -895,13 +895,13 @@ labels: {
   buttons: {
     perMetricButtons: {
 //       rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.3,0.2,0.1],
-      rush:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
-      mood:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
-      social:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
-      energy:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
-      focus:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
-      anxiety:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
-      impair:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2],
+      rush:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2,'',0.3,0.2,0.1],
+      mood:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2,'',0.3,0.2,0.1],
+      social:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2,'',0.3,0.2,0.1],
+      energy:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2,'',0.3,0.2,0.1],
+      focus:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2,'',0.3,0.2,0.1],
+      anxiety:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2,'',0.3,0.2,0.1],
+      impair:[6,5,4.5,4,3.5,'',3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1,-2,'',0.3,0.2,0.1],
       confidence:[5,3,1,0],
       auto:[5,3,1,0],
       jitter:[5,3,1,0],
@@ -911,7 +911,7 @@ labels: {
       other: [5,4,3,2,1,0]
     },
 //     rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
-    rapidValues: [6,5,4,3,2,1,0,'',0.25,-0.25,'',4.5,3.5,2.5,1.5,0.5],
+    rapidValues: [6,5,'',4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,0.5,0],
 
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
@@ -920,13 +920,13 @@ labels: {
     metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other', 'confidence','auto','jitter','dopamine']
   },
   notes: {
-    extra: ['Minor', 'Some', 'Slight', 'Lots', 'Now', 'Then', 'Next', 'Last','Redose', 'Hit', 'Continue', 'AnxietyPreventing', 'Stereotypy', 'Scattered', 'Motivated', 'Productive', 'Neglecting', 'NeglectAware', 'Dysphoric', 'Correlate', 'Flag', 'Changes', 'Note', 'Context', 'Associate', 'Plan', 'Review', 'Hindsight', 'Food', 'Drink', 'Sleep', 'LastRow', 'LastDose', 'LastHit', 'Single', 'Multiple', 'DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'MaybeUsable', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', 'Scales', 'HardToSee', 'LightRoom', 'DarkRoom'],
+    extra: ['Minor', 'Major', 'Some', 'Slight', 'Lots', 'Now', 'Then', 'Next', 'Last','Redose', 'Hit', 'Continue', 'AnxietyPreventing', 'Stereotypy', 'Scattered', 'Motivated', 'Productive', 'Neglecting', 'NeglectAware', 'Dysphoric', 'Correlate', 'Flag', 'Changes', 'Note', 'Context', 'Associate', 'Plan', 'Review', 'Hindsight', 'Food', 'Drink', 'Sleep', 'LastRow', 'LastDose', 'LastHit', 'Single', 'Multiple', 'DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'MaybeUsable', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', 'Scales', 'HardToSee', 'LightRoom', 'DarkRoom'],
     dark: [ 'Observe', 'Follow', 'Adaptive', 'Rock', 'Fast', 'Slowly', 'Roll', 'Rapid', 'Spin', 'SideToSide', 'CoatBowl', 'LargeRoll', 'SmallRoll', 'ManyHits', 'OneHit', 'MeltFirst', 'Burned', 'SuddenDrop'],
     blue: ['Plumes', 'Billowing', 'Vapour', 'Visible', 'Invisible', 'LotsOfVapour', 'SoftVapour', 'ThickVapour', 'WarmAir', 'BackPressure', 'Smoke', 'HalfBurned', 'NiceSmell', 'NiceTaste', 'Irritant', 'Pressure', 'Ignition', 'BurnedSmell', 'DarkVapour'],
     red: ['EarsRinging', 'ChestPain', 'SideEffects', 'WideEyes', 'Headache', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Visceral', 'Feel',  'Chills', 'Sweat', 'Tremor', 'Shakes', 'Nausea', 'AfterEffects', 'DayAfter', 'Hangover', 'JustWoke', 'MorningAfter'],
     green: [ '555Hold', 'DeepBreath', 'ShallowBreath', 'Diaphragm', 'HoldBreath', 'MultipleBreath', 'Sucked', 'SuckedHard', 'Gentle', 'Aggressive', 'OneBreath', 'LipSeal', 'HalfSealed', 'NotSealed', 'MouthOpen', 'ThroatBreath', 'Irritant','SuctionDistance', 'HighHeat', 'LowHeat'],
-    orange: [ 'Cone', 'Snowcone', 'Metal', 'Glass', 'Pipe', 'Line', 'Sniff', 'Rectal', 'Inject', 'Oral', 'Sublingual', 'Lighter', 'Jet', 'Blowtorch', 'Broken', 'Clean', 'New', 'Dirty', 'Rinsed', 'Scraped', 'Dried', 'Wet', 'Dry', 'Weathered', 'Soaked', 'Damp', 'WasWet', 'HasDried', 'Loose', 'Moving', 'NotMoving', 'Runny', 'Chunk', 'Paste', 'Rock', 'Sludge', 'Crushed', 'NotCrushed', 'Powder', 'Granules', 'Crystal', 'Crystalline', 'Dust', 'Liquid', 'WaterWeighted', 'PropyleneGlycol', 'Water','VapourWait', 'VapourPool', 'PowderIgnites'],
-    yellow: ['Positive', 'Negative', 'ColourChange', 'StateChange', 'Melt', 'Burn', 'Audible','Neither', 'Flat', 'Unknown', 'Melted', 'Burned', 'Carbon', 'Thin', 'Film', 'Fun', 'Analytics', 'Comparative', 'Relative', 'Absolute', 'Observe'],
+    orange: [ 'Cone', 'Snowcone', 'Metal', 'Glass', 'Pipe', 'Oral', 'Sublingual', 'Lighter', 'Jet', 'Blowtorch', 'Broken', 'Clean', 'New', 'Dirty', 'Rinsed', 'Scraped', 'Dried', 'Wet', 'Dry', 'Weathered', 'Soaked', 'Damp', 'WasWet', 'HasDried', 'Loose', 'Moving', 'NotMoving', 'Runny', 'Chunk', 'Paste', 'Rock', 'Sludge', 'Crushed', 'NotCrushed', 'Powder', 'Granules', 'Crystal', 'Crystalline', 'Dust', 'Liquid', 'WaterWeighted', 'PropyleneGlycol', 'Water','VapourWait', 'VapourPool', 'PowderIgnites'],
+    yellow: ['Positive', 'Negative', 'Colour', 'State', 'StateChange', 'Melt', 'Burn', 'Audible','Neither', 'Flat', 'Unknown', 'Melted', 'Burned', 'Carbon', 'Thin', 'Film', 'Fun', 'Analytics', 'Comparative', 'Relative', 'Absolute', 'Observe'],
     purple: ['Male', 'Female', 'Others', 'Home', 'Alone', 'Downstairs', 'Upstairs', 'RoomAlone', 'NotAlone', 'Thirsty', 'Hungry', 'HungerPains', 'AlreadyHadSome', 'Weed', 'Tobacco', 'Spin', 'Mix', 'Edible', 'MusicUrge', 'MusicOn', 'MusicOff', 'NotEating', 'NotDrinking', 'Neglecting', 'AwareOfChoices', 'BadChoices', '2MMC', '3MMC','4MMC', 'Meth', 'Cocaine', 'Crack', 'MDPIHP', '2MEPIHP', 'Claimed', 'NoAlcohol', 'Alcohol', 'AlcoholAffected', 'Drunk', 'Stoned', 'BR1', 'BR2', 'BR3']
   }
 });
@@ -6125,7 +6125,7 @@ window.openAllRated10MinutesPopup = function(){
 // BOOKMARK
   // Configure which metrics/values Rush Mode shows (independent of Rapid)
   const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const RUSH_MODE_VALUES  = [6,5,4,3,2,1,0,'',0.25,-0.25];
+  const RUSH_MODE_VALUES  = [6,5,4,3,2,1,0,'',0.5,-0.5,-1,-2];
 
   // Local, Rush-Mode-only selections
   const rushModeSelections = Object.create(null);
