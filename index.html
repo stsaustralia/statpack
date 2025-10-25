@@ -446,7 +446,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.19.4 r2430</title>
+<title>statpack v1.19.5 r2431</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -529,8 +529,8 @@ BOOKMARK
  */
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
-    width: 150px;
-    height: 30px;
+    width: 145px;
+    height: 25px;
     font-size: 12px;
   }
 </style>
@@ -539,12 +539,19 @@ BOOKMARK
 <style id="unlocked-scores-size-override">
   /* Scoped size overrides for Unlocked Mode modal buttons only */
   #unlockedModeModal .score-column button {
-    width: 150px;
-    height: 30;
+    width: 145px;
+    height: 25;
     font-size: 13px;
   }
 </style>
-</head>
+<style id="fast-mode-size-override">
+  /* Fast Mode modal button sizing */
+  #fastModeModal .score-column button {
+    width: 145px;
+    height: 25px;
+    font-size: 12px;
+  }
+</style>\n\1
 <body>
 
 <!-- Column Chooser UI -->
@@ -6303,7 +6310,8 @@ window.openAllRated10MinutesPopup = function(){
 
 
 <!-- Rush Mode launcher (you can reposition this anywhere in your toolbar) -->
-<button id="rushModeBtn" onclick="openRushMode()" type="button">Rush Mode</button>
+\1
+<button id="fastModeBtn" type="button" title="Open Fast Mode" onclick="openFastMode()">Fast Mode</button>
 
 <!-- Scoped button sizing for Rush Mode modal -->
 <!-- 
@@ -8437,7 +8445,28 @@ const b=document.createElement('button');
   window.UnlockedMode = { open: openModal, submit: submitEntry, reset: resetAll };
 })();
 </script>
-</body>
+<script id="fast-mode-position">
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    var rushBtn = document.getElementById('rushModeBtn');
+    var fastBtn = document.getElementById('fastModeBtn');
+    if (!fastBtn) return;
+    if (rushBtn && rushBtn.parentElement){
+      rushBtn.insertAdjacentElement('afterend', fastBtn);
+      return;
+    }
+    var rapid = document.getElementById('rapidScoresBtn');
+    if (rapid && rapid.parentElement){
+      rapid.insertAdjacentElement('afterend', fastBtn);
+      return;
+    }
+    var unlocked = document.getElementById('unlockedModeBtn');
+    if (unlocked && unlocked.parentElement){
+      unlocked.insertAdjacentElement('afterend', fastBtn);
+    }
+  }catch(e){ console.warn(e); }
+});
+</script>\n\1
 <script>
 function openEmotionModal() {
     document.getElementById('emotionModal').style.display = 'block';
@@ -10112,3 +10141,178 @@ function applyUnlockedAndAddStay(){
 </script>
 <!-- === /STS inject === -->
 
+\n<!-- Fast Mode Modal -->
+<div id="fastModeModal"
+     style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%);
+            background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px;
+            box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000; max-width:min(96vw, 1400px);">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+    <div style="font-weight:700; font-size:18px;">Fast Mode</div>
+    <button aria-label="Close" onclick="closeFastMode()">Close</button>
+  </div>
+  <div class="score-columns" id="fastModeButtons"></div>
+  <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+    <button onclick="applyFastMode()">Apply</button>
+    <button onclick="applyFastModeAndAdd()">Apply &amp; Add Entry</button>
+    <button onclick="applyFastModeAndAddStay()">Apply, Add &amp; Stay</button>
+  </div>
+</div>\n\n<script id="fast-mode-logic">
+(function(){
+  const FAST_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
+  const FAST_MODE_VALUES  = [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25];
+
+  const fastModeSelections = Object.create(null);
+
+  function getFastModeLabel(metric, value){
+    try{
+      const key = Number.isFinite(value) ? value.toFixed(2) : String(value);
+      const cfg = (window.CONFIG && window.CONFIG.labels) || {};
+      const R = (cfg.rapidLabels && cfg.rapidLabels[metric] && cfg.rapidLabels[metric][key]) || '';
+      if (R) return R;
+      const L = (cfg.labelMappings && cfg.labelMappings[metric] && cfg.labelMappings[metric][key]) || '';
+      return L || '';
+    }catch(e){}
+    return '';
+  }
+
+  window.buildFastModeButtons = function(){
+    try{
+      const container = document.getElementById('fastModeButtons');
+      if (!container) return;
+      container.innerHTML = '';
+      FAST_MODE_METRICS.forEach(metric=>{
+        const col = document.createElement('div');
+        col.className = 'score-column';
+        const t = document.createElement('strong');
+        t.innerText = metric.charAt(0).toUpperCase() + metric.slice(1);
+        col.appendChild(t);
+        FAST_MODE_VALUES.forEach(v=>{
+          if (v === ''){ const sep = document.createElement('div'); sep.style.height='6px'; col.appendChild(sep); return; }
+          const b = document.createElement('button');
+          const label = getFastModeLabel(metric, v);
+          b.innerText = `${v}: ${label}`;
+          b.onclick = ()=>{
+            if (!Array.isArray(fastModeSelections[metric])) fastModeSelections[metric] = [];
+            const i = fastModeSelections[metric].indexOf(v);
+            if (i < 0){ fastModeSelections[metric].push(v); b.classList.add('selected-score'); }
+            else { fastModeSelections[metric].splice(i,1); b.classList.remove('selected-score'); }
+          };
+          if (Array.isArray(fastModeSelections[metric]) && fastModeSelections[metric].includes(v)){
+            b.classList.add('selected-score');
+          }
+          col.appendChild(b);
+        });
+        container.appendChild(col);
+      });
+    }catch(e){ console.warn(e); }
+  };
+
+  window.openFastMode = function(){
+    try{
+      buildFastModeButtons();
+      const m = document.getElementById('fastModeModal');
+      if (!m) return;
+      if (m.parentElement !== document.body) document.body.appendChild(m);
+      m.style.zIndex = '10000';
+      m.style.display = 'block';
+    }catch(e){ console.warn(e); }
+  };
+
+  window.closeFastMode = function(){
+    try{ const m = document.getElementById('fastModeModal'); if (m) m.style.display = 'none'; }catch(e){}
+  };
+
+  function normalizeFastModeSelections(){
+    try{
+      FAST_MODE_METRICS.forEach(f=>{
+        if (!Array.isArray(fastModeSelections[f])) fastModeSelections[f] = [];
+        fastModeSelections[f] = Array.from(new Set(fastModeSelections[f])).sort((a,b)=>{
+          if (typeof a === 'number' && typeof b === 'number') return b - a;
+          if (typeof a === 'number' && typeof b !== 'number') return -1;
+          if (typeof a !== 'number' && typeof b === 'number') return 1;
+          return String(b).localeCompare(String(a));
+        });
+      });
+    }catch(e){}
+  }
+
+  window.applyFastMode = function(){
+    try{
+      normalizeFastModeSelections();
+      if (typeof selections === 'object' && selections){
+        FAST_MODE_METRICS.forEach(f=>{ selections[f] = fastModeSelections[f] ? fastModeSelections[f].slice() : []; });
+      }
+      closeFastMode();
+      try { if (typeof buildButtons==='function') buildButtons(); } catch(e){}
+    }catch(e){ console.warn(e); }
+  };
+
+  function finalizeFastEntryAsFastMode(){
+    try{
+      if (!Array.isArray(logData) || !logData.length) return;
+      const entry = logData[logData.length - 1];
+      entry.inputSource = 'FastMode';
+      ['rush','energy','focus','anxiety','mood','social','impair'].forEach(m=>{
+        try{
+          const arr = Array.isArray(entry[m]) ? entry[m] : [];
+          const labs = [];
+          const vals = Array.from(new Set(arr.slice().sort((a,b)=>{
+            if (typeof a === 'number' && typeof b === 'number') return b - a;
+            if (typeof a === 'number' && typeof b !== 'number') return -1;
+            if (typeof a !== 'number' && typeof b === 'number') return 1;
+            return String(b).localeCompare(String(a));
+          })));
+          vals.forEach(v=>{ const L = getFastModeLabel(m, v); if (L) labs.push(L); });
+          entry[m + 'Label'] = labs.join(', ');
+        }catch(e){}
+      });
+      try { if (typeof setTripLogDebounced==='function') setTripLogDebounced(logData); } catch(e){}
+      try { if (typeof renderTable==='function') renderTable(); } catch(e){}
+    }catch(e){ console.warn(e); }
+  }
+
+  window.applyFastModeAndAdd = function(){
+    try{
+      applyFastMode();
+      window._rapidLabelMode = false;
+      window._rapidInputSource = 'FastMode';
+      if (typeof addEntry === 'function') addEntry('fastMode');
+      finalizeFastEntryAsFastMode();
+      window.clearFastModeSelections();
+      window._rapidInputSource = 'Main';
+    }catch(e){ console.warn(e); }
+  };
+
+  window.applyFastModeAndAddStay = function(){
+    try{
+      normalizeFastModeSelections();
+      if (typeof selections === 'object' && selections){
+        FAST_MODE_METRICS.forEach(f=>{ selections[f] = fastModeSelections[f] ? fastModeSelections[f].slice() : []; });
+      }
+      window._rapidInputSource = 'FastMode';
+      if (typeof addEntry === 'function') addEntry('fastMode');
+      finalizeFastEntryAsFastMode();
+      window.clearFastModeSelections();
+      window._rapidInputSource = 'Main';
+      try{ buildFastModeButtons(); }catch(e){}
+      try{ const m=document.getElementById('fastModeModal'); if (m) m.style.display='block'; }catch(e){}
+    }catch(e){ console.warn(e); }
+  };
+
+  window.clearFastModeSelections = function(){
+    try{
+      Object.keys(fastModeSelections).forEach(k => { fastModeSelections[k] = []; });
+      try{
+        if (typeof selections === 'object' && selections){
+          ['rush','mood','social','energy','focus','anxiety','impair'].forEach(f=>{ selections[f] = []; });
+        }
+      }catch(e){}
+      const modal = document.getElementById('fastModeModal');
+      if (modal && modal.style.display !== 'none'){
+        const btns = modal.querySelectorAll('.score-column button.selected-score');
+        btns.forEach(b => b.classList.remove('selected-score'));
+      }
+    }catch(e){ console.warn(e); }
+  };
+})();
+</script>\n
