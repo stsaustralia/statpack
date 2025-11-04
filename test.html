@@ -3,26 +3,6 @@
 (() => {
   'use strict';
 
-  const CONFIG = {
-    metrics: ['rush','mood','social','energy','focus','anxiety','confidence'],
-    values: [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,-0.5,-1],
-    labelMappings: {
-      rush: { 0:'None', 1:'Noticed + Mental', 2:'Feel + Physical', 3:'Strong + Euphoric', 4:'Intense + Frenzied', 5:'Extreme + Overwhelm', 4.5:'Obvious + Bliss', 3.5:'Uncontrollable', 2.5:'Clear + Contained', 1.5:'Noticed + Mental', 0.5:'+', -0.5:'-', -1:'Negative' },
-      mood: { 0:'None' }, social: { 0:'None' }, energy: { 0:'None' },
-      focus: { 0:'None' }, anxiety: { 0:'None' }, confidence: { 0:'None' }
-    },
-    ui: {
-      metricButton: { minWidthPx:64, minHeightPx:30, paddingBlockPx:6, paddingInlinePx:10, fontSizeRem:0.95, gapPx:6 },
-      table: { showColumns:{}, shadeRows:true }
-    },
-    backfill: {
-      windowsMin:[5,15,60],
-      timestampFormat:'dd/MM/yyyy HH:mm:ss',
-      timestampHeaderNames:['Timestamp','Time','Date/Time']
-    },
-    features: { unlockedMode:true, rapidScores:true, rapidScores2:true, fastMode:true, backfill:true }
-  };
-
   Object.defineProperty(window,'CONFIG',{ value:CONFIG, writable:false, enumerable:true });
 
   // Back-compat for any legacy reads
@@ -158,8 +138,8 @@ CONFIG.popups = Object.assign({
         height: 30px;
         BOOKMARK
  */
-        width: 140px;
-        height: 25px;
+        width: 175px;
+        height: 30px;
         margin: 1px;
         border-radius: 6px;
         border: 1px solid #ccc;
@@ -500,7 +480,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.20.1 r2490</title>
+<title>statpack v1.24.1 r2492</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -583,9 +563,9 @@ BOOKMARK
  */
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
-    width: 150px;
-    height: 25px;
-    font-size: 12px;
+    width: 175px;
+    height: 30px;
+    font-size: 13px;
   }
 </style>
 
@@ -593,7 +573,7 @@ BOOKMARK
 <style id="unlocked-scores-size-override">
   /* Scoped size overrides for Unlocked Mode modal buttons only */
   #unlockedModeModal .score-column button {
-    width: 150px;
+    width: 175px;
     height: 30px;
     font-size: 13px;
   }
@@ -601,7 +581,7 @@ BOOKMARK
 <style id="fast-mode-size-override">
   /* Fast Mode modal button sizing */
   #fastModeModal .score-column button {
-    width: 120px;
+    width: 175px;
     height: 30px;
     font-size: 13px;
   }
@@ -922,49 +902,49 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 6.00: 'Overwhelming', 5.50: 'Extreme', 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Uncontrollable', 3.50: 'Intense', 3.00: 'Energetic', 2.50: 'Controllable', 2.00: 'Physical', 1.50: 'Mild/Light', 1.00: 'Mental', 0.50: 'Maybe', 0.00: 'No Rush', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Exceptional', 5.00: 'Euphoric', 4.50: 'Exceptional', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Motivated', 2.00: 'Certain', 1.50: 'Felt', 1.00: 'Thought', 0.50: 'Noticed', 0.00: 'No Change', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Uninhibited', 4.00: 'Outgoing', 3.50: 'Proactive', 3.00: 'Empathy/Social', 2.50: 'Push/Urge', 2.00: 'Sociable', 1.50: 'Capable/Able', 1.00: 'Some', 0.50: 'Functional', 0.00: 'No/Avoidant', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Hyper', 3.50: 'Very Acive', 3.00: 'Energetic', 2.50: 'Significant', 2.00: 'Moderate', 1.50: 'Some', 1.00: 'Alert', 0.50: 'Inactive', 0.00: 'None/Tired', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  focus: { 6.00: 'Laser', 5.50: 'Tunnel', 5.00: 'Wired', 4.50: 'Very Strong', 4.00: 'Obsessive', 3.50: 'Locked', 3.00: 'Focused', 2.50: 'Fixate/Focus', 2.00: 'Concentrating', 1.50: 'Effective', 1.00: 'Capable', 0.50: 'Effort', 0.00: 'None/Scattered', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  anxiety: { 6.00: 'Severe', 5.50: 'Controlling', 5.00: 'Panic', 4.50: 'Domianting', 4.00: 'Paranoid', 3.50: 'Impact Behaviour', 3.00: 'Anxious', 2.50: 'Affect Choices', 2.00: 'Distracting', 1.50: 'With Effort', 1.00: 'Ignorable', 0.50: 'Negligible', 0.00: 'None', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Controlling', 5.00: 'Controlling', 4.50: 'Dominating', 4.00: 'Dominating', 3.50: 'Impact Behaviour', 3.00: 'Impact Behaviour', 2.50: 'Affect Choices', 2.00: 'Affect Choices', 1.50: 'Physical', 1.00: 'Mental', 0.50: 'Negligible', 0.00: 'None', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  change: { 6.00: 'Hindsight', 5.00: 'Blatant', 4.00: 'Obvious', 3.00: 'Clear', 2.00: 'Yes', 1.00: 'Maybe', 0.00: 'None' },
-  degree: { 6.00: 'Perfect', 5.00: 'Excellent', 4.00: 'Great', 3.00: 'Good', 2.00: 'Fair', 1.00: 'OK', 0.00: 'Poor' },
-  other: { 6.00: 'One Minute', 5.00: 'Now', 4.00: 'Last', 3.00: 'Late', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
-  confidence: { 6.00: '10 or more', 5.00: '9 of 10', 4.00: '8 of 10', 3.00: '7 of 10', 2.00: '6 of 10', 1.00: '5 of 10', 0.00: 'less than 5' },
-  auto: { 6.00: 'Hindsight', 5.00: 'Autopilot', 4.00: 'Yes', 3.00: 'Physical', 2.00: 'Mental', 1.00: 'Maybe', 0.00: 'No' },
-  jitter: { 6.00: 'Extreme', 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Adverse', 2.00: 'Shakes', 1.00: 'Tremor', 0.00: 'None' },
-  dopamine: { 6.00: 'Extreme', 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme/Frenzied', 4.00: 'Intense, Uncontrollable', 3.00: 'Strong/Physical', 2.00: 'Mental/Controlled', 1.00: 'Some/Mild', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  mood: { 6.00: 'Autopilot', 5.00: 'Euphoria', 4.00: 'Obvious/Blatant', 3.00: 'Clear/Distinct', 2.00: 'Required Thinking', 1.00: 'Maybe/Slight', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  social: { 6.00: 'Disinhibited', 5.00: 'Natural/Outgoing', 4.00: 'Social/Empathy', 3.00: 'Feel/Urge/Push', 2.00: 'Think/Want', 1.00: 'Maybe/Slight', 0.00: 'No', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  energy: { 6.00: 'Overdrive', 5.00: 'Extreme/Manic', 4.00: 'Energetic/Active', 3.00: 'High', 2.00: 'Moderate or Active', 1.00: 'Some/Low', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  focus: { 6.00: 'Laser', 5.00: 'Wired', 4.00: 'Strong/Obsessive/', 3.00: 'High/Focused', 2.00: 'Moderate or Active', 1.00: 'Some/Low', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  anxiety: { 6.00: 'Crippling', 5.00: 'Panic/Fear/Feel', 4.00: 'Anxious/Paranoia/Impaired', 3.00: 'Clear Hinderance', 2.00: 'Some/Ignorable/Low', 1.00: 'Negligible/Minimal', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  impair: { 6.00: 'Health Concerns', 5.00: 'Crippled', 4.00: 'Impactiung Behaviour/Choices', 3.00: 'Affecting/Adverse/', 2.00: 'Minor Impaorment or Tremor', 1.00: 'Negligible/Minimal', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  change: { 5.00: 'Hindsight', 4.00: 'Obvious', 3.00: 'Prominent', 2.00: 'Thought', 1.00: 'Noticed', 0.00: 'None' },
+  degree: { 5.00: 'Autopilot', 4.00: 'Dominating', 3.00: 'Strong', 2.00: 'Significant', 1.00: 'Maybe', 0.00: 'None' },
+  other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Late', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
+  confidence: { 5.00: 'A', 4.00: 'B', 3.00: 'C', 2.00: 'D', 1.00: 'E', 0.00: 'F' },
+  auto: { 5.00: 'Autopilot', 4.00: 'Yes', 3.00: 'Physical', 2.00: 'Mental', 1.00: 'Maybe', 0.00: 'No' },
+  jitter: { 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Adverse', 2.00: 'Shakes', 1.00: 'Tremor', 0.00: 'None' },
+  dopamine: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
     }
 , rapidLabels: {
-  rush: { 6.00: 'Overwhelming', 5.50: 'Extreme', 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Uncontrollable', 3.50: 'Intense', 3.00: 'Energetic', 2.50: 'Controllable', 2.00: 'Physical', 1.50: 'Mild/Light', 1.00: 'Mental', 0.50: 'Maybe', 0.00: 'No Rush', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Exceptional', 5.00: 'Euphoric', 4.50: 'Exceptional', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Motivated', 2.00: 'Certain', 1.50: 'Felt', 1.00: 'Thought', 0.50: 'Noticed', 0.00: 'No Change', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Uninhibited', 4.00: 'Outgoing', 3.50: 'Proactive', 3.00: 'Empathy/Social', 2.50: 'Push/Urge', 2.00: 'Sociable', 1.50: 'Capable/Able', 1.00: 'Some', 0.50: 'Functional', 0.00: 'No/Avoidant', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Hyper', 3.50: 'Very Acive', 3.00: 'Energetic', 2.50: 'Significant', 2.00: 'Moderate', 1.50: 'Some', 1.00: 'Alert', 0.50: 'Inactive', 0.00: 'None/Tired', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  focus: { 6.00: 'Laser', 5.50: 'Tunnel', 5.00: 'Wired', 4.50: 'Very Strong', 4.00: 'Obsessive', 3.50: 'Locked', 3.00: 'Focused', 2.50: 'Fixate/Focus', 2.00: 'Concentrating', 1.50: 'Effective', 1.00: 'Capable', 0.50: 'Effort', 0.00: 'None/Scattered', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  anxiety: { 6.00: 'Severe', 5.50: 'Controlling', 5.00: 'Panic', 4.50: 'Domianting', 4.00: 'Paranoid', 3.50: 'Impact Behaviour', 3.00: 'Anxious', 2.50: 'Affect Choices', 2.00: 'Distracting', 1.50: 'With Effort', 1.00: 'Ignorable', 0.50: 'Negligible', 0.00: 'None', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  impair: { 6.00: 'Dangerous', 5.50: 'Controlling', 5.00: 'Controlling', 4.50: 'Dominating', 4.00: 'Dominating', 3.50: 'Impact Behaviour', 3.00: 'Impact Behaviour', 2.50: 'Affect Choices', 2.00: 'Affect Choices', 1.50: 'Physical', 1.00: 'Mental', 0.50: 'Negligible', 0.00: 'None', 0.10: 'Minimal/None', 0.60: 'Very Low', 1.10: 'Low', 2.10: 'Medium', 3.10: 'High', 4.10: 'Very High', 4.60: 'Extreme' },
-  change: { 6.00: 'Hindsight', 5.00: 'Blatant', 4.00: 'Obvious', 3.00: 'Clear', 2.00: 'Yes', 1.00: 'Maybe', 0.00: 'None' },
-  degree: { 6.00: 'Perfect', 5.00: 'Excellent', 4.00: 'Great', 3.00: 'Good', 2.00: 'Fair', 1.00: 'OK', 0.00: 'Poor' },
-  other: { 6.00: 'One Minute', 5.00: 'Now', 4.00: 'Last', 3.00: 'Late', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
-  confidence: { 6.00: '10 or more', 5.00: '9 of 10', 4.00: '8 of 10', 3.00: '7 of 10', 2.00: '6 of 10', 1.00: '5 of 10', 0.00: 'less than 5' },
-  auto: { 6.00: 'Hindsight', 5.00: 'Autopilot', 4.00: 'Yes', 3.00: 'Physical', 2.00: 'Mental', 1.00: 'Maybe', 0.00: 'No' },
-  jitter: { 6.00: 'Extreme', 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Adverse', 2.00: 'Shakes', 1.00: 'Tremor', 0.00: 'None' },
-  dopamine: { 6.00: 'Extreme', 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme/Frenzied', 4.00: 'Intense, Uncontrollable', 3.00: 'Strong/Physical', 2.00: 'Mental/Controlled', 1.00: 'Some/Mild', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  mood: { 6.00: 'Autopilot', 5.00: 'Euphoria', 4.00: 'Obvious/Blatant', 3.00: 'Clear/Distinct', 2.00: 'Required Thinking', 1.00: 'Maybe/Slight', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  social: { 6.00: 'Disinhibited', 5.00: 'Natural/Outgoing', 4.00: 'Social/Empathy', 3.00: 'Feel/Urge/Push', 2.00: 'Think/Want', 1.00: 'Maybe/Slight', 0.00: 'No', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  energy: { 6.00: 'Overdrive', 5.00: 'Extreme/Manic', 4.00: 'Energetic/Active', 3.00: 'High', 2.00: 'Moderate or Active', 1.00: 'Some/Low', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  focus: { 6.00: 'Laser', 5.00: 'Wired', 4.00: 'Strong/Obsessive/', 3.00: 'High/Focused', 2.00: 'Moderate or Active', 1.00: 'Some/Low', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  anxiety: { 6.00: 'Crippling', 5.00: 'Panic/Fear/Feel', 4.00: 'Anxious/Paranoia/Impaired', 3.00: 'Clear Hinderance', 2.00: 'Some/Ignorable/Low', 1.00: 'Negligible/Minimal', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  impair: { 6.00: 'Health Concerns', 5.00: 'Crippled', 4.00: 'Impactiung Behaviour/Choices', 3.00: 'Affecting/Adverse/', 2.00: 'Minor Impaorment or Tremor', 1.00: 'Negligible/Minimal', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  change: { 5.00: 'Hindsight', 4.00: 'Obvious', 3.00: 'Prominent', 2.00: 'Thought', 1.00: 'Noticed', 0.00: 'None' },
+  degree: { 5.00: 'Autopilot', 4.00: 'Dominating', 3.00: 'Strong', 2.00: 'Significant', 1.00: 'Maybe', 0.00: 'None' },
+  other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Late', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
+  confidence: { 5.00: 'A', 4.00: 'B', 3.00: 'C', 2.00: 'D', 1.00: 'E', 0.00: 'F' },
+  auto: { 5.00: 'Autopilot', 4.00: 'Yes', 3.00: 'Physical', 2.00: 'Mental', 1.00: 'Maybe', 0.00: 'No' },
+  jitter: { 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Adverse', 2.00: 'Shakes', 1.00: 'Tremor', 0.00: 'None' },
+  dopamine: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
       },
   buttonLabelsByMetric: {}},
   buttons: {
     perMetricButtons: {
 //       rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.3,0.2,0.1],
 //       rush:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.75,0.25,-0.25,-0.5,-0.75,-1,-2],
-      rush:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1],
-      mood:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1],
-      social:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1],
-      energy:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1],
-      focus:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1],
-      anxiety:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1],
-      impair:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.25,-0.25,-0.5,-1],
+      rush:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      mood:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      social:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      energy:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      focus:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      anxiety:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      impair:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -975,7 +955,7 @@ labels: {
     },
 //     rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
 //     rapidValues: [6,5,4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,0.5,0],
-    rapidValues: [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25],
+    rapidValues: [6,5,4,3,2,1,0,'',-0.25],
 
 
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
@@ -6234,7 +6214,7 @@ window.openAllRated10MinutesPopup = function(){
 // BOOKMARK
   // Configure which metrics/values Rush Mode shows (independent of Rapid)
   const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const RUSH_MODE_VALUES  = [6,5,4,3,2,1,0];
+  const RUSH_MODE_VALUES  = [6,5,4,3,2,1,0,'',0.25];
 
   // Local, Rush-Mode-only selections
   const rushModeSelections = Object.create(null);
@@ -9778,7 +9758,7 @@ function applyUnlockedAndAddStay(){
 </div>  <script id="fast-mode-logic">
 (function(){
   const FAST_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const FAST_MODE_VALUES  = [4.60,4.10,3.10,2.10,1.10,0.60,0.009];
+  const FAST_MODE_VALUES  = [6.1,5.1,4.1,3.1,2.1,1.1,0.1];
 
   const fastModeSelections = Object.create(null);
 
@@ -10589,3 +10569,218 @@ btn.classList.add('metric-btn');
   } else { boot(); }
 })();
 </script>
+
+<!-- === STS: Metric Button Order Preferences (auto-injected, 2025/11/05 08:00:00 AEST) === -->
+<style>
+  #btnOrderGear{position:fixed; right:68px; bottom:18px; z-index:9999; width:42px; height:42px; border-radius:50%;
+    border:1px solid rgba(0,0,0,0.2); background:#fff; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,0.2);
+    display:flex; align-items:center; justify-content:center; font-size:20px;}
+  #btnOrderModal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); z-index:10000;}
+  #btnOrderCard{width:min(900px,92vw); max-height:86vh; overflow:auto; background:#fff; border-radius:10px; padding:16px 18px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35); font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif;}
+  #btnOrderCard h2{margin:0 0 10px 0;}
+  .bo-row{display:grid; grid-template-columns: 160px 1fr; gap:10px; margin:8px 0; align-items:center;}
+  .bo-controls{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+  .bo-controls button{padding:6px 10px; border-radius:6px; border:1px solid #ccc; background:#f7f7f7; cursor:pointer;}
+  #bo-preview{border:1px solid #ddd; border-radius:8px; padding:8px; max-height:240px; overflow:auto; font-size:12px; background:#fafafa;}
+  #bo-status{font-size:12px; opacity:0.75; margin-top:6px;}
+  .bo-badge{display:inline-block; padding:3px 6px; border-radius:6px; background:#eee; margin:2px; border:1px solid #ddd;}
+</style>
+<div id="btnOrderModal" role="dialog" aria-modal="true" aria-labelledby="bo-title">
+  <div id="btnOrderCard">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+      <h2 id="bo-title">Metric Button Order</h2>
+      <button id="bo-close" title="Close" style="border:1px solid #ccc; background:#fff; border-radius:6px; padding:6px 10px; cursor:pointer;">×</button>
+    </div>
+    <div class="bo-row">
+      <label for="bo-metric">Metric</label>
+      <select id="bo-metric"></select>
+    </div>
+    <div class="bo-row">
+      <label for="bo-values">Values (comma‑separated)</label>
+      <input id="bo-values" type="text" placeholder="e.g., 6,5.5,'',5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0" style="width:100%;"/>
+    </div>
+    <div class="bo-controls">
+      <button id="bo-load-default">Load defaults</button>
+      <button id="bo-reset-metric">Reset metric override</button>
+      <button id="bo-save-apply" style="background:#007aff; color:#fff; border:none;">Save & Apply</button>
+    </div>
+    <div id="bo-preview"></div>
+    <div id="bo-status"></div>
+  </div>
+</div>
+<button id="btnOrderGear" title="Button Order">⚙︎</button>
+<script>
+(function(){
+  // Parse helper: supports numbers and empty-string token '' for gaps
+  function parseList(str){
+    if (!str) return [];
+    return str.split(/[,\\s]+/).filter(s=>s.length>0).map(tok=>{
+      if (tok === "''" or tok == "“”" or tok == '""') return '';
+      if (tok === "''" || tok === "“”" || tok === '""' || tok === '–' || tok === '—') return '';
+      if (tok === "''" || tok === "''") return ''; // redundant safe-guards
+      if (tok === "''") return '';
+      if (tok === "''") return '';
+      if (tok === "''") return '';
+      // allow bare '' typed without quotes as two apostrophes
+      if (tok == "''") return '';
+      // allow plus/minus tokens like + or - to pass through as symbols
+      if (tok === '+' || tok === '-') return tok;
+      const n = Number(tok);
+      return Number.isFinite(n) ? n : tok;
+    });
+  }
+  function listToString(arr){
+    return (Array.isArray(arr)?arr:[]).map(v => (v===''? "''" : String(v))).join(', ');
+  }
+  function getDefaultButtons(metric){
+    try{
+      if (typeof getMetricButtons === 'function'){
+        // getMetricButtons already resolves localStorage; we want the PROJECT defaults:
+        // try to read hard defaults if exposed; else fall back to CONFIG.*
+        if (window.CONFIG && CONFIG.buttons && CONFIG.buttons.perMetricButtons && CONFIG.buttons.perMetricButtons[metric]){
+          return CONFIG.buttons.perMetricButtons[metric].slice();
+        }
+      }
+    }catch(e){}
+    // r2490 unified config
+    try{
+      if (window.CONFIG && Array.isArray(CONFIG.values) && CONFIG.values.length){
+        return CONFIG.values.slice();
+      }
+    }catch(e){}
+    // final fallback
+    return [6,5,4,3,2,1,0];
+  }
+  function getCurrentButtons(metric){
+    // Prefer runtime override in localStorage
+    try{
+      const data = JSON.parse(localStorage.getItem('metricButtonOrder')||'{}');
+      if (data && Array.isArray(data[metric])) return data[metric].slice();
+    }catch(e){}
+    // Else project defaults
+    return getDefaultButtons(metric);
+  }
+  function saveButtons(metric, arr){
+    try{
+      // If app exposes saveMetricButtons, use it so any in-app hooks fire
+      if (typeof saveMetricButtons === 'function'){ saveMetricButtons(metric, arr); return; }
+    }catch(e){}
+    // else write to localStorage using same schema
+    try{
+      const data = (()=>{ try { return JSON.parse(localStorage.getItem('metricButtonOrder')||'{}'); } catch(e){ return {}; } })();
+      data[metric] = Array.isArray(arr) ? arr.slice() : [];
+      localStorage.setItem('metricButtonOrder', JSON.stringify(data));
+    }catch(e){ console.warn(e); }
+  }
+  function resetMetric(metric){
+    try{
+      const data = (()=>{ try { return JSON.parse(localStorage.getItem('metricButtonOrder')||'{}'); } catch(e){ return {}; } })();
+      delete data[metric];
+      localStorage.setItem('metricButtonOrder', JSON.stringify(data));
+    }catch(e){ console.warn(e); }
+  }
+  function rebuildGrids(){
+    try{ if (typeof buildButtons === 'function') buildButtons(); }catch(e){}
+    try{
+      const rapid = document.getElementById('rapidScoresModal');
+      if (rapid && typeof buildRapidScoresButtons === 'function') buildRapidScoresButtons();
+    }catch(e){}
+  }
+  // UI wiring
+  const gear = document.getElementById('btnOrderGear');
+  const modal = document.getElementById('btnOrderModal');
+  const closeBtn = document.getElementById('bo-close');
+  const metricSel = document.getElementById('bo-metric');
+  const valuesInp = document.getElementById('bo-values');
+  const preview = document.getElementById('bo-preview');
+  const status = document.getElementById('bo-status');
+  const resetBtn = document.getElementById('bo-reset-metric');
+  const loadBtn = document.getElementById('bo-load-default');
+  const saveBtn = document.getElementById('bo-save-apply');
+
+  function setStatus(msg){ try{ status.textContent = msg || ''; }catch(e){} }
+
+  function refreshPreview(arr){
+    preview.innerHTML = '';
+    const list = Array.isArray(arr)?arr:[];
+    const wrap = document.createElement('div');
+    list.forEach(v=>{
+      const span = document.createElement('span');
+      span.className = 'bo-badge';
+      span.textContent = (v===''? "''" : String(v));
+      wrap.appendChild(span);
+    });
+    preview.appendChild(wrap);
+  }
+
+  function populateMetrics(){
+    // Prefer app-defined metric list
+    let list = [];
+    try{ if (Array.isArray(window.metrics)) list = window.metrics.slice(); }catch(e){}
+    if (!list.length){
+      try{
+        if (window.CONFIG){
+          if (Array.isArray(CONFIG.core?.metrics)) list = CONFIG.core.metrics.slice();
+          else if (Array.isArray(CONFIG.metrics)) list = CONFIG.metrics.slice();
+        }
+      }catch(e){}
+    }
+    if (!list.length) list = ['rush','mood','social','energy','focus','anxiety','impair'];
+    metricSel.innerHTML = '';
+    list.forEach(m=>{
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = m.charAt(0).toUpperCase()+m.slice(1);
+      metricSel.appendChild(opt);
+    });
+  }
+
+  function loadMetric(m){
+    const cur = getCurrentButtons(m);
+    valuesInp.value = listToString(cur);
+    refreshPreview(cur);
+    setStatus('');
+  }
+
+  function open(){
+    populateMetrics();
+    const m = metricSel.value || metricSel.options[0]?.value || 'rush';
+    loadMetric(m);
+    modal.style.display = 'flex';
+  }
+  function close(){ modal.style.display = 'none'; }
+
+  gear?.addEventListener('click', open);
+  closeBtn?.addEventListener('click', close);
+  modal?.addEventListener('click', (e)=>{ if (e.target === modal) close(); });
+  metricSel?.addEventListener('change', ()=> loadMetric(metricSel.value));
+  loadBtn?.addEventListener('click', ()=>{
+    const m = metricSel.value;
+    const def = getDefaultButtons(m);
+    valuesInp.value = listToString(def);
+    refreshPreview(def);
+    setStatus('Loaded defaults for '+m);
+  });
+  resetBtn?.addEventListener('click', ()=>{
+    const m = metricSel.value;
+    resetMetric(m);
+    const cur = getCurrentButtons(m);
+    valuesInp.value = listToString(cur);
+    refreshPreview(cur);
+    setStatus('Reset override for '+m);
+    rebuildGrids();
+  });
+  valuesInp?.addEventListener('input', ()=>{
+    const arr = parseList(valuesInp.value);
+    refreshPreview(arr);
+  });
+  saveBtn?.addEventListener('click', ()=>{
+    const m = metricSel.value;
+    const arr = parseList(valuesInp.value);
+    saveButtons(m, arr);
+    setStatus('Saved override for '+m);
+    rebuildGrids();
+  });
+})();
+</script>
+<!-- === /STS: Metric Button Order Preferences === -->
