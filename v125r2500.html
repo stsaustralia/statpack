@@ -1,4 +1,40 @@
 <script>
+/* ===== Unified CONFIG (2025/10/31 12:00:00) ===== */
+(() => {
+  'use strict';
+
+  Object.defineProperty(window,'CONFIG',{ value:CONFIG, writable:false, enumerable:true });
+
+  // Back-compat for any legacy reads
+  if (!window.STS_UI) window.STS_UI = { table: CONFIG.ui.table };
+})();
+</script>
+
+<!-- Shared UI rules -->
+<style>
+  :root {
+    --metric-btn-min-w: 64px;
+    --metric-btn-min-h: 30px;
+    --metric-btn-pad-b: 6px;
+    --metric-btn-pad-i: 10px;
+    --metric-btn-font: 0.95rem;
+    --metric-btn-gap: 6px;
+  }
+/* Modal-scoped metric button styles */
+.modal .metric-btn,
+.modal-content .metric-btn {
+  min-width: var(--metric-btn-min-w);
+  min-height: var(--metric-btn-min-h);
+  padding-block: var(--metric-btn-pad-b);
+  padding-inline: var(--metric-btn-pad-i);
+  font-size: var(--metric-btn-font);
+}
+
+
+  .metric-grid { display:grid; grid-auto-flow:column; gap:var(--metric-btn-gap); align-items:start; }
+</style>
+
+<script>
 /* Central config for popups/windows (non-breaking defaults) */
 window.CONFIG = window.CONFIG || {};
 CONFIG.popups = Object.assign({
@@ -444,7 +480,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.20.4 r2467</title>
+<title>statpack v1.25 r2500</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -529,7 +565,7 @@ BOOKMARK
   #rapidScoresModal .score-column button {
     width: 175px;
     height: 30px;
-    font-size: 12px;
+    font-size: 13px;
   }
 </style>
 
@@ -538,7 +574,7 @@ BOOKMARK
   /* Scoped size overrides for Unlocked Mode modal buttons only */
   #unlockedModeModal .score-column button {
     width: 175px;
-    height: 30;
+    height: 30px;
     font-size: 13px;
   }
 </style>
@@ -549,7 +585,7 @@ BOOKMARK
     height: 30px;
     font-size: 13px;
   }
-</style>
+</style> \1
 <body>
 
 <!-- Column Chooser UI -->
@@ -866,15 +902,15 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Uncontrollable', 3.50: 'Intense', 3.00: 'Energetic', 2.50: 'Controllable', 2.00: 'Physical', 1.50: 'Mild/Light', 1.00: 'Mental', 0.50: 'Maybe', 0.00: 'No Rush', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  mood: { 6.00: 'Autopilot', 5.00: 'Euphoric', 4.50: 'Exceptional', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Motivated', 2.00: 'Certain', 1.50: 'Felt', 1.00: 'Thought', 0.50: 'Noticed', 0.00: 'No Change', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.50: 'Uninhibited', 4.00: 'Outgoing', 3.50: 'Proactive', 3.00: 'Empathy/Social', 2.50: 'Push/Urge', 2.00: 'Sociable', 1.50: 'Capable/Able', 1.00: 'Some', 0.50: 'Functional', 0.00: 'No/Avoidant', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Hyper', 3.50: 'Very Acive', 3.00: 'Energetic', 2.50: 'Significant', 2.00: 'Moderate', 1.50: 'Some', 1.00: 'Alert', 0.50: 'Inactive', 0.00: 'None/Tired', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  focus: { 6.00: 'Laser', 5.00: 'Wired', 4.50: 'Very Strong', 4.00: 'Obsessive', 3.50: 'Locked', 3.00: 'Focused', 2.50: 'Fixate/Focus', 2.00: 'Concentrating', 1.50: 'Effective', 1.00: 'Capable', 0.50: 'Effort', 0.00: 'None/Scattered', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  anxiety: { 6.00: 'Severe', 5.00: 'Panic', 4.50: 'Domianting', 4.00: 'Paranoid', 3.50: 'Impact Behaviour', 3.00: 'Anxious', 2.50: 'Affect Choices', 2.00: 'Distracting', 1.50: 'With Effort', 1.00: 'Ignorable', 0.50: 'Negligible', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  impair: { 6.00: 'Dangerous', 5.00: 'Controlling', 4.50: 'Dominating', 4.00: 'Dominating', 3.50: 'Impact Behaviour', 3.00: 'Impact Behaviour', 2.50: 'Affect Choices', 2.00: 'Affect Choices', 1.50: 'Physical', 1.00: 'Mental', 0.50: 'Negligible', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  change: { 5.00: 'Autopilot', 4.00: 'Dopamine', 3.00: 'Positive', 2.00: 'Shakes', 1.00: 'Effect Noticed', 0.00: 'No Change' },
-  degree: { 5.00: 'Autopilot', 4.00: 'Controlling', 3.00: 'Dominating', 2.00: 'Significant', 1.00: 'Maybe', 0.00: 'None' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme/Frenzied', 4.00: 'Intense, Uncontrollable', 3.00: 'Strong/Physical', 2.00: 'Mental/Controlled', 1.00: 'Some/Mild', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  mood: { 6.00: 'Autopilot', 5.00: 'Euphoria', 4.00: 'Obvious/Blatant', 3.00: 'Clear/Distinct', 2.00: 'Required Thinking', 1.00: 'Maybe/Slight', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  social: { 6.00: 'Disinhibited', 5.00: 'Natural/Outgoing', 4.00: 'Social/Empathy', 3.00: 'Feel/Urge/Push', 2.00: 'Think/Want', 1.00: 'Maybe/Slight', 0.00: 'No', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  energy: { 6.00: 'Overdrive', 5.00: 'Extreme/Manic', 4.00: 'Energetic/Active', 3.00: 'High', 2.00: 'Moderate or Active', 1.00: 'Some/Low', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  focus: { 6.00: 'Laser', 5.00: 'Wired', 4.00: 'Strong/Obsessive/', 3.00: 'High/Focused', 2.00: 'Moderate or Active', 1.00: 'Some/Low', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  anxiety: { 6.00: 'Crippling', 5.00: 'Panic/Fear/Feel', 4.00: 'Anxious/Paranoia/Impaired', 3.00: 'Clear Hinderance', 2.00: 'Some/Ignorable/Low', 1.00: 'Negligible/Minimal', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  impair: { 6.00: 'Health Concerns', 5.00: 'Crippled', 4.00: 'Impactiung Behaviour/Choices', 3.00: 'Affecting/Adverse/', 2.00: 'Minor Impaorment or Tremor', 1.00: 'Negligible/Minimal', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  change: { 5.00: 'Hindsight', 4.00: 'Obvious', 3.00: 'Prominent', 2.00: 'Thought', 1.00: 'Noticed', 0.00: 'None' },
+  degree: { 5.00: 'Autopilot', 4.00: 'Dominating', 3.00: 'Strong', 2.00: 'Significant', 1.00: 'Maybe', 0.00: 'None' },
   other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Late', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
   confidence: { 5.00: 'A', 4.00: 'B', 3.00: 'C', 2.00: 'D', 1.00: 'E', 0.00: 'F' },
   auto: { 5.00: 'Autopilot', 4.00: 'Yes', 3.00: 'Physical', 2.00: 'Mental', 1.00: 'Maybe', 0.00: 'No' },
@@ -882,15 +918,15 @@ labels: {
   dopamine: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
     }
 , rapidLabels: {
-  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Uncontrollable', 3.50: 'Intense', 3.00: 'Energetic', 2.50: 'Controllable', 2.00: 'Physical', 1.50: 'Mild/Light', 1.00: 'Mental', 0.50: 'Maybe', 0.00: 'No Rush', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  mood: { 6.00: 'Autopilot', 5.00: 'Euphoric', 4.50: 'Exceptional', 4.00: 'Obvious', 3.50: 'Distinct', 3.00: 'Clear', 2.50: 'Motivated', 2.00: 'Certain', 1.50: 'Felt', 1.00: 'Thought', 0.50: 'Noticed', 0.00: 'No Change', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.50: 'Uninhibited', 4.00: 'Outgoing', 3.50: 'Proactive', 3.00: 'Empathy/Social', 2.50: 'Push/Urge', 2.00: 'Sociable', 1.50: 'Capable/Able', 1.00: 'Some', 0.50: 'Functional', 0.00: 'No/Avoidant', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Hyper', 3.50: 'Very Acive', 3.00: 'Energetic', 2.50: 'Significant', 2.00: 'Moderate', 1.50: 'Some', 1.00: 'Alert', 0.50: 'Inactive', 0.00: 'None/Tired', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  focus: { 6.00: 'Laser', 5.00: 'Wired', 4.50: 'Very Strong', 4.00: 'Obsessive', 3.50: 'Locked', 3.00: 'Focused', 2.50: 'Fixate/Focus', 2.00: 'Concentrating', 1.50: 'Effective', 1.00: 'Capable', 0.50: 'Effort', 0.00: 'None/Scattered', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  anxiety: { 6.00: 'Severe', 5.00: 'Panic', 4.50: 'Domianting', 4.00: 'Paranoid', 3.50: 'Impact Behaviour', 3.00: 'Anxious', 2.50: 'Affect Choices', 2.00: 'Distracting', 1.50: 'With Effort', 1.00: 'Ignorable', 0.50: 'Negligible', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  impair: { 6.00: 'Dangerous', 5.00: 'Controlling', 4.50: 'Dominating', 4.00: 'Dominating', 3.50: 'Impact Behaviour', 3.00: 'Impact Behaviour', 2.50: 'Affect Choices', 2.00: 'Affect Choices', 1.50: 'Physical', 1.00: 'Mental', 0.50: 'Negligible', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
-  change: { 5.00: 'Autopilot', 4.00: 'Dopamine', 3.00: 'Positive', 2.00: 'Shakes', 1.00: 'Effect Noticed', 0.00: 'No Change' },
-  degree: { 5.00: 'Autopilot', 4.00: 'Controlling', 3.00: 'Dominating', 2.00: 'Significant', 1.00: 'Maybe', 0.00: 'None' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme/Frenzied', 4.00: 'Intense, Uncontrollable', 3.00: 'Strong/Physical', 2.00: 'Mental/Controlled', 1.00: 'Some/Mild', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  mood: { 6.00: 'Autopilot', 5.00: 'Euphoria', 4.00: 'Obvious/Blatant', 3.00: 'Clear/Distinct', 2.00: 'Required Thinking', 1.00: 'Maybe/Slight', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  social: { 6.00: 'Disinhibited', 5.00: 'Natural/Outgoing', 4.00: 'Social/Empathy', 3.00: 'Feel/Urge/Push', 2.00: 'Think/Want', 1.00: 'Maybe/Slight', 0.00: 'No', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  energy: { 6.00: 'Overdrive', 5.00: 'Extreme/Manic', 4.00: 'Energetic/Active', 3.00: 'High', 2.00: 'Moderate or Active', 1.00: 'Some/Low', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  focus: { 6.00: 'Laser', 5.00: 'Wired', 4.00: 'Strong/Obsessive/', 3.00: 'High/Focused', 2.00: 'Moderate or Active', 1.00: 'Some/Low', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  anxiety: { 6.00: 'Crippling', 5.00: 'Panic/Fear/Feel', 4.00: 'Anxious/Paranoia/Impaired', 3.00: 'Clear Hinderance', 2.00: 'Some/Ignorable/Low', 1.00: 'Negligible/Minimal', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  impair: { 6.00: 'Health Concerns', 5.00: 'Crippled', 4.00: 'Impactiung Behaviour/Choices', 3.00: 'Affecting/Adverse/', 2.00: 'Minor Impaorment or Tremor', 1.00: 'Negligible/Minimal', 0.00: 'None', 6.10: 'Ultra', 5.10: 'Extreme', 4.10: 'Very High', 3.10: 'High', 2.10: 'Medium', 1.10: 'Low', 0.10: 'None' },
+  change: { 5.00: 'Hindsight', 4.00: 'Obvious', 3.00: 'Prominent', 2.00: 'Thought', 1.00: 'Noticed', 0.00: 'None' },
+  degree: { 5.00: 'Autopilot', 4.00: 'Dominating', 3.00: 'Strong', 2.00: 'Significant', 1.00: 'Maybe', 0.00: 'None' },
   other: { 5.00: 'Now', 4.00: 'Last', 3.00: 'Late', 2.00: 'Hit', 1.00: 'Dose', 0.00: 'After' },
   confidence: { 5.00: 'A', 4.00: 'B', 3.00: 'C', 2.00: 'D', 1.00: 'E', 0.00: 'F' },
   auto: { 5.00: 'Autopilot', 4.00: 'Yes', 3.00: 'Physical', 2.00: 'Mental', 1.00: 'Maybe', 0.00: 'No' },
@@ -902,13 +938,13 @@ labels: {
     perMetricButtons: {
 //       rush:[5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.3,0.2,0.1],
 //       rush:[6,5,4.5,4,'',3.5,3,2.5,2,'',1.5,1,0.5,0,'','',0.75,0.25,-0.25,-0.5,-0.75,-1,-2],
-      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1],
-      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1],
-      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1],
-      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1],
-      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1],
-      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1],
-      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1],
+      rush:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      mood:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      social:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      energy:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      focus:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      anxiety:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
+      impair:[6,5,4,3,2,1,0,'',0.25,'',6.1,5.1,4.1,3.1,2.1,1.1,0.1,'',4.5,3.5,2.5,1.5,0.5],
       confidence:[5,4,3,2,1,0],
       auto:[5,4,3,2,1,0],
       jitter:[5,4,3,2,1,0],
@@ -919,7 +955,7 @@ labels: {
     },
 //     rapidValues: [5,4.5,4,'',3.5,3,2.5,'',2,1.5,1,0.5,0],
 //     rapidValues: [6,5,4.5,4,'',3.5,3,'',2.5,2,'',1.5,1,0.5,0],
-    rapidValues: [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25],
+    rapidValues: [6,5,4,3,2,1,0,'',-0.25],
 
 
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
@@ -1116,9 +1152,10 @@ function getSum(arr) {
            getMetricButtons(f).forEach(v => {
 
                 const b = document.createElement('button');
+b.classList.add('metric-btn');
                 let customLabel = '';
 // if (v === 7.02) customLabel = 'Ultra Extreme';
-if (v === -111) customLabel = '-';
+// if (v === -111) customLabel = '-';
 // if (v === -0.25) customLabel = '-';
 // if (v === -0.75) customLabel = '-';
 // if (v === -0.5) customLabel = '-';
@@ -1189,6 +1226,7 @@ b.innerText = `${v}: ${customLabel}`;
         const extra = CONFIG.notes.extra;
         extra.forEach(lbl => {
             const b = document.createElement('button');
+b.classList.add('metric-btn');
             b.className = 'note-btn';
             b.innerText = lbl;
             b.setAttribute('data-category', 'gold');
@@ -1214,6 +1252,7 @@ b.innerText = `${v}: ${customLabel}`;
         const darkLabels = CONFIG.notes.dark;
         darkLabels.forEach(lbl => {
             const b = document.createElement('button');
+b.classList.add('metric-btn');
             b.className = 'note-btn';
             b.innerText = lbl;
             b.setAttribute('data-category', 'dose');
@@ -1239,6 +1278,7 @@ b.innerText = `${v}: ${customLabel}`;
         const blueLabels = CONFIG.notes.blue;
         blueLabels.forEach(lbl => {
             const b = document.createElement('button');
+b.classList.add('metric-btn');
             b.className = 'note-btn';
             b.innerText = lbl;
             b.setAttribute('data-category', 'blue');
@@ -1263,6 +1303,7 @@ b.innerText = `${v}: ${customLabel}`;
         const redLabels = CONFIG.notes.red;
         redLabels.forEach(lbl => {
             const b = document.createElement('button');
+b.classList.add('metric-btn');
             b.className = 'note-btn';
             b.innerText = lbl;
             b.setAttribute('data-category', 'red');
@@ -1285,6 +1326,7 @@ b.innerText = `${v}: ${customLabel}`;
 const greenLabels = CONFIG.notes.green;
         greenLabels.forEach(lbl => {
             const b = document.createElement('button');
+b.classList.add('metric-btn');
             b.className = 'note-btn';
             b.innerText = lbl;
             b.setAttribute('data-category', 'green');
@@ -1307,6 +1349,7 @@ const greenLabels = CONFIG.notes.green;
 const orangeLabels = CONFIG.notes.orange;
         orangeLabels.forEach(lbl => {
             const b = document.createElement('button');
+b.classList.add('metric-btn');
             b.className = 'note-btn';
             b.innerText = lbl;
             b.setAttribute('data-category', 'orange');
@@ -1330,6 +1373,7 @@ const yellowLabels = CONFIG.notes.yellow;
 // Purple category labels
 yellowLabels.forEach(lbl => {
             const b = document.createElement('button');
+b.classList.add('metric-btn');
             b.className = 'note-btn';
             b.textContent = lbl;
             b.setAttribute('data-category', 'yellow');
@@ -1357,6 +1401,7 @@ const purpleLabels = CONFIG.notes.purple;
     const purpleContainer = document.querySelector('#extraNoteButtons');
     purpleLabels.forEach(label => {
       const btn = document.createElement('button');
+btn.classList.add('metric-btn');
       btn.type = 'button';
       btn.textContent = label;
       btn.dataset.category = 'purple';
@@ -1912,6 +1957,7 @@ function buildRapidScoresButtons(){
       col.appendChild(t);
       RAPID_VALUES.forEach(v => {
         const b = document.createElement('button');
+b.classList.add('metric-btn');
         const label = (RAPID_LABELS[metric] && RAPID_LABELS[metric][v] != null) ? RAPID_LABELS[metric][v] : ((labelMappings[metric] && labelMappings[metric][v] != null) ? labelMappings[metric][v] : "");
         b.innerText = `${v}: ${label}`;
         b.onclick = () => {
@@ -2094,37 +2140,49 @@ function formatMinuteLabel(d){
 
 // === Snapshot strictly from the MAIN TABLE DOM ===
 // Never read from popup or auto-dock.
-function snapshotFromMainTable(){
-  const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
-  return rows.map(tr => {
-    const ts = +(tr.getAttribute('data-ts')||0);
-    const get = (field) => {
-      const td = tr.querySelector(`td[data-field="${field}Sum"]`);
-      if (!td) return null;
-      const raw = td.getAttribute('data-value');
-      const v = raw != null ? parseFloat(raw) : parseFloat(td.textContent);
-      return Number.isFinite(v) ? v : null;
-    };
-    const pack = {
-      _ts: ts,
-      rush: get('rush'),
-      mood: get('mood'),
-      social: get('social'),
-      energy: get('energy'),
-      focus: get('focus'),
-      anxiety: get('anxiety'),
-      impair: get('impair'),
-    };
-    // annotate completeness from the DOM row
-    pack._complete = (typeof countCompletedMetricsFromRow === 'function') ? countCompletedMetricsFromRow(tr) : (['rush','mood','social','energy','focus','anxiety','impair'].reduce((n,f)=>{
-      const val = pack[f];
-      return n + ((val !== null && val !== undefined) ? 1 : 0);
-    },0));
-    return pack;
-  })
-  .filter(o => o._ts > 0 && (o._complete >= 7));
-}
+function snapshotFromMainTable() {
+  const table = document.querySelector(CFG.mainTableSelector);
+  if (!table) return [];
 
+  const thead = table.tHead || table.querySelector('thead');
+  const tbody = table.tBodies?.[0] || table.querySelector('tbody');
+
+  let headers = [];
+  if (thead) {
+    headers = Array.from(thead.querySelectorAll('th')).map(th => th.textContent.trim());
+  } else {
+    const firstRow = table.querySelector('tr');
+    if (firstRow) headers = Array.from(firstRow.cells).map(td => td.textContent.trim());
+  }
+  if (!headers.length) return [];
+
+  const tsIdx = (() => {
+    const wanted = (window.CONFIG?.backfill?.timestampHeaderNames) || CFG.tsHeaderNames;
+    const idxExact = headers.findIndex(h => wanted.some(n => h.toLowerCase() === n.toLowerCase()));
+    if (idxExact >= 0) return idxExact;
+    const idxContains = headers.findIndex(h => /time|timestamp/i.test(h));
+    return idxContains;
+  })();
+  if (tsIdx < 0) return [];
+
+  const rowEls = tbody ? Array.from(tbody.rows)
+                       : Array.from(table.querySelectorAll('tr')).slice(1);
+  const rows = [];
+  for (const tr of rowEls) {
+    if (tr.classList?.contains('backfill-summary-row')) continue;
+    const tds = Array.from(tr.cells);
+    if (tds.length <= tsIdx) continue;
+    const cells = tds.map(td => td.textContent.trim());
+    const ts = parseLocalAU(cells[tsIdx], tds[tsIdx]);
+    if (ts) rows.push({_ts: ts.getTime(), tr, cells});
+  }
+  rows.sort((a,b)=>a._ts-b._ts);
+
+  if (!rows.length) {
+    console.warn('[Backfill] Snapshot empty. Headers=', headers, 'tsIdx=', tsIdx, 'rowCount=', rowEls.length);
+  }
+  return rows;
+}
 // Means over window [startMs, endMs)
 function computeMeansForWindow(startMs, endMs){
   const snap = snapshotFromMainTable();
@@ -2277,7 +2335,9 @@ function computeCompositeFromMeans(M){
   const btn = document.getElementById('backfillBtn');
   if (btn){
     btn.addEventListener('click', function(ev){
-      if (typeof window.backfillAll === 'function') window.backfillAll(ev);
+      if (typeof /* legacy backfill implementation superseded on 2025/10/31 START */
+window.backfillAll === 'function') window.backfillAll(ev);
+/* legacy backfill implementation superseded on 2025/10/31 END */
     });
   }
 });
@@ -2393,15 +2453,18 @@ function ensureSummaryPopup(){
   const controls = document.createElement("div");
 
   const exportBtn = document.createElement("button");
+exportBtn
   exportBtn.textContent = "Export CSV";
   exportBtn.onclick = exportPopupCSV;
 
   const autoBtn = document.createElement("button");
+autoBtn
   autoBtn.id = "autoSummaryBtn";
   autoBtn.textContent = autoSummaryActive ? "Auto (On)" : "Auto (Off)";
   autoBtn.onclick = toggleAutoSummary;
 
   const closeBtn = document.createElement("button");
+closeBtn
   closeBtn.textContent = "×";
   closeBtn.style.marginLeft = "8px";
   closeBtn.onclick = ()=>popup.remove();
@@ -2409,11 +2472,13 @@ function ensureSummaryPopup(){
   controls.appendChild(exportBtn);
 
   const instant5Btn = document.createElement("button");
+instant5Btn
   instant5Btn.textContent = "5m Now";
   instant5Btn.onclick = ()=>appendInstantSummaryToPopup(5);
   controls.appendChild(instant5Btn);
 
   const instant15Btn = document.createElement("button");
+instant15Btn
   instant15Btn.textContent = "15m Now";
   instant15Btn.onclick = ()=>appendInstantSummaryToPopup(15);
   controls.appendChild(instant15Btn);
@@ -2606,9 +2671,11 @@ window.toggleAutoSummary = toggleAutoSummary;
     head.innerHTML = `<strong>Statistical Analysis (5m)</strong>`;
     const controls = document.createElement("div");
     const exportBtn = document.createElement("button");
+exportBtn.classList.add('metric-btn');
     exportBtn.textContent = "Export CSV";
     exportBtn.onclick = exportStatCSV;
     const closeBtn = document.createElement("button");
+closeBtn.classList.add('metric-btn');
     closeBtn.textContent = "×";
     closeBtn.style.marginLeft = "8px";
     closeBtn.onclick = ()=>popup.remove();
@@ -2855,9 +2922,11 @@ function snapshotWithExtras(){
     head.innerHTML = `<strong>Statistical Analysis (60m)</strong>`;
     const controls = document.createElement("div");
     const exportBtn = document.createElement("button");
+exportBtn
     exportBtn.textContent = "Export CSV";
     exportBtn.onclick = exportStatHourCSV;
     const closeBtn = document.createElement("button");
+closeBtn
     closeBtn.textContent = "×";
     closeBtn.style.marginLeft = "8px";
     closeBtn.onclick = ()=>popup.remove();
@@ -3111,9 +3180,11 @@ function snapshotWithExtras(){
     head.innerHTML = `<strong>Summary Significant 5m</strong>`;
     const controls = document.createElement("div");
     const exportBtn = document.createElement("button");
+exportBtn
     exportBtn.textContent = "Export CSV";
     exportBtn.onclick = exportSignificant5mCSV;
     const closeBtn = document.createElement("button");
+closeBtn
     closeBtn.textContent = "×";
     closeBtn.style.marginLeft = "8px";
     closeBtn.onclick = ()=>popup.remove();
@@ -6176,6 +6247,7 @@ window.openAllRated10MinutesPopup = function(){
         col.appendChild(t);
         RUSH_MODE_VALUES.forEach(v=>{
           const b = document.createElement('button');
+b
           const label = getRushModeLabel(metric, v);
           b.innerText = `${v}: ${label}`;
           b.onclick = ()=>{
@@ -6335,35 +6407,9 @@ BOOKMARK
 
 
 
-<script id="rush-mode-position">
-document.addEventListener('DOMContentLoaded', function(){
-  try{
-    const rushBtn  = document.getElementById('rushModeBtn');
-    if (!rushBtn) return;
 
-    const candidates = [
-      document.getElementById('rapidScoresBtn'),
-      document.querySelector('button[onclick*="openRapidScores"]'),
-      document.querySelector('button[data-target="#rapidScoresModal"]'),
-      document.querySelector('#rapidScoresModal')?.closest('div,section,form')?.querySelector('button')
-    ].filter(Boolean);
+<!-- Legacy Unlocked toolbar injection removed (2025/10/31). Permanent header button is canonical. -->
 
-    if (candidates.length){
-      const rapidBtn = candidates[0];
-      // Try to mirror classes for consistent size/spacing if Rapid button has classes
-      try{ if (rapidBtn.className && rapidBtn.className.length) rushBtn.className = rapidBtn.className; }catch(e){}
-      rapidBtn.insertAdjacentElement('afterend', rushBtn);
-      return;
-    }
-
-    // Fallback: append to a toolbar-like container
-    const toolbars = document.querySelectorAll('.toolbar, .controls, header, nav');
-    for (const tb of toolbars){
-      if (tb.querySelector('button')){ tb.appendChild(rushBtn); return; }
-    }
-  }catch(e){ console.warn(e); }
-});
-</script>
 
 
 <script id="dose-review-segmentation">
@@ -6513,6 +6559,7 @@ document.addEventListener('click', function(ev){
   function ensureRunningAverageButton(){
     if (document.getElementById('runningAverageBtn')) return;
     var btn = document.createElement('button');
+btn
     btn.id = 'runningAverageBtn';
     btn.type = 'button';
     btn.textContent = 'Running Average';
@@ -6756,10 +6803,12 @@ document.addEventListener('click', function(ev){
 // Timestamp: 2025/10/18 00:00:00
 (function(){
   if (typeof window.backfillAll !== 'function') {
-    window.backfillAll = function(){
+    /* legacy backfill implementation superseded on 2025/10/31 START */
+window.backfillAll = function(){
       try {
         if (typeof window.backfillAllImpl === 'function') {
           return window.backfillAllImpl();
+/* legacy backfill implementation superseded on 2025/10/31 END */
         }
         var helper = (typeof window.backfillWindow === 'function') ? window.backfillWindow
                    : (typeof backfillWindow === 'function') ? backfillWindow
@@ -6782,7 +6831,9 @@ document.addEventListener('click', function(ev){
       var el = ev.target;
       if (!el || !el.id) return;
       if (el.id === 'backfillBtnGlobal' || el.id === 'backfillBtn' || /^backfillBtn\d+$/.test(el.id)) {
-        if (typeof window.backfillAll === 'function') window.backfillAll();
+        if (typeof /* legacy backfill implementation superseded on 2025/10/31 START */
+window.backfillAll === 'function') window.backfillAll();
+/* legacy backfill implementation superseded on 2025/10/31 END */
       }
     }catch(e){}
   }, true);
@@ -7216,249 +7267,9 @@ document.addEventListener('click', function(ev){
 })();
 </script>
 <!-- Unlocked Mode Module (2025/10/21 15:50:00) -->
-<script>
-(() => {
-  'use strict';
-  const MODAL_ID = 'unlockedModeModal';
-  const BTN_ID = 'unlockedModeBtn';
-  const TITLE = 'Unlocked Mode';
-  const METRICS = [
-    { field: 'rushSum',    label: 'Rush Sum' },
-    { field: 'moodSum',    label: 'Mood Sum' },
-    { field: 'socialSum',  label: 'Social Sum' },
-    { field: 'energySum',  label: 'Energy Sum' },
-    { field: 'focusSum',   label: 'Focus Sum' },
-    { field: 'anxietySum', label: 'Anxiety Sum' },
-    { field: 'impairSum',  label: 'Impair Sum' }
-  ];
-  const VALUES = [6, 5, null, 4.5, 4, null, 3.5, 3, null, 2.5, 2, null, 1.5, 1, null, 0.5, 0];
-  const FALLBACK_NOTES = [
-    'Correlate','Flag','Now','Then','Next','Last','Changes','Note','Context','Associate','Plan','Review',
-    'Hindsight','Redose','Hit','Continue','Food','Drink','Sleep','LastRow','LastDose','LastHit','Single','Multiple',
-    'DrugAdded','NothingAdded','UsingRemains','LeftRemains','MaybeUsable','LotsUsable','Weighed','Eyeballed','Guessed',
-    'Estimate','Scales','HardToSee','LightRoom','DarkRoom','Less','More','Somewhat','Lots'
-  ];
-  const selection = new Map();
-  const selectedNotes = new Set();
 
-  function ensureToolbar() {
-    const selectors = ['.summary-controls', '#summaryControls', '#toolbar', '.toolbar', '#topbar', '#appToolbarHost'];
-    for (const sel of selectors) { const el = document.querySelector(sel); if (el) return el; }
-    let host = document.getElementById('appToolbarHost');
-    if (!host) {
-      host = document.createElement('div');
-      host.id = 'appToolbarHost';
-      host.style.display = 'flex';
-      host.style.flexWrap = 'wrap';
-      host.style.gap = '8px';
-      host.style.padding = '8px';
-      host.style.borderBottom = '1px solid #ddd';
-      document.body.prepend(host);
-    }
-    return host;
-  }
+<!-- Legacy Unlocked toolbar injection removed (2025/10/31). Permanent header button is canonical. -->
 
-  function injectButton() {
-    if (document.getElementById(BTN_ID)) return;
-    const btn = document.createElement('button');
-    btn.id = BTN_ID;
-    btn.type = 'button';
-    btn.textContent = 'Unlocked Mode';
-    btn.style.padding = '6px 10px';
-    btn.style.cursor = 'pointer';
-    btn.addEventListener('click', openModal);
-    const bar = ensureToolbar();
-    const rushBtn = document.getElementById('rushModeBtn') || document.querySelector('button#rushMode') || null;
-    if (rushBtn && rushBtn.parentElement === bar) rushBtn.insertAdjacentElement('afterend', btn);
-    else bar.appendChild(btn);
-  }
-
-  function watchLateToolbar() {
-    const mo = new MutationObserver(() => injectButton());
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-    const iv = setInterval(() => { if (document.getElementById(BTN_ID)) { mo.disconnect(); clearInterval(iv); } }, 500);
-  }
-
-  function ensureModal() {
-    if (document.getElementById(MODAL_ID)) return;
-    const html = `
-      <div id="${MODAL_ID}" style="position:fixed; inset:0; display:none; background:rgba(0,0,0,0.35); z-index:9999;">
-        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:min(96vw, 980px); max-height:86vh; background:#fff; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.2); display:flex; flex-direction:column;">
-          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #eee;">
-            <strong>${TITLE}</strong>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button id="umSubmitBtn" type="button">Add Entry</button>
-              <button id="umResetBtn" type="button">Reset</button>
-              <button id="umCloseBtn" type="button">Close</button>
-            </div>
-          </div>
-          <div id="umBody" style="padding:12px 16px; overflow:auto;">
-            <div id="umMetrics"></div>
-            <div style="height:10px;"></div>
-            <div id="umNotesWrap">
-              <div style="display:flex; align-items:center; justify-content:space-between; margin:6px 0;">
-                <strong>Notes</strong>
-                <small id="umNotesHint" style="color:#666;">Tap to toggle (grid 10-wide)</small>
-              </div>
-              <div id="umNotes" style="display:grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap:6px;"></div>
-            </div>
-          </div>
-          <div style="padding:8px 16px; border-top:1px solid #eee; color:#555; font-size:12px;">
-            <span id="umStatus">Ready.</span>
-          </div>
-        </div>
-      </div>`;
-    document.body.insertAdjacentHTML('beforeend', html);
-    document.getElementById('umCloseBtn').addEventListener('click', closeModal);
-    document.getElementById('umSubmitBtn').addEventListener('click', submitEntry);
-    document.getElementById('umResetBtn').addEventListener('click', resetAll);
-    buildMetricRows(); buildNotes();
-  }
-
-  function openModal(){ ensureModal(); document.getElementById(MODAL_ID).style.display='block'; setStatus('Ready.'); }
-  function closeModal(){ const el=document.getElementById(MODAL_ID); if (el) el.style.display='none'; }
-
-  function buildMetricRows() {
-    const host = document.getElementById('umMetrics');
-    if (!host) return;
-    host.innerHTML = '';
-
-    // Container: vertical stack of metric sections (like Rush Mode)
-    host.style.display = 'flex';
-    host.style.flexDirection = 'column';
-    host.style.gap = '10px';
-
-    for (const m of METRICS) {
-      // Section wrapper
-      const section = document.createElement('div');
-      section.style.display = 'flex';
-      section.style.flexDirection = 'column';
-      section.style.padding = '8px 10px';
-      section.style.border = '1px solid #eee';
-      section.style.borderRadius = '8px';
-      section.style.background = '#fff';
-
-      // Metric label
-      const label = document.createElement('div');
-      label.textContent = m.label;
-      label.style.fontWeight = '600';
-      label.style.marginBottom = '6px';
-      section.appendChild(label);
-
-      // Column of numeric buttons
-      const col = document.createElement('div');
-      col.style.display = 'flex';
-      col.style.flexDirection = 'column';
-      col.style.gap = '6px';
-      section.appendChild(col);
-
-      // Build buttons in required order; render null as a divider/spacer
-      VALUES.forEach((v) => {
-        if (v === null) {
-          const divider = document.createElement('div');
-          divider.style.height = '6px';
-          divider.style.borderTop = '1px dashed #ddd';
-          divider.style.margin = '2px 0';
-          col.appendChild(divider);
-          return;
-        }
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.dataset.field = m.field;
-        b.dataset.val = String(v);
-        b.textContent = String(v); // numbers visible, as requested
-        // Button visuals to match Rush Mode’s stacked style
-        b.style.display = 'block';
-        b.style.width = '100%';
-        b.style.textAlign = 'center';
-        b.style.padding = '8px 10px';
-        b.style.minHeight = '34px';
-        b.style.cursor = 'pointer';
-        b.style.border = '1px solid #ddd';
-        b.style.borderRadius = '8px';
-        b.style.background = '#fafafa';
-        b.style.userSelect = 'none';
-        b.style.fontWeight = '500';
-        b.addEventListener('click', () => onValueClick(b, m.field, v));
-        col.appendChild(b);
-      });
-
-      host.appendChild(section);
-    }
-  }
-const b=document.createElement('button');
-        b.type='button'; b.dataset.field=m.field; b.dataset.val=String(v); b.textContent=String(v);
-        b.style.padding='6px 0'; b.style.minHeight='32px'; b.style.cursor='pointer';
-        b.style.border='1px solid #ddd'; b.style.borderRadius='6px'; b.style.background='#fafafa'; b.style.userSelect='none';
-        b.addEventListener('click', ()=>onValueClick(b,m.field,v)); row.appendChild(b);
-      });
-      host.appendChild(row);
-    }
-  }
-
-  function onValueClick(btn, field, value){
-    selection.set(field, value);
-    const row = btn.parentElement;
-    row.querySelectorAll('button[data-field="'+field+'"]').forEach(b=>{ b.style.background='#fafafa'; b.style.borderColor='#ddd'; b.style.fontWeight='400'; });
-    btn.style.background='#e8f5ff'; btn.style.borderColor='#57a9ff'; btn.style.fontWeight='600';
-    setStatus(field+' = '+value);
-  }
-
-  function buildNotes(){
-    const host=document.getElementById('umNotes'); if (!host) return; host.innerHTML='';
-    const labels = scrapeExistingNotes() || FALLBACK_NOTES;
-    for (const lbl of labels){
-      const b=document.createElement('button'); b.type='button'; b.textContent=lbl; b.dataset.note=lbl;
-      b.style.padding='6px 8px'; b.style.minHeight='28px'; b.style.cursor='pointer';
-      b.style.border='1px solid #e6c200'; b.style.borderRadius='6px'; b.style.background='#ffef8a'; b.style.userSelect='none';
-      b.addEventListener('click',()=>{
-        if (selectedNotes.has(lbl)){ selectedNotes.delete(lbl); b.style.opacity='1'; b.style.outline='none'; }
-        else { selectedNotes.add(lbl); b.style.opacity='0.7'; b.style.outline='2px solid #caa800'; }
-      });
-      host.appendChild(b);
-    }
-  }
-
-  function scrapeExistingNotes(){
-    const candidates = Array.from(document.querySelectorAll('button[data-note], .note-yellow, button.note, .yellow-note, [data-notelabel]'));
-    const labels=new Set(); for (const el of candidates){ const t=(el.getAttribute('data-note')||el.getAttribute('data-notelabel')||el.textContent||'').trim(); if (t) labels.add(t); }
-    return labels.size ? Array.from(labels) : null;
-  }
-
-  function submitEntry(){
-    const payload={}; for (const m of METRICS){ if (selection.has(m.field)) payload[m.field]=selection.get(m.field); }
-    const notes=Array.from(selectedNotes); if (notes.length) payload.notes=notes;
-    let committed=false;
-    try{ if (typeof window.addEntry==='function'){ window.addEntry(payload,{source:'UnlockedMode'}); committed=true; } }catch(e){}
-    if (!committed){ try{ if (typeof window.addEntry==='function'){ window.addEntry(payload); committed=true; } }catch(e){} }
-    if (!committed){ try{
-      for (const [k,v] of Object.entries(payload)){ const input=document.querySelector(`[data-field="${k}"] input, [name="${k}"]`); if (input){ input.value=v; input.dispatchEvent(new Event('input',{bubbles:true})); } }
-      const addBtn=document.getElementById('addEntryBtn')||document.querySelector('button.add-entry'); if (addBtn){ addBtn.click(); committed=true; }
-    }catch(e){}}
-    if (!committed){ try{
-      const tbody=document.querySelector('#logTable tbody'); if (tbody){ const tr=document.createElement('tr'); const ts=Date.now(); tr.setAttribute('data-ts',String(ts));
-        const tc=document.createElement('td'); tc.textContent=new Date(ts).toISOString(); tr.appendChild(tc);
-        for (const m of METRICS){ const td=document.createElement('td'); td.setAttribute('data-field',m.field); const v=payload[m.field];
-          if (typeof v==='number'){ td.setAttribute('data-value',String(v)); td.textContent=String(v); } else { td.textContent=''; } tr.appendChild(td); }
-        const tdN=document.createElement('td'); tdN.textContent=(notes||[]).join(' '); tr.appendChild(tdN); tbody.appendChild(tr); committed=true; }
-    }catch(e){}}
-    if (committed){ setStatus('Entry added.'); resetAll(); } else { setStatus('Could not add entry.'); console.warn('UnlockedMode: commit failed', payload); }
-  }
-
-  function resetAll(){
-    selection.clear(); selectedNotes.clear();
-    document.querySelectorAll('#'+CSS.escape(MODAL_ID)+' button[data-field]').forEach(b=>{ b.style.background='#fafafa'; b.style.borderColor='#ddd'; b.style.fontWeight='400'; });
-    document.querySelectorAll('#umNotes button').forEach(b=>{ b.style.opacity='1'; b.style.outline='none'; });
-    setStatus('Reset.');
-  }
-
-  function setStatus(msg){ const el=document.getElementById('umStatus'); if (el) el.textContent=msg; }
-
-  function boot(){ ensureModal(); injectButton(); watchLateToolbar(); console.debug('UnlockedMode: booted'); }
-  window.UnlockedMode = { open: openModal, submit: submitEntry, reset: resetAll };
-  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
-})();
-</script>
 
 <!-- Backfill Fix Module (2025/10/21 15:50:00) -->
 <script>
@@ -7503,242 +7314,9 @@ const b=document.createElement('button');
 
 
 <!-- BEGIN: ChatGPT patch 2025/10/21 05:01:46 -->
-<script>
-(function(){{"use strict";
-  // ===== A) Backfill: canonical implementation & safe handler =====
-  function alignToBoundary(ms, stepMin){{
-    const d = new Date(ms);
-    d.setSeconds(0,0);
-    if (stepMin===60) {{
-      d.setMinutes(0,0,0);
-    }} else if (stepMin===15 || stepMin===5) {{
-      const m = d.getMinutes();
-      d.setMinutes(m - (m % stepMin), 0, 0);
-    }}
-    return d.getTime();
-  }}
-  function getEarliestSnapshotMs(){{
-    try {{
-      const rows = document.querySelectorAll('#logTable tbody tr');
-      if (!rows.length) return null;
-      // assume first column contains a time label we can parse; fall back to row dataset.timestamp if present
-      for (const tr of rows) {{
-        let t = null;
-        if (tr.dataset && tr.dataset.timestamp) {{
-          const v = Number(tr.dataset.timestamp);
-          if (!Number.isNaN(v) && v>0) return v;
-        }}
-        const td0 = tr.querySelector('td');
-        if (td0) {{
-          const txt = td0.textContent.trim();
-          // Try parse HH:MM prefixed label
-          const m = txt.match(/(\d{{1,2}}):(\d{{2}})/);
-          if (m) {{
-            const d = new Date();
-            d.setSeconds(0,0);
-            d.setMinutes(parseInt(m[2],10));
-            d.setHours(parseInt(m[1],10));
-            t = d.getTime();
-          }}
-        }}
-        if (t) return t;
-      }}
-      return Date.now();
-    }} catch(e) {{
-      console.warn('[Backfill] getEarliestSnapshotMs failed:', e);
-      return Date.now();
-    }}
-  }}
-  function formatMinuteLabel(d){{
-    // Keep existing label convention "HH:MM Average"
-    const h = String(d.getHours()).padStart(2,'0');
-    const m = String(d.getMinutes()).padStart(2,'0');
-    return h + ':' + m + ' Average';
-  }}
-  function hasRowWithLabel(tableId,label){{
-    const table = document.getElementById(tableId);
-    if (!table) return false;
-    const firstCol = table.querySelectorAll('tbody tr td:first-child');
-    for (const td of firstCol) {{
-      const t = (td.textContent||'').trim();
-      if (t.startsWith(label)) return true;
-    }}
-    return false;
-  }}
-  function snapshotFromMainTable(){{
-    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
-    return rows.map(tr => {{
-      const obj = {{ }};
-      obj.ts = (tr.dataset && tr.dataset.timestamp) ? Number(tr.dataset.timestamp) : Date.now();
-      const fields = ['RushSum','MoodSum','SocialSum','EnergySum','FocusSum','AnxietySum','ImpairSum'];
-      for (const f of fields){{
-        const td = tr.querySelector(`td[data-field="{{}}" ]`.replace("{{}}", f));
-        let v = null;
-        if (td) {{
-          if (td.hasAttribute('data-value')) {{
-            v = Number(td.getAttribute('data-value'));
-          }} else {{
-            v = Number((td.textContent||'').replace(/[^0-9.+-]/g,''));
-          }}
-        }}
-        obj[f] = Number.isFinite(v) ? v : 0;
-      }}
-      return obj;
-    }});
-  }}
-  function computeMeansForWindow(startMs, endMs){{
-    const snap = snapshotFromMainTable();
-    const win = snap.filter(r => r.ts >= startMs && r.ts < endMs);
-    if (!win.length) return null;
-    const acc = {{RushSum:0,MoodSum:0,SocialSum:0,EnergySum:0,FocusSum:0,AnxietySum:0,ImpairSum:0}};
-    for (const r of win){{
-      acc.RushSum += r.RushSum;
-      acc.MoodSum += r.MoodSum;
-      acc.SocialSum += r.SocialSum;
-      acc.EnergySum += r.EnergySum;
-      acc.FocusSum += r.FocusSum;
-      acc.AnxietySum += r.AnxietySum;
-      acc.ImpairSum += r.ImpairSum;
-    }}
-    const n = win.length;
-    for (const k in acc) acc[k] = acc[k]/n;
-    return acc;
-  }}
-  function computeRollingMeans(endMs, minutes){{
-    const startMs = endMs - minutes*60*1000;
-    return computeMeansForWindow(startMs, endMs);
-  }}
-  function computeCompositeFromMeans(M){{
-    if (!M) return null;
-    const positives = [M.RushSum,M.MoodSum,M.SocialSum,M.EnergySum,M.FocusSum];
-    const negatives = [M.AnxietySum,M.ImpairSum];
-    const score = positives.reduce((a,b)=>a+b,0) - negatives.reduce((a,b)=>a+b,0);
-    const maxPos = Math.max.apply(null, positives);
-    const minPos = Math.min.apply(null, positives);
-    return {{ Score: score, Max: maxPos, Min: minPos }};
-  }}
-  function appendSummaryRowToTable(tableId, boundary, M, C, opts){{
-    const table = document.getElementById(tableId);
-    if (!table) return;
-    const tbody = table.tBodies[0] || table.appendChild(document.createElement('tbody'));
-    const tr = document.createElement('tr');
-    const label = formatMinuteLabel(boundary) + (opts && opts.labelSuffix ? opts.labelSuffix : '');
-    const cells = [
-      label,
-      M.RushSum, M.MoodSum, M.SocialSum, M.EnergySum, M.FocusSum, M.AnxietySum, M.ImpairSum,
-      C ? C.Score : '', C ? C.Max : '', C ? C.Min : ''
-    ];
-    for (const v of cells){{
-      const td = document.createElement('td');
-      td.textContent = (typeof v === 'number' && Number.isFinite(v)) ? String(v) : String(v||'');
-      tr.appendChild(td);
-    }}
-    if (opts && opts.bold) tr.style.fontWeight = '600';
-    tbody.appendChild(tr);
-  }}
-  function backfillWindow(stepMin, tableId){{
-    const startMs0 = getEarliestSnapshotMs();
-    if (startMs0==null) return 0;
-    const nowMs = Date.now();
-    const stepMs = stepMin*60*1000;
-    let t = alignToBoundary(startMs0, stepMin);
-    let added = 0;
-    while (t <= nowMs){{
-      const boundary = new Date(t);
-      const endMs   = boundary.getTime() + 60*1000;
-      const M = computeRollingMeans(endMs, stepMin);
-      const C = M ? computeCompositeFromMeans(M) : null;
-      const label = formatMinuteLabel(boundary);
-      if (M && !hasRowWithLabel(tableId, label)){{
-        appendSummaryRowToTable(tableId, boundary, M, C, {{bold:false, labelSuffix:''}});
-        added++;
-      }}
-      t += stepMs;
-    }}
-    return added;
-  }}
-  function backfillAll(){{
-    const added5  = backfillWindow(5,  'summary5Table');
-    const added15 = backfillWindow(15, 'summary15Table');
-    const added60 = backfillWindow(60, 'summary60Table');
-    console.log(`[Backfill] added rows — 5m:${{added5}}  15m:${{added15}}  60m:${{added60}}`);
-  }}
-  // Assign globally to override any legacy wrapper
-  window.backfillAll = backfillAll;
-  // Bind button safely
-  document.addEventListener('DOMContentLoaded', function(){{
-    const btn = document.getElementById('backfillBtn');
-    if (btn && !btn._bfBound) {{
-      btn.addEventListener('click', function(ev){{ if (window.backfillAll) window.backfillAll(ev); }} , {{ passive: true }});
-      btn._bfBound = true;
-    }}
-  }});
 
-  // ===== B) Unlocked Mode: ensure button beside Rush Mode =====
-  (function(){{
-    const BTN_ID = 'unlockedModeBtn';
-    function openUnlockedModal(){{
-      // Assume existing modal open function if present
-      if (typeof window.openUnlockedMode === 'function') return window.openUnlockedMode();
-      alert('Unlocked Mode modal: existing implementation not found; please wire openUnlockedMode().');
-    }}
-    function ensureToolbar(){{
-      const selectors = ['.summary-controls','#summaryControls','#toolbar','.toolbar','#topbar','#appToolbarHost','header','nav'];
-      for (const s of selectors) {{
-        const el = document.querySelector(s);
-        if (el) return el;
-      }}
-      const host = document.createElement('div');
-      host.id = 'appToolbarHost';
-      host.style.display = 'flex';
-      host.style.flexWrap = 'wrap';
-      host.style.gap = '8px';
-      host.style.padding = '8px';
-      host.style.borderBottom = '1px solid #ddd';
-      document.body.prepend(host);
-      return host;
-    }}
-    });
-      const bar = ensureToolbar();
-      const rushBtn = document.getElementById('rushModeBtn') || document.querySelector('button#rushMode') || null;
-      if (rushBtn && rushBtn.parentElement) {{
-        rushBtn.insertAdjacentElement('afterend', btn);
-      }} else {{
-        bar.appendChild(btn);
-      }}
-    }}
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectUnlocked);
-    else injectUnlocked();
-    const mo = new MutationObserver(injectUnlocked);
-    mo.observe(document.documentElement, {{ childList: true, subtree: true }});
-  }})();
+<!-- Legacy Unlocked toolbar injection removed (2025/10/31). Permanent header button is canonical. -->
 
-  // ===== C) Running Average: idempotent button placement beside Rush/Rapid =====
-  (function(){{
-    function ensureRunningAverageButton(){{
-      if (document.getElementById('runningAverageBtn')) return;
-      const btn = document.createElement('button');
-      btn.id = 'runningAverageBtn';
-      btn.type = 'button';
-      btn.textContent = 'Running Average';
-      btn.title = 'Open Running Average logger';
-      btn.addEventListener('click', function(){{
-        if (typeof window.openRunningAverage === 'function') window.openRunningAverage();
-        else alert('Running Average modal opener (openRunningAverage) not found.');
-      }}, {{ passive: true }});
-      const ref = document.getElementById('rushModeBtn') || document.querySelector('button[onclick*="openRapidScores"]');
-      if (ref && ref.parentElement) {{
-        ref.insertAdjacentElement('afterend', btn);
-      }} else {{
-        const bar = document.querySelector('.summary-controls, #summaryControls, #toolbar, .toolbar, header, nav') || document.body;
-        bar.appendChild(btn);
-      }}
-    }}
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureRunningAverageButton);
-    else ensureRunningAverageButton();
-  }})();
-}})();
-</script>
 <!-- END: ChatGPT patch 2025/10/21 05:01:46 -->
 
 <!-- === Begin: Dose Reviews Segment-Aware Patch (injected) === -->
@@ -8015,179 +7593,114 @@ const b=document.createElement('button');
 #stsToast.show { opacity: 1; }
 </style>
 <div id="stsToast" role="status" aria-live="polite"></div>
+
 <script>
-(function(){
-  // Toast helper
-  function showToast(msg, ms){
-    try{
-      const el = document.getElementById('stsToast');
-      if (!el) return;
-      el.textContent = String(msg || '');
-      el.classList.add('show');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(()=>{ el.classList.remove('show'); }, Math.max(800, ms||2200));
-    }catch(e){ console.warn(e); }
-  }
+(() => {
+  'use strict';
 
-  // Insert "Backfill popups too" toggle next to the Manual Backfill area
-  function ensureBackfillToggle(){
-    try{
-      const row = document.getElementById('backfillRow');
-      if (!row) return;
-      if (document.getElementById('backfillPopupsToggle')) return;
-      const label = document.createElement('label');
-      label.style.marginLeft = '10px';
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.id = 'backfillPopupsToggle';
-      label.appendChild(cb);
-      label.appendChild(document.createTextNode(' Backfill popups too'));
-      row.appendChild(label);
-    }catch(e){ console.warn(e); }
-  }
+  // ===== Canonical Backfill (header-based, AU timestamps) =====
+  function backfillAllCanonical() {
+    const TABLE_SEL = '#mainLogTable';
+    const table = document.querySelector(TABLE_SEL);
+    if (!table) { console.error('[Backfill] table not found:', TABLE_SEL); return; }
 
-  // Copy summary table rows into popup tables when present (best-effort)
-  function syncPopups(){
-    try{
-      const map = [
-        {src:'#summary5Table',  dsts:['#summary5PopupTable','#summaryPopupTable5']},
-        {src:'#summary15Table', dsts:['#summary15PopupTable','#summaryPopupTable15']},
-        {src:'#summary60Table', dsts:['#summary60PopupTable','#summaryPopupTable60']},
-      ];
-      for (const {src, dsts} of map){
-        const s = document.querySelector(src);
-        if (!s) continue;
-        const sBody = s.tBodies && s.tBodies[0];
-        if (!sBody) continue;
-        const html = sBody.innerHTML;
-        for (const dSel of dsts){
-          const d = document.querySelector(dSel);
-          if (d && d.tBodies && d.tBodies[0]){
-            d.tBodies[0].innerHTML = html;
-          }
-        }
-      }
-    }catch(e){ console.warn(e); }
-  }
+    // Resolve timestamp column by header name
+    const idxes = __findHeaderIndexes(table);
+    if (idxes.timestamp == null) { alert('Timestamp column not found'); return; }
 
-  // Unified backfill window using existing app hooks where possible
-  function doBackfillWindow(stepMin, tableId){
-    // Prefer existing app implementation if present
-    if (typeof window.backfillWindow === 'function'){
-      return window.backfillWindow(stepMin, tableId);
+    // Extract rows with parsed timestamps
+    const rows = [];
+    for (const tr of __iterDataRows(table)) {
+      const cells = Array.from(tr.children);
+      const tsCell = cells[idxes.timestamp];
+      const tsText = tsCell ? tsCell.textContent.trim() : '';
+      const when = __parseAULocalTimestamp(tsText);
+      if (!when) continue;
+      rows.push({ tr, ts: when, tsText });
     }
-    // Fallback minimal implementation using expected helpers
-    try{
-      if (typeof window.computeRollingMeans !== 'function' || typeof window.appendSummaryRowToTable !== 'function'){
-        console.warn('Backfill fallback missing dependencies.');
-        return 0;
-      }
-      // Build from earliest visible row in main table
-      const main = document.querySelector('#logTable tbody');
-      if (!main || !main.rows || !main.rows.length) return 0;
-      // parse AU time "dd/mm/yyyy, HH:MM:SS" from first cell in the row (Timestamp column index may vary; we rely on data attribute if present)
-      function parseTs(tr){
-        const tsCell = tr.cells[1] || null; // 0=Select, 1=Timestamp in current layouts
-        if (!tsCell) return null;
-        const s = tsCell.textContent.trim().replace(',', ' ');
-        const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/);
-        if (!m) return null;
-        const d = new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5], +m[6]);
-        return d.getTime();
-      }
-      const firstRow = main.rows[0];
-      const startMs0 = parseTs(firstRow);
-      if (!startMs0) return 0;
-      // align to boundary
-      function align(ms, step){
-        const d = new Date(ms);
-        d.setSeconds(0,0);
-        const m = d.getMinutes();
-        const alignedM = Math.floor(m / step) * step;
-        d.setMinutes(alignedM);
-        return d.getTime();
-      }
-      const step = stepMin;
-      let t = align(startMs0, step);
-      const now = Date.now();
-      const tbody = document.querySelector(tableId ? ('#'+tableId) : null) || document.querySelector('#summary' + step + 'Table');
-      if (!tbody) return 0;
-      const body = tbody.tBodies && tbody.tBodies[0];
-      if (!body) return 0;
+    if (!rows.length) { alert('No timestamped rows to backfill.'); return; }
 
-      // check if a label exists in first column matching date/time string
-      function labelExists(dt){
-        const d = new Date(dt);
-        const lab = d.toLocaleString('en-AU', {hour12:false});
-        for (const tr of Array.from(body.rows)){
-          const cell = tr.cells[0];
-          if (cell && cell.textContent.indexOf(lab) !== -1) return true;
-        }
-        return false;
-      }
+    // Sort by time ascending for window processing
+    rows.sort((a,b) => a.ts - b.ts);
 
-      let added = 0;
-      while (t <= now){
-        const M = window.computeRollingMeans(t, step);
-        if (M){
-          const C = (typeof window.computeCompositeFromMeans === 'function') ? window.computeCompositeFromMeans(M) : null;
-          const d = new Date(t);
-          if (!labelExists(t)){
-            window.appendSummaryRowToTable(body.parentElement.id, d, M, C, {});
-            added++;
-          }
-        }
-        t += step * 60000;
-      }
-      return added;
-    }catch(e){
-      console.warn(e);
-      return 0;
-    }
-  }
+    // Compute windows in milliseconds
+    const minutes = (window.CONFIG?.backfill?.windowsMin || [5, 15, 60]).slice().sort((a,b)=>a-b);
+    const windowsMs = minutes.map(m => m * 60 * 1000);
 
-  // Canonical backfill-all
-  function backfillAllCanonical(){
-    const add5  = doBackfillWindow(5,  'summary5Table');
-    const add15 = doBackfillWindow(15, 'summary15Table');
-    const add60 = doBackfillWindow(60, 'summary60Table');
-
-    // Popup sync if toggled
-    const popups = document.getElementById('backfillPopupsToggle');
-    if (popups && popups.checked){
-      syncPopups();
+    function summaryKey(anchorISO, windowMin) {
+      return `bf:${anchorISO}:+${windowMin}m`;
     }
 
-    showToast(`Backfill: 5m +${add5}, 15m +${add15}, 60m +${add60}`, 2200);
-    return {add5, add15, add60};
+    function ensureSummaryRow(anchorTr, anchorISO, windowMin, data) {
+      const key = summaryKey(anchorISO, windowMin);
+      const existing = table.querySelector(`tbody tr[data-bf-key="${key}"]`);
+      if (existing) {
+        const sumCell = existing.querySelector('td[data-bf-field="summary"]');
+        if (sumCell) sumCell.textContent = data.summaryText;
+        return existing;
+      }
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-bf-key', key);
+      tr.classList.add('backfill-summary-row');
+
+      const headerCells = table.querySelectorAll('thead tr th');
+      const cellCount = headerCells.length || 1;
+      for (let i = 0; i < cellCount; i++) {
+        const td = document.createElement('td');
+        if (i === 0) {
+          td.setAttribute('data-bf-field', 'summary');
+          td.textContent = data.summaryText;
+        } else {
+          td.textContent = '';
+        }
+        tr.appendChild(td);
+      }
+
+      const body = table.querySelector('tbody') || table;
+      const next = anchorTr.nextSibling;
+      if (next) body.insertBefore(tr, next); else body.appendChild(tr);
+      return tr;
+    }
+
+    function aggregateWindow(anchorIdx, windowMs) {
+      const anchor = rows[anchorIdx];
+      const t0 = anchor.ts;
+      const t1 = new Date(t0.getTime() + windowMs);
+      let count = 0;
+      let lastTs = null;
+      for (let j = anchorIdx; j < rows.length; j++) {
+        const t = rows[j].ts;
+        if (t > t1) break;
+        if (t >= t0 && t <= t1) {
+          count++;
+          lastTs = t;
+        }
+      }
+      return { count, lastTs };
+    }
+
+    for (let i = 0; i < rows.length; i++) {
+      const anchorISO = rows[i].ts.toISOString();
+      for (let w = 0; w < windowsMs.length; w++) {
+        const winMs = windowsMs[w];
+        const winMin = minutes[w];
+        const key = summaryKey(anchorISO, winMin);
+        if (table.querySelector(`tbody tr[data-bf-key="${key}"]`)) continue;
+
+        const agg = aggregateWindow(i, winMs);
+        const summaryText = `Backfill ${winMin} min: ${agg.count} row(s)` +
+                            (agg.lastTs ? `; last @ ${agg.lastTs.toLocaleString()}` : '');
+        ensureSummaryRow(rows[i].tr, anchorISO, winMin, { summaryText });
+      }
+    }
+
+    try { console.info('[Backfill] Completed via canonical header-based routine.'); } catch {}
   }
 
-  // Bind button safely: replace any legacy handlers
-  function bindBackfillButton(){
-    try{
-      const btn = document.getElementById('backfillBtn');
-      if (!btn) return;
-      // clone to drop existing listeners
-      const clone = btn.cloneNode(true);
-      clone.addEventListener('click', backfillAllCanonical);
-      btn.replaceWith(clone);
-      clone.id = 'backfillBtn';
-      window.backfillAll = backfillAllCanonical; // force alias
-    }catch(e){ console.warn(e); }
-  }
-
-  // Init after DOM ready
-  function init(){
-    ensureBackfillToggle();
-    bindBackfillButton();
-  }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init, {once:true});
-  } else {
-    init();
-  }
+  window.backfillAllCanonical = backfillAllCanonical;
 })();
 </script>
+
 <!-- === End: Backfill Consolidation + Toast + Popup Sync Patch === -->
 <!-- Unlocked Mode Module (patched, 2025/10/23 12:00:00) -->
 <script>
@@ -8212,7 +7725,7 @@ const b=document.createElement('button');
   // Column of discrete numeric buttons per metric.
   // BOOKMARK unlcoked mode metrics
   // Render `null` as a visual divider.
-  const VALUES = [6, 5, 4, 3, 2, 1 0];
+  const VALUES = CONFIG.values;
 
   // Notes palette (fallback when no scrapeable notes are found)
   const FALLBACK_NOTES = [
@@ -8293,7 +7806,7 @@ const b=document.createElement('button');
       col.style.gap = '6px';
       section.appendChild(col);
 
-      VALUES.forEach((v) => {
+      CONFIG.values.forEach((v) => {
         if (v === null) {
           const divider = document.createElement('div');
           divider.style.height = '6px';
@@ -8303,6 +7816,7 @@ const b=document.createElement('button');
           return;
         }
         const b = document.createElement('button');
+b
         b.type = 'button';
         b.dataset.field = m.field;
         b.dataset.val = String(v);
@@ -8345,6 +7859,7 @@ const b=document.createElement('button');
     const labels = scrapeExistingNotes() || FALLBACK_NOTES;
     labels.forEach((lbl) => {
       const b = document.createElement('button');
+b
       b.type = 'button';
       b.textContent = lbl;
       b.dataset.note = lbl;
@@ -8454,28 +7969,9 @@ const b=document.createElement('button');
   window.UnlockedMode = { open: openModal, submit: submitEntry, reset: resetAll };
 })();
 </script>
-<script id="fast-mode-position">
-document.addEventListener('DOMContentLoaded', function(){
-  try{
-    var rushBtn = document.getElementById('rushModeBtn');
-    var fastBtn = document.getElementById('fastModeBtn');
-    if (!fastBtn) return;
-    if (rushBtn && rushBtn.parentElement){
-      rushBtn.insertAdjacentElement('afterend', fastBtn);
-      return;
-    }
-    var rapid = document.getElementById('rapidScoresBtn');
-    if (rapid && rapid.parentElement){
-      rapid.insertAdjacentElement('afterend', fastBtn);
-      return;
-    }
-    var unlocked = document.getElementById('unlockedModeBtn');
-    if (unlocked && unlocked.parentElement){
-      unlocked.insertAdjacentElement('afterend', fastBtn);
-    }
-  }catch(e){ console.warn(e); }
-});
-</script>\n\1
+
+<!-- Legacy Unlocked toolbar injection removed (2025/10/31). Permanent header button is canonical. -->
+ \1
 <script>
 function openEmotionModal() {
     document.getElementById('emotionModal').style.display = 'block';
@@ -8497,6 +7993,41 @@ function buildEmotionButtons() {
     emotions.forEach(word => {
         const btn = document.cr
 <script>
+/* === Metric completeness helpers (2025/10/26 00:00:00) === */
+const MAIN_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair'];
+
+/** Return how many of the seven main metrics are completed on a TR element. */
+function countCompletedMetricsFromRow(tr){
+  let n = 0;
+  for (const f of MAIN_FIELDS){
+    const td = tr.querySelector(`td[data-field="${f}Sum"]`);
+    if (!td) continue;
+    const hasDataValue = td.hasAttribute('data-value') && td.getAttribute('data-value').trim() !== '';
+    const hasText = (td.textContent || '').trim() !== '';
+    if (hasDataValue || hasText) n++;
+  }
+  return n;
+}
+
+/** Return how many of the seven main metrics are completed on a plain entry object (e.g., CSV/imported). */
+function countCompletedMetricsFromEntry(e){
+  let n = 0;
+  for (const f of MAIN_FIELDS){
+    const lbl = e && typeof e[`${f}Label`] === 'string' ? e[`${f}Label`].trim() : '';
+    const hasLabel = lbl !== '';
+    const val = e ? e[`${f}Sum`] : null;
+    const hasValue = Number.isFinite(+val);
+    if (hasLabel || hasValue) n++;
+  }
+  return n;
+}
+
+/** True if at least seven main metrics are completed. */
+function hasAtLeastSeven(eOrTr){
+  if (eOrTr && eOrTr.nodeType === 1) return countCompletedMetricsFromRow(eOrTr) >= 7;
+  return countCompletedMetricsFromEntry(eOrTr) >= 7;
+}
+</script>
 /* === Metric completeness helpers (2025/10/26 00:00:00) === */
 const MAIN_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair'];
 
@@ -8573,30 +8104,49 @@ eateElement('button');
   }
 
   // Read-only snapshot from main table (same invariant as existing code)
-  function snapshotFromMainTable(){
-    const rows = Array.from(document.querySelectorAll('#logTable tbody tr'));
-    return rows.map(tr => {
-      const ts = +(tr.getAttribute('data-ts')||0);
-      const get = (field) => {
-        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
-        if (!td) return 0;
-        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
-        return Number.isFinite(v) ? v : 0;
-      };
-      const pack = {
-        _ts: ts,
-        rush: get('rush'),
-        mood: get('mood'),
-        social: get('social'),
-        energy: get('energy'),
-        focus: get('focus'),
-        anxiety: get('anxiety'),
-        impair: get('impair')
-      };
-      return pack;
-    }).filter(o => o._ts>0);
-  }
+  function snapshotFromMainTable() {
+  const table = document.querySelector(CFG.mainTableSelector);
+  if (!table) return [];
 
+  const thead = table.tHead || table.querySelector('thead');
+  const tbody = table.tBodies?.[0] || table.querySelector('tbody');
+
+  let headers = [];
+  if (thead) {
+    headers = Array.from(thead.querySelectorAll('th')).map(th => th.textContent.trim());
+  } else {
+    const firstRow = table.querySelector('tr');
+    if (firstRow) headers = Array.from(firstRow.cells).map(td => td.textContent.trim());
+  }
+  if (!headers.length) return [];
+
+  const tsIdx = (() => {
+    const wanted = (window.CONFIG?.backfill?.timestampHeaderNames) || CFG.tsHeaderNames;
+    const idxExact = headers.findIndex(h => wanted.some(n => h.toLowerCase() === n.toLowerCase()));
+    if (idxExact >= 0) return idxExact;
+    const idxContains = headers.findIndex(h => /time|timestamp/i.test(h));
+    return idxContains;
+  })();
+  if (tsIdx < 0) return [];
+
+  const rowEls = tbody ? Array.from(tbody.rows)
+                       : Array.from(table.querySelectorAll('tr')).slice(1);
+  const rows = [];
+  for (const tr of rowEls) {
+    if (tr.classList?.contains('backfill-summary-row')) continue;
+    const tds = Array.from(tr.cells);
+    if (tds.length <= tsIdx) continue;
+    const cells = tds.map(td => td.textContent.trim());
+    const ts = parseLocalAU(cells[tsIdx], tds[tsIdx]);
+    if (ts) rows.push({_ts: ts.getTime(), tr, cells});
+  }
+  rows.sort((a,b)=>a._ts-b._ts);
+
+  if (!rows.length) {
+    console.warn('[Backfill] Snapshot empty. Headers=', headers, 'tsIdx=', tsIdx, 'rowCount=', rowEls.length);
+  }
+  return rows;
+}
   function computeMeansForWindow(startMs, endMs){
     const snap = snapshotFromMainTable();
     const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
@@ -9699,6 +9249,7 @@ thead th{ background: var(--table-head); }
   document.addEventListener('DOMContentLoaded', ()=>{
     initTheme();
     const btn = document.createElement('button');
+btn.classList.add('metric-btn');
     btn.id = 'themeToggleBtn';
     btn.style.position='fixed'; btn.style.top='70px'; btn.style.right='92px'; btn.style.zIndex='10000';
     btn.textContent = (localStorage.getItem(KEY)==='dark') ? 'Light' : 'Dark';
@@ -10109,6 +9660,7 @@ function buildUnlockedYellowNotes(){
     const yellow = (CONFIG && CONFIG.notes && Array.isArray(CONFIG.notes.yellow)) ? CONFIG.notes.yellow : [];
     yellow.forEach(lbl => {
       const b = document.createElement('button');
+b.classList.add('metric-btn');
       b.type = 'button';
       b.className = 'note-btn';
       b.textContent = lbl;
@@ -10142,6 +9694,7 @@ function buildUnlockedModeButtons(){
 
       (getMetricButtons(metric) || []).forEach(v => {
         const b = document.createElement('button');
+b.classList.add('metric-btn');
         let customLabel = '';
         if (v === -0.25 || v === -0.5 || v === -0.75) customLabel = '-';
         else if (v === 0.25 || v === 0.75) customLabel = '+';
@@ -10187,7 +9740,7 @@ function applyUnlockedAndAddStay(){
 </script>
 <!-- === /STS inject === -->
 
-\n<!-- Fast Mode Modal -->
+ <!-- Fast Mode Modal -->
 <div id="fastModeModal"
      style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%);
             background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px;
@@ -10202,11 +9755,10 @@ function applyUnlockedAndAddStay(){
     <button onclick="applyFastModeAndAdd()">Apply &amp; Add Entry</button>
     <button onclick="applyFastModeAndAddStay()">Apply, Add &amp; Stay</button>
   </div>
-</div>\n\n<script id="fast-mode-logic">
+</div>  <script id="fast-mode-logic">
 (function(){
   const FAST_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-//   const FAST_MODE_VALUES  = [4.60,4.10,3.10,2.10,1.10,0.60,0.009];
-  const FAST_MODE_VALUES  = [6.10,5.10,4.10,3.10,2.10,1.10,0.10];
+  const FAST_MODE_VALUES  = [6.1,5.1,4.1,3.1,2.1,1.1,0.1];
 
   const fastModeSelections = Object.create(null);
 
@@ -10236,6 +9788,7 @@ function applyUnlockedAndAddStay(){
         FAST_MODE_VALUES.forEach(v=>{
           if (v === ''){ const sep = document.createElement('div'); sep.style.height='6px'; col.appendChild(sep); return; }
           const b = document.createElement('button');
+b.classList.add('metric-btn');
           const label = getFastModeLabel(metric, v);
           b.innerText = `${v}: ${label}`;
           b.onclick = ()=>{
@@ -10362,7 +9915,7 @@ function applyUnlockedAndAddStay(){
     }catch(e){ console.warn(e); }
   };
 })();
-</script>
+</script> 
 
 <!-- Rapid Scores 2 Patch (injected) - 2025/10/26 17:10:09 -->
 <script>
@@ -10432,6 +9985,7 @@ function applyUnlockedAndAddStay(){
     Object.assign(title.style, { fontWeight: '700', fontSize: '18px' });
 
     const closeBtn = document.createElement('button');
+closeBtn.classList.add('metric-btn');
     closeBtn.type = 'button';
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.textContent = 'Close';
@@ -10453,16 +10007,19 @@ function applyUnlockedAndAddStay(){
     });
 
     const btnApply = document.createElement('button');
+btnApply.classList.add('metric-btn');
     btnApply.type = 'button';
     btnApply.textContent = 'Apply';
     btnApply.addEventListener('click', applyRapid2Scores);
 
     const btnApplyAdd = document.createElement('button');
+btnApplyAdd.classList.add('metric-btn');
     btnApplyAdd.type = 'button';
     btnApplyAdd.innerHTML = 'Apply &amp; Add Entry';
     btnApplyAdd.addEventListener('click', applyRapid2ScoresAndAdd);
 
     const btnApplyAddStay = document.createElement('button');
+btnApplyAddStay.classList.add('metric-btn');
     btnApplyAddStay.type = 'button';
     btnApplyAddStay.innerHTML = 'Apply &amp; Add &amp; Stay';
     btnApplyAddStay.addEventListener('click', applyRapid2ScoresAndAddStay);
@@ -10520,6 +10077,7 @@ function applyUnlockedAndAddStay(){
           return;
         }
         const btn = document.createElement('button');
+btn.classList.add('metric-btn');
         btn.type = 'button';
         btn.textContent = labelForRapid2Value(val);
         btn.dataset.metric = field;
@@ -10667,6 +10225,351 @@ function applyUnlockedAndAddStay(){
 })();
 </script>
 
+
+<script>
+(() => {
+  'use strict';
+  function requireFunctions(fnNames) {
+    const missing = fnNames.filter(n => typeof window[n] !== 'function');
+    if (missing.length) {
+      const msg = `[Init] Missing required functions: ${missing.join(', ')}`;
+      console.error(msg);
+      if (!window.__shownMissingFns) { window.__shownMissingFns = true; try { alert(msg); } catch {} }
+      return false;
+    }
+    return true;
+  }
+  window.requireFunctions = requireFunctions;
+})();
+</script>
+
+
+
+<script>
+(() => {
+  'use strict';
+  function __parseAULocalTimestamp(text) {
+    const r = /^\s*(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*$/;
+    const m = r.exec(text);
+    if (!m) return null;
+    const dd = +m[1], MM = +m[2]-1, yyyy = +m[3], hh = +m[4], mm = +m[5], ss = m[6] ? +m[6] : 0;
+    const d = new Date(yyyy, MM, dd, hh, mm, ss);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function __findHeaderIndexes(tableEl) {
+    const header = tableEl?.querySelector('thead tr');
+    const names = Array.from(header ? header.children : []).map(th => th.textContent.trim());
+    const idx = {};
+    const candidates = (window.CONFIG?.backfill?.timestampHeaderNames || []);
+    for (const wanted of candidates) {
+      const i = names.findIndex(n => n.toLowerCase() === wanted.toLowerCase());
+      if (i >= 0) { idx.timestamp = i; break; }
+    }
+    return idx;
+  }
+  function* __iterDataRows(tableEl) {
+    const body = tableEl?.querySelector('tbody');
+    if (!body) return;
+    for (const tr of Array.from(body.children)) yield tr;
+  }
+  window.__parseAULocalTimestamp = __parseAULocalTimestamp;
+  window.__findHeaderIndexes = __findHeaderIndexes;
+  window.__iterDataRows = __iterDataRows;
+})();
+</script>
+
+
+
+<script>
+(() => {
+  'use strict';
+  // If a canonical function exists, export once, else keep existing user-defined function
+  if (typeof window.backfillAllCanonical === 'function') {
+    if (!window.backfillAll) window.backfillAll = window.backfillAllCanonical;
+  }
+  function bindBackfillButtonOnce() {
+    const btn = document.querySelector('#backfillAllBtn');
+    if (!btn) return;
+    const clone = btn.cloneNode(true);
+    btn.parentNode.replaceChild(clone, btn);
+    clone.addEventListener('click', () => window.backfillAll && window.backfillAll());
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindBackfillButtonOnce, { once: true });
+  } else {
+    bindBackfillButtonOnce();
+  }
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  function applyModeButtonSizeTo(modalEl, modeKey) {
+    const base = (window.CONFIG && window.CONFIG.ui && window.CONFIG.ui.metricButton) || {};
+    const per = (window.CONFIG && window.CONFIG.ui && window.CONFIG.ui.perModeButtonSizes && window.CONFIG.ui.perModeButtonSizes[modeKey]) || {};
+    const s = Object.assign({}, base, per);
+    if (!modalEl) return;
+    modalEl.style.setProperty('--metric-btn-min-w', (s.minWidthPx ?? 64) + 'px');
+    modalEl.style.setProperty('--metric-btn-min-h', (s.minHeightPx ?? 30) + 'px');
+    modalEl.style.setProperty('--metric-btn-pad-b', (s.paddingBlockPx ?? 6) + 'px');
+    modalEl.style.setProperty('--metric-btn-pad-i', (s.paddingInlinePx ?? 10) + 'px');
+    modalEl.style.setProperty('--metric-btn-font', (s.fontSizeRem ?? 0.95) + 'rem');
+    modalEl.style.setProperty('--metric-btn-gap', (s.gapPx ?? 6) + 'px');
+  }
+  function initPerModeSizing() {
+    const ids = [
+      ['rush','rushModeModal'],
+      ['rapid','rapidScoresModal'],
+      ['fast','fastModeModal'],
+      ['unlocked','unlockedModeModal']
+    ];
+    ids.forEach(([mode,id]) => {
+      const el = document.getElementById(id);
+      if (el) applyModeButtonSizeTo(el, mode);
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPerModeSizing, { once: true });
+  } else {
+    initPerModeSizing();
+  }
+  window.applyModeButtonSizeTo = applyModeButtonSizeTo;
+})();
+</script>
+
+<!-- Backfill Control (2025/11/01 13:25:00) -->
+<button id="backfillControlBtn" type="button">Backfill All (5/15/60)</button>
+<script>
+(() => {
+  'use strict';
+  const CFG = {
+    windowsMin: [5, 15, 60],
+    mainTableSelector: '#logTable',
+    summaryTableByMin: { 5:'#summary5Table', 15:'#summary15Table', 60:'#summary60Table' },
+    tsHeaderNames: (window.CONFIG?.backfill?.timestampHeaderNames) || [
+      'Timestamp','Timestamp (Local)','Time','Local Time','Date/Time','Logged At'
+    ]
+  };
+  function parseLocalAU(tsText, tdEl) {
+  const epoch = tdEl?.getAttribute?.('data-epoch') || tdEl?.dataset?.epoch;
+  if (epoch && !Number.isNaN(Number(epoch))) {
+    const d = new Date(Number(epoch));
+    return isNaN(d) ? null : d;
+  }
+  const raw = (tsText || '').trim();
+
+  // AU: DD/MM/YYYY [HH[:MM[:SS]]]
+  let m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2})(?::(\d{2})(?::(\d{2}))?)?)?$/);
+  if (m) {
+    const d  = Number(m[1]);
+    const mo = Number(m[2]);
+    const y  = Number(m[3]);
+    const hh = Number(m[4] ?? 0);
+    const mm = Number(m[5] ?? 0);
+    const ss = Number(m[6] ?? 0);
+    const dt = new Date(y, mo - 1, d, hh, mm, ss);
+    return isNaN(dt) ? null : dt;
+  }
+
+  // ISO-ish: YYYY/MM/DD [HH[:MM[:SS]]]
+  m = raw.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})(?:\s+(\d{1,2})(?::(\d{2})(?::(\d{2}))?)?)?$/);
+  if (m) {
+    const y  = Number(m[1]);
+    const mo = Number(m[2]);
+    const d  = Number(m[3]);
+    const hh = Number(m[4] ?? 0);
+    const mm = Number(m[5] ?? 0);
+    const ss = Number(m[6] ?? 0);
+    const dt = new Date(y, mo - 1, d, hh, mm, ss);
+    return isNaN(dt) ? null : dt;
+  }
+
+  const normalised = raw.replace(/-/g,'/').replace('T',' ').replace(/\.[0-9]+Z?$/,'');
+  const dt = new Date(normalised);
+  return isNaN(dt) ? null : dt;
+}
+    const s = (tsText||'').trim()
+      .replace(/-/g,'/')
+      .replace(/T/,' ')
+      .replace(/\.[0-9]+Z?$/,'');
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
+  }
+  function snapshotFromMainTable() {
+  const table = document.querySelector(CFG.mainTableSelector);
+  if (!table) return [];
+
+  const thead = table.tHead || table.querySelector('thead');
+  const tbody = table.tBodies?.[0] || table.querySelector('tbody');
+
+  let headers = [];
+  if (thead) {
+    headers = Array.from(thead.querySelectorAll('th')).map(th => th.textContent.trim());
+  } else {
+    const firstRow = table.querySelector('tr');
+    if (firstRow) headers = Array.from(firstRow.cells).map(td => td.textContent.trim());
+  }
+  if (!headers.length) return [];
+
+  const tsIdx = (() => {
+    const wanted = (window.CONFIG?.backfill?.timestampHeaderNames) || CFG.tsHeaderNames;
+    const idxExact = headers.findIndex(h => wanted.some(n => h.toLowerCase() === n.toLowerCase()));
+    if (idxExact >= 0) return idxExact;
+    const idxContains = headers.findIndex(h => /time|timestamp/i.test(h));
+    return idxContains;
+  })();
+  if (tsIdx < 0) return [];
+
+  const rowEls = tbody ? Array.from(tbody.rows)
+                       : Array.from(table.querySelectorAll('tr')).slice(1);
+  const rows = [];
+  for (const tr of rowEls) {
+    if (tr.classList?.contains('backfill-summary-row')) continue;
+    const tds = Array.from(tr.cells);
+    if (tds.length <= tsIdx) continue;
+    const cells = tds.map(td => td.textContent.trim());
+    const ts = parseLocalAU(cells[tsIdx], tds[tsIdx]);
+    if (ts) rows.push({_ts: ts.getTime(), tr, cells});
+  }
+  rows.sort((a,b)=>a._ts-b._ts);
+
+  if (!rows.length) {
+    console.warn('[Backfill] Snapshot empty. Headers=', headers, 'tsIdx=', tsIdx, 'rowCount=', rowEls.length);
+  }
+  return rows;
+}
+    rows.sort((a,b)=>a._ts-b._ts);
+    return rows;
+  }
+  function computeRollingMeans(snapshot, endMs, windowMin) {
+    if (!snapshot.length) return null;
+    const startMs = endMs - windowMin*60*1000;
+    const inRange = snapshot.filter(r => r._ts > startMs && r._ts <= endMs);
+    if (!inRange.length) return null;
+    const colCount = inRange[0].cells.length;
+    const sums = new Array(colCount).fill(0);
+    const counts = new Array(colCount).fill(0);
+    for (const r of inRange) {
+      r.cells.forEach((txt,i)=>{
+        const v = Number((txt||'').replace(/[^0-9.+-]/g,''));
+        if (!Number.isNaN(v)) { sums[i]+=v; counts[i]++; }
+      });
+    }
+    const means = sums.map((s,i)=> counts[i] ? s/counts[i] : null);
+    return {n: inRange.length, means, endMs, windowMin};
+  }
+  function insertSummaryRow(result) {
+    const sel = CFG.summaryTableByMin[result.windowMin];
+    const table = document.querySelector(sel);
+    if (!table) return false;
+    const tbody = table.tBodies[0] || table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
+    const label = new Date(result.endMs).toLocaleString();
+    const existing = Array.from(tbody.rows).find(tr => tr.dataset.label === label && tr.dataset.windowMin === String(result.windowMin));
+    if (existing) return true;
+    const tr = document.createElement('tr');
+    tr.dataset.label = label;
+    tr.dataset.windowMin = String(result.windowMin);
+    const tdTime = document.createElement('td');  tdTime.textContent = label;
+    const tdWin  = document.createElement('td');  tdWin.textContent  = result.windowMin + ' min';
+    const tdN    = document.createElement('td');  tdN.textContent    = String(result.n);
+    const tdM    = document.createElement('td');  tdM.textContent    = JSON.stringify(result.means);
+    tr.appendChild(tdTime); tr.appendChild(tdWin); tr.appendChild(tdN); tr.appendChild(tdM);
+    tbody.appendChild(tr);
+    return true;
+  }
+  function backfillAllWindows() {
+    const snapshot = snapshotFromMainTable();
+    if (!snapshot.length) { console.warn('[Backfill] No rows found.'); return {ok:false, reason:'no_rows'}; }
+    const firstMs = snapshot[0]._ts;
+    const nowMs   = Date.now();
+    let inserted = 0;
+    for (const w of (window.CONFIG?.backfill?.windowsMin || CFG.windowsMin)) {
+      const stepMs = w*60*1000;
+      let t = Math.ceil(firstMs/stepMs)*stepMs;
+      for (; t <= nowMs; t += stepMs) {
+        const res = computeRollingMeans(snapshot, t, w);
+        if (res && insertSummaryRow(res)) inserted++;
+      }
+    }
+    console.log(`[Backfill] Inserted ${inserted} summary rows.`);
+    return {ok:true, inserted};
+  }
+  function bindButton() {
+    const btn = document.querySelector('#backfillControlBtn');
+    if (!btn) { console.warn('[Backfill] Control button not found.'); return; }
+    const fresh = btn.cloneNode(true);
+    btn.replaceWith(fresh);
+    fresh.addEventListener('click', () => {
+      const rv = backfillAllWindows();
+      fresh.textContent = rv.ok ? `Backfilled (${rv.inserted})` : 'Backfill: No data';
+      setTimeout(()=>{ fresh.textContent = 'Backfill All (5/15/60)'; }, 1500);
+    });
+    console.log('[Backfill] Bound #backfillControlBtn');
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindButton, {once:true});
+  } else {
+    bindButton();
+  }
+  window.backfillControl = { run: backfillAllWindows };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  function initImportGuard() {
+    const hasFileReader = typeof window.FileReader === 'function';
+    const input = document.querySelector('#csvImportInput');
+    if (!input) return;
+    if (!hasFileReader) {
+      console.warn('[Import] FileReader unavailable (Safari Lockdown). Disabling local import.');
+      input.disabled = true;
+      const note = document.createElement('div');
+      note.textContent = 'Local file import disabled by Safari Lockdown.';
+      note.style.fontSize = '12px';
+      input.insertAdjacentElement('afterend', note);
+    }
+  }
+  function ensureSummaryTables() {
+    const targets = [
+      { id:'summary5Table',  label:'Summary 5m'  },
+      { id:'summary15Table', label:'Summary 15m' },
+      { id:'summary60Table', label:'Summary 60m' }
+    ];
+    const host = document.querySelector('#summaryArea') || document.body;
+    targets.forEach(t=>{
+      if (document.getElementById(t.id)) return;
+      const wrap = document.createElement('div');
+      const h = document.createElement('h3'); h.textContent = t.label;
+      const table = document.createElement('table'); table.id = t.id;
+      const thead = document.createElement('thead');
+      thead.innerHTML = '<tr><th>Time</th><th>Window</th><th>N</th><th>Means</th></tr>';
+      const tbody = document.createElement('tbody');
+      table.appendChild(thead); table.appendChild(tbody);
+      wrap.appendChild(h); wrap.appendChild(table);
+      host.appendChild(wrap);
+    });
+  }
+  function rebindLegacyBackfillButtons() {
+    if (!window.backfillControl?.run) return;
+    ['#backfillBtn','#backfillBtnGlobal','#backfill','#backfillAllBtn'].forEach(sel=>{
+      const el = document.querySelector(sel);
+      if (!el) return;
+      const fresh = el.cloneNode(true);
+      el.replaceWith(fresh);
+      fresh.addEventListener('click', () => window.backfillControl.run());
+    });
+    console.log('[Backfill] Legacy buttons rebound to universal runner.');
+  }
+  function boot() { initImportGuard(); ensureSummaryTables(); rebindLegacyBackfillButtons(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else { boot(); }
+})();
+</script>
+
 <!-- === STS: Metric Button Order Preferences (auto-injected, 2025/11/05 08:00:00 AEST) === -->
 <style>
   #btnOrderGear{position:fixed; right:68px; bottom:18px; z-index:9999; width:42px; height:42px; border-radius:50%;
@@ -10740,7 +10643,7 @@ function applyUnlockedAndAddStay(){
         }
       }
     }catch(e){}
-    // r2490 unified config
+    // r unified config
     try{
       if (window.CONFIG && Array.isArray(CONFIG.values) && CONFIG.values.length){
         return CONFIG.values.slice();
