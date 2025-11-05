@@ -8828,6 +8828,131 @@ function appendPerDoseToDoseReviews_EXACT(){
   }
 })();
 </script>
+
+<script>
+/* Injected on 2025/11/05 00:00:01
+ * Fix: populate the 7 main "* Sum" metrics by summing paired columns:
+ * Rush = cols 'Rush' (two cols), etc. Score/Min/Max/Weighted/5Max read from their single columns.
+ */
+
+(function(){
+  const METRIC_COLUMNS_EXACT = [
+    "Rush Sum","Mood Sum","Social Sum","Energy Sum","Focus Sum","Anxiety Sum","Impair Sum",
+    "Score","Min","Max","Weighted","5Max"
+  ];
+
+  function normaliseHeaderName(s){
+    return String(s||"").toLowerCase().replace(/\s+/g," ").trim();
+  }
+
+  function headerNameArray(table){
+    const heads = Array.from(table.querySelectorAll("thead tr th")).map(th => th.textContent.trim());
+    const norm = heads.map(normaliseHeaderName);
+    return {heads, norm};
+  }
+
+  function indicesByExactName(normHeads, label){
+    const target = normaliseHeaderName(label);
+    const idxs = [];
+    for (let i=0;i<normHeads.length;i++){
+      if (normHeads[i] === target) idxs.push(i);
+    }
+    return idxs;
+  }
+
+  // Override readMainRowsExact with pair-sum derivation
+  window.readMainRowsExact = function(){
+    const table = document.querySelector("#logTable");
+    if (!table) return { rows: [], metricNames: METRIC_COLUMNS_EXACT.slice() };
+
+    const {heads, norm} = headerNameArray(table);
+
+    const tsIdx = norm.findIndex(h => h.includes("timestamp"));
+    const sinceIdx = norm.findIndex(h => h.includes("since") || h.includes("elapsed"));
+
+    // base metric pairs
+    const baseNames = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair"];
+    const pairIdxs = {};
+    for (const base of baseNames){
+      pairIdxs[base] = indicesByExactName(norm, base.toLowerCase());
+    }
+    const singleIdxs = {
+      "Score": indicesByExactName(norm, "score")[0] ?? -1,
+      "Min": indicesByExactName(norm, "min")[0] ?? -1,
+      "Max": indicesByExactName(norm, "max")[0] ?? -1,
+      "Weighted": indicesByExactName(norm, "weighted")[0] ?? -1,
+      "5Max": indicesByExactName(norm, "5max")[0] ?? -1
+    };
+
+    function parseNum(x){
+      if (x == null) return null;
+      const n = Number(String(x).trim());
+      return Number.isFinite(n) ? n : null;
+    }
+    function parseRowTimestamp(tsText) {
+      if (!tsText) return null;
+      const t = String(tsText).trim();
+      const m = t.match(/^(\d{4})\/(\d{2})\/(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+      if (m) {
+        const Y = +m[1], M = +m[2]-1, D = +m[3], h = +m[4], mi = +m[5], s = +(m[6] ?? 0);
+        const d = new Date(Y, M, D, h, mi, s, 0);
+        return isNaN(d.getTime()) ? null : d;
+      }
+      const d2 = new Date(t);
+      return isNaN(d2.getTime()) ? null : d2;
+    }
+    function hmsToSeconds(hmsText) {
+      if (!hmsText) return null;
+      const m = String(hmsText).trim().match(/^(\d{2}):(\d{2}):(\d{2})$/);
+      if (!m) return null;
+      return (+m[1])*3600 + (+m[2])*60 + (+m[3]);
+    }
+
+    const bodyRows = Array.from(table.querySelectorAll("tbody tr"));
+    const rows = [];
+
+    for (const tr of bodyRows){
+      const tds = Array.from(tr.cells);
+      const ts   = (tsIdx>=0) ? parseRowTimestamp(tds[tsIdx]?.textContent) : null;
+      if (!ts) continue;
+      const sinceSec = (sinceIdx>=0) ? hmsToSeconds(tds[sinceIdx]?.textContent) : null;
+
+      const metrics = Object.create(null);
+
+      // 7 sums from pairs
+      for (const base of baseNames){
+        const idxs = pairIdxs[base];
+        let s = null;
+        for (const ci of idxs){
+          const v = parseNum(tds[ci]?.textContent);
+          if (v != null){
+            s = (s==null ? v : s+v);
+          }
+        }
+        metrics[`${base} Sum`] = s;
+      }
+
+      // Singles
+      metrics["Score"]    = (singleIdxs["Score"]>=0) ? parseNum(tds[singleIdxs["Score"]]?.textContent) : null;
+      metrics["Min"]      = (singleIdxs["Min"]>=0) ? parseNum(tds[singleIdxs["Min"]]?.textContent) : null;
+      metrics["Max"]      = (singleIdxs["Max"]>=0) ? parseNum(tds[singleIdxs["Max"]]?.textContent) : null;
+      metrics["Weighted"] = (singleIdxs["Weighted"]>=0) ? parseNum(tds[singleIdxs["Weighted"]]?.textContent) : null;
+      metrics["5Max"]     = (singleIdxs["5Max"]>=0) ? parseNum(tds[singleIdxs["5Max"]]?.textContent) : null;
+
+      rows.push({
+        el: tr,
+        ts,
+        tsMs: ts.getTime(),
+        sinceSec,
+        metrics
+      });
+    }
+
+    rows.sort((a,b)=>a.tsMs-b.tsMs);
+    return { rows, metricNames: METRIC_COLUMNS_EXACT.slice() };
+  };
+})();
+</script>
 </html>
 <!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
 <script>
