@@ -646,7 +646,7 @@ BOOKMARK
 <button onclick="exportCSV()">Export CSV</button>
 <button id="openLogBtn" onclick="openExistingLog()">Open Log (Append)</button>
 <input accept=".csv,text/csv" id="openLogInput" style="display:none" type="file"/>
-<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button>
+<button onclick="openScoreModal()">Manual Score Entry</button><button onclick="openRapidScores()">Rapid Scores</button><button onclick="openFastMode()">Fast Mode</button>
 <button onclick="openEmotionModal()">Emotion Wheel</button>
 </div>
 <div>
@@ -8828,6 +8828,334 @@ function appendPerDoseToDoseReviews_EXACT(){
   }
 })();
 </script>
+
+<script>
+/* Injected on 2025/11/05 00:00:01
+ * Fix: populate the 7 main "* Sum" metrics by summing paired columns:
+ * Rush = cols 'Rush' (two cols), etc. Score/Min/Max/Weighted/5Max read from their single columns.
+ */
+
+(function(){
+  const METRIC_COLUMNS_EXACT = [
+    "Rush Sum","Mood Sum","Social Sum","Energy Sum","Focus Sum","Anxiety Sum","Impair Sum",
+    "Score","Min","Max","Weighted","5Max"
+  ];
+
+  function normaliseHeaderName(s){
+    return String(s||"").toLowerCase().replace(/\s+/g," ").trim();
+  }
+
+  function headerNameArray(table){
+    const heads = Array.from(table.querySelectorAll("thead tr th")).map(th => th.textContent.trim());
+    const norm = heads.map(normaliseHeaderName);
+    return {heads, norm};
+  }
+
+  function indicesByExactName(normHeads, label){
+    const target = normaliseHeaderName(label);
+    const idxs = [];
+    for (let i=0;i<normHeads.length;i++){
+      if (normHeads[i] === target) idxs.push(i);
+    }
+    return idxs;
+  }
+
+  // Override readMainRowsExact with pair-sum derivation
+  window.readMainRowsExact = function(){
+    const table = document.querySelector("#logTable");
+    if (!table) return { rows: [], metricNames: METRIC_COLUMNS_EXACT.slice() };
+
+    const {heads, norm} = headerNameArray(table);
+
+    const tsIdx = norm.findIndex(h => h.includes("timestamp"));
+    const sinceIdx = norm.findIndex(h => h.includes("since") || h.includes("elapsed"));
+
+    // base metric pairs
+    const baseNames = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair"];
+    const pairIdxs = {};
+    for (const base of baseNames){
+      pairIdxs[base] = indicesByExactName(norm, base.toLowerCase());
+    }
+    const singleIdxs = {
+      "Score": indicesByExactName(norm, "score")[0] ?? -1,
+      "Min": indicesByExactName(norm, "min")[0] ?? -1,
+      "Max": indicesByExactName(norm, "max")[0] ?? -1,
+      "Weighted": indicesByExactName(norm, "weighted")[0] ?? -1,
+      "5Max": indicesByExactName(norm, "5max")[0] ?? -1
+    };
+
+    function parseNum(x){
+      if (x == null) return null;
+      const n = Number(String(x).trim());
+      return Number.isFinite(n) ? n : null;
+    }
+    function parseRowTimestamp(tsText) {
+      if (!tsText) return null;
+      const t = String(tsText).trim();
+      const m = t.match(/^(\d{4})\/(\d{2})\/(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+      if (m) {
+        const Y = +m[1], M = +m[2]-1, D = +m[3], h = +m[4], mi = +m[5], s = +(m[6] ?? 0);
+        const d = new Date(Y, M, D, h, mi, s, 0);
+        return isNaN(d.getTime()) ? null : d;
+      }
+      const d2 = new Date(t);
+      return isNaN(d2.getTime()) ? null : d2;
+    }
+    function hmsToSeconds(hmsText) {
+      if (!hmsText) return null;
+      const m = String(hmsText).trim().match(/^(\d{2}):(\d{2}):(\d{2})$/);
+      if (!m) return null;
+      return (+m[1])*3600 + (+m[2])*60 + (+m[3]);
+    }
+
+    const bodyRows = Array.from(table.querySelectorAll("tbody tr"));
+    const rows = [];
+
+    for (const tr of bodyRows){
+      const tds = Array.from(tr.cells);
+      const ts   = (tsIdx>=0) ? parseRowTimestamp(tds[tsIdx]?.textContent) : null;
+      if (!ts) continue;
+      const sinceSec = (sinceIdx>=0) ? hmsToSeconds(tds[sinceIdx]?.textContent) : null;
+
+      const metrics = Object.create(null);
+
+      // 7 sums from pairs
+      for (const base of baseNames){
+        const idxs = pairIdxs[base];
+        let s = null;
+        for (const ci of idxs){
+          const v = parseNum(tds[ci]?.textContent);
+          if (v != null){
+            s = (s==null ? v : s+v);
+          }
+        }
+        metrics[`${base} Sum`] = s;
+      }
+
+      // Singles
+      metrics["Score"]    = (singleIdxs["Score"]>=0) ? parseNum(tds[singleIdxs["Score"]]?.textContent) : null;
+      metrics["Min"]      = (singleIdxs["Min"]>=0) ? parseNum(tds[singleIdxs["Min"]]?.textContent) : null;
+      metrics["Max"]      = (singleIdxs["Max"]>=0) ? parseNum(tds[singleIdxs["Max"]]?.textContent) : null;
+      metrics["Weighted"] = (singleIdxs["Weighted"]>=0) ? parseNum(tds[singleIdxs["Weighted"]]?.textContent) : null;
+      metrics["5Max"]     = (singleIdxs["5Max"]>=0) ? parseNum(tds[singleIdxs["5Max"]]?.textContent) : null;
+
+      rows.push({
+        el: tr,
+        ts,
+        tsMs: ts.getTime(),
+        sinceSec,
+        metrics
+      });
+    }
+
+    rows.sort((a,b)=>a.tsMs-b.tsMs);
+    return { rows, metricNames: METRIC_COLUMNS_EXACT.slice() };
+  };
+})();
+</script>
+
+<script>
+/* Injected on 2025/11/05 00:00:02 (Australia/Sydney)
+ * Raw averages (no +5), cell shading like main grid, multi-dose detection via Since/Elapsed rule.
+ */
+const METRIC_COLUMNS_EXACT = [
+  "Rush Sum","Mood Sum","Social Sum","Energy Sum","Focus Sum","Anxiety Sum","Impair Sum",
+  "Score","Min","Max","Weighted","5Max"
+];
+function _normHeader(s){ return String(s||"").toLowerCase().replace(/\s+/g," ").trim(); }
+function _getHeaderMap(table){
+  const heads = Array.from(table.querySelectorAll("thead tr th")).map(th => th.textContent.trim());
+  const norm = heads.map(_normHeader);
+  const tsIdx = norm.findIndex(h => h.includes("timestamp"));
+  const sinceIdx = norm.findIndex(h => h.includes("since") || h.includes("elapsed"));
+  return {heads, norm, tsIdx, sinceIdx};
+}
+function _parseTS(t){
+  if (!t) return null;
+  const s = String(t).trim();
+  const m = s.match(/^(\d{4})\/(\d{2})\/(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/);
+  if (m) { const d=new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +(m[6]||0), 0); return isNaN(d.getTime())?null:d; }
+  const d2 = new Date(s); return isNaN(d2.getTime())?null:d2;
+}
+function _hmsToSec(h){ if (!h) return null; const m=String(h).trim().match(/^(\d{2}):(\d{2}):(\d{2})$/); if(!m) return null; return (+m[1])*3600+(+m[2])*60+(+m[3]); }
+function _num(x){ if (x==null) return null; const n=Number(String(x).trim()); return Number.isFinite(n)?n:null; }
+function _p2(n){return String(n).padStart(2,'0');}
+function _fmt(d){return `${d.getFullYear()}/${_p2(d.getMonth()+1)}/${_p2(d.getDate())} ${_p2(d.getHours())}:${_p2(d.getMinutes())}:${_p2(d.getSeconds())}`;}
+function _fmtWin(ms){const s=new Date(ms), e=new Date(ms+5*60*1000); return _fmt(s)+' – '+_fmt(e);}
+function _bucket5(dt){return Math.floor(dt.getTime()/(5*60*1000))*(5*60*1000);}
+
+function _readRows(){
+  const table = document.querySelector('#logTable');
+  if (!table) return {rows:[], metricNames: METRIC_COLUMNS_EXACT.slice()};
+  const map = _getHeaderMap(table);
+  const ths = Array.from(table.querySelectorAll('thead tr th')).map(th => th.textContent.trim());
+  const bases = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
+  const pairIdxs = {}; for (const b of bases){ pairIdxs[b]=[]; for (let i=0;i<ths.length;i++) if (ths[i].toLowerCase()===b.toLowerCase()) pairIdxs[b].push(i); }
+  const singles = { Score: ths.findIndex(h=>h.toLowerCase()==='score'),
+    Min: ths.findIndex(h=>h.toLowerCase()==='min'),
+    Max: ths.findIndex(h=>h.toLowerCase()==='max'),
+    Weighted: ths.findIndex(h=>h.toLowerCase()==='weighted'),
+    '5Max': ths.findIndex(h=>h.toLowerCase()==='5max') };
+
+  const body = Array.from(table.querySelectorAll('tbody tr'));
+  const out=[];
+  for (const tr of body){
+    const tds = Array.from(tr.cells);
+    const ts = (map.tsIdx>=0) ? _parseTS(tds[map.tsIdx]?.textContent) : null;
+    if (!ts) continue;
+    const sinceSec = (map.sinceIdx>=0) ? _hmsToSec(tds[map.sinceIdx]?.textContent) : null;
+
+    const metrics = {};
+    for (const b of bases){
+      let s = null;
+      for (const ci of pairIdxs[b]){ const v=_num(tds[ci]?.textContent); if (v!=null) s=(s==null? v : s+v); }
+      metrics[b+' Sum'] = s;
+    }
+    for (const k of Object.keys(singles)){ const i=singles[k]; metrics[k]=(i>=0? _num(tds[i]?.textContent): null); }
+
+    out.push({ el: tr, ts, tsMs: ts.getTime(), sinceSec, metrics });
+  }
+  out.sort((a,b)=>a.tsMs-b.tsMs);
+  return { rows: out, metricNames: METRIC_COLUMNS_EXACT.slice() };
+}
+
+function _detectDoseStarts(rows){
+  const starts=[];
+  for (let i=0;i<rows.length;i++){ const s=rows[i].sinceSec; const prev=(i>0? rows[i-1].sinceSec: null);
+    if ((s!=null && s<5) || (s!=null && prev!=null && s<prev)) starts.push(i);
+  } return starts;
+}
+
+function _avgWindowsGlobal(rows, metricNames){
+  const buckets=new Map();
+  for (const r of rows){
+    const b=_bucket5(r.ts); let agg=buckets.get(b);
+    if (!agg){ agg={n:0, metrics:{}}; for (const n of metricNames) agg.metrics[n]={sum:0,c:0}; buckets.set(b,agg); }
+    agg.n++; for (const n of metricNames){ const v=r.metrics[n]; if (v!=null){ agg.metrics[n].sum+=v; agg.metrics[n].c++; } }
+  }
+  return Array.from(buckets.entries()).sort((a,b)=>a[0]-b[0]).map(([ms,agg])=>{
+    const averages={}; for (const n of metricNames){ const m=agg.metrics[n]; averages[n]=(m.c>0? m.sum/m.c : null); }
+    return { window:_fmtWin(ms), count:agg.n, averages };
+  });
+}
+
+function _avgWindowsPerDose(rows, doseStarts, metricNames){
+  const out=[];
+  for (let d=0; d<doseStarts.length; d++){
+    const iStart=doseStarts[d], t0=rows[iStart].tsMs, tNext=(d+1<doseStarts.length? rows[doseStarts[d+1]].tsMs: Infinity);
+    const buckets=new Map();
+    for (let j=iStart; j<rows.length; j++){
+      const r=rows[j]; if (r.tsMs>=tNext) break; if (r.tsMs<t0) continue;
+      const relStart=t0+Math.floor((r.tsMs-t0)/(5*60*1000))*(5*60*1000); let agg=buckets.get(relStart);
+      if (!agg){ agg={n:0, metrics:{}}; for (const n of metricNames) agg.metrics[n]={sum:0,c:0}; buckets.set(relStart, agg); }
+      agg.n++; for (const n of metricNames){ const v=r.metrics[n]; if (v!=null){ agg.metrics[n].sum+=v; agg.metrics[n].c++; } }
+    }
+    const windows=Array.from(buckets.entries()).sort((a,b)=>a[0]-b[0]).map(([ms,agg])=>{
+      const averages={}; for (const n of metricNames){ const m=agg.metrics[n]; averages[n]=(m.c>0? m.sum/m.c : null); }
+      return { window:_fmtWin(ms), count:agg.n, averages };
+    });
+    out.push({ doseIndex:iStart, doseTime:new Date(t0), windows });
+  }
+  return out;
+}
+
+function _td(name, val){
+  const td=document.createElement('td');
+  td.textContent = (val==null? '—' : Number(val).toFixed(2));
+  td.setAttribute('data-col', name.replace(/ Sum$/,''));
+  if (val!=null) td.setAttribute('data-value', String(val));
+  return td;
+}
+function _shadeTR(tr){ try{ if (typeof window.applyRowShading==='function') window.applyRowShading(tr); }catch(e){} }
+
+function _renderAll5(){
+  const {rows, metricNames} = _readRows();
+  const doseStarts=_detectDoseStarts(rows);
+  const globalData=_avgWindowsGlobal(rows, metricNames);
+  const perDoseData=_avgWindowsPerDose(rows, doseStarts, metricNames);
+
+  const card = document.getElementById('allRated5MinutesOutOf10PopupCard');
+  const fallbackTbl = document.getElementById('allRated5MinutesOutOf10PopupTable');
+  let host=null;
+  if (card){ host=card.querySelector('#allRated5m-content'); if(!host){ host=document.createElement('div'); host.id='allRated5m-content'; card.appendChild(host);} host.innerHTML=''; }
+  else if (fallbackTbl && fallbackTbl.parentElement){ host=fallbackTbl.parentElement.querySelector('#allRated5m-content'); if(!host){ host=document.createElement('div'); host.id='allRated5m-content'; fallbackTbl.parentElement.appendChild(host);} host.innerHTML=''; }
+  if (!host) return;
+
+  function renderSection(title, rowsArr){
+    const section=document.createElement('section');
+    const h=document.createElement('h3'); h.textContent=title; section.appendChild(h);
+    const table=document.createElement('table'); table.className='table table-striped table-sm';
+    const thead=document.createElement('thead');
+    thead.innerHTML = `<tr><th>5-minute window</th>${metricNames.map(n=>`<th class="text-right">${n}</th>`).join('')}<th class="text-right">n</th></tr>`;
+    table.appendChild(thead);
+    const tbody=document.createElement('tbody');
+    for (const row of rowsArr){
+      const tr=document.createElement('tr');
+      const tdw=document.createElement('td'); tdw.textContent=row.window; tr.appendChild(tdw);
+      for (const n of metricNames) tr.appendChild(_td(n, row.averages[n]));
+      const tdn=document.createElement('td'); tdn.className='text-right'; tdn.textContent=String(row.count); tr.appendChild(tdn);
+      tbody.appendChild(tr); _shadeTR(tr);
+    }
+    table.appendChild(tbody); section.appendChild(table); host.appendChild(section);
+  }
+
+  renderSection('Global 5-minute averages (raw)', globalData);
+  const top=document.createElement('h3'); top.textContent='Per-dose 5-minute averages (raw)'; host.appendChild(top);
+  for (const seg of perDoseData){
+    const segWrap=document.createElement('section');
+    const h=document.createElement('h4'); h.textContent='Dose starting '+_fmt(seg.doseTime); segWrap.appendChild(h);
+    const table=document.createElement('table'); table.className='table table-striped table-sm';
+    const thead=document.createElement('thead');
+    thead.innerHTML = `<tr><th>5-minute window</th>${metricNames.map(n=>`<th class="text-right">${n}</th>`).join('')}<th class="text-right">n</th></tr>`;
+    table.appendChild(thead);
+    const tbody=document.createElement('tbody');
+    for (const w of seg.windows){
+      const tr=document.createElement('tr');
+      const tdw=document.createElement('td'); tdw.textContent=w.window; tr.appendChild(tdw);
+      for (const n of metricNames) tr.appendChild(_td(n, w.averages[n]));
+      const tdn=document.createElement('td'); tdn.className='text-right'; tdn.textContent=String(w.count); tr.appendChild(tdn);
+      tbody.appendChild(tr); _shadeTR(tr);
+    }
+    table.appendChild(tbody); segWrap.appendChild(table); host.appendChild(segWrap);
+  }
+}
+
+(function(){
+  const orig = window.openAllRated5MinutesOutOf10Popup;
+  if (typeof orig === 'function'){ window.openAllRated5MinutesOutOf10Popup = function(){ try{orig();}catch(e){} setTimeout(_renderAll5,50); }; }
+  else { window.renderAllRated5Raw = _renderAll5; }
+})();
+
+function _appendPerDoseToDoseReviews(){
+  const {rows, metricNames} = _readRows();
+  const doseStarts=_detectDoseStarts(rows);
+  const perDose=_avgWindowsPerDose(rows, doseStarts, metricNames);
+  const table=document.getElementById('doseReviewsTable');
+  if (!table) return;
+  let host=document.getElementById('doseReviewsPer5min');
+  if (!host){ host=document.createElement('div'); host.id='doseReviewsPer5min'; table.insertAdjacentElement('afterend', host); }
+  host.innerHTML='';
+  const top=document.createElement('h3'); top.textContent='Per-dose 5-minute averages (raw)'; host.appendChild(top);
+  for (const seg of perDose){
+    const section=document.createElement('section'); const h=document.createElement('h4'); h.textContent='Dose starting '+_fmt(seg.doseTime); section.appendChild(h);
+    const t=document.createElement('table'); t.className='table table-striped table-sm';
+    const thead=document.createElement('thead'); thead.innerHTML=`<tr><th>5-minute window</th>${metricNames.map(n=>`<th class="text-right">${n}</th>`).join('')}<th class="text-right">n</th></tr>`; t.appendChild(thead);
+    const tb=document.createElement('tbody');
+    for (const w of seg.windows){
+      const tr=document.createElement('tr'); const tdw=document.createElement('td'); tdw.textContent=w.window; tr.appendChild(tdw);
+      for (const n of metricNames) tr.appendChild(_td(n, w.averages[n]));
+      const tdn=document.createElement('td'); tdn.className='text-right'; tdn.textContent=String(w.count); tr.appendChild(tdn);
+      tb.appendChild(tr); _shadeTR(tr);
+    }
+    t.appendChild(tb); section.appendChild(t); host.appendChild(section);
+  }
+}
+(function(){
+  const orig=window.openDoseReviews;
+  if (typeof orig==='function'){ window.openDoseReviews=function(){ try{orig();}catch(e){} setTimeout(_appendPerDoseToDoseReviews,50); }; }
+  else { window.appendPerDoseToDoseReviews=_appendPerDoseToDoseReviews; }
+})();
+</script>
 </html>
 <!-- === OVERRIDE: Auto timers reworked to isolate targets and cadences === -->
 <script>
@@ -10506,16 +10834,52 @@ function applyUnlockedAndAddStay(){
     <button onclick="applyFastModeAndAdd()">Apply &amp; Add Entry</button>
     <button onclick="applyFastModeAndAddStay()">Apply, Add &amp; Stay</button>
   </div>
-</div>  <script id="fast-mode-logic">
+</div>
+
+<script id="fast-mode-logic">
 (function(){
+  // Per-metric values for Fast Mode
+  const FAST_MODE_VALUES = {
+    rush:    [5.99, 4.99, 3.99, 2.66, 1.66, 0.33, 0],
+    mood:    [5.99, 4.99, 3.99, 2.66, 1.66, 0.33, 0],
+    social:  [5.99, 4.99, 3.99, 2.66, 1.66, 0.33, 0],
+    energy:  [5.99, 4.99, 3.99, 2.66, 1.66, 0.33, 0],
+    focus:   [5.99, 4.99, 3.99, 2.66, 1.66, 0.33, 0],
+    anxiety: [5.99, 4.99, 3.99, 2.66, 1.66, 0.33, 0],
+    impair:  [5.99, 4.99, 3.99, 2.66, 1.66, 0.33, 0],
+    __default: [6,5,4,3,2,1,0]
+  };
+
+  // Fast Mode-specific labels used on buttons and written into the table
+  const FAST_MODE_LABELS = {
+    rush:    { 5.99:'Extreme', 4.99:'Very High', 3.99:'High', 2.66:'Moderate', 1.66:'Low', 0.33:'Minimal', 0:'None' },
+    mood:    { 5.99:'Bliss',   4.99:'Euphoric',  3.99:'Great', 2.66:'Positive', 1.66:'Some', 0.33:'Noticed', 0:'None' },
+    social:  { 5.99:'Disinhib',4.99:'Outgoing',  3.99:'Sociable', 2.66:'Urge', 1.66:'Able', 0.33:'Functional', 0:'Avoidant' },
+    energy:  { 5.99:'Overdrive',4.99:'Manic',    3.99:'Hyper', 2.66:'Energetic', 1.66:'Some', 0.33:'Inactive', 0:'None' },
+    focus:   { 5.99:'Laser',   4.99:'Wired',     3.99:'Obsessive', 2.66:'Focused', 1.66:'Effective', 0.33:'Effort', 0:'None' },
+    anxiety: { 5.99:'Severe',  4.99:'Panic',     3.99:'Paranoid', 2.66:'Distracting', 1.66:'Ignorable', 0.33:'Negligible', 0:'None' },
+    impair:  { 5.99:'Dangerous',4.99:'Controlling',3.99:'Dominating',2.66:'Affects Choices',1.66:'Physical',0.33:'Negligible',0:'None' }
+  };
+
   const FAST_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const FAST_MODE_VALUES  = [5.99,3.99,2.66,1.66,0.33,0];
 
   const fastModeSelections = Object.create(null);
 
+  function getValuesForMetric(metric){
+    const v = FAST_MODE_VALUES[metric];
+    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6,5,4,3,2,1,0]);
+    }
+
   function getFastModeLabel(metric, value){
     try{
-      const key = Number.isFinite(value) ? value.toFixed(2) : String(value);
+      const keyNum = Number(value);
+      const key = Number.isFinite(keyNum) ? keyNum.toFixed(2) : String(value);
+      const fm = FAST_MODE_LABELS[metric];
+      if (fm) {
+        if (fm[key] != null) return String(fm[key]);
+        if (fm[keyNum] != null) return String(fm[keyNum]);
+      }
+      // optional fallback to CONFIG if present
       const cfg = (window.CONFIG && window.CONFIG.labels) || {};
       const R = (cfg.rapidLabels && cfg.rapidLabels[metric] && cfg.rapidLabels[metric][key]) || '';
       if (R) return R;
@@ -10525,6 +10889,17 @@ function applyUnlockedAndAddStay(){
     return '';
   }
 
+  function sortNumericDescStable(a,b){
+    const an = (typeof a === 'number') ? a : Number(a);
+    const bn = (typeof b === 'number') ? b : Number(b);
+    const aNum = Number.isFinite(an), bNum = Number.isFinite(bn);
+    if (aNum && bNum) return bn - an;
+    if (aNum && !bNum) return -1;
+    if (!aNum && bNum) return 1;
+    return String(b).localeCompare(String(a));
+  }
+
+  // UI build
   window.buildFastModeButtons = function(){
     try{
       const container = document.getElementById('fastModeButtons');
@@ -10536,12 +10911,12 @@ function applyUnlockedAndAddStay(){
         const t = document.createElement('strong');
         t.innerText = metric.charAt(0).toUpperCase() + metric.slice(1);
         col.appendChild(t);
-        FAST_MODE_VALUES.forEach(v=>{
+        getValuesForMetric(metric).forEach(v=>{
           if (v === ''){ const sep = document.createElement('div'); sep.style.height='6px'; col.appendChild(sep); return; }
           const b = document.createElement('button');
-b.classList.add('metric-btn');
+          b.classList.add('metric-btn');
           const label = getFastModeLabel(metric, v);
-          b.innerText = `${v}: ${label}`;
+          b.innerText = label ? `${v}: ${label}` : String(v);
           b.onclick = ()=>{
             if (!Array.isArray(fastModeSelections[metric])) fastModeSelections[metric] = [];
             const i = fastModeSelections[metric].indexOf(v);
@@ -10558,6 +10933,7 @@ b.classList.add('metric-btn');
     }catch(e){ console.warn(e); }
   };
 
+  // Open/close
   window.openFastMode = function(){
     try{
       buildFastModeButtons();
@@ -10568,7 +10944,6 @@ b.classList.add('metric-btn');
       m.style.display = 'block';
     }catch(e){ console.warn(e); }
   };
-
   window.closeFastMode = function(){
     try{ const m = document.getElementById('fastModeModal'); if (m) m.style.display = 'none'; }catch(e){}
   };
@@ -10577,16 +10952,12 @@ b.classList.add('metric-btn');
     try{
       FAST_MODE_METRICS.forEach(f=>{
         if (!Array.isArray(fastModeSelections[f])) fastModeSelections[f] = [];
-        fastModeSelections[f] = Array.from(new Set(fastModeSelections[f])).sort((a,b)=>{
-          if (typeof a === 'number' && typeof b === 'number') return b - a;
-          if (typeof a === 'number' && typeof b !== 'number') return -1;
-          if (typeof a !== 'number' && typeof b === 'number') return 1;
-          return String(b).localeCompare(String(a));
-        });
+        fastModeSelections[f] = Array.from(new Set(fastModeSelections[f])).sort(sortNumericDescStable);
       });
     }catch(e){}
   }
 
+  // Apply into global 'selections' buffer only
   window.applyFastMode = function(){
     try{
       normalizeFastModeSelections();
@@ -10598,25 +10969,27 @@ b.classList.add('metric-btn');
     }catch(e){ console.warn(e); }
   };
 
+  // Stamp labels/values into the last-added entry and refresh table
   function finalizeFastEntryAsFastMode(){
     try{
       if (!Array.isArray(logData) || !logData.length) return;
       const entry = logData[logData.length - 1];
       entry.inputSource = 'FastMode';
-      ['rush','energy','focus','anxiety','mood','social','impair'].forEach(m=>{
+      entry.fastMode = true;
+
+      FAST_MODE_METRICS.forEach(metric=>{
         try{
-          const arr = Array.isArray(entry[m]) ? entry[m] : [];
-          const labs = [];
-          const vals = Array.from(new Set(arr.slice().sort((a,b)=>{
-            if (typeof a === 'number' && typeof b === 'number') return b - a;
-            if (typeof a === 'number' && typeof b !== 'number') return -1;
-            if (typeof a !== 'number' && typeof b === 'number') return 1;
-            return String(b).localeCompare(String(a));
-          })));
-          vals.forEach(v=>{ const L = getFastModeLabel(m, v); if (L) labs.push(L); });
-          entry[m + 'Label'] = labs.join(', ');
+          const chosen = Array.isArray(fastModeSelections[metric]) ? fastModeSelections[metric].slice() : [];
+          entry[metric] = chosen;
+          const labels = [];
+          Array.from(new Set(chosen)).sort(sortNumericDescStable).forEach(v=>{
+            const L = getFastModeLabel(metric, v);
+            if (L) labels.push(L);
+          });
+          entry[metric + 'Label'] = labels.join(', ');
         }catch(e){}
       });
+
       try { if (typeof setTripLogDebounced==='function') setTripLogDebounced(logData); } catch(e){}
       try { if (typeof renderTable==='function') renderTable(); } catch(e){}
     }catch(e){ console.warn(e); }
@@ -10655,7 +11028,7 @@ b.classList.add('metric-btn');
       Object.keys(fastModeSelections).forEach(k => { fastModeSelections[k] = []; });
       try{
         if (typeof selections === 'object' && selections){
-          ['rush','mood','social','energy','focus','anxiety','impair'].forEach(f=>{ selections[f] = []; });
+          FAST_MODE_METRICS.forEach(f=>{ selections[f] = []; });
         }
       }catch(e){}
       const modal = document.getElementById('fastModeModal');
