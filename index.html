@@ -139,7 +139,7 @@ CONFIG.popups = Object.assign({
         height: 30px;
         BOOKMARK
  */
-        width: 150px;
+        width: 140px;
         height: 28px;
         margin: 1px;
         border-radius: 6px;
@@ -481,13 +481,13 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.26.7 r2555</title>
+<title>statpack v1.26.7 r2558</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
 
 
-<!-- STS: UI CONFIG (auto-injected) -->
+<!-- UI CONFIG (auto-injected) -->
 <script>
 function computeFiveMax(obj){
   const rush    = +obj.rush    || 0;
@@ -564,7 +564,7 @@ BOOKMARK FOR SCORING WINDOW SIZES
  */
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
-    width: 150px;
+    width: 140px;
     height: 30px;
     font-size: 13px;
   }
@@ -906,7 +906,7 @@ const CONFIG = Object.freeze({
   },
 labels: {
   labelMappings: {
-  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Uncontroillable', 4.00: 'Intense', 3.50: 'Energetic', 3.00: 'Energetic', 2.50: 'Physical/Contained', 2.00: 'Physical/Contained', 1.50: 'Mild/Mental', 1.00: 'Mild/Mental', 0.50: 'Present', 0.00: 'No Rush', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Uncontroillable', 4.00: 'Intense', 3.50: 'Energetic', 3.00: 'Energetic', 2.50: 'Physical/Contain', 2.00: 'Physical/Contain', 1.50: 'Mild/Mental', 1.00: 'Mild/Mental', 0.50: 'Present', 0.00: 'No Rush', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
   mood: { 6.00: 'Autopilot', 5.00: 'Euphoric', 4.50: 'Obvious', 4.00: 'Obvious', 3.50: 'Clear', 3.00: 'Clear', 2.50: 'Motivated', 2.00: 'Felt', 1.50: 'Felt', 1.00: 'Thought', 0.50: 'Noticed', 0.00: 'No Change', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
   social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.50: 'Uninhibited', 4.00: 'Outgoing', 3.50: 'Empathy/Social', 3.00: 'Empathy/Social', 2.50: 'Sociable/Push', 2.00: 'Sociable/Push', 1.50: 'Capable/Able', 1.00: 'Capable/Able', 0.50: 'Functional', 0.00: 'No/Avoidant', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
   energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Hyper', 3.50: 'Energetic', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Moderate', 1.50: 'Some', 1.00: 'Some', 0.50: 'Inactive', 0.00: 'None/Tired', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
@@ -922,7 +922,7 @@ labels: {
   dopamine: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
     }
 , rapidLabels: {
-  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Uncontroillable', 4.00: 'Intense', 3.50: 'Energetic', 3.00: 'Energetic', 2.50: 'Physical/Contained', 2.00: 'Physical/Contained', 1.50: 'Mild/Mental', 1.00: 'Mild/Mental', 0.50: 'Present', 0.00: 'No Rush', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.50: 'Uncontroillable', 4.00: 'Intense', 3.50: 'Energetic', 3.00: 'Energetic', 2.50: 'Physical/Contain', 2.00: 'Physical/Contain', 1.50: 'Mild/Mental', 1.00: 'Mild/Mental', 0.50: 'Present', 0.00: 'No Rush', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
   mood: { 6.00: 'Autopilot', 5.00: 'Euphoric', 4.50: 'Obvious', 4.00: 'Obvious', 3.50: 'Clear', 3.00: 'Clear', 2.50: 'Motivated', 2.00: 'Felt', 1.50: 'Felt', 1.00: 'Thought', 0.50: 'Noticed', 0.00: 'No Change', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
   social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.50: 'Uninhibited', 4.00: 'Outgoing', 3.50: 'Empathy/Social', 3.00: 'Empathy/Social', 2.50: 'Sociable/Push', 2.00: 'Sociable/Push', 1.50: 'Capable/Able', 1.00: 'Capable/Able', 0.50: 'Functional', 0.00: 'No/Avoidant', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
   energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.50: 'Very High', 4.00: 'Hyper', 3.50: 'Energetic', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Moderate', 1.50: 'Some', 1.00: 'Some', 0.50: 'Inactive', 0.00: 'None/Tired', 0.20: '+', 0.30: '+', 0.25: '+', 0.75: '+' },
@@ -6399,17 +6399,17 @@ b
 
 
 <!-- Rush Mode launcher (you can reposition this anywhere in your toolbar) -->
-\1
+
 <button id="rushModeBtn" type="button" title="Open Rush Mode" onclick="openRushMode()">Rush Mode</button>
 <button id="fastModeBtn" type="button" title="Open Fast Mode" onclick="openFastMode()">Fast Mode</button>
 
 <!-- Scoped button sizing for Rush Mode modal -->
 <!-- 
-BOOKMARK
+BOOKMARK FOR RUSH MODE BUTTON SIZES
  -->
 <style id="rush-mode-size-override">
   #rushModeModal .score-column button {
-    width: 160px;
+    width: 150px;
     height: 30px;
     font-size: 13px;
   }
@@ -8038,6 +8038,7 @@ function hasAtLeastSeven(eOrTr){
   return countCompletedMetricsFromEntry(eOrTr) >= 7;
 }
 </script>
+<script>
 /* === Metric completeness helpers (2025/10/26 00:00:00) === */
 const MAIN_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair'];
 
@@ -10839,21 +10840,21 @@ function applyUnlockedAndAddStay(){
 <script id="fast-mode-logic">
 (function(){
   // Per-metric values for Fast Mode
-//   BOoKmArk FAST MODe LABELS AND VALUES
+//   BOOKMARK FAST MODE LABELS AND VALUES
   const FAST_MODE_VALUES = {
-    rush:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '-----', 0.50,-0.50],
-    mood:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '-----', 0.50,-0.50],
-    social:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '-----', 0.50,-0.50],
-    energy:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '-----', 0.50,-0.50],
-    focus:   [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '-----', 0.50,-0.50],
-    anxiety: [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '-----', 0.50,-0.50],
-    impair:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '-----', 0.50,-0.50],
-    __default: [6,5,4,3,2,1,0,'-----',0.5,-0.5]
+    rush:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    mood:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    social:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    energy:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    focus:   [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    anxiety: [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    impair:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    __default: [6,5,4,3,2,1,0,'---------------',0.5,-0.5]
   };
 
   // Fast Mode-specific labels used on buttons and written into the table
   const FAST_MODE_LABELS = {
-  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.00: 'Intense + Uncontrolalble', 3.00: 'Energetic + Physical', 2.00: 'Mental + Contained', 1.00: 'Some / Mild', 0.00: 'No Rush', 0.50: '+' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.00: 'Intense + Uncontrol', 3.00: 'Energetic + Physical', 2.00: 'Mental + Contained', 1.00: 'Some / Mild', 0.00: 'No Rush', 0.50: '+' },
   mood: { 6.00: 'Autopilot', 5.00: 'Euphoria', 4.00: 'Obvious', 3.00: 'Clear + Good', 2.00: 'Distinct + Definite', 1.00: 'Required Thought', 0.00: 'No/Avoidant', 0.50: '+' },
   social: { 6.00: 'Disinhibited', 5.00: 'Empathy/Love', 4.00: 'Outgoing/Great', 3.00: 'Flow/Natural', 2.00: 'Push/Motivated', 1.00: 'Want/Urge/Aroused', 0.00: 'No/Avoidant', 0.50: '+' },
   energy: { 6.00: 'Hyper', 5.00: 'Manic', 4.00: 'Strong Physical', 3.00: 'Energetic/Push', 2.00: 'Noticeable', 1.00: 'Some', 0.00: 'None', 0.50: '+' },
@@ -10868,7 +10869,7 @@ function applyUnlockedAndAddStay(){
 
   function getValuesForMetric(metric){
     const v = FAST_MODE_VALUES[metric];
-    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6,5,4,3,2,1,0,'-----',0.5,-0.5]);
+    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6,5,4,3,2,1,0,'---------------',0.5,-0.5]);
     }
 
   function getFastModeLabel(metric, value){
@@ -11046,7 +11047,7 @@ function applyUnlockedAndAddStay(){
 <script>
 (() => {
   'use strict';
-  // ===== Config defaults for Rapid 2 (mirror Rapid 1 unless explicitly set) =====
+  // ===== Config defaults for Rapid 2 (mirror Rapid 1 unless explicitly set) BOOKMARK =====
   if (!window.CONFIG) window.CONFIG = {};
   if (!CONFIG.buttons) CONFIG.buttons = {};
 
@@ -11695,7 +11696,7 @@ btn.classList.add('metric-btn');
 })();
 </script>
 
-<!-- === STS: Metric Button Order Preferences (auto-injected, 2025/11/05 08:00:00 AEST) === -->
+<!-- === Metric Button Order Preferences (auto-injected, 2025/11/05 08:00:00 AEST) === -->
 <style>
   #btnOrderGear{position:fixed; right:68px; bottom:18px; z-index:9999; width:42px; height:42px; border-radius:50%;
     border:1px solid rgba(0,0,0,0.2); background:#fff; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,0.2);
