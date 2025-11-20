@@ -481,7 +481,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.26.8 r2564</title>
+<title>statpack v1.26.7 r2565</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -2418,6 +2418,7 @@ function toggleAutoSummary(){
   const btn1 = document.getElementById('autoSummaryBtn');       // popup button
   const btn2 = document.getElementById('autoSummaryToggleBtn'); // fixed header button
   if (autoSummaryActive){
+    try { if (typeof window.autoSliderAStart === 'function') window.autoSliderAStart(); } catch (e) {}
     if (btn1) btn1.textContent = 'Auto (On)';
     if (btn2) btn2.textContent = 'Auto (On)';
     // emit immediate row
@@ -2439,6 +2440,7 @@ function toggleAutoSummary(){
       auto1mIntervalId = setInterval(function(){ try{ if (typeof emitAuto1m==='function') emitAuto1m(); }catch(e){} }, 60000);
     }, Math.max(0, msToNext));
   } else {
+    try { if (typeof window.autoSliderAStop === 'function') window.autoSliderAStop(); } catch (e) {}
     if (btn1) btn1.textContent = 'Auto (Off)';
     if (btn2) btn2.textContent = 'Auto';
     if (auto1mIntervalId){ clearInterval(auto1mIntervalId); auto1mIntervalId=null; }
@@ -3644,11 +3646,33 @@ closeBtn
   };
 
   window.openAutoSliderA = function(){
-    var rows = loadRows('A');
-    var tb = document.querySelector('#autoSliderATable tbody'); if(tb){ tb.innerHTML=''; rows.forEach(function(r){ appendRowToModalTable('A', r); }); }
-    document.getElementById('autoSliderAModal').style.display='block';
+    var rows = loadRows('A') || [];
+    var tb = document.querySelector('#autoSliderATable tbody');
+    if (!tb) return;
+    tb.innerHTML = '';
+
+    if (!rows.length) {
+      try {
+        var snap = snapshotFromMainTableForSliding();
+        if (snap && snap.length) {
+          var row = slidingMeanAtIndex(snap, snap.length - 1);
+          rows.push(row);
+          saveRows('A', rows);
+        }
+      } catch (e) {
+        console.warn('openAutoSliderA compute error', e);
+      }
+    }
+
+    rows.forEach(function(r){
+      appendRowToModalTable('A', r);
+    });
+
+    var modal = document.getElementById('autoSliderAModal');
+    if (modal) modal.style.display = 'block';
   };
-  window.openAutoSliderB = function(){
+  
+window.openAutoSliderB = function(){
     var rows = loadRows('B');
     var tb = document.querySelector('#autoSliderBTable tbody'); if(tb){ tb.innerHTML=''; rows.forEach(function(r){ appendRowToModalTable('B', r); }); }
     document.getElementById('autoSliderBModal').style.display='block';
@@ -3670,6 +3694,10 @@ closeBtn
     if (autoSliderATimer && typeof autoSliderATimer==='number'){ clearTimeout(autoSliderATimer); }
     if (autoSliderATimer && typeof autoSliderATimer==='object'){ clearInterval(autoSliderATimer); }
     autoSliderATimer=null;
+
+  window.autoSliderAStart = startAutoSliderA;
+  window.autoSliderAStop = stopAutoSliderA;
+
   }
 
   var _origAddEntry = window.addEntry;
@@ -10835,21 +10863,16 @@ function buildUnlockedModeButtons(){
       col.appendChild(t);
 
       (getUnlockedValues(metric) || getMetricButtons(metric) || []).forEach(v => {
-        // Render a visual separator for the row break value
-        if (typeof v === 'string') {
-          const sep = document.createElement('div');
-          sep.className = 'metric-separator';
-          sep.innerText = v;
-          col.appendChild(sep);
-          return;
-        }
-
         const b = document.createElement('button');
         b.classList.add('metric-btn');
 
-        const customLabel = getUnlockedLabel(metric, v);
-        b.innerText = String(v) + ': ' + (customLabel || '');
+        let customLabel = '';
+        if (v === -0.25 || v === -0.5 || v === -0.75) customLabel = '-';
+        else if (v === 0.25 || v === 0.75) customLabel = '+';
+        else if (v === 4.99) customLabel = 'Extreme';
+        else customLabel = getMetricLabel(metric, v);
 
+        b.innerText = String(v) + ': ' + (customLabel || '');
         b.addEventListener('click', () => {
           if (!Array.isArray(selections[metric])) selections[metric] = [];
           const i = selections[metric].indexOf(v);
@@ -10932,13 +10955,13 @@ function applyUnlockedAndAddStay(){
 
   // Unlocked Mode-specific values (independent of main per-metric buttons)
   const UNLOCKED_MODE_VALUES = {
-    rush:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
-    mood:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
-    social:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
-    energy:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
-    focus:   [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
-    anxiety: [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
-    impair:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
+    rush:    [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
+    mood:    [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
+    social:  [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
+    energy:  [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
+    focus:   [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
+    anxiety: [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
+    impair:  [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
     __default: [6,5,4,3,2,1,0]
   };
 
@@ -10949,92 +10972,6 @@ function applyUnlockedAndAddStay(){
     }
     return UNLOCKED_MODE_VALUES.__default;
   }
-
-  const UNLOCKED_MODE_LABELS = {
-    rush: {
-      6.00: 'Overwhelming',
-      5.00: 'Extreme',
-      4.00: 'Intense + Uncontrol',
-      3.00: 'Energetic + Physical',
-      2.00: 'Mental + Contained',
-      1.00: 'Some / Mild',
-      0.00: 'No Rush',
-      0.50: '+'
-    },
-    mood: {
-      6.00: 'Autopilot',
-      5.00: 'Euphoria',
-      4.00: 'Obvious',
-      3.00: 'Clear + Good',
-      2.00: 'Distinct + Definite',
-      1.00: 'Required Thought',
-      0.00: 'No/Avoidant',
-      0.50: '+'
-    },
-    social: {
-      6.00: 'Disinhibited',
-      5.00: 'Empathy/Love',
-      4.00: 'Outgoing/Great',
-      3.00: 'Flow/Natural',
-      2.00: 'Push/Motivated',
-      1.00: 'Want/Urge/Aroused',
-      0.00: 'No/Avoidant',
-      0.50: '+'
-    },
-    energy: {
-      6.00: 'Hyper',
-      5.00: 'Manic',
-      4.00: 'Strong Physical',
-      3.00: 'Energetic/Push',
-      2.00: 'Noticeable',
-      1.00: 'Some',
-      0.00: 'None',
-      0.50: '+'
-    },
-    focus: {
-      6.00: 'Wired',
-      5.00: 'Laser',
-      4.00: 'Strong/Obsessive',
-      3.00: 'Engaged',
-      2.00: 'Focused',
-      1.00: 'Some',
-      0.00: 'None',
-      0.50: '+'
-    },
-    anxiety: {
-      6.00: 'Physical Terror',
-      5.00: 'Panic, Visceral, Fear',
-      4.00: 'Impact Behaviour',
-      3.00: 'Affecting, Adverse',
-      2.00: 'Ignorable',
-      1.00: 'Low/Negligible',
-      0.00: 'None',
-      0.50: '+'
-    },
-    impair: {
-      6.00: 'Dangerous',
-      5.00: 'Crippled',
-      4.00: 'Major Adverse',
-      3.00: 'Hinderance, Affecting',
-      2.00: 'Can Compensate',
-      1.00: 'Minor, Side Effects',
-      0.00: 'None',
-      0.50: '+'
-    }
-  };
-
-  function getUnlockedLabel(metric, v){
-    const key = String(metric || '').toLowerCase();
-    const table = UNLOCKED_MODE_LABELS[key];
-    if (table && Object.prototype.hasOwnProperty.call(table, v)) {
-      return table[v];
-    }
-    if (v === 0.50) return '+';
-    if (v === -0.50) return '-';
-    return getMetricLabel(metric, v);
-  }
-
-
 
   // Fast Mode-specific labels used on buttons and written into the table
   const FAST_MODE_LABELS = {
