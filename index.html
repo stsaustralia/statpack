@@ -481,7 +481,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.26.7 r2560</title>
+<title>statpack v1.26.8 r2564</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -7965,7 +7965,18 @@ b
       ensureModal();
       // If an existing header button is present, use it. Otherwise, do not inject a duplicate into the UI.
       const btn = document.getElementById(BTN_ID);
-      if (btn && !btn._umBound) { btn.addEventListener('click', openModal); btn._umBound = true; }
+      if (btn && !btn._umBound) {
+        btn.addEventListener('click', function(){
+          if (typeof openUnlockedMode === 'function') {
+            // New horizontal Unlocked Mode
+            openUnlockedMode();
+          } else {
+            // Fallback to legacy Unlocked modal
+            openModal();
+          }
+        });
+        btn._umBound = true;
+      }
       console.debug('[UnlockedMode] ready');
     } catch(e) {
       console.warn('[UnlockedMode] boot error', e);
@@ -9834,10 +9845,35 @@ function segmentBySinceDose(visibleRows){
   }
 
   window.openRollingAverage = function(){
-    var tb = document.querySelector('#rollingAverageTable tbody'); if (tb) tb.innerHTML = '';
-    (loadRolling()||[]).forEach(function(r){ appendRollingRow(r.data); });
-    if (typeof openModal === 'function') { openModal('#rollingAverageModal'); }
-    else { var m=document.getElementById('rollingAverageModal'); if(m) m.style.display='block'; }
+    var tb = document.querySelector('#rollingAverageTable tbody');
+    if (tb) tb.innerHTML = '';
+
+    var rows = loadRolling() || [];
+
+    // If no stored rolling rows yet, compute one on demand from current log
+    if (!rows.length) {
+      try {
+        var avg = computeRollingAverage();
+        if (avg) {
+          var snap = { t: Date.now(), data: avg };
+          rows.push(snap);
+          saveRolling(rows);
+        }
+      } catch (e) {
+        console.warn('openRollingAverage compute error', e);
+      }
+    }
+
+    rows.forEach(function(r){
+      appendRollingRow(r.data);
+    });
+
+    if (typeof openModal === 'function') {
+      openModal('#rollingAverageModal');
+    } else {
+      var m = document.getElementById('rollingAverageModal');
+      if (m) m.style.display = 'block';
+    }
   };
   window.clearRollingAverage = function(){
     saveRolling([]); var tb = document.querySelector('#rollingAverageTable tbody'); if (tb) tb.innerHTML='';
@@ -9865,6 +9901,22 @@ function segmentBySinceDose(visibleRows){
     emit(); window.rollingAvgTimer = setInterval(emit, 30000);
   };
 })();
+document.addEventListener('DOMContentLoaded', function(){
+  var btn = document.getElementById('rollingAvgBtn');
+  if (btn && !btn._raBound) {
+    btn.addEventListener('click', function(){
+      // Always open the popup
+      if (typeof openRollingAverage === 'function') {
+        openRollingAverage();
+      }
+      // Start background rolling average updates if not already running
+      if (typeof toggleRollingAverage === 'function' && !window.rollingAvgTimer) {
+        toggleRollingAverage();
+      }
+    });
+    btn._raBound = true;
+  }
+});
 
 // === Rated Popup ===
 
@@ -10747,12 +10799,22 @@ b.classList.add('metric-btn');
       b.setAttribute('data-category','yellow');
       b.addEventListener('click', () => {
         const ta = document.getElementById('notesInput');
-        const toks = ta.value.split(/\\s+/).filter(Boolean);
+        if (!ta) {
+          console.warn('Unlocked Yellow Note click: #notesInput not found');
+          return;
+        }
+        const toks = (ta.value || '').split(/\s+/).filter(Boolean);
         const i = toks.indexOf(lbl);
-        if (i >= 0) { toks.splice(i, 1); b.classList.remove('selected-score'); }
-        else { toks.push(lbl); b.classList.add('selected-score'); }
+        if (i >= 0) {
+          toks.splice(i, 1);
+          b.classList.remove('selected-score');
+        } else {
+          toks.push(lbl);
+          b.classList.add('selected-score');
+        }
         ta.value = toks.join(' ');
       });
+
       grid.appendChild(b);
     });
   } catch(e){ console.warn(e); }
@@ -10762,7 +10824,7 @@ function buildUnlockedModeButtons(){
   const host = document.getElementById('unlockedModeButtons');
   if (!host) return;
   host.innerHTML = '';
-  try{
+  try {
     // We only include the 7 primary metrics horizontally
     const primary = ['rush','mood','social','energy','focus','anxiety','impair'];
     primary.forEach(metric => {
@@ -10772,25 +10834,40 @@ function buildUnlockedModeButtons(){
       t.innerText = metric.charAt(0).toUpperCase() + metric.slice(1);
       col.appendChild(t);
 
-      (getMetricButtons(metric) || []).forEach(v => {
+      (getUnlockedValues(metric) || getMetricButtons(metric) || []).forEach(v => {
+        // Render a visual separator for the row break value
+        if (typeof v === 'string') {
+          const sep = document.createElement('div');
+          sep.className = 'metric-separator';
+          sep.innerText = v;
+          col.appendChild(sep);
+          return;
+        }
+
         const b = document.createElement('button');
-b.classList.add('metric-btn');
-        let customLabel = '';
-        if (v === -0.25 || v === -0.5 || v === -0.75) customLabel = '-';
-        else if (v === 0.25 || v === 0.75) customLabel = '+';
-        else if (v === 4.99) customLabel = 'Extreme';
-        else customLabel = getMetricLabel(metric, v);
+        b.classList.add('metric-btn');
+
+        const customLabel = getUnlockedLabel(metric, v);
         b.innerText = String(v) + ': ' + (customLabel || '');
+
         b.addEventListener('click', () => {
+          if (!Array.isArray(selections[metric])) selections[metric] = [];
           const i = selections[metric].indexOf(v);
-          if (i < 0) { selections[metric].push(v); b.classList.add('selected-score'); }
-          else { selections[metric].splice(i, 1); b.classList.remove('selected-score'); }
+          if (i < 0) {
+            selections[metric].push(v);
+            b.classList.add('selected-score');
+          } else {
+            selections[metric].splice(i, 1);
+            b.classList.remove('selected-score');
+          }
         });
         col.appendChild(b);
       });
       host.appendChild(col);
     });
-  } catch(e){ console.warn(e); }
+  } catch (e) {
+    console.warn(e);
+  }
 }
 
 function applyUnlocked(){
@@ -10851,6 +10928,113 @@ function applyUnlockedAndAddStay(){
     impair:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
     __default: [6,5,4,3,2,1,0,'---------------',0.5,-0.5]
   };
+
+
+  // Unlocked Mode-specific values (independent of main per-metric buttons)
+  const UNLOCKED_MODE_VALUES = {
+    rush:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
+    mood:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
+    social:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
+    energy:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
+    focus:   [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
+    anxiety: [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
+    impair:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50, -0.50],
+    __default: [6,5,4,3,2,1,0]
+  };
+
+  function getUnlockedValues(metric){
+    const key = String(metric || '').toLowerCase();
+    if (UNLOCKED_MODE_VALUES[key] && Array.isArray(UNLOCKED_MODE_VALUES[key])) {
+      return UNLOCKED_MODE_VALUES[key];
+    }
+    return UNLOCKED_MODE_VALUES.__default;
+  }
+
+  const UNLOCKED_MODE_LABELS = {
+    rush: {
+      6.00: 'Overwhelming',
+      5.00: 'Extreme',
+      4.00: 'Intense + Uncontrol',
+      3.00: 'Energetic + Physical',
+      2.00: 'Mental + Contained',
+      1.00: 'Some / Mild',
+      0.00: 'No Rush',
+      0.50: '+'
+    },
+    mood: {
+      6.00: 'Autopilot',
+      5.00: 'Euphoria',
+      4.00: 'Obvious',
+      3.00: 'Clear + Good',
+      2.00: 'Distinct + Definite',
+      1.00: 'Required Thought',
+      0.00: 'No/Avoidant',
+      0.50: '+'
+    },
+    social: {
+      6.00: 'Disinhibited',
+      5.00: 'Empathy/Love',
+      4.00: 'Outgoing/Great',
+      3.00: 'Flow/Natural',
+      2.00: 'Push/Motivated',
+      1.00: 'Want/Urge/Aroused',
+      0.00: 'No/Avoidant',
+      0.50: '+'
+    },
+    energy: {
+      6.00: 'Hyper',
+      5.00: 'Manic',
+      4.00: 'Strong Physical',
+      3.00: 'Energetic/Push',
+      2.00: 'Noticeable',
+      1.00: 'Some',
+      0.00: 'None',
+      0.50: '+'
+    },
+    focus: {
+      6.00: 'Wired',
+      5.00: 'Laser',
+      4.00: 'Strong/Obsessive',
+      3.00: 'Engaged',
+      2.00: 'Focused',
+      1.00: 'Some',
+      0.00: 'None',
+      0.50: '+'
+    },
+    anxiety: {
+      6.00: 'Physical Terror',
+      5.00: 'Panic, Visceral, Fear',
+      4.00: 'Impact Behaviour',
+      3.00: 'Affecting, Adverse',
+      2.00: 'Ignorable',
+      1.00: 'Low/Negligible',
+      0.00: 'None',
+      0.50: '+'
+    },
+    impair: {
+      6.00: 'Dangerous',
+      5.00: 'Crippled',
+      4.00: 'Major Adverse',
+      3.00: 'Hinderance, Affecting',
+      2.00: 'Can Compensate',
+      1.00: 'Minor, Side Effects',
+      0.00: 'None',
+      0.50: '+'
+    }
+  };
+
+  function getUnlockedLabel(metric, v){
+    const key = String(metric || '').toLowerCase();
+    const table = UNLOCKED_MODE_LABELS[key];
+    if (table && Object.prototype.hasOwnProperty.call(table, v)) {
+      return table[v];
+    }
+    if (v === 0.50) return '+';
+    if (v === -0.50) return '-';
+    return getMetricLabel(metric, v);
+  }
+
+
 
   // Fast Mode-specific labels used on buttons and written into the table
   const FAST_MODE_LABELS = {
