@@ -481,7 +481,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.26.7 r2565</title>
+<title>statpack v1.26.9 r2572</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -2418,7 +2418,6 @@ function toggleAutoSummary(){
   const btn1 = document.getElementById('autoSummaryBtn');       // popup button
   const btn2 = document.getElementById('autoSummaryToggleBtn'); // fixed header button
   if (autoSummaryActive){
-    try { if (typeof window.autoSliderAStart === 'function') window.autoSliderAStart(); } catch (e) {}
     if (btn1) btn1.textContent = 'Auto (On)';
     if (btn2) btn2.textContent = 'Auto (On)';
     // emit immediate row
@@ -2440,7 +2439,6 @@ function toggleAutoSummary(){
       auto1mIntervalId = setInterval(function(){ try{ if (typeof emitAuto1m==='function') emitAuto1m(); }catch(e){} }, 60000);
     }, Math.max(0, msToNext));
   } else {
-    try { if (typeof window.autoSliderAStop === 'function') window.autoSliderAStop(); } catch (e) {}
     if (btn1) btn1.textContent = 'Auto (Off)';
     if (btn2) btn2.textContent = 'Auto';
     if (auto1mIntervalId){ clearInterval(auto1mIntervalId); auto1mIntervalId=null; }
@@ -3646,33 +3644,11 @@ closeBtn
   };
 
   window.openAutoSliderA = function(){
-    var rows = loadRows('A') || [];
-    var tb = document.querySelector('#autoSliderATable tbody');
-    if (!tb) return;
-    tb.innerHTML = '';
-
-    if (!rows.length) {
-      try {
-        var snap = snapshotFromMainTableForSliding();
-        if (snap && snap.length) {
-          var row = slidingMeanAtIndex(snap, snap.length - 1);
-          rows.push(row);
-          saveRows('A', rows);
-        }
-      } catch (e) {
-        console.warn('openAutoSliderA compute error', e);
-      }
-    }
-
-    rows.forEach(function(r){
-      appendRowToModalTable('A', r);
-    });
-
-    var modal = document.getElementById('autoSliderAModal');
-    if (modal) modal.style.display = 'block';
+    var rows = loadRows('A');
+    var tb = document.querySelector('#autoSliderATable tbody'); if(tb){ tb.innerHTML=''; rows.forEach(function(r){ appendRowToModalTable('A', r); }); }
+    document.getElementById('autoSliderAModal').style.display='block';
   };
-  
-window.openAutoSliderB = function(){
+  window.openAutoSliderB = function(){
     var rows = loadRows('B');
     var tb = document.querySelector('#autoSliderBTable tbody'); if(tb){ tb.innerHTML=''; rows.forEach(function(r){ appendRowToModalTable('B', r); }); }
     document.getElementById('autoSliderBModal').style.display='block';
@@ -3694,10 +3670,6 @@ window.openAutoSliderB = function(){
     if (autoSliderATimer && typeof autoSliderATimer==='number'){ clearTimeout(autoSliderATimer); }
     if (autoSliderATimer && typeof autoSliderATimer==='object'){ clearInterval(autoSliderATimer); }
     autoSliderATimer=null;
-
-  window.autoSliderAStart = startAutoSliderA;
-  window.autoSliderAStop = stopAutoSliderA;
-
   }
 
   var _origAddEntry = window.addEntry;
@@ -5916,8 +5888,26 @@ window.openAllRated5MinutesPopup = function(){
     var c = cat10(v);
     return '<td class="cat '+c.cls+'"><span class="badge '+c.cls+'">'+c.label+'</span> <span style="opacity:.6">('+ (Number(v).toFixed(2)) +')</span></td>';
   }
-  function fiveMinBucketsLocal(){
-    var src = Array.isArray(window.logData) ? window.logData : []; if(!src.length) return [];
+    function readMetric(r, base){
+    if (!r) return 0;
+    var v, key;
+    if (r[base + 'Sum'] != null) v = r[base + 'Sum'];
+    else if (r[base] != null) v = r[base];
+    else {
+      key = base.charAt(0).toUpperCase() + base.slice(1);
+      if (r[key + ' Sum'] != null) v = r[key + ' Sum'];
+      else if (r[key] != null) v = r[key];
+      else v = 0;
+    }
+    var n = parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
+  }
+function fiveMinBucketsLocal(){
+    if (typeof window.syncLogDataFromTable === 'function') {
+      try { window.syncLogDataFromTable(); } catch(e) {}
+    }
+    var src = Array.isArray(window.logData) ? window.logData : [];
+    if (!src.length) return [];
     var res = {};
     var t0  = src[0] && src[0].timestamp ? new Date(src[0].timestamp).getTime() : Date.now();
     src.forEach(function(r){
@@ -5929,8 +5919,13 @@ window.openAllRated5MinutesPopup = function(){
     Object.keys(res).sort(function(a,b){return a-b;}).forEach(function(k){
       var list = res[k], agg = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
       list.forEach(function(r){
-        agg.rush+=r.rushSum||0; agg.mood+=r.moodSum||0; agg.social+=r.socialSum||0; agg.energy+=r.energySum||0;
-        agg.focus+=r.focusSum||0; agg.anxiety+=r.anxietySum||0; agg.impair+=r.impairSum||0;
+        agg.rush   += readMetric(r,'rush');
+        agg.mood   += readMetric(r,'mood');
+        agg.social += readMetric(r,'social');
+        agg.energy += readMetric(r,'energy');
+        agg.focus  += readMetric(r,'focus');
+        agg.anxiety+= readMetric(r,'anxiety');
+        agg.impair += readMetric(r,'impair');
       });
       for (var f in agg){ agg[f] = list.length ? (agg[f]/list.length) : 0; } // 0..5
       out.push({offset:+k, values:agg});
@@ -7993,18 +7988,7 @@ b
       ensureModal();
       // If an existing header button is present, use it. Otherwise, do not inject a duplicate into the UI.
       const btn = document.getElementById(BTN_ID);
-      if (btn && !btn._umBound) {
-        btn.addEventListener('click', function(){
-          if (typeof openUnlockedMode === 'function') {
-            // New horizontal Unlocked Mode
-            openUnlockedMode();
-          } else {
-            // Fallback to legacy Unlocked modal
-            openModal();
-          }
-        });
-        btn._umBound = true;
-      }
+      if (btn && !btn._umBound) { btn.addEventListener('click', openModal); btn._umBound = true; }
       console.debug('[UnlockedMode] ready');
     } catch(e) {
       console.warn('[UnlockedMode] boot error', e);
@@ -8195,6 +8179,9 @@ function readMainRowsMulti() {
   const idxTimestamp = header.findIndex(t => /timestamp/i.test(t));
   const idxSince     = header.findIndex(t => /since|elapsed/i.test(t));
   const idxScore     = header.findIndex(t => /^score$/i.test(t));
+  const idxWeighted  = header.findIndex(t => /^weighted$/i.test(t));
+  const idxFiveMax   = header.findIndex(t => /^5max$/i.test(t) || /^5 max$/i.test(t) || /^five\s*max$/i.test(t));
+
   const metricScan   = detectMetricSumColumns(table, 7);
   const metricIdxs   = metricScan.indicesInOrder;
   const metricNames  = metricScan.namesInOrder;
@@ -8204,15 +8191,18 @@ function readMainRowsMulti() {
 
   for (const tr of bodyRows) {
     const tds = Array.from(tr.cells);
-    const ts   = parseRowTimestamp(idxTimestamp>=0 ? tds[idxTimestamp]?.textContent : "");
+    const tsText   = idxTimestamp>=0 ? tds[idxTimestamp]?.textContent : "";
+    const ts       = parseRowTimestamp(tsText);
     const sinceSec = hmsToSeconds(idxSince>=0 ? tds[idxSince]?.textContent : "");
-    const score = idxScore>=0 ? parseNum(tds[idxScore]?.textContent) : null;
+    const score    = idxScore>=0    ? parseNum(tds[idxScore]?.textContent)    : null;
+    const weighted = idxWeighted>=0 ? parseNum(tds[idxWeighted]?.textContent) : null;
+    const fiveMax  = idxFiveMax>=0  ? parseNum(tds[idxFiveMax]?.textContent)  : null;
 
     const metrics = {};
     for (let k=0;k<metricIdxs.length;k++) {
-      const ci = metricIdxs[k];
+      const ci   = metricIdxs[k];
       const name = metricNames[k];
-      const val = parseNum(tds[ci]?.textContent);
+      const val  = parseNum(tds[ci]?.textContent);
       metrics[name] = val;
     }
 
@@ -8222,6 +8212,8 @@ function readMainRowsMulti() {
       tsMs: ts ? ts.getTime() : null,
       sinceSec,
       score,
+      weighted,
+      fiveMax,
       metrics
     });
   }
@@ -8232,6 +8224,7 @@ function readMainRowsMulti() {
     scoreIdx: idxScore
   };
 }
+
 
 /* ---------- Dose detection (no Drug requirement) ---------- */
 function detectDoseStartsNoDrug(rows) {
@@ -8248,25 +8241,53 @@ function detectDoseStartsNoDrug(rows) {
 
 /* ---------- Global 5-minute averages ---------- */
 function computeGlobal5MinAverages(rows, metricNames) {
-  const buckets = new Map(); // msStart -> { n, metrics:{name:{sum,n}} , score:{sum,min,max,n} }
+  const buckets = new Map(); // msStart -> { n, metrics, score, weighted, fiveMax }
   for (const r of rows) {
+    if (!r.ts) continue;
     const ms = floorTo5MinMs(r.ts);
     let agg = buckets.get(ms);
     if (!agg) {
-      agg = { n: 0, metrics: {}, score: { n:0, sum:0, min:Infinity, max:-Infinity } };
-      for (const name of metricNames) agg.metrics[name] = { sum: 0, n: 0 };
+      agg = {
+        n: 0,
+        metrics: {},
+        score:    { n:0, sum:0, min:Infinity, max:-Infinity },
+        weighted: { n:0, sum:0, min:Infinity, max:-Infinity },
+        fiveMax:  { n:0, sum:0, min:Infinity, max:-Infinity }
+      };
+      for (const name of metricNames) {
+        agg.metrics[name] = { sum:0, n:0 };
+      }
       buckets.set(ms, agg);
     }
     agg.n++;
     for (const name of metricNames) {
       const v = r.metrics[name];
-      if (v != null) { agg.metrics[name].sum += v; agg.metrics[name].n++; }
+      if (v != null) {
+        const m = agg.metrics[name];
+        m.sum += v;
+        m.n   += 1;
+      }
     }
     if (r.score != null) {
-      agg.score.n++;
-      agg.score.sum += r.score;
-      if (r.score < agg.score.min) agg.score.min = r.score;
-      if (r.score > agg.score.max) agg.score.max = r.score;
+      const s = agg.score;
+      s.n   += 1;
+      s.sum += r.score;
+      if (r.score < s.min) s.min = r.score;
+      if (r.score > s.max) s.max = r.score;
+    }
+    if (r.weighted != null) {
+      const s = agg.weighted;
+      s.n   += 1;
+      s.sum += r.weighted;
+      if (r.weighted < s.min) s.min = r.weighted;
+      if (r.weighted > s.max) s.max = r.weighted;
+    }
+    if (r.fiveMax != null) {
+      const s = agg.fiveMax;
+      s.n   += 1;
+      s.sum += r.fiveMax;
+      if (r.fiveMax < s.min) s.min = r.fiveMax;
+      if (r.fiveMax > s.max) s.max = r.fiveMax;
     }
   }
 
@@ -8275,30 +8296,38 @@ function computeGlobal5MinAverages(rows, metricNames) {
     .map(([ms, agg]) => {
       const item = {
         window: format5MinWindow(ms),
-        count: agg.n,
+        count:  agg.n,
         averages: {},
-        scoreAvg: (agg.score.n>0 ? agg.score.sum/agg.score.n : null),
-        scoreMin: (agg.score.n>0 ? agg.score.min : null),
-        scoreMax: (agg.score.n>0 ? agg.score.max : null)
+        scoreAvg:    (agg.score.n    > 0 ? agg.score.sum    / agg.score.n    : null),
+        scoreMin:    (agg.score.n    > 0 ? agg.score.min                         : null),
+        scoreMax:    (agg.score.n    > 0 ? agg.score.max                         : null),
+        weightedAvg: (agg.weighted.n > 0 ? agg.weighted.sum / agg.weighted.n : null),
+        weightedMin: (agg.weighted.n > 0 ? agg.weighted.min                    : null),
+        weightedMax: (agg.weighted.n > 0 ? agg.weighted.max                    : null),
+        fiveMaxAvg:  (agg.fiveMax.n  > 0 ? agg.fiveMax.sum  / agg.fiveMax.n  : null),
+        fiveMaxMin:  (agg.fiveMax.n  > 0 ? agg.fiveMax.min                     : null),
+        fiveMaxMax:  (agg.fiveMax.n  > 0 ? agg.fiveMax.max                     : null)
       };
       for (const name of metricNames) {
         const m = agg.metrics[name];
-        item.averages[name] = (m.n>0 ? m.sum/m.n : null);
+        item.averages[name] = (m.n > 0 ? m.sum / m.n : null);
       }
       return item;
     });
 }
 
+
 /* ---------- Per-dose 5-minute averages ---------- */
 function computePerDose5MinAverages(rows, doseStarts, metricNames) {
   const results = [];
-  for (let d=0; d<doseStarts.length; d++) {
-    const iStart = doseStarts[d];
-    const tStartMs = rows[iStart].tsMs;
-    const nextStartMs = (d+1 < doseStarts.length) ? rows[doseStarts[d+1]].tsMs : Infinity;
+  for (let d = 0; d < doseStarts.length; d++) {
+    const iStart      = doseStarts[d];
+    const tStartMs    = rows[iStart].tsMs;
+    const nextStartMs = (d + 1 < doseStarts.length) ? rows[doseStarts[d+1]].tsMs : Infinity;
 
-    const buckets = new Map(); // msBucketStart -> agg
-    for (let j=iStart; j<rows.length; j++) {
+    const buckets = new Map(); // relBucketStartMs -> agg
+
+    for (let j = iStart; j < rows.length; j++) {
       const r = rows[j];
       if (r.tsMs >= nextStartMs) break;
       if (r.tsMs < tStartMs) continue;
@@ -8306,20 +8335,49 @@ function computePerDose5MinAverages(rows, doseStarts, metricNames) {
       const relBucketStart = tStartMs + Math.floor((r.tsMs - tStartMs) / (5*60*1000)) * (5*60*1000);
       let agg = buckets.get(relBucketStart);
       if (!agg) {
-        agg = { n: 0, metrics: {}, score: { n:0, sum:0, min:Infinity, max:-Infinity } };
-        for (const name of metricNames) agg.metrics[name] = { sum: 0, n: 0 };
+        agg = {
+          n: 0,
+          metrics: {},
+          score:    { n:0, sum:0, min:Infinity, max:-Infinity },
+          weighted: { n:0, sum:0, min:Infinity, max:-Infinity },
+          fiveMax:  { n:0, sum:0, min:Infinity, max:-Infinity }
+        };
+        for (const name of metricNames) {
+          agg.metrics[name] = { sum:0, n:0 };
+        }
         buckets.set(relBucketStart, agg);
       }
+
       agg.n++;
       for (const name of metricNames) {
         const v = r.metrics[name];
-        if (v != null) { agg.metrics[name].sum += v; agg.metrics[name].n++; }
+        if (v != null) {
+          const m = agg.metrics[name];
+          m.sum += v;
+          m.n   += 1;
+        }
       }
+
       if (r.score != null) {
-        agg.score.n++;
-        agg.score.sum += r.score;
-        if (r.score < agg.score.min) agg.score.min = r.score;
-        if (r.score > agg.score.max) agg.score.max = r.score;
+        const s = agg.score;
+        s.n   += 1;
+        s.sum += r.score;
+        if (r.score < s.min) s.min = r.score;
+        if (r.score > s.max) s.max = r.score;
+      }
+      if (r.weighted != null) {
+        const s = agg.weighted;
+        s.n   += 1;
+        s.sum += r.weighted;
+        if (r.weighted < s.min) s.min = r.weighted;
+        if (r.weighted > s.max) s.max = r.weighted;
+      }
+      if (r.fiveMax != null) {
+        const s = agg.fiveMax;
+        s.n   += 1;
+        s.sum += r.fiveMax;
+        if (r.fiveMax < s.min) s.min = r.fiveMax;
+        if (r.fiveMax > s.max) s.max = r.fiveMax;
       }
     }
 
@@ -8328,40 +8386,84 @@ function computePerDose5MinAverages(rows, doseStarts, metricNames) {
       .map(([ms, agg]) => {
         const out = {
           window: format5MinWindow(ms),
-          count: agg.n,
+          count:  agg.n,
           averages: {},
-          scoreAvg: (agg.score.n>0 ? agg.score.sum/agg.score.n : null),
-          scoreMin: (agg.score.n>0 ? agg.score.min : null),
-          scoreMax: (agg.score.n>0 ? agg.score.max : null)
+          scoreAvg:    (agg.score.n    > 0 ? agg.score.sum    / agg.score.n    : null),
+          scoreMin:    (agg.score.n    > 0 ? agg.score.min                         : null),
+          scoreMax:    (agg.score.n    > 0 ? agg.score.max                         : null),
+          weightedAvg: (agg.weighted.n > 0 ? agg.weighted.sum / agg.weighted.n : null),
+          weightedMin: (agg.weighted.n > 0 ? agg.weighted.min                    : null),
+          weightedMax: (agg.weighted.n > 0 ? agg.weighted.max                    : null),
+          fiveMaxAvg:  (agg.fiveMax.n  > 0 ? agg.fiveMax.sum  / agg.fiveMax.n  : null),
+          fiveMaxMin:  (agg.fiveMax.n  > 0 ? agg.fiveMax.min                     : null),
+          fiveMaxMax:  (agg.fiveMax.n  > 0 ? agg.fiveMax.max                     : null)
         };
         for (const name of metricNames) {
           const m = agg.metrics[name];
-          out.averages[name] = (m.n>0 ? m.sum/m.n : null);
+          out.averages[name] = (m.n > 0 ? m.sum / m.n : null);
         }
         return out;
       });
 
-    results.push({ doseIndex: iStart, doseTime: new Date(tStartMs), windows });
+    results.push({
+      doseIndex: iStart,
+      doseTime:  new Date(tStartMs),
+      windows
+    });
   }
   return results;
 }
 
+
 /* ---------- Rendering ---------- */
+function scaleSumTo10(v) {
+  if (v == null) return null;
+  const scaled = v * (10/6);
+  if (!Number.isFinite(scaled)) return null;
+  return Math.max(0, Math.min(10, scaled));
+}
+function classify10(v) {
+  if (v == null) return { cls:'cat-na', label:'—' };
+  if (v <= 2) return { cls:'cat-verylow', label:'Very Low' };
+  if (v <= 4) return { cls:'cat-low', label:'Low' };
+  if (v <= 6) return { cls:'cat-medium', label:'Medium' };
+  if (v <= 8) return { cls:'cat-high', label:'High' };
+  return { cls:'cat-veryhigh', label:'Very High' };
+}
+function ratedTdFromSum(v) {
+  const s = scaleSumTo10(v);
+  if (s == null) return '<td class="text-center">\u2014</td>';
+  const cat = classify10(s);
+  return `<td class="text-center ${cat.cls}"><span class="badge ${cat.cls}">${s.toFixed(2)}</span></td>`;
+}
+function scoreTd10(v) {
+  if (v == null) return '<td class="text-center">\u2014</td>';
+  const cat = classify10(v);
+  return `<td class="text-center ${cat.cls}"><span class="badge ${cat.cls}">${v.toFixed(2)}</span></td>`;
+}
+
 function renderGlobal5MinTableIntoCard(cardEl, globalData, metricNames) {
   const section = document.createElement('section');
   const h = document.createElement('h3');
-  h.textContent = 'Global 5-minute averages (raw Sum)';
+  h.textContent = 'Global 5-minute averages (/10, 7 main metrics + Score/Weighted/5Max)';
   section.appendChild(h);
 
   const table = document.createElement('table');
   table.className = 'table table-striped table-sm';
+
   const thead = document.createElement('thead');
   const headerCells = [
     '<th>5-minute window</th>',
-    ...metricNames.map(n=>`<th class="text-right">${n}</th>`),
-    '<th class="text-right">Score Avg</th>',
-    '<th class="text-right">Score Min</th>',
-    '<th class="text-right">Score Max</th>',
+    ...metricNames.map(n => `<th class="text-center">${n} (/10)</th>`),
+    '<th class="text-center">Score Avg</th>',
+    '<th class="text-center">Score Min</th>',
+    '<th class="text-center">Score Max</th>',
+    '<th class="text-center">Weighted Avg</th>',
+    '<th class="text-center">Weighted Min</th>',
+    '<th class="text-center">Weighted Max</th>',
+    '<th class="text-center">5Max Avg</th>',
+    '<th class="text-center">5Max Min</th>',
+    '<th class="text-center">5Max Max</th>',
     '<th class="text-right">n</th>'
   ];
   thead.innerHTML = `<tr>${headerCells.join('')}</tr>`;
@@ -8371,28 +8473,34 @@ function renderGlobal5MinTableIntoCard(cardEl, globalData, metricNames) {
   for (const row of globalData) {
     const metricTds = metricNames.map(n => {
       const v = row.averages[n];
-      return `<td class="text-right">${v!=null ? v.toFixed(2) : '—'}</td>`;
+      return ratedTdFromSum(v);
     });
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${row.window}</td>
-      ${metricTds.join('')}
-      <td class="text-right">${row.scoreAvg!=null ? row.scoreAvg.toFixed(2) : '—'}</td>
-      <td class="text-right">${row.scoreMin!=null ? row.scoreMin.toFixed(2) : '—'}</td>
-      <td class="text-right">${row.scoreMax!=null ? row.scoreMax.toFixed(2) : '—'}</td>
-      <td class="text-right">${row.count}</td>
-    `;
+    tr.innerHTML = [
+      `<td>${row.window}</td>`,
+      ...metricTds,
+      scoreTd10(row.scoreAvg),
+      scoreTd10(row.scoreMin),
+      scoreTd10(row.scoreMax),
+      scoreTd10(row.weightedAvg),
+      scoreTd10(row.weightedMin),
+      scoreTd10(row.weightedMax),
+      scoreTd10(row.fiveMaxAvg),
+      scoreTd10(row.fiveMaxMin),
+      scoreTd10(row.fiveMaxMax),
+      `<td class="text-right">${row.count}</td>`
+    ].join('');
     tbody.appendChild(tr);
   }
   table.appendChild(tbody);
   section.appendChild(table);
-
   cardEl.appendChild(section);
 }
 
+
 function renderPerDose5MinTablesIntoCard(cardEl, perDoseData, metricNames) {
   const topH = document.createElement('h3');
-  topH.textContent = 'Per-dose 5-minute averages (raw Sum)';
+  topH.textContent = 'Per-dose 5-minute averages (/10, 7 main metrics + Score/Weighted/5Max)';
   cardEl.appendChild(topH);
 
   for (const seg of perDoseData) {
@@ -8405,13 +8513,20 @@ function renderPerDose5MinTablesIntoCard(cardEl, perDoseData, metricNames) {
 
     const table = document.createElement('table');
     table.className = 'table table-striped table-sm';
+
     const thead = document.createElement('thead');
     const headerCells = [
       '<th>5-minute window</th>',
-      ...metricNames.map(n=>`<th class="text-right">${n}</th>`),
-      '<th class="text-right">Score Avg</th>',
-      '<th class="text-right">Score Min</th>',
-      '<th class="text-right">Score Max</th>',
+      ...metricNames.map(n => `<th class="text-center">${n} (/10)</th>`),
+      '<th class="text-center">Score Avg</th>',
+      '<th class="text-center">Score Min</th>',
+      '<th class="text-center">Score Max</th>',
+      '<th class="text-center">Weighted Avg</th>',
+      '<th class="text-center">Weighted Min</th>',
+      '<th class="text-center">Weighted Max</th>',
+      '<th class="text-center">5Max Avg</th>',
+      '<th class="text-center">5Max Min</th>',
+      '<th class="text-center">5Max Max</th>',
       '<th class="text-right">n</th>'
     ];
     thead.innerHTML = `<tr>${headerCells.join('')}</tr>`;
@@ -8421,17 +8536,23 @@ function renderPerDose5MinTablesIntoCard(cardEl, perDoseData, metricNames) {
     for (const w of seg.windows) {
       const metricTds = metricNames.map(n => {
         const v = w.averages[n];
-        return `<td class="text-right">${v!=null ? v.toFixed(2) : '—'}</td>`;
+        return ratedTdFromSum(v);
       });
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${w.window}</td>
-        ${metricTds.join('')}
-        <td class="text-right">${w.scoreAvg!=null ? w.scoreAvg.toFixed(2) : '—'}</td>
-        <td class="text-right">${w.scoreMin!=null ? w.scoreMin.toFixed(2) : '—'}</td>
-        <td class="text-right">${w.scoreMax!=null ? w.scoreMax.toFixed(2) : '—'}</td>
-        <td class="text-right">${w.count}</td>
-      `;
+      tr.innerHTML = [
+        `<td>${w.window}</td>`,
+        ...metricTds,
+        scoreTd10(w.scoreAvg),
+        scoreTd10(w.scoreMin),
+        scoreTd10(w.scoreMax),
+        scoreTd10(w.weightedAvg),
+        scoreTd10(w.weightedMin),
+        scoreTd10(w.weightedMax),
+        scoreTd10(w.fiveMaxAvg),
+        scoreTd10(w.fiveMaxMin),
+        scoreTd10(w.fiveMaxMax),
+        `<td class="text-right">${w.count}</td>`
+      ].join('');
       tbody.appendChild(tr);
     }
     table.appendChild(tbody);
@@ -8439,6 +8560,7 @@ function renderPerDose5MinTablesIntoCard(cardEl, perDoseData, metricNames) {
     cardEl.appendChild(section);
   }
 }
+
 
 /* ---------- Drivers / Wiring ---------- */
 function refreshAllRated5MinViews() {
@@ -9873,35 +9995,10 @@ function segmentBySinceDose(visibleRows){
   }
 
   window.openRollingAverage = function(){
-    var tb = document.querySelector('#rollingAverageTable tbody');
-    if (tb) tb.innerHTML = '';
-
-    var rows = loadRolling() || [];
-
-    // If no stored rolling rows yet, compute one on demand from current log
-    if (!rows.length) {
-      try {
-        var avg = computeRollingAverage();
-        if (avg) {
-          var snap = { t: Date.now(), data: avg };
-          rows.push(snap);
-          saveRolling(rows);
-        }
-      } catch (e) {
-        console.warn('openRollingAverage compute error', e);
-      }
-    }
-
-    rows.forEach(function(r){
-      appendRollingRow(r.data);
-    });
-
-    if (typeof openModal === 'function') {
-      openModal('#rollingAverageModal');
-    } else {
-      var m = document.getElementById('rollingAverageModal');
-      if (m) m.style.display = 'block';
-    }
+    var tb = document.querySelector('#rollingAverageTable tbody'); if (tb) tb.innerHTML = '';
+    (loadRolling()||[]).forEach(function(r){ appendRollingRow(r.data); });
+    if (typeof openModal === 'function') { openModal('#rollingAverageModal'); }
+    else { var m=document.getElementById('rollingAverageModal'); if(m) m.style.display='block'; }
   };
   window.clearRollingAverage = function(){
     saveRolling([]); var tb = document.querySelector('#rollingAverageTable tbody'); if (tb) tb.innerHTML='';
@@ -9929,22 +10026,6 @@ function segmentBySinceDose(visibleRows){
     emit(); window.rollingAvgTimer = setInterval(emit, 30000);
   };
 })();
-document.addEventListener('DOMContentLoaded', function(){
-  var btn = document.getElementById('rollingAvgBtn');
-  if (btn && !btn._raBound) {
-    btn.addEventListener('click', function(){
-      // Always open the popup
-      if (typeof openRollingAverage === 'function') {
-        openRollingAverage();
-      }
-      // Start background rolling average updates if not already running
-      if (typeof toggleRollingAverage === 'function' && !window.rollingAvgTimer) {
-        toggleRollingAverage();
-      }
-    });
-    btn._raBound = true;
-  }
-});
 
 // === Rated Popup ===
 
@@ -10827,22 +10908,12 @@ b.classList.add('metric-btn');
       b.setAttribute('data-category','yellow');
       b.addEventListener('click', () => {
         const ta = document.getElementById('notesInput');
-        if (!ta) {
-          console.warn('Unlocked Yellow Note click: #notesInput not found');
-          return;
-        }
-        const toks = (ta.value || '').split(/\s+/).filter(Boolean);
+        const toks = ta.value.split(/\\s+/).filter(Boolean);
         const i = toks.indexOf(lbl);
-        if (i >= 0) {
-          toks.splice(i, 1);
-          b.classList.remove('selected-score');
-        } else {
-          toks.push(lbl);
-          b.classList.add('selected-score');
-        }
+        if (i >= 0) { toks.splice(i, 1); b.classList.remove('selected-score'); }
+        else { toks.push(lbl); b.classList.add('selected-score'); }
         ta.value = toks.join(' ');
       });
-
       grid.appendChild(b);
     });
   } catch(e){ console.warn(e); }
@@ -10852,7 +10923,7 @@ function buildUnlockedModeButtons(){
   const host = document.getElementById('unlockedModeButtons');
   if (!host) return;
   host.innerHTML = '';
-  try {
+  try{
     // We only include the 7 primary metrics horizontally
     const primary = ['rush','mood','social','energy','focus','anxiety','impair'];
     primary.forEach(metric => {
@@ -10862,35 +10933,25 @@ function buildUnlockedModeButtons(){
       t.innerText = metric.charAt(0).toUpperCase() + metric.slice(1);
       col.appendChild(t);
 
-      (getUnlockedValues(metric) || getMetricButtons(metric) || []).forEach(v => {
+      (getMetricButtons(metric) || []).forEach(v => {
         const b = document.createElement('button');
-        b.classList.add('metric-btn');
-
+b.classList.add('metric-btn');
         let customLabel = '';
         if (v === -0.25 || v === -0.5 || v === -0.75) customLabel = '-';
         else if (v === 0.25 || v === 0.75) customLabel = '+';
         else if (v === 4.99) customLabel = 'Extreme';
         else customLabel = getMetricLabel(metric, v);
-
         b.innerText = String(v) + ': ' + (customLabel || '');
         b.addEventListener('click', () => {
-          if (!Array.isArray(selections[metric])) selections[metric] = [];
           const i = selections[metric].indexOf(v);
-          if (i < 0) {
-            selections[metric].push(v);
-            b.classList.add('selected-score');
-          } else {
-            selections[metric].splice(i, 1);
-            b.classList.remove('selected-score');
-          }
+          if (i < 0) { selections[metric].push(v); b.classList.add('selected-score'); }
+          else { selections[metric].splice(i, 1); b.classList.remove('selected-score'); }
         });
         col.appendChild(b);
       });
       host.appendChild(col);
     });
-  } catch (e) {
-    console.warn(e);
-  }
+  } catch(e){ console.warn(e); }
 }
 
 function applyUnlocked(){
@@ -10951,27 +11012,6 @@ function applyUnlockedAndAddStay(){
     impair:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
     __default: [6,5,4,3,2,1,0,'---------------',0.5,-0.5]
   };
-
-
-  // Unlocked Mode-specific values (independent of main per-metric buttons)
-  const UNLOCKED_MODE_VALUES = {
-    rush:    [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
-    mood:    [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
-    social:  [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
-    energy:  [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
-    focus:   [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
-    anxiety: [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
-    impair:  [6.00, 5.00, 4.50, 4.00, 3.50, 3.00, 2.50, 2.00, 1.50, 1.00, 0.75, 0.50, 0.25, 0.00],
-    __default: [6,5,4,3,2,1,0]
-  };
-
-  function getUnlockedValues(metric){
-    const key = String(metric || '').toLowerCase();
-    if (UNLOCKED_MODE_VALUES[key] && Array.isArray(UNLOCKED_MODE_VALUES[key])) {
-      return UNLOCKED_MODE_VALUES[key];
-    }
-    return UNLOCKED_MODE_VALUES.__default;
-  }
 
   // Fast Mode-specific labels used on buttons and written into the table
   const FAST_MODE_LABELS = {
