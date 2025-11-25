@@ -481,7 +481,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.26.10 r2563</title>
+<title>statpack v1.26.10 r2564</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -564,8 +564,8 @@ BOOKMARK FOR SCORING WINDOW SIZES
  */
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
-    width: 140px;
-    height: 20px;
+    width: 144px;
+    height: 22px;
     font-size: 12px;
   }
 </style>
@@ -940,29 +940,22 @@ labels: {
   buttonLabelsByMetric: {}},
   buttons: {
     perMetricButtons: {
-      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
-      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
-      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
-      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
-      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
-      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
-      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
-//       rush:[6,5,4,3,2,1,0,'',0.25],
-//       mood:[6,5,4,3,2,1,0,'',0.25],
-//       social:[6,5,4,3,2,1,0,'',0.25],
-//       energy:[6,5,4,3,2,1,0,'',0.25],
-//       focus:[6,5,4,3,2,1,0,'',0.25],
-//       anxiety:[6,5,4,3,2,1,0,'',0.25],
-//       impair:[6,5,4,3,2,1,0,'',0.25],
-      confidence:[5,4,3,2,1,0,'',0.6],
-      auto:[5,4,3,2,1,0,'',0.6],
-      jitter:[5,4,3,2,1,0,'',0.6],
-      dopamine:[5,4,3,2,1,0,'',0.6],
-      change:[5,4,3,2,1,0,'',0.6],
-      degree:[5,4,3,2,1,0,'',0.6],
-      other: [5,4,3,2,1,0,'',0.6]
+      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
+      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
+      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
+      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
+      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
+      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
+      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
+      confidence:[5,4,3,2,1,0,'',0.5],
+      auto:[5,4,3,2,1,0,'',0.5],
+      jitter:[5,4,3,2,1,0,'',0.5],
+      dopamine:[5,4,3,2,1,0,'',0.5],
+      change:[5,4,3,2,1,0,'',0.5],
+      degree:[5,4,3,2,1,0,'',0.5],
+      other: [5,4,3,2,1,0,'',0.5]
     },
-    rapidValues: [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
+    rapidValues: [6,5,4.5,4,3,2,1,0.5,0],
 
 
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
@@ -10118,6 +10111,7 @@ function segmentBySinceDose(visibleRows){
 // === Rated Popup ===
 
 
+//BOOKMARK
 const RATING_CONFIG = {
   rush: [
     { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
@@ -11304,7 +11298,7 @@ function applyUnlockedAndAddStay(){
 
   const mirrorValues = (CONFIG.buttons.rapidValues && Array.isArray(CONFIG.buttons.rapidValues))
     ? CONFIG.buttons.rapidValues.slice()
-    : [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25];
+    : [6,5,4.5,4,3.5,3,2,1,0];
 
   const mirrorMetrics = (CONFIG.buttons.rapidMetrics && Array.isArray(CONFIG.buttons.rapidMetrics))
     ? CONFIG.buttons.rapidMetrics.slice()
