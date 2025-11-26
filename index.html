@@ -481,7 +481,7 @@ CONFIG.popups = Object.assign({
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.26.10 r2564</title>
+<title>statpack v1.26.11 r2580</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -564,8 +564,8 @@ BOOKMARK FOR SCORING WINDOW SIZES
  */
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
-    width: 144px;
-    height: 22px;
+    width: 140px;
+    height: 20px;
     font-size: 12px;
   }
 </style>
@@ -885,7 +885,7 @@ const CONFIG = Object.freeze({
 //     hideInUi: ['VL','sM','sB','sF','GS'],
 //     hideInUi: ['VL','sM','sB','sF','GS','change',	'Change'	,'Deg'	,'D2'	,'Oth',	'O2','Weighted','5Max','Dopamine','Jitter','Auto','Confidence'],
 //     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
-    hideInUi: ['sM','sB','sF','GS','change','Deg','Oth','Jitter','Confidence','Auto','Dopamine'],
+    hideInUi: ['sM','sB','sF','GS','change','Deg','Oth','Jitter','Confidence'],
     noShadeCols: [],
     shadeCap: {
       'Score': 30,
@@ -940,22 +940,29 @@ labels: {
   buttonLabelsByMetric: {}},
   buttons: {
     perMetricButtons: {
-      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
-      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
-      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
-      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
-      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
-      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
-      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
-      confidence:[5,4,3,2,1,0,'',0.5],
-      auto:[5,4,3,2,1,0,'',0.5],
-      jitter:[5,4,3,2,1,0,'',0.5],
-      dopamine:[5,4,3,2,1,0,'',0.5],
-      change:[5,4,3,2,1,0,'',0.5],
-      degree:[5,4,3,2,1,0,'',0.5],
-      other: [5,4,3,2,1,0,'',0.5]
+      rush:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
+      mood:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
+      social:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
+      energy:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
+      focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
+      anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
+      impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
+//       rush:[6,5,4,3,2,1,0,'',0.25],
+//       mood:[6,5,4,3,2,1,0,'',0.25],
+//       social:[6,5,4,3,2,1,0,'',0.25],
+//       energy:[6,5,4,3,2,1,0,'',0.25],
+//       focus:[6,5,4,3,2,1,0,'',0.25],
+//       anxiety:[6,5,4,3,2,1,0,'',0.25],
+//       impair:[6,5,4,3,2,1,0,'',0.25],
+      confidence:[5,4,3,2,1,0,'',0.5,6],
+      auto:[5,4,3,2,1,0,'',0.5,6],
+      jitter:[5,4,3,2,1,0,'',0.5,6],
+      dopamine:[5,4,3,2,1,0,'',0.5,6],
+      change:[5,4,3,2,1,0,'',0.5,6],
+      degree:[5,4,3,2,1,0,'',0.5,6],
+      other: [5,4,3,2,1,0,'',0.5,6]
     },
-    rapidValues: [6,5,4.5,4,3,2,1,0.5,0],
+    rapidValues: [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5],
 
 
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
@@ -4781,7 +4788,6 @@ function(){
 <div id="sts-roaming-buttons" style="padding:8px; display:flex; gap:8px; flex-wrap:wrap;">
   <button id="roamingEntriesBtn" type="button" onclick="openRoamingEntries && openRoamingEntries()">Roaming Entries</button>
   <button id="roamingAverageBtn" type="button" onclick="openRoamingAverage && openRoamingAverage()">Roaming Average</button>
-  <button id="decAutoOneBtn" type="button" onclick="openDecemberAutoOne && openDecemberAutoOne()">DecemberAutoOne</button>
 </div>
 
 <!-- STS: Roaming Entries (auto-injected) -->
@@ -5206,33 +5212,6 @@ function(){
 })();
 </script>
 <!-- /STS: Roaming Average (auto-injected) -->
-
-<!-- STS: DecemberAutoOne (auto-injected) -->
-
-<div id="decAutoOneModal" class="sts-modal" role="dialog" aria-labelledby="decAutoOneTitle" aria-modal="true" style="display:none;">
-  <div class="sts-box" role="document">
-    <div class="sts-hdr">
-      <h2 id="decAutoOneTitle">DecemberAutoOne</h2>
-      <div class="sts-status" id="decAutoOneStatus">stopped</div>
-      <button id="decAutoOneCloseBtn" title="Close"
-              style="border:none;background:none;font-size:22px;line-height:1;cursor:pointer;">&times;</button>
-    </div>
-    <div class="sts-ctl">
-      <button id="decAutoOneStartBtn" title="Start 1 min capture">Start</button>
-      <button id="decAutoOneStopBtn"  title="Stop capture">Stop</button>
-      <button id="decAutoOneExportBtn" title="Export captured rows as CSV">Export CSV</button>
-      <button id="decAutoOneClearBtn"  title="Clear captured rows">Clear</button>
-    </div>
-    <div class="sts-body">
-      <table id="decAutoOneTable" class="sts-table">
-        <thead>
-          <tr id="decAutoOneHeaderRow"></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-</div>
 
 <script>
 // ──────────────────────────────────────────────────────────────────────────────
@@ -10111,7 +10090,6 @@ function segmentBySinceDose(visibleRows){
 // === Rated Popup ===
 
 
-//BOOKMARK
 const RATING_CONFIG = {
   rush: [
     { test: v => v > 4.5, label: 'Extreme', cls: 'veryhigh' },
@@ -11087,25 +11065,25 @@ function applyUnlockedAndAddStay(){
   // Per-metric values for Fast Mode
 //   BOOKMARK FAST MODE LABELS AND VALUES
   const FAST_MODE_VALUES = {
-    rush:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '', '', '', '', 0.50,-0.50],
-    mood:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '', '', '', '', 0.50,-0.50],
-    social:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '', '', '', '', 0.50,-0.50],
-    energy:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '', '', '', '', 0.50,-0.50],
-    focus:   [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '', '', '', '', 0.50,-0.50],
-    anxiety: [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '', '', '', '', 0.50,-0.50],
-    impair:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '', '', '', '', 0.50,-0.50],
-    __default: [6,5,4,3,2,1,0,'','','','',0.5,-0.5]
+    rush:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    mood:    [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    social:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    energy:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    focus:   [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    anxiety: [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    impair:  [6.00, 5.00, 4.00, 3.00, 2.00, 1.00, 0.00, '---------------', 0.50,-0.50],
+    __default: [6,5,4,3,2,1,0,'---------------',0.5,-0.5]
   };
 
   // Fast Mode-specific labels used on buttons and written into the table
   const FAST_MODE_LABELS = {
-  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.00: 'Intense + Uncontrol', 3.00: 'Strong + Energetic', 2.00: 'Physical + Control', 1.00: 'Noticed/Mild', 0.00: 'No Rush', 0.50: '+' },
-  mood: { 6.00: 'Autopilot', 5.00: 'Euphoric', 4.00: 'Obvious To All', 3.00: 'Clear & Prominent', 2.00: 'Distinct & Notable', 1.00: 'Required Thinking', 0.00: 'No Change', 0.50: '+' },
-  social: { 6.00: 'Perfect', 5.00: 'Disinhibited', 4.00: 'Outgoing/Adept', 3.00: 'Flow/Natural', 2.00: 'Push/Motivated', 1.00: 'Want/Urge', 0.00: 'No/Avoidant', 0.50: '+' },
-  energy: { 6.00: 'Manic', 5.00: 'Hyperactive', 4.00: 'Energetic/Active', 3.00: 'Strong Physical', 2.00: 'Significant/Noticeable', 1.00: 'Some/Capable', 0.00: 'None/Low', 0.50: '+' },
-  focus: { 6.00: 'Laser/Tunnel', 5.00: 'Wired', 4.00: 'Strong/Obsessive', 3.00: 'Engaged & Focused', 2.00: 'Effective/Motivated', 1.00: 'Some/Alert', 0.00: 'None/Low', 0.50: '+' },
-  anxiety: { 6.00: 'Panic/Paranoia', 5.00: 'Panic/Paranoia', 4.00: 'Impact Beaviour', 3.00: 'Affected/Constant', 2.00: 'Distracting  + Hinderance', 1.00: 'Present/Ignorable', 0.00: 'None/Negligible', 0.50: '+' },
-  impair: { 6.00: 'Dangerous', 5.00: 'Crippled', 4.00: 'Major Impact', 3.00: 'Affecting/Adverse', 2.00: 'Affecting +/ Adverse/Shakes', 1.00: 'Minor/Side Effect', 0.00: 'None/Negligible', 0.50: '+' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.00: 'Intense + Uncontrol', 3.00: 'Energetic + Physical', 2.00: 'Mental + Contained', 1.00: 'Some / Mild', 0.00: 'No Rush', 0.50: '+' },
+  mood: { 6.00: 'Autopilot', 5.00: 'Euphoria', 4.00: 'Obvious', 3.00: 'Clear + Good', 2.00: 'Distinct + Definite', 1.00: 'Required Thought', 0.00: 'No/Avoidant', 0.50: '+' },
+  social: { 6.00: 'Disinhibited', 5.00: 'Empathy/Love', 4.00: 'Outgoing/Great', 3.00: 'Flow/Natural', 2.00: 'Push/Motivated', 1.00: 'Want/Urge/Aroused', 0.00: 'No/Avoidant', 0.50: '+' },
+  energy: { 6.00: 'Hyper', 5.00: 'Manic', 4.00: 'Strong Physical', 3.00: 'Energetic/Push', 2.00: 'Noticeable', 1.00: 'Some', 0.00: 'None', 0.50: '+' },
+  focus: { 6.00: 'Wired', 5.00: 'Laser', 4.00: 'Strong/Obsessive', 3.00: 'Engaged', 2.00: 'Focused', 1.00: 'Some', 0.00: 'None', 0.50: '+' },
+  anxiety: { 6.00: 'Physical Terror', 5.00: 'Panic, Visceral, Fear', 4.00: 'Impact Behaviour', 3.00: 'Affecting, Adverse', 2.00: 'Ignorable', 1.00: 'Low/Negligible', 0.00: 'None', 0.50: '+' },
+  impair: { 6.00: 'Dangerous', 5.00: 'Crippled', 4.00: 'Major Adverse', 3.00: 'Hinderance, Affecting', 2.00: 'Can Compensate', 1.00: 'Minor, Side Effects', 0.00: 'None', 0.50: '+' },
   };
 
   const FAST_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
@@ -11114,7 +11092,7 @@ function applyUnlockedAndAddStay(){
 
   function getValuesForMetric(metric){
     const v = FAST_MODE_VALUES[metric];
-    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6,5,4,3,2,1,0,'',0.5,-0.5]);
+    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6,5,4,3,2,1,0,'---------------',0.5,-0.5]);
     }
 
   function getFastModeLabel(metric, value){
@@ -11298,7 +11276,7 @@ function applyUnlockedAndAddStay(){
 
   const mirrorValues = (CONFIG.buttons.rapidValues && Array.isArray(CONFIG.buttons.rapidValues))
     ? CONFIG.buttons.rapidValues.slice()
-    : [6,5,4.5,4,3.5,3,2,1,0];
+    : [6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25];
 
   const mirrorMetrics = (CONFIG.buttons.rapidMetrics && Array.isArray(CONFIG.buttons.rapidMetrics))
     ? CONFIG.buttons.rapidMetrics.slice()
@@ -12154,316 +12132,3 @@ btn.classList.add('metric-btn');
   });
 })();
 </script>
-
-<script>
-(function(){
-  'use strict';
-
-  const LS_KEY = 'STS_DECEMBER_AUTO_ONE_v1';
-  const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
-    ? SUMMARY_COLUMNS.slice()
-    : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
-  const DEC_COLS = BASE_COLS.concat(["Drug","QtySum"]);
-
-  const NUM_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair'];
-
-  let rows = [];
-  let timer = null;
-
-  function $(sel, root){ return (root || document).querySelector(sel); }
-
-  function load(){
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      rows = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(rows)) rows = [];
-    } catch(e){
-      rows = [];
-    }
-  }
-
-  function save(){
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify(rows));
-    } catch(e){}
-  }
-
-  function updateStatus(msg){
-    const st = $('#decAutoOneStatus');
-    if (!st) return;
-    st.textContent = msg;
-  }
-
-  // Local snapshot: mirror the 60m statistical summary source (no Notes)
-  function snapshotWithExtrasDec(){
-    const trs = Array.from(document.querySelectorAll('#logTable tbody tr'));
-    return trs.map(tr => {
-      const ts = +(tr.getAttribute('data-ts')||0);
-      const getValCI = (names) => {
-        const want = Array.isArray(names) ? names.map(n=>String(n).toLowerCase()) : [String(names).toLowerCase()];
-        const tds = tr.querySelectorAll('td[data-col]');
-        for (const td of tds){
-          const col = (td.getAttribute('data-col')||'').trim().toLowerCase();
-          if (want.includes(col)) return td.textContent.trim();
-        }
-      };
-      const numFrom = (names) => {
-        const raw = getValCI(names);
-        const m = (raw||"").match(/-?\d+(\.\d+)?/);
-        return m ? parseFloat(m[0]) : NaN;
-      };
-      const getSum = (field) => {
-        const td = tr.querySelector(`td[data-field="${field}Sum"]`);
-        if (!td) return 0;
-        const v = parseFloat(td.getAttribute('data-value')||td.textContent||'0');
-        return Number.isFinite(v) ? v : 0;
-      };
-      return {
-        _ts: ts,
-        rush: getSum('rush'), mood: getSum('mood'), social: getSum('social'),
-        energy: getSum('energy'), focus: getSum('focus'),
-        anxiety: getSum('anxiety'), impair: getSum('impair'),
-        Drug: getValCI(["Drug"]),
-        Qty: numFrom(["Qty","QTY","Quantity"])
-      };
-    }).filter(o => o._ts>0);
-  }
-
-  function computeMeansForWindowDec(startMs, endMs){
-    const snap = snapshotWithExtrasDec();
-    const sel = snap.filter(e => e._ts >= startMs && e._ts < endMs);
-    if (!sel.length) return null;
-    const sums = {rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
-    sel.forEach(e => NUM_FIELDS.forEach(f => sums[f] += (e[f]||0)));
-    const means = {};
-    NUM_FIELDS.forEach(f => means[f] = +(sums[f]/sel.length));
-    return {means, sel};
-  }
-
-  function computeCompositeFromMeansDec(M){
-    if (!M) return null;
-    const m = M.means || M;
-    const score = (+m.rush + +m.mood + +m.social + +m.energy + +m.focus) - (+m.anxiety + +m.impair);
-    const max = Math.max(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
-    const min = Math.min(m.rush, m.mood, m.social, m.energy, m.focus, m.anxiety, m.impair);
-    let weighted = null;
-    if (typeof window.computeWeighted === 'function'){
-      try { weighted = window.computeWeighted(M); } catch(e){ weighted = null; }
-    }
-    const fiveMax = [m.rush,m.mood,m.social,m.energy,m.focus].sort((a,b)=>b-a).slice(0,5).reduce((a,b)=>a+b,0);
-    return {score, max, min, weighted, fiveMax};
-  }
-
-  function aggregateExtrasDec(sel){
-    let drugs = [];
-    let qtySum = 0;
-    sel.forEach(e => {
-      if (e.Drug){
-        const parts = String(e.Drug).split(/[,;]/).map(s=>s.trim()).filter(Boolean);
-        drugs = drugs.concat(parts);
-      }
-      if (Number.isFinite(e.Qty)) qtySum += e.Qty;
-    });
-    const uniqDrugs = Array.from(new Set(drugs));
-    return {
-      Drug: uniqDrugs.join(', '),
-      QtySum: Number.isFinite(qtySum) ? +qtySum : 0
-    };
-  }
-
-  function renderHeaders(){
-    const theadRow = $('#decAutoOneHeaderRow');
-    if (!theadRow) return;
-    theadRow.innerHTML = '';
-    DEC_COLS.forEach(col => {
-      const th = document.createElement('th');
-      th.textContent = col;
-      th.setAttribute('data-col', col);
-      theadRow.appendChild(th);
-    });
-  }
-
-  function renderTableBody(){
-    const tb = $('#decAutoOneTable tbody');
-    if (!tb) return;
-    tb.innerHTML = '';
-    for (const r of rows){
-      const tr = document.createElement('tr');
-      DEC_COLS.forEach(col => {
-        const td = document.createElement('td');
-        const v = (r.values && Object.prototype.hasOwnProperty.call(r.values, col))
-          ? r.values[col]
-          : '';
-        td.textContent = v != null ? String(v) : '';
-        td.setAttribute('data-col', col);
-        tr.appendChild(td);
-      });
-      try { if (typeof window.STS_applyShading === 'function') window.STS_applyShading(tr); } catch(e){}
-      tb.appendChild(tr);
-    }
-  }
-
-  function appendRowToTable(r){
-    const tb = $('#decAutoOneTable tbody');
-    if (!tb) return renderTableBody();
-    const tr = document.createElement('tr');
-    DEC_COLS.forEach(col => {
-      const td = document.createElement('td');
-      const v = (r.values && Object.prototype.hasOwnProperty.call(r.values, col))
-        ? r.values[col]
-        : '';
-      td.textContent = v != null ? String(v) : '';
-      td.setAttribute('data-col', col);
-      tr.appendChild(td);
-    });
-    try { if (typeof window.STS_applyShading === 'function') window.STS_applyShading(tr); } catch(e){}
-    tb.appendChild(tr);
-  }
-
-  function captureOnce(){
-    const end = new Date();
-    end.setSeconds(0,0);
-    const endMs = end.getTime();
-    const startMs = endMs - 60*60000;
-    const M = computeMeansForWindowDec(startMs, endMs);
-    if (!M) return;
-    const C = computeCompositeFromMeansDec(M);
-    const extras = aggregateExtrasDec(M.sel);
-
-    const values = {};
-    // Fill in Time + metrics using the same column set as 60m summary, minus Notes
-    values['Time'] = end.toLocaleString();
-    const m = M.means;
-    values['Rush'] = m.rush;
-    values['Mood'] = m.mood;
-    values['Social'] = m.social;
-    values['Energy'] = m.energy;
-    values['Focus'] = m.focus;
-    values['Anxiety'] = m.anxiety;
-    values['Impair'] = m.impair;
-    if (C){
-      values['Score'] = C.score;
-      values['Max'] = C.max;
-      values['Min'] = C.min;
-      values['Weighted'] = C.weighted;
-      values['5Max'] = C.fiveMax;
-    }
-    values['Drug'] = extras.Drug || '';
-    values['QtySum'] = extras.QtySum;
-
-    const rec = { ts: endMs, values: values };
-    rows.push(rec);
-    save();
-    appendRowToTable(rec);
-  }
-
-  function start(){
-    if (timer) return;
-    updateStatus('capturing every 1 min');
-    // immediate capture
-    captureOnce();
-    const now = new Date();
-    const delay = (typeof window.msToNextMinute === 'function')
-      ? window.msToNextMinute(now)
-      : 60000;
-
-    timer = setTimeout(function firstTick(){
-      captureOnce();
-      timer = setInterval(captureOnce, 60000);
-    }, Math.max(0, delay));
-  }
-
-  function stop(){
-    if (!timer) {
-      updateStatus('stopped');
-      return;
-    }
-    if (typeof timer === 'number'){
-      clearTimeout(timer);
-      clearInterval(timer);
-    } else if (typeof timer === 'object'){
-      try { clearTimeout(timer); } catch(e){}
-      try { clearInterval(timer); } catch(e){}
-    }
-    timer = null;
-    updateStatus('stopped');
-  }
-
-  function clearAll(){
-    rows = [];
-    save();
-    renderTableBody();
-  }
-
-  function exportCsv(){
-    if (!rows.length) return;
-    const cols = DEC_COLS.slice();
-    const headerLine = cols.join(',');
-    const lines = [headerLine];
-
-    rows.forEach(r => {
-      const vals = cols.map(col => {
-        const v = r.values && Object.prototype.hasOwnProperty.call(r.values, col)
-          ? (r.values[col] ?? '')
-          : '';
-        const s = String(v);
-        return '"' + s.replace(/"/g,'""') + '"';
-      });
-      lines.push(vals.join(','));
-    });
-
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'december_auto_one.csv';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
-  }
-
-  function openModal(){
-    load();
-    renderHeaders();
-    renderTableBody();
-    const m = $('#decAutoOneModal');
-    if (m) m.style.display = 'block';
-    updateStatus(timer ? 'capturing every 1 min' : 'stopped');
-  }
-
-  function closeModal(){
-    const m = $('#decAutoOneModal');
-    if (m) m.style.display = 'none';
-    save();
-  }
-
-  function wire(){
-    const openBtn = $('#decAutoOneBtn');
-    if (openBtn) openBtn.addEventListener('click', ()=>openModal());
-
-    const startBtn = $('#decAutoOneStartBtn');
-    if (startBtn) startBtn.addEventListener('click', start);
-
-    const stopBtn = $('#decAutoOneStopBtn');
-    if (stopBtn) stopBtn.addEventListener('click', stop);
-
-    const exportBtn = $('#decAutoOneExportBtn');
-    if (exportBtn) exportBtn.addEventListener('click', exportCsv);
-
-    const clearBtn = $('#decAutoOneClearBtn');
-    if (clearBtn) clearBtn.addEventListener('click', clearAll);
-
-    const closeBtn = $('#decAutoOneCloseBtn');
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-
-    window.openDecemberAutoOne = openModal;
-  }
-
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', wire, { once: true });
-  } else {
-    wire();
-  }
-})();
-</script>
-
