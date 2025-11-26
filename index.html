@@ -498,7 +498,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.26.11 r2590</title>
+<title>statpack v1.26.11 r2591</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -967,8 +967,8 @@ labels: {
       degree:[5,4,3,2,1,0,'',0.5],
       other: [5,4,3,2,1,0,'',0.5]
     },
-//     rapidValues: [6,5,4.5,4,3,2.5,2,1,0.5,0],
-    rapidValues: [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5,0],
+    rapidValues: [6,5,4.5,4,3,2.5,2,1,0.5,0],
+//     rapidValues: [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5,0],
 
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
 //     zeroScoreMetrics: ['change','degree','other']
@@ -11322,25 +11322,26 @@ function applyUnlockedAndAddStay(){
 //     anxiety: [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0, '     ', '     ', 6, 5, 4, 3, 2, 1, 0, '     ', '     ', 4.5, 3.5, 2.5, 1.5, 0.5, 0],
 //     impair:  [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0, '     ', '     ', 6, 5, 4, 3, 2, 1, 0, '     ', '     ', 4.5, 3.5, 2.5, 1.5, 0.5, 0],
 //     __default: [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0, '     ', '     ', 6, 5, 4, 3, 2, 1, 0, '     ', '     ', 4.5, 3.5, 2.5, 1.5, 0.5, 0]
-    rush:    [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0],
-    mood:    [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0],
-    social:  [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0],
-    energy:  [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0],
-    focus:   [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0],
-    anxiety: [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0],
-    impair:  [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0],
-    __default: [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0]
+    rush:    [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5],
+    mood:    [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5],
+    social:  [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5],
+    energy:  [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5],
+    focus:   [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5],
+    anxiety: [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5],
+    impair:  [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5],
+    __default: [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5]
+//     6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0
   };
 
   // ===== New Mode: per-metric labels =====
   const NEW_MODE_LABELS = {
-  rush: { 6.0: 'Overwhelming', 5.5: 'Extreme', 5.0: 'Extreme', 4.5: 'Frenzied', 4.0: 'Uncontrollable', 3.5: 'Strong', 3.0: 'Energetic', 2.5: 'Moderate', 2.0: 'Physical', 1.5: 'Light', 1.0: 'Mental', 0.5: 'Maybe', 0.0: 'No Rush' },
-  mood: { 6.0: 'Hindsight', 5.5: 'Blatant', 5.0: 'Euphoric', 4.5: 'Obvious', 4.0: 'Euphoric', 3.5: 'Prominent', 3.0: 'Clear', 2.5: 'Significant', 2.0: 'Distinct', 1.5: 'Fair', 1.0: 'Noticed', 0.5: 'Slight', 0.0: 'No Change' },
-  social: { 6.0: 'Autopilot', 5.5: 'Flow', 5.0: 'Disinhibited', 4.5: 'Euphoric', 4.0: 'Outgoing', 3.5: 'Empathy', 3.0: 'Social', 2.5: 'Motivated', 2.0: 'Felt', 1.5: 'Push', 1.0: 'Thought', 0.5: 'Functional', 0.0: 'No' },
-  energy: { 6.0: 'Overdrive', 5.5: 'Ultra Mainc', 5.0: 'Manic', 4.5: 'Very High', 4.0: 'Hyperactive', 3.5: 'Forced', 3.0: 'Energetic', 2.5: 'Active', 2.0: 'Definite', 1.5: 'Moderate', 1.0: 'Some', 0.5: 'Effort', 0.0: 'None/Low' },
-  focus: { 6.0: 'Laser', 5.5: 'Super Wired', 5.0: 'Wired', 4.5: 'Very Strong', 4.0: 'Tunnel/Feel', 3.5: 'Obsessive', 3.0: 'Effective', 2.5: 'Fixated', 2.0: 'Adept', 1.5: 'Stereotypy', 1.0: 'Some', 0.5: 'Scattered', 0.0: 'No/Poor' },
+  rush: { 6.0: 'Overwhelming', 5.5: 'Ultra Extreme', 5.0: 'Extreme', 4.5: 'Frenzied', 4.0: 'Uncontrollable', 3.5: 'Very Strong', 3.0: 'Energetic', 2.5: 'Moderate', 2.0: 'Physical', 1.5: 'Light', 1.0: 'Mental', 0.5: 'Maybe', 0.0: 'No Rush' },
+  mood: { 6.0: 'Hindsight', 5.5: 'Blatant', 5.0: 'Euphoric', 4.5: 'Obvious', 4.0: 'Euphoric', 3.5: 'Prominent', 3.0: 'Clear + Good', 2.5: 'Significant', 2.0: 'Distinct', 1.5: 'Fair', 1.0: 'Noticed', 0.5: 'Slight', 0.0: 'No Change' },
+  social: { 6.0: 'Autopilot', 5.5: 'Flow', 5.0: 'Disinhibited', 4.5: 'Euphoric', 4.0: 'Outgoing', 3.5: 'Empathy', 3.0: 'Social', 2.5: 'Motivated', 2.0: 'Push/Aroused', 1.5: 'Felt', 1.0: 'Thought', 0.5: 'Functional', 0.0: 'No' },
+  energy: { 6.0: 'Overdrive', 5.5: 'Ultra Mainc', 5.0: 'Manic', 4.5: 'Very High', 4.0: 'Hyperactive', 3.5: 'Very/High', 3.0: 'Energetic', 2.5: 'Active', 2.0: 'Definite', 1.5: 'Moderate', 1.0: 'Some', 0.5: 'Effort', 0.0: 'None/Low' },
+  focus: { 6.0: 'Laser', 5.5: 'Super Wired', 5.0: 'Wired', 4.5: 'Very Strong', 4.0: 'Tunnel/Feel', 3.5: 'Strong/Obsess', 3.0: 'Effective', 2.5: 'Fixated', 2.0: 'Adept', 1.5: 'Stereotypy', 1.0: 'Some', 0.5: 'Scattered', 0.0: 'No/Poor' },
   anxiety: { 6.0: 'Crippled', 5.5: 'Controlling', 5.0: 'Panic', 4.5: 'Dominating', 4.0: 'Feel/Paranoia', 3.5: 'Impacting', 3.0: 'Constant', 2.5: 'Affecting', 2.0: 'Distracting', 1.5: 'Notable', 1.0: 'Ignoarable', 0.5: 'Negligible', 0.0: 'None' },
-  impair: { 6.0: 'Dangerous', 5.5: 'Psychotic', 5.0: 'Heath Risks', 4.5: 'Severe', 4.0: 'Breakdown', 3.5: 'Preventing', 3.0: 'Behavioural', 2.5: 'Hinderance', 2.0: 'Annoyance', 1.5: 'Tremors', 1.0: 'Forgettable', 0.5: 'Negligible', 0.0: 'None' },
+  impair: { 6.0: 'Dangerous', 5.5: 'Psychotic', 5.0: 'Damage', 4.5: 'Severe', 4.0: 'Heath Risks', 3.5: 'Preventing', 3.0: 'Behavioural', 2.5: 'Hinderance', 2.0: 'Annoyance', 1.5: 'Tremors', 1.0: 'Forgettable', 0.5: 'Negligible', 0.0: 'None' },
   };
 
   const NEW_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
@@ -11349,7 +11350,7 @@ function applyUnlockedAndAddStay(){
 
   function getNewModeValuesForMetric(metric){
     const v = NEW_MODE_VALUES[metric];
-    return Array.isArray(v) ? v : (NEW_MODE_VALUES.__default || [6.0, 5.5, 5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0]);
+    return Array.isArray(v) ? v : (NEW_MODE_VALUES.__default || [6,5,4,3,2,1,0,'','',5.5,4.5,3.5,2.5,1.5,0.5]);
   }
 
   function getNewModeLabel(metric, value){
