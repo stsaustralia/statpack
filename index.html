@@ -498,7 +498,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.30.1 r2692</title>
+<title>statpack v1.30.2 r2694</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -5973,12 +5973,31 @@ window.openAllRated5MinutesPopup = function(){
     function readMetric(r, base){
     if (!r) return 0;
     var v, key;
+
+    // Prefer flattened fields on the row first
     if (r[base + 'Sum'] != null) v = r[base + 'Sum'];
     else if (r[base] != null) v = r[base];
     else {
       key = base.charAt(0).toUpperCase() + base.slice(1);
       if (r[key + ' Sum'] != null) v = r[key + ' Sum'];
       else if (r[key] != null) v = r[key];
+      // Fallback: check a metrics map if present (rows from EXACT summaries)
+      else if (r.metrics && typeof r.metrics === 'object') {
+        var candidates = [
+          base,
+          base + 'Sum',
+          key,
+          key + ' Sum'
+        ];
+        for (var i = 0; i < candidates.length; i++){
+          var k = candidates[i];
+          if (k in r.metrics && r.metrics[k] != null){
+            v = r.metrics[k];
+            break;
+          }
+        }
+        if (v == null) v = 0;
+      }
       else v = 0;
     }
     var n = parseFloat(v);
@@ -8322,12 +8341,17 @@ function p2(n){ return String(n).padStart(2,'0'); }
 function fmtStamp(d){ return `${d.getFullYear()}/${p2(d.getMonth()+1)}/${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`; }
 function format5MinWindow(msStart){ const s=new Date(msStart), e=new Date(msStart+5*60*1000); return `${fmtStamp(s)} – ${fmtStamp(e)}`; }
 
-function detectMetricSumColumns(tableEl, maxMetrics=7) {
-  const headers = Array.from(tableEl.querySelectorAll("thead tr th")).map(th => th.textContent.trim());
+function detectMetricSumColumns(tableEl, maxMetrics = 7) {
+  const headers = Array.from(
+    tableEl.querySelectorAll("thead tr th")
+  ).map(th => th.textContent.trim());
+
   const idxByName = {};
   const indices = [];
   const names = [];
-  for (let i=0;i<headers.length;i++) {
+
+  // --- Pass 1: prefer explicit "* Sum" headers, as before ---
+  for (let i = 0; i < headers.length; i++) {
     const h = headers[i];
     if (/sum$/i.test(h)) {
       indices.push(i);
@@ -8336,6 +8360,40 @@ function detectMetricSumColumns(tableEl, maxMetrics=7) {
       if (indices.length >= maxMetrics) break;
     }
   }
+
+  // If enough metric columns were found, keep existing behaviour
+  if (indices.length >= maxMetrics) {
+    return { idxByName, indicesInOrder: indices, namesInOrder: names };
+  }
+
+  // --- Pass 2: fallback using the 7 core metrics and resolveMetricIndex ---
+  try {
+    const colMap = getLogTableColumnMap && getLogTableColumnMap();
+    const headerCells = headers.slice();
+    const firstRow =
+      tableEl.querySelector("#logTable tbody tr") ||
+      tableEl.querySelector("tbody tr") ||
+      null;
+
+    const coreNames = ["Rush", "Mood", "Social", "Energy", "Focus", "Anxiety", "Impair"];
+
+    coreNames.forEach(baseName => {
+      if (indices.length >= maxMetrics) return;
+      if (typeof resolveMetricIndex !== "function") return;
+
+      const ci = resolveMetricIndex(colMap, headerCells, firstRow, baseName);
+      if (ci == null || ci < 0) return;
+      if (indices.indexOf(ci) !== -1) return;
+
+      indices.push(ci);
+      const metricName = baseName + " Sum";
+      names.push(metricName);
+      idxByName[metricName] = ci;
+    });
+  } catch (e) {
+    // fail soft; downstream will see fewer metrics
+  }
+
   return { idxByName, indicesInOrder: indices, namesInOrder: names };
 }
 
@@ -11404,11 +11462,11 @@ function applyUnlockedAndAddStay(){
   function getShortModeValuesForMetric(metric){
     try{
       const v = SHORT_MODE_VALUES[metric];
-      return Array.isArray(v) ? v : (SHORT_MODE_VALUES.__default || [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00]);
+      return Array.isArray(v) ? v : (SHORT_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00]);
     }catch(e){
       console.warn(e);
-      return SHORT_MODE_VALUES.__default || [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00];
-//       return SHORT_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00];
+//       return SHORT_MODE_VALUES.__default || [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00];
+      return SHORT_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00];
     }
   }
 
