@@ -498,7 +498,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.30.0 r2684</title>
+<title>statpack v1.30.1 r2687</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -6510,6 +6510,7 @@ b
 <button id="fastModeBtn" type="button" title="Open Fast Mode" onclick="openFastMode()">Fast Mode</button>
 <button id="newModeBtn" type="button" title="Open New Mode" onclick="openNewMode()">New Mode</button>
 <button id="shortModeBtn" type="button" title="Open Short Mode" onclick="openShortMode()">Short Mode</button>
+<button id="festivalModeBtn" type="button" title="Open Festival Mode" onclick="openFestivalMode()">Festival Mode</button>
 
 <!-- Scoped button sizing for Rush Mode modal -->
 <!-- 
@@ -13270,4 +13271,276 @@ btn.classList.add('metric-btn');
     wire();
   }
 })();
+</script>
+<!-- Festival Mode Modal -->
+<div id="festivalModeModal"
+     style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%);
+            background:#fff; padding:20px; border:2px solid #007aff; border-radius:8px;
+            box-shadow:0 4px 8px rgba(0,0,0,0.2); z-index:1000; max-width:min(96vw, 1400px);">
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+    <div style="font-weight:700; font-size:18px;">Festival Mode</div>
+    <button type="button" aria-label="Close" onclick="closeFestivalMode()">Close</button>
+  </div>
+  <div class="score-columns" id="festivalModeButtons"></div>
+  <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+    <button type="button" onclick="applyFestivalMode()">Apply</button>
+    <button type="button" onclick="applyFestivalModeAndAdd()">Apply &amp; Add Entry</button>
+    <button type="button" onclick="applyFestivalModeAndAddStay()">Apply &amp; Add &amp; Stay</button>
+  </div>
+</div>
+
+<script>
+// Festival Mode Script
+(function(){
+  'use strict';
+
+  // Metrics covered by Festival Mode
+  const FESTIVAL_MODE_METRICS = [
+    'rush','mood','social','energy','focus','anxiety','impair',
+    'change','degree','other','confidence','auto','jitter','dopamine'
+  ];
+
+  // Festival Mode label mappings (per-metric)
+  const FESTIVAL_MODE_LABELS = {
+    rush: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'VHI', 3.50: 'HI', 3.00: 'HI', 2.50: 'MID', 2.00: 'MID', 1.50: 'LO', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
+    mood: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'HI', 3.50: 'HI', 3.00: 'MID', 2.50: 'MID', 2.00: 'MID', 1.50: 'MID', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
+    social: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'VHI', 3.50: 'HI', 3.00: 'HI', 2.50: 'MID', 2.00: 'MID', 1.50: 'MID', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
+    energy: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'HI', 3.50: 'HI', 3.00: 'MID', 2.50: 'MID', 2.00: 'MID', 1.50: 'MID', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
+    focus: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'VHI', 3.50: 'HI', 3.00: 'HI', 2.50: 'MID', 2.00: 'MID', 1.50: 'MID', 1.00: 'MID', 0.50: '+', 0.00: 'N', 0.25: '+' },
+    anxiety: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'HI', 3.50: 'HI', 3.00: 'MID', 2.50: 'MID', 2.00: 'MID', 1.50: 'LO', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
+    impair: { 6.00: 'Severe', 5.50: 'Damage', 5.00: 'Damage', 4.50: 'Damage', 4.00: 'Impacting', 3.50: 'Worrying', 3.00: 'Adverse', 2.50: 'Affected', 2.00: 'Constant', 1.50: 'Distracting', 1.00: 'Ignorable', 0.50: '+', 0.00: 'N', 0.25: '+' },
+    change: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
+    degree: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
+    other: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
+    confidence: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
+    auto: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
+    jitter: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
+    dopamine: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' }
+  };
+
+  function getFestivalModeValuesForMetric(metric){
+    const map = FESTIVAL_MODE_LABELS[metric];
+    if (!map) return [];
+    // Derive numeric keys and sort descending
+    const vals = Object.keys(map)
+      .map(function(k){ return Number(k); })
+      .filter(function(n){ return Number.isFinite(n); })
+      .sort(function(a,b){ return b - a; });
+    return vals;
+  }
+
+  function getFestivalModeLabel(metric, value){
+    try{
+      const keyNum = Number(value);
+      const key = Number.isFinite(keyNum) ? keyNum.toFixed(2) : String(value);
+      const fm = FESTIVAL_MODE_LABELS[metric];
+      if (fm) {
+        if (Object.prototype.hasOwnProperty.call(fm, key)) return String(fm[key]);
+        if (Object.prototype.hasOwnProperty.call(fm, keyNum)) return String(fm[keyNum]);
+      }
+    }catch(e){}
+    return '';
+  }
+
+  const festivalModeSelections = Object.create(null);
+
+  function ensureFestivalMetric(metric){
+    if (!festivalModeSelections[metric]) festivalModeSelections[metric] = [];
+  }
+
+  function toggleFestivalSelection(metric, value){
+    ensureFestivalMetric(metric);
+    const arr = festivalModeSelections[metric];
+    const idx = arr.indexOf(value);
+    if (idx === -1) {
+      arr.push(value);
+    } else {
+      arr.splice(idx, 1);
+    }
+  }
+
+  function isFestivalSelected(metric, value){
+    const arr = festivalModeSelections[metric];
+    return Array.isArray(arr) && arr.indexOf(value) !== -1;
+  }
+
+  function normalizeFestivalModeSelections(){
+    FESTIVAL_MODE_METRICS.forEach(function(metric){
+      var arr = Array.isArray(festivalModeSelections[metric]) ? festivalModeSelections[metric] : [];
+      festivalModeSelections[metric] = arr
+        .slice()
+        .filter(function(v){ return v !== null && v !== undefined && v !== ''; })
+        .map(function(v){ return Number(v); })
+        .filter(function(v){ return Number.isFinite(v); });
+    });
+  }
+
+  function sortNumericDescStableFestival(a,b){
+    var na = Number(a);
+    var nb = Number(b);
+    if (!Number.isFinite(na) && !Number.isFinite(nb)) return 0;
+    if (!Number.isFinite(na)) return 1;
+    if (!Number.isFinite(nb)) return -1;
+    if (na > nb) return -1;
+    if (na < nb) return 1;
+    return 0;
+  }
+
+  function buildFestivalModeButtons(){
+    var container = document.getElementById('festivalModeButtons');
+    if (!container) return;
+    container.innerHTML = '';
+
+    FESTIVAL_MODE_METRICS.forEach(function(metric){
+      var col = document.createElement('div');
+      col.className = 'score-column';
+
+      var title = document.createElement('strong');
+      title.innerText = metric.charAt(0).toUpperCase() + metric.slice(1);
+      col.appendChild(title);
+
+      var values = getFestivalModeValuesForMetric(metric);
+      values.forEach(function(v){
+        var b = document.createElement('button');
+        b.classList.add('metric-btn');
+        b.type = 'button';
+        b.dataset.metric = metric;
+        b.dataset.value = String(v);
+
+        var lbl = getFestivalModeLabel(metric, v);
+        b.textContent = lbl ? (String(v) + ' – ' + lbl) : String(v);
+
+        if (isFestivalSelected(metric, Number(v))) {
+          b.classList.add('selected-score');
+        }
+
+        b.addEventListener('click', function(){
+          var mv = Number(this.dataset.value);
+          toggleFestivalSelection(metric, mv);
+          if (isFestivalSelected(metric, mv)) {
+            this.classList.add('selected-score');
+          } else {
+            this.classList.remove('selected-score');
+          }
+        });
+
+        col.appendChild(b);
+      });
+
+      container.appendChild(col);
+    });
+  }
+
+  function clearFestivalModeSelections(){
+    FESTIVAL_MODE_METRICS.forEach(function(metric){
+      festivalModeSelections[metric] = [];
+    });
+    var container = document.getElementById('festivalModeButtons');
+    if (container) {
+      var btns = container.querySelectorAll('button.metric-btn.selected-score');
+      btns.forEach(function(b){
+        b.classList.remove('selected-score');
+      });
+    }
+  }
+
+  function closeFestivalMode(){
+    var modal = document.getElementById('festivalModeModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function openFestivalMode(){
+    try{
+      if (typeof applyModeButtonSizeTo === 'function') {
+        var modal = document.getElementById('festivalModeModal');
+        if (modal) applyModeButtonSizeTo(modal, 'festival');
+      }
+    }catch(e){}
+    buildFestivalModeButtons();
+    var modal = document.getElementById('festivalModeModal');
+    if (modal) modal.style.display = 'block';
+  }
+
+  function applyFestivalMode(){
+    normalizeFestivalModeSelections();
+    if (typeof selections === 'object' && selections) {
+      FESTIVAL_MODE_METRICS.forEach(function(metric){
+        selections[metric] = festivalModeSelections[metric]
+          ? festivalModeSelections[metric].slice()
+          : [];
+      });
+    }
+    closeFestivalMode();
+    try{
+      if (typeof buildButtons === 'function') buildButtons();
+    }catch(e){}
+  }
+
+  function finalizeFestivalEntryAsFestivalMode(){
+    try{
+      if (!Array.isArray(logData) || !logData.length) return;
+      var entry = logData[logData.length - 1];
+      entry.inputSource = 'FestivalMode';
+      entry.festivalMode = true;
+
+      FESTIVAL_MODE_METRICS.forEach(function(metric){
+        var chosen = Array.isArray(festivalModeSelections[metric])
+          ? festivalModeSelections[metric].slice()
+          : [];
+        entry[metric] = chosen;
+
+        var labels = [];
+        Array.from(new Set(chosen))
+          .sort(sortNumericDescStableFestival)
+          .forEach(function(v){
+            var L = getFestivalModeLabel(metric, v);
+            if (L) labels.push(L);
+          });
+        entry[metric + 'Label'] = labels.join(', ');
+      });
+
+      if (typeof setTripLogDebounced === 'function') setTripLogDebounced(logData);
+      if (typeof renderTable === 'function') renderTable();
+    }catch(e){}
+  }
+
+  function applyFestivalModeAndAddInternal(stayOpen){
+    normalizeFestivalModeSelections();
+    try{
+      window._rapidInputSource = 'FestivalMode';
+    }catch(e){}
+    try{
+      if (typeof addEntry === 'function') {
+        addEntry('festivalMode');
+      }
+    }catch(e){}
+    finalizeFestivalEntryAsFestivalMode();
+    try{
+      window._rapidInputSource = null;
+    }catch(e){}
+    if (stayOpen) {
+      buildFestivalModeButtons();
+    } else {
+      closeFestivalMode();
+    }
+  }
+
+  function applyFestivalModeAndAdd(){
+    applyFestivalModeAndAddInternal(false);
+  }
+
+  function applyFestivalModeAndAddStay(){
+    applyFestivalModeAndAddInternal(true);
+  }
+
+  // Expose public API
+  window.openFestivalMode = openFestivalMode;
+  window.closeFestivalMode = closeFestivalMode;
+  window.applyFestivalMode = applyFestivalMode;
+  window.applyFestivalModeAndAdd = applyFestivalModeAndAdd;
+  window.applyFestivalModeAndAddStay = applyFestivalModeAndAddStay;
+  window.clearFestivalModeSelections = clearFestivalModeSelections;
+  window.buildFestivalModeButtons = buildFestivalModeButtons;
+
+})(); 
 </script>
