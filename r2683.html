@@ -498,7 +498,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.30.0 r2684</title>
+<title>statpack v1.30.0 r2683</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -577,7 +577,7 @@ BOOKMARK FOR SCORING WINDOW SIZES
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
     width: 144px;
-    height: 24px;
+    height: 30px;
     font-size: 13px;
   }
 </style>
@@ -586,7 +586,7 @@ BOOKMARK FOR SCORING WINDOW SIZES
 <style id="unlocked-scores-size-override">
   /* Scoped size overrides for Unlocked Mode modal buttons only */
   #unlockedModeModal .score-column button {
-    width: 144px;
+    width: 140px;
     height: 28px;
     font-size: 13px;
   }
@@ -922,7 +922,7 @@ labels: {
   mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Obvious', 4.00: 'Obvious', 3.50: 'Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Thought', 1.00: 'Thought', 0.50: '+', 0.00: 'No Change', 0.25: '+' },
   social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Strong Empathy', 4.00: 'Outgoing', 3.50: 'Outgoing', 3.00: 'Empathetic', 2.50: 'Connection', 2.00: 'Push', 1.50: 'Desire', 1.00: 'Sociable', 0.50: '+', 0.00: 'No/Avoidant', 0.25: '+' },
   energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Hyperactive', 4.00: 'Hyperactive', 3.50: 'Active', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Moderate', 1.50: 'Improved', 1.00: 'Some', 0.50: '+', 0.00: 'None/Tired', 0.25: '+' },
-  focus: { 6.00: 'Laser', 5.50: 'Laser', 5.00: 'Wired', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Obsessive', 3.00: 'Strong', 2.50: 'Locked', 2.00: 'Focused', 1.50: 'Motivated', 1.00: 'Concentrating', 0.50: '+', 0.00: 'No/Low', 0.25: '+' },
+  focus: { 6.00: 'Laser', 5.50: 'Laser', 5.00: 'Wired', 4.50: 'Wired', 4.00: 'Obsessive', 3.50: 'Obsessive', 3.00: 'Strong', 2.50: 'Focused', 2.00: 'Fixating', 1.50: 'Motivated', 1.00: 'Concentrating', 0.50: '+', 0.00: 'No/Low', 0.25: '+' },
   anxiety: { 6.00: 'Despair', 5.50: 'Panic', 5.00: 'Panic', 4.50: 'Fear', 4.00: 'Impacting', 3.50: 'Paranoia', 3.00: 'Affecting', 2.50: 'Constant', 2.00: 'Hinderance', 1.50: 'Distracting', 1.00: 'Ignorable', 0.50: '+', 0.00: 'None/Negligible', 0.25: '+' },
   impair: { 6.00: 'Severe', 5.50: 'Damage', 5.00: 'Damage', 4.50: 'Damage', 4.00: 'Impacting', 3.50: 'Worrying', 3.00: 'Adverse', 2.50: 'Affected', 2.00: 'Constant', 1.50: 'Distracting', 1.00: 'Ignorable', 0.50: '+', 0.00: 'No/Negligible', 0.25: '+' },
   change: { 5.00: 'Autopilot', 4.00: 'Rush', 3.00: 'Effects Noticed', 2.00: 'Tinnitus', 1.00: 'Tremors', 0.00: 'No Change' },
@@ -938,7 +938,7 @@ labels: {
   mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Obvious', 4.00: 'Obvious', 3.50: 'Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Thought', 1.00: 'Thought', 0.50: '+', 0.00: 'No Change', 0.25: '+' },
   social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Strong Empathy', 4.00: 'Outgoing', 3.50: 'Outgoing', 3.00: 'Empathetic', 2.50: 'Connection', 2.00: 'Push', 1.50: 'Desire', 1.00: 'Sociable', 0.50: '+', 0.00: 'No/Avoidant', 0.25: '+' },
   energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Hyperactive', 4.00: 'Hyperactive', 3.50: 'Active', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Moderate', 1.50: 'Improved', 1.00: 'Some', 0.50: '+', 0.00: 'None/Tired', 0.25: '+' },
-  focus: { 6.00: 'Laser', 5.50: 'Laser', 5.00: 'Wired', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Obsessive', 3.00: 'Strong', 2.50: 'Locked', 2.00: 'Focused', 1.50: 'Motivated', 1.00: 'Concentrating', 0.50: '+', 0.00: 'No/Low', 0.25: '+' },
+  focus: { 6.00: 'Laser', 5.50: 'Laser', 5.00: 'Wired', 4.50: 'Wired', 4.00: 'Obsessive', 3.50: 'Obsessive', 3.00: 'Strong', 2.50: 'Focused', 2.00: 'Fixating', 1.50: 'Motivated', 1.00: 'Concentrating', 0.50: '+', 0.00: 'No/Low', 0.25: '+' },
   anxiety: { 6.00: 'Despair', 5.50: 'Panic', 5.00: 'Panic', 4.50: 'Fear', 4.00: 'Impacting', 3.50: 'Paranoia', 3.00: 'Affecting', 2.50: 'Constant', 2.00: 'Hinderance', 1.50: 'Distracting', 1.00: 'Ignorable', 0.50: '+', 0.00: 'None/Negligible', 0.25: '+' },
   impair: { 6.00: 'Severe', 5.50: 'Damage', 5.00: 'Damage', 4.50: 'Damage', 4.00: 'Impacting', 3.50: 'Worrying', 3.00: 'Adverse', 2.50: 'Affected', 2.00: 'Constant', 1.50: 'Distracting', 1.00: 'Ignorable', 0.50: '+', 0.00: 'No/Negligible', 0.25: '+' },
   change: { 5.00: 'Autopilot', 4.00: 'Rush', 3.00: 'Effects Noticed', 2.00: 'Tinnitus', 1.00: 'Tremors', 0.00: 'No Change' },
@@ -11630,13 +11630,13 @@ window.applyShortModeAndAdd = function(){
 //   focus: { 6.00: 'Super', 5.00: 'Wired', 4.00: 'Laser/Obsess', 3.00: 'Focused/Strong', 2.00: 'Motivated/Fixated', 1.00: 'Some', 0.50: '+', 0.00: 'None/Scattered' },
 //   anxiety: { 6.00: 'Despair', 5.00: 'Panic', 4.00: 'Feel + Paranoia', 3.00: 'Affecting + Constant', 2.00: 'Hinder/Distract', 1.00: 'Some/Ignorable', 0.50: '+', 0.00: 'None' },
 //   impair: { 6.00: 'Dangerous', 5.00: 'Severe', 4.00: 'Crippled + Adverse', 3.00: 'Impaired + Affected', 2.00: 'Hinder/Distract', 1.00: 'Minor/Annoyance', 0.50: '+', 0.00: 'None' },
-  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.00: 'Intense, Uncontrollable', 3.00: 'Strong, Energetic, Push', 2.00: 'Prominent, Controllable', 1.00: 'Physical, Mental', 0.50: '+', 0.25: '+', 0.00: 'No Rush' },
-  mood: { 6.00: 'Autopilot', 5.00: 'Euphoric', 4.00: 'Obvious + Good', 3.00: 'Clear, Distinct, Prominent', 2.00: 'Felt, Improved, Significant', 1.00: 'Maybe, Some, Thought', 0.50: '+', 0.25: '+', 0.00: 'No Change' },
-  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.00: 'Outgoing, Empathy, Flow', 3.00: 'Connection, Social, Empatheic', 2.00: 'Push, Desire/Proactive', 1.00: 'Sociable, Want', 0.50: '+', 0.25: '+', 0.00: 'No/Avoidant' },
-  energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.00: 'Hyperactive/Half Wired', 3.00: 'High, Energetic/Active', 2.00: 'Moderate, Improved, Encouraged', 1.00: 'Some, Low', 0.50: '+', 0.25: '+', 0.00: 'None/Tired' },
-  focus: { 6.00: 'Super', 5.00: 'Wired', 4.00: 'Laser/Obsessive', 3.00: 'Strong, Focused', 2.00: 'Concentration, Motivated', 1.00: 'Some/Scattered', 0.50: '+', 0.25: '+', 0.00: 'No/Low' },
-  anxiety: { 6.00: 'Despair', 5.00: 'Panic', 4.00: 'Feel + Paranoia', 3.00: 'Affecting + Constant', 2.00: 'Hinderance, Distracting', 1.00: 'Some, Ignorable', 0.50: '+', 0.25: '+', 0.00: 'None/Negligible' },
-  impair: { 6.00: 'Dangerous', 5.00: 'Severe', 4.00: 'Crippled + Adverse', 3.00: 'Constant, Affected', 2.00: 'Hinderance, Distracting', 1.00: 'Ignorable, Minor/Side Effects', 0.50: '+', 0.25: '+', 0.00: 'No/Negligible' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme + Uncontrol', 4.00: 'Strong + Intense', 3.00: 'Energetic + Controlled', 2.00: 'Physical + Mental', 1.00: 'Noticable', 0.50: '+', 0.00: 'No Rush' },
+  mood: { 6.00: 'Autopilot', 5.00: 'Euphoric + Auto', 4.00: 'Obvious + Good', 3.00: 'Clear + Distinct', 2.00: 'Thought + Felt', 1.00: 'Noticed', 0.50: '+', 0.00: 'No Change' },
+  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited + Flow', 4.00: 'Empathy + Outgoing', 3.00: 'Push + Natural', 2.00: 'Social + Desire', 1.00: 'Capable', 0.50: '+', 0.00: 'No/Avoidant' },
+  energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.00: 'Hyper + Active', 3.00: 'Very Energetic', 2.00: 'Improved + Alert', 1.00: 'Some', 0.50: '+', 0.00: 'None/Tired' },
+  focus: { 6.00: 'Super', 5.00: 'Wired', 4.00: 'Laser + Obsessed', 3.00: 'Focused + Fixated', 2.00: 'Motivated + Alert', 1.00: 'Some', 0.50: '+', 0.00: 'None/Scattered' },
+  anxiety: { 6.00: 'Despair', 5.00: 'Panic + Fear', 4.00: 'Impacted + Paranoia', 3.00: 'Constant + Affected', 2.00: 'Hinder + Distract', 1.00: 'Some + Ignorable', 0.50: '+', 0.00: 'None' },
+  impair: { 6.00: 'Dangerous', 5.00: 'Severe + Warning', 4.00: 'Crippled + Adverse', 3.00: 'Clear + Impaired', 2.00: 'Affected + Minor', 1.00: 'Some + Annoyance', 0.50: '+', 0.00: 'None' },
   };
 
   const FAST_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
