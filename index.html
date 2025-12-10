@@ -498,7 +498,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.32.2 r2723</title>
+<title>statpack v1.32.2 r2729</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -917,7 +917,7 @@ const CONFIG = Object.freeze({
       gold:  ['Energy','Focus'],
       red:   ['Anxiety','Impair','Min']
       , blue:  ['Change','D2','O2','change','Deg','Oth']
-      , grey:  ['Confidence','Auto','Jitter','Dopamine','sF','sB','sM','VL','QuitStatsOne']}
+      , grey:  ['Confidence','Auto','Jitter','Dopamine','VL','QuitStatsOne','scaleMood','sB','sF']}
   },
 labels: {
   labelMappings: {
@@ -3760,6 +3760,9 @@ closeBtn
 <!-- ===== Label Settings & CSV Import/Export (Option C + Option 4) ===== -->
 
 <button id="labelGearBtn" title="Label Settings">⚙️</button>
+<!-- 
+BOOKMarK DEC 20251211
+ -->
 <div aria-hidden="true" id="labelSettingsModal">
 <div aria-labelledby="ls-title" aria-modal="true" id="labelSettingsCard" role="dialog">
 <h2 id="ls-title">Label Settings</h2>
@@ -5557,10 +5560,10 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
   );}
   function computeCat10(val){
     if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
-    if(val<=2.50) return {label:'Some',cls:'verylow'};
-    if(val<=4.50) return {label:'Moderate',cls:'low'};
-    if(val<=6.50) return {label:'Strong',cls:'medium'};
-    if(val<=8.50) return {label:'Very Strong',cls:'high'};
+    if(val<=3) return {label:'Lower',cls:'verylow'};
+    if(val<=5) return {label:'Moderate',cls:'low'};
+    if(val<=7) return {label:'Strong',cls:'medium'};
+    if(val<=8.5) return {label:'Very Strong',cls:'high'};
     return {label:'Extreme',cls:'veryhigh'};
 //BOOKMARK DEC2025
 //   function computeCat10(val){
