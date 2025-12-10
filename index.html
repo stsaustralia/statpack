@@ -498,7 +498,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.30.2 r2694</title>
+<title>statpack v1.31.1 r2717</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -576,8 +576,8 @@ BOOKMARK FOR SCORING WINDOW SIZES
  */
   /* Scoped size overrides for Rapid Scores modal buttons only BOOKMARK */
   #rapidScoresModal .score-column button {
-    width: 144px;
-    height: 24px;
+    width: 168px;
+    height: 30px;
     font-size: 13px;
   }
 </style>
@@ -852,6 +852,7 @@ BOOKMARK FOR SCORING WINDOW SIZES
 <th>Segment</th>
 <th>Time</th><th>Rush</th><th>Mood</th><th>Social</th><th>Energy</th><th>Focus</th><th>Anxiety</th><th>Impair</th>
 <th>Score</th><th>Max</th><th>Min</th><th>Weighted</th><th>5Max</th>
+      <th>Drug</th><th>Qty</th><th>Notes</th>
 </tr>
 </thead>
 <tbody></tbody>
@@ -897,7 +898,8 @@ const CONFIG = Object.freeze({
 //     hideInUi: ['VL','sM','sB','sF','GS'],
 //     hideInUi: ['VL','sM','sB','sF','GS','change',	'Change'	,'Deg'	,'D2'	,'Oth',	'O2','Weighted','5Max','Dopamine','Jitter','Auto','Confidence'],
 //     hideInUi: ['VL','sM','sB','sF','GS','change','Deg','Oth'],
-    hideInUi: ['sM','sB','sF','GS','change','Deg','Oth','Jitter','Confidence','Auto','Dopamine','Phase','Scale','QuickStatsOne'],
+    hideInUi: ['sM','sB','sF','GS','change','Deg','Oth','Jitter','Confidence','Auto','Dopamine'],
+//     hideInUi: ['sM','sB','sF','GS'],
     noShadeCols: [],
     shadeCap: {
       'Score': 30,
@@ -919,7 +921,7 @@ const CONFIG = Object.freeze({
 labels: {
   labelMappings: {
   rush: { 6.00: 'Overwhelming', 5.50: 'Massive', 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Uncontrollable', 3.50: 'Energetic', 3.00: 'Intense', 2.50: 'Strong', 2.00: 'Controllable', 1.50: 'Prominent', 1.00: 'Physical', 0.50: '+', 0.00: 'No Rush', 0.25: '+' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Obvious', 4.00: 'Obvious', 3.50: 'Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Thought', 1.00: 'Thought', 0.50: '+', 0.00: 'No Change', 0.25: '+' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Obvious', 4.00: 'Obvious', 3.50: 'Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Improved', 1.00: 'Thought', 0.50: '+', 0.00: 'No Change', 0.25: '+' },
   social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Strong Empathy', 4.00: 'Outgoing', 3.50: 'Outgoing', 3.00: 'Empathetic', 2.50: 'Connection', 2.00: 'Push', 1.50: 'Desire', 1.00: 'Sociable', 0.50: '+', 0.00: 'No/Avoidant', 0.25: '+' },
   energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Hyperactive', 4.00: 'Hyperactive', 3.50: 'Active', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Moderate', 1.50: 'Improved', 1.00: 'Some', 0.50: '+', 0.00: 'None/Tired', 0.25: '+' },
   focus: { 6.00: 'Laser', 5.50: 'Laser', 5.00: 'Wired', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Obsessive', 3.00: 'Strong', 2.50: 'Locked', 2.00: 'Focused', 1.50: 'Motivated', 1.00: 'Concentrating', 0.50: '+', 0.00: 'No/Low', 0.25: '+' },
@@ -931,11 +933,11 @@ labels: {
   confidence: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Medium', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None' },
   auto: { 5.00: 'Autopilot', 4.00: 'Yes', 3.00: 'Physical', 2.00: 'Mental', 1.00: 'Maybe', 0.00: 'No' },
   jitter: { 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Adverse', 2.00: 'Shakes', 1.00: 'Tremor', 0.00: 'None' },
-  dopamine: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
+  dopamine: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Aroused', 0.00: 'None' },
     }
 , rapidLabels: {
   rush: { 6.00: 'Overwhelming', 5.50: 'Massive', 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Uncontrollable', 3.50: 'Energetic', 3.00: 'Intense', 2.50: 'Strong', 2.00: 'Controllable', 1.50: 'Prominent', 1.00: 'Physical', 0.50: '+', 0.00: 'No Rush', 0.25: '+' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Obvious', 4.00: 'Obvious', 3.50: 'Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Thought', 1.00: 'Thought', 0.50: '+', 0.00: 'No Change', 0.25: '+' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Obvious', 4.00: 'Obvious', 3.50: 'Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Improved', 1.00: 'Thought', 0.50: '+', 0.00: 'No Change', 0.25: '+' },
   social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Strong Empathy', 4.00: 'Outgoing', 3.50: 'Outgoing', 3.00: 'Empathetic', 2.50: 'Connection', 2.00: 'Push', 1.50: 'Desire', 1.00: 'Sociable', 0.50: '+', 0.00: 'No/Avoidant', 0.25: '+' },
   energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Hyperactive', 4.00: 'Hyperactive', 3.50: 'Active', 3.00: 'Energetic', 2.50: 'Moderate', 2.00: 'Moderate', 1.50: 'Improved', 1.00: 'Some', 0.50: '+', 0.00: 'None/Tired', 0.25: '+' },
   focus: { 6.00: 'Laser', 5.50: 'Laser', 5.00: 'Wired', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Obsessive', 3.00: 'Strong', 2.50: 'Locked', 2.00: 'Focused', 1.50: 'Motivated', 1.00: 'Concentrating', 0.50: '+', 0.00: 'No/Low', 0.25: '+' },
@@ -947,7 +949,7 @@ labels: {
   confidence: { 5.00: 'Very High', 4.00: 'High', 3.00: 'Medium', 2.00: 'Low', 1.00: 'Very Low', 0.00: 'None' },
   auto: { 5.00: 'Autopilot', 4.00: 'Yes', 3.00: 'Physical', 2.00: 'Mental', 1.00: 'Maybe', 0.00: 'No' },
   jitter: { 5.00: 'Severe', 4.00: 'Obvious', 3.00: 'Adverse', 2.00: 'Shakes', 1.00: 'Tremor', 0.00: 'None' },
-  dopamine: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Low', 0.00: 'None' },
+  dopamine: { 5.00: 'Extreme', 4.00: 'Very High', 3.00: 'High', 2.00: 'Medium', 1.00: 'Aroused', 0.00: 'None' },
       },
   buttonLabelsByMetric: {}},
   buttons: {
@@ -959,13 +961,13 @@ labels: {
 //       focus:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
 //       anxiety:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
 //       impair:[6,5,4.5,4,3.5,3,2.5,2,1.5,1,0.5,0,'',0.25,-0.25,0.75,-0.5,-1],
-      rush:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.75,-0.25,-0.50,-0.75,-1.00],
-      mood:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.75,-0.25,-0.50,-0.75,-1.00],
-      social:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.75,-0.25,-0.50,-0.75,-1.00],
-      energy:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.75,-0.25,-0.50,-0.75,-1.00],
-      focus:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.75,-0.25,-0.50,-0.75,-1.00],
-      anxiety:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.75,-0.25,-0.50,-0.75,-1.00],
-      impair:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.75,-0.25,-0.50,-0.75,-1.00],
+      rush:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
+      mood:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
+      social:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
+      energy:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
+      focus:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
+      anxiety:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
+      impair:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
       confidence:[5.00,4.00,3.00,2.00,1.00,0.00],
       auto:[5.00,4.00,3.00,2.00,1.00,0.00],
       jitter:[5.00,4.00,3.00,2.00,1.00,0.00],
@@ -974,7 +976,7 @@ labels: {
       degree:[5.00,4.00,3.00,2.00,1.00,0.00],
       other: [5.00,4.00,3.00,2.00,1.00,0.00]
     },
-    rapidValues: [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.50,-0.50],
+    rapidValues: [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,'',0.50,-0.50],
 //     rapidValues: [6,'',5,4.5,'',4,3.5,'',3,2.5,'',2,1.5,'',1,0.5,'',0],
 
     rapidMetrics: ['rush','mood','social','energy','focus','anxiety','impair'],
@@ -984,10 +986,10 @@ labels: {
     metrics: ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other', 'confidence','auto','jitter','dopamine']
   },
   notes: {
-    extra: ['Minor', 'Major', 'Maybe', 'Was', 'Is', 'After', 'Before', 'Usable', 'Some', 'Slight', 'Lots', 'Now', 'Then', 'Next', 'Last','Redose', 'Hit', 'Continue', 'AnxietyPreventing', 'Stereotypy', 'Scattered', 'Motivated', 'Productive', 'Neglecting', 'NeglectAware', 'Dysphoric', 'Correlate', 'Flag', 'Changes', 'Note', 'Context', 'Associate', 'Plan', 'Review', 'Hindsight', 'Food', 'Drink', 'Sleep', 'LastRow', 'LastDose', 'LastHit', 'Single', 'Multiple', 'DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', 'Scales', 'HardToSee', 'LightRoom', 'DarkRoom'],
+    extra: ['Minor', 'Major', 'Maybe', 'Was', 'Is', 'After', 'Late', '1Min', '2Min', 'Last5Mins', 'Before', 'Usable', 'Some', 'Slight', 'Significant', 'Now', 'Then', 'Next', 'Last','Redose', 'Hit', 'Continue', 'AnxietyPreventing', 'Stereotypy', 'Scattered', 'Motivated', 'Productive', 'Neglecting', 'NeglectAware', 'Dysphoric', 'Correlate', 'Flag', 'Changes', 'Note', 'Context', 'Associate', 'Plan', 'Review', 'Hindsight', 'Food', 'Drink', 'Sleep', 'LastRow', 'LastDose', 'LastHit', 'Single', 'Multiple', 'DrugAdded', 'NothingAdded', 'UsingRemains', 'LeftRemains', 'LotsUsable', 'Weighed', 'Eyeballed', 'Guessed', 'Estimate', 'Scales', 'HardToSee', 'LightRoom', 'DarkRoom'],
     dark: [ 'Observe', 'Follow', 'Adaptive', 'Rock', 'Fast', 'Slowly', 'Roll', 'Rapid', 'Spin', 'SideToSide', 'CoatBowl', 'PreHeatBowl', 'FlashHeated', 'LargeRoll', 'SmallRoll', 'ManyHits', 'OneHit', 'MeltFirst', 'Burned', 'SuddenDrop'],
     blue: ['Plumes', 'Billowing', 'Vapour', 'Visible', 'Invisible', 'LotsOfVapour', 'SoftVapour', 'ThickVapour', 'WarmAir', 'BackPressure', 'Smoke', 'HalfBurned', 'NiceSmell', 'NiceTaste', 'Irritant', 'Pressure', 'Ignition', 'BurnedSmell', 'DarkVapour'],
-    red: ['EarsRinging', 'ChestPain', 'SideEffects', 'WideEyes', 'Headache', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Visceral', 'Feel',  'Chills', 'Sweat', 'Tremor', 'Shakes', 'Nausea', 'AfterEffects', 'DayAfter', 'Hangover', 'JustWoke', 'MorningAfter'],
+    red: ['EarsRinging', 'ChestPain', 'SideEffects', 'WideEyes', 'Headache', 'Heartbeat', 'HeartPounding', 'BloodPressure', 'TempIncrease', 'TempDecrease', 'Stomach', 'Bowel', 'Visceral', 'Feel',  'Chills', 'Sweat', 'Tremor', 'Shakes', 'Nausea', 'AfterEffects', 'DayAfter', 'Hangover', 'JustWoke', 'MorningAfter'],
     green: [ 'Breath', 'Deep', 'Shallow', 'Single', 'Multiple', 'Diaphragm', 'Hold', 'Rapid', 'Long', 'Short', 'Single', 'Sucked', 'SuckedHard', 'Gentle', 'Aggressive', 'OneBreath', 'LipSeal', 'HalfSealed', 'NotSealed', 'MouthOpen', 'ThroatBreath', 'Irritant','SuctionDistance', 'HighHeat', 'LowHeat'],
     orange: [ 'Cone', 'Snowcone', 'Pipe', 'Lighter', 'Blowtorch', 'Broken', 'Clean', 'New', 'Dirty', 'Rinsed', 'Scraped', 'Dried', 'Wet', 'Dry', 'Weathered', 'Soaked', 'Damp', 'Loose', 'Moving', 'NotMoving', 'Chunk', 'Paste', 'Rock', 'Sludge', 'Crushed', 'NotCrushed', 'Powder', 'Granules', 'Crystal', 'Crystalline', 'Dust', 'Liquid', 'WaterWeighted', 'PropyleneGlycol', 'Water','VapourWait', 'VapourPool', 'PowderIgnites'],
     yellow: ['Positive', 'Negative', 'Colour', 'State', 'StateChange', 'Melt', 'Burn', 'Audible','Neither', 'Flat', 'Unknown', 'Melted', 'Burned', 'Carbon', 'Thin', 'Film', 'Fun', 'Analytics', 'Comparative', 'Relative', 'Absolute', 'Observe'],
@@ -5554,11 +5556,19 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
   );}
   function computeCat10(val){
     if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
-    if(val<=2) return {label:'Very Low',cls:'verylow'};
-    if(val<=4) return {label:'Low',cls:'low'};
-    if(val<=6) return {label:'Medium',cls:'medium'};
-    if(val<=8) return {label:'High',cls:'high'};
-    return {label:'Very High',cls:'veryhigh'};
+    if(val<=2.50) return {label:'Some',cls:'verylow'};
+    if(val<=4.50) return {label:'Moderate',cls:'low'};
+    if(val<=6.50) return {label:'Strong',cls:'medium'};
+    if(val<=8.50) return {label:'Very Strong',cls:'high'};
+    return {label:'Extreme',cls:'veryhigh'};
+//BOOKMARK DEC2025
+//   function computeCat10(val){
+//     if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
+//     if(val<=2) return {label:'Very Low',cls:'verylow'};
+//     if(val<=4) return {label:'Low',cls:'low'};
+//     if(val<=6) return {label:'Medium',cls:'medium'};
+//     if(val<=8) return {label:'High',cls:'high'};
+//     return {label:'Very High',cls:'veryhigh'};
   }
   // ---- OutOf10 ----
   
@@ -6348,7 +6358,17 @@ window.openAllRated10MinutesPopup = function(){
 // BOOKMARK RUSH MODE LABELS
   // Configure which metrics/values Rush Mode shows (independent of Rapid)
   const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair'];
-  const RUSH_MODE_VALUES  = [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50];
+//   const RUSH_MODE_METRICS = ['rush','mood','social','energy','focus','anxiety','impair','change','degree','other','confidence','auto','jitter','dopamine'];
+  const RUSH_MODE_VALUES  = [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50,0.25,-0.25];
+// const RUSH_MODE_VALUES = [
+//   6.00, 5.75, 5.50, 5.25,
+//   5.00, 4.75, 4.50, 4.25,
+//   4.00, 3.75, 3.50, 3.25,
+//   3.00, 2.75, 2.50, 2.25,
+//   2.00, 1.75, 1.50, 1.25,
+//   1.00, 0.75, 0.50, 0.25,
+//   0.00, '-', 0.50, -0.50, 0.25,-0.25
+// ];
 //   const RUSH_MODE_VALUES  = [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.75,-0.25,-0.50];
 
   // Local, Rush-Mode-only selections
@@ -6548,9 +6568,9 @@ BOOKMARK SHORT MODE BUTTON SIZE was 168x36
  -->
 <style id="short-mode-size-override">
   #shortModeModal .score-column button {
-    width: 90px;
+    width: 144px;
     height: 30px;
-    font-size: 13px;
+    font-size: 14px;
   }
 </style>
 
@@ -11429,14 +11449,14 @@ function applyUnlockedAndAddStay(){
 //     anxiety: [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00],
 //     impair:  [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00],
 //     __default: [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00]
-    rush:    [6.00,5.00,4.00,3.00,2.00,1.00,0.00],
-    mood:    [6.00,5.00,4.00,3.00,2.00,1.00,0.00],
-    social:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00],
-    energy:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00],
-    focus:   [6.00,5.00,4.00,3.00,2.00,1.00,0.00],
-    anxiety: [6.00,5.00,4.00,3.00,2.00,1.00,0.00],
-    impair:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00],
-    __default: [6.00,5.00,4.00,3.00,2.00,1.00,0.00]
+    rush:    [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
+    mood:    [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
+    social:  [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
+    energy:  [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
+    focus:   [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
+    anxiety: [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
+    impair:  [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
+    __default: [8.00,4.00,2.00,1.00,0.50,0.25,0.00]
   };
 
   // Per-metric labels for Short Mode
@@ -11448,13 +11468,13 @@ function applyUnlockedAndAddStay(){
 //   focus: { 6.00: 'Laser', 5.00: 'Wired', 4.00: 'Obsessive', 3.00: 'Strong Focus', 2.00: 'Locked/Fixated', 1.00: 'Some/Attentive', 0.00: 'None/Scattered', 0.50: '+' },
 //   anxiety: { 6.00: 'Despair', 5.00: 'Panic', 4.00: 'Paranoia + Physical', 3.00: 'Adverse + Affecting', 2.00: 'Distracting', 1.00: 'Ignorable', 0.00: 'None', 0.50: '+' },
 //   impair: { 6.00: 'Damage', 5.00: 'Crippled', 4.00: 'Impacting Behaviour', 3.00: 'Affected + Adverse', 2.00: 'Hindrance', 1.00: 'Minor/Side', 0.00: 'None', 0.50: '+' },
-  rush: { 6.00: 'Ext', 5.50: 'Ext', 5.00: 'Ext', 4.50: 'VHi', 4.00: 'VHi', 3.50: 'Hi', 3.00: 'Hi', 2.50: 'Mid', 2.00: 'Mid', 1.50: 'Lo', 1.00: 'Lo', 0.50: '+', 0.00: 'N', 0.25: '+' },
-  mood: { 6.00: 'Ext', 5.50: 'Ext', 5.00: 'Ext', 4.50: 'VHi', 4.00: 'Hi', 3.50: 'Hi', 3.00: 'Mid', 2.50: 'Mid', 2.00: 'Mid', 1.50: 'Mid', 1.00: 'Lo', 0.50: '+', 0.00: 'N', 0.25: '+' },
-  social: { 6.00: 'Ext', 5.50: 'Ext', 5.00: 'Ext', 4.50: 'VHi', 4.00: 'VHi', 3.50: 'Hi', 3.00: 'Hi', 2.50: 'Mid', 2.00: 'Mid', 1.50: 'Mid', 1.00: 'Lo', 0.50: '+', 0.00: 'N', 0.25: '+' },
-  energy: { 6.00: 'Ext', 5.50: 'Ext', 5.00: 'Ext', 4.50: 'VHi', 4.00: 'Hi', 3.50: 'Hi', 3.00: 'Mid', 2.50: 'Mid', 2.00: 'Mid', 1.50: 'Mid', 1.00: 'Lo', 0.50: '+', 0.00: 'N', 0.25: '+' },
-  focus: { 6.00: 'Ext', 5.50: 'Ext', 5.00: 'Ext', 4.50: 'VHi', 4.00: 'VHi', 3.50: 'Hi', 3.00: 'Hi', 2.50: 'Mid', 2.00: 'Mid', 1.50: 'Mid', 1.00: 'Mid', 0.50: '+', 0.00: 'N', 0.25: '+' },
-  anxiety: { 6.00: 'Ext', 5.50: 'Ext', 5.00: 'Ext', 4.50: 'VHi', 4.00: 'Hi', 3.50: 'Hi', 3.00: 'Mid', 2.50: 'Mid', 2.00: 'Mid', 1.50: 'Lo', 1.00: 'Lo', 0.50: '+', 0.00: 'N', 0.25: '+' },
-  impair: { 6.00: 'Ext', 5.50: 'Ext', 5.00: 'Ext', 4.50: 'VHi', 4.00: 'VHi', 3.50: 'Hi', 3.00: 'Hi', 2.50: 'Mid', 2.00: 'Mid', 1.50: 'Lo', 1.00: 'Lo', 0.50: '+', 0.00: 'N', 0.25: '+' },
+  rush: { 8.00: 'Extreme', 4.00: 'Obvious', 2.00: 'Clear', 1.00: 'Yes', 0.50: 'Maybe', 0.00: 'None', 0.25: '+', 0.75: '++', 1.50: '+++' },
+  mood: { 8.00: 'Autopilot', 4.00: 'Euphoric', 2.00: 'Good', 1.00: 'Distinct', 0.50: 'Thought', 0.00: 'No Change', 0.25: '+', 0.75: '++', 1.50: '+++' },
+  social: { 8.00: 'Disinhibited', 4.00: 'Outgoing', 2.00: 'Natural', 1.00: 'Push', 0.50: 'Want', 0.00: 'Avoidant', 0.25: '+', 0.75: '++', 1.50: '+++' },
+  energy: { 8.00: 'Manic', 4.00: 'Hyperactive', 2.00: 'Energetic', 1.00: 'Moderate', 0.50: 'Some', 0.00: 'Low', 0.25: '+', 0.75: '++', 1.50: '+++' },
+  focus: { 8.00: 'Wired', 4.00: 'Obsessive', 2.00: 'Focused', 1.00: 'Concentrating', 0.50: 'Some', 0.00: 'Low', 0.25: '+', 0.75: '++', 1.50: '+++' },
+  anxiety: { 8.00: 'Panic', 4.00: 'Fear', 2.00: 'Hindered', 1.00: 'Distracting', 0.50: 'Forgettable', 0.00: 'Negligible', 0.25: '+', 0.75: '++', 1.50: '+++' },
+  impair: { 8.00: 'Damage', 4.00: 'Crippled', 2.00: 'Impacting', 1.00: 'Affecting', 0.50: 'Distracting', 0.00: 'None', 0.25: '+', 0.75: '++', 1.50: '+++' },
   };
 
   const shortModeSelections = Object.create(null);
@@ -11462,11 +11482,11 @@ function applyUnlockedAndAddStay(){
   function getShortModeValuesForMetric(metric){
     try{
       const v = SHORT_MODE_VALUES[metric];
-      return Array.isArray(v) ? v : (SHORT_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00]);
+      return Array.isArray(v) ? v : (SHORT_MODE_VALUES.__default || [8.00,4.00,2.00,1.00,0.50,0.25,0.00]);
     }catch(e){
       console.warn(e);
 //       return SHORT_MODE_VALUES.__default || [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00];
-      return SHORT_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00];
+      return SHORT_MODE_VALUES.__default || [8.00,4.00,2.00,1.00,0.50,0.25,0.00];
     }
   }
 
@@ -11496,6 +11516,37 @@ function applyUnlockedAndAddStay(){
       console.warn(e);
     }
   }
+
+  window.getShortModeSnapshotForCapture = function(){
+    try{
+      const modal = document.getElementById('shortModeModal');
+      if (!modal || modal.style.display === 'none') return null;
+
+      normalizeShortModeSelections();
+
+      const metrics = {};
+      SHORT_MODE_METRICS.forEach(metric => {
+        const arr = shortModeSelections[metric];
+        if (!Array.isArray(arr) || !arr.length) return;
+
+        const value = arr[0];
+        if (!Number.isFinite(value)) return;
+
+        const label = getShortModeLabel(metric, value) || '';
+        metrics[metric] = { value, label };
+      });
+
+      if (!Object.keys(metrics).length) return null;
+
+      return {
+        ts: Date.now(),
+        metrics: metrics
+      };
+    }catch(e){
+      console.warn(e);
+      return null;
+    }
+  };
 
   window.buildShortModeButtons = function(){
     try{
@@ -11686,14 +11737,14 @@ window.applyShortModeAndAdd = function(){
   // Per-metric values for Fast Mode
 //   BOOKMARK FAST MODE LABELS AND VALUES
   const FAST_MODE_VALUES = {
-    rush:    [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50],
-    mood:    [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50],
-    social:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50],
-    energy:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50],
-    focus:   [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50],
-    anxiety: [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50],
-    impair:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50],
-    __default: [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50]
+    rush:    [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25],
+    mood:    [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25],
+    social:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25],
+    energy:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25],
+    focus:   [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25],
+    anxiety: [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25],
+    impair:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25],
+    __default: [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25]
   };
 
   // Fast Mode-specific labels used on buttons and written into the table
@@ -11721,7 +11772,7 @@ window.applyShortModeAndAdd = function(){
   function getValuesForMetric(metric){
     const v = FAST_MODE_VALUES[metric];
 //     return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'-----',0.50,-0.50]);
-    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,-0.50]);
+    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25,-0.25]);
     }
 
   function getFastModeLabel(metric, value){
@@ -13001,7 +13052,12 @@ btn.classList.add('metric-btn');
   const BASE_COLS = (typeof SUMMARY_COLUMNS !== 'undefined' && Array.isArray(SUMMARY_COLUMNS))
     ? SUMMARY_COLUMNS.slice()
     : ["Time","Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
-  const DEC_COLS = BASE_COLS.concat(["Drug","QtySum"]);
+
+  const METRICS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
+
+  const DEC_COLS = ['Time'].concat(
+    METRICS.flatMap(name => [name, name + 'Label'])
+  );
 
   const NUM_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair'];
 
@@ -13193,59 +13249,56 @@ btn.classList.add('metric-btn');
   }
 
   function captureOnce(){
-    const end = new Date();
-    end.setSeconds(0,0);
-    const endMs = end.getTime();
-    const startMs = endMs - 60*60000;
-    const M = computeMeansForWindowDec(startMs, endMs);
-    if (!M) return;
-    const C = computeCompositeFromMeansDec(M);
-    const extras = aggregateExtrasDec(M.sel);
+    try{
+      if (typeof window.getShortModeSnapshotForCapture !== 'function'){
+        updateStatus('Short Mode capture helper missing');
+        return;
+      }
 
-    const values = {};
-    // Fill in Time + metrics using the same column set as 60m summary, minus Notes
-    values['Time'] = end.toLocaleString();
-    const m = M.means;
-    values['Rush'] = m.rush;
-    values['Mood'] = m.mood;
-    values['Social'] = m.social;
-    values['Energy'] = m.energy;
-    values['Focus'] = m.focus;
-    values['Anxiety'] = m.anxiety;
-    values['Impair'] = m.impair;
-    if (C){
-      values['Score'] = C.score;
-      values['Max'] = C.max;
-      values['Min'] = C.min;
-      values['Weighted'] = C.weighted;
-      values['5Max'] = C.fiveMax;
+      const snap = window.getShortModeSnapshotForCapture();
+      if (!snap){
+        updateStatus('Short Mode not open or no selections');
+        return;
+      }
+
+      const d = new Date(snap.ts);
+      const values = {};
+      values['Time'] = d.toLocaleString(undefined, { hour12: false });
+
+      METRICS.forEach(name => {
+        const key = name.toLowerCase();
+        const entry = snap.metrics && snap.metrics[key];
+        if (entry){
+          values[name] = entry.value;
+          values[name + 'Label'] = entry.label || '';
+        } else {
+          values[name] = '';
+          values[name + 'Label'] = '';
+        }
+      });
+
+      const rec = { ts: snap.ts, values: values };
+      rows.push(rec);
+      save();
+      appendRowToTable(rec);
+    }catch(e){
+      console.warn(e);
     }
-    values['Drug'] = extras.Drug || '';
-    values['QtySum'] = extras.QtySum;
-
-    const rec = { ts: endMs, values: values };
-    rows.push(rec);
-    save();
-    appendRowToTable(rec);
   }
 
   function start(){
-    if (timer) return;
-    updateStatus('capturing every 1 min');
-    // immediate capture
-    captureOnce();
-    const now = new Date();
-    const delay = (typeof window.msToNextMinute === 'function')
-      ? window.msToNextMinute(now)
-      : 60000;
 
-    timer = setTimeout(function firstTick(){
-      captureOnce();
-      timer = setInterval(captureOnce, 60000);
-    }, Math.max(0, delay));
+    if (timer) {
+      updateStatus('already running');
+      return;
+    }
+    updateStatus('capturing every 15 s from Short Mode');
+    captureOnce();
+    timer = setInterval(captureOnce, 15000);
   }
 
   function stop(){
+
     if (!timer) {
       updateStatus('stopped');
       return;
@@ -13375,13 +13428,13 @@ btn.classList.add('metric-btn');
 
   // Festival Mode label mappings (per-metric)
   const FESTIVAL_MODE_LABELS = {
-    rush: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'VHI', 3.50: 'HI', 3.00: 'HI', 2.50: 'MID', 2.00: 'MID', 1.50: 'LO', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
-    mood: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'HI', 3.50: 'HI', 3.00: 'MID', 2.50: 'MID', 2.00: 'MID', 1.50: 'MID', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
-    social: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'VHI', 3.50: 'HI', 3.00: 'HI', 2.50: 'MID', 2.00: 'MID', 1.50: 'MID', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
-    energy: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'HI', 3.50: 'HI', 3.00: 'MID', 2.50: 'MID', 2.00: 'MID', 1.50: 'MID', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
-    focus: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'VHI', 3.50: 'HI', 3.00: 'HI', 2.50: 'MID', 2.00: 'MID', 1.50: 'MID', 1.00: 'MID', 0.50: '+', 0.00: 'N', 0.25: '+' },
-    anxiety: { 6.00: 'EXT', 5.50: 'EXT', 5.00: 'EXT', 4.50: 'VHI', 4.00: 'HI', 3.50: 'HI', 3.00: 'MID', 2.50: 'MID', 2.00: 'MID', 1.50: 'LO', 1.00: 'LO', 0.50: '+', 0.00: 'N', 0.25: '+' },
-    impair: { 6.00: 'Severe', 5.50: 'Damage', 5.00: 'Damage', 4.50: 'Damage', 4.00: 'Impacting', 3.50: 'Worrying', 3.00: 'Adverse', 2.50: 'Affected', 2.00: 'Constant', 1.50: 'Distracting', 1.00: 'Ignorable', 0.50: '+', 0.00: 'N', 0.25: '+' },
+  rush: { 5.00: 'Extreme', 4.00: 'Obvious', 3.00: 'Clear', 2.00: 'Yes', 1.00: 'Maybe', 0.00: 'None', 0.25: '+', 0.75: '+', 0.50: '+' },
+  mood: { 5.00: 'Autopilot', 4.00: 'Euphoric', 3.00: 'Good', 2.00: 'Distinct', 1.00: 'Thought', 0.00: 'No Change', 0.25: '+', 0.75: '+', 0.50: '+' },
+  social: { 5.00: 'Disinhibited', 4.00: 'Outgoing', 3.00: 'Natural', 2.00: 'Push', 1.00: 'Want', 0.00: 'Avoidant', 0.25: '+', 0.75: '+', 0.50: '+' },
+  energy: { 5.00: 'Manic', 4.00: 'Hyperactive', 3.00: 'Energetic', 2.00: 'Moderate', 1.00: 'Some', 0.00: 'Low', 0.25: '+', 0.75: '+', 0.50: '+' },
+  focus: { 5.00: 'Wired', 4.00: 'Obsessive', 3.00: 'Focused', 2.00: 'Concentrating', 1.00: 'Some', 0.00: 'Low', 0.25: '+', 0.75: '+', 0.50: '+' },
+  anxiety: { 5.00: 'Panic', 4.00: 'Fear', 3.00: 'Hindered', 2.00: 'Distracting', 1.00: 'Forgettable', 0.00: 'Negligible', 0.25: '+', 0.75: '+', 0.50: '+' },
+  impair: { 5.00: 'Damage', 4.00: 'Crippled', 3.00: 'Impacting', 2.00: 'Affecting', 1.00: 'Distracting', 0.00: 'None', 0.25: '+', 0.75: '+', 0.50: '+' },
     change: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
     degree: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
     other: { 5.00: '+5', 4.00: '+4', 3.00: '+3', 2.00: '+2', 1.00: '+1', 0.00: '0' },
