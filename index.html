@@ -498,7 +498,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.32.0 r2720</title>
+<title>statpack v1.32.2 r2723</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -917,7 +917,7 @@ const CONFIG = Object.freeze({
       gold:  ['Energy','Focus'],
       red:   ['Anxiety','Impair','Min']
       , blue:  ['Change','D2','O2','change','Deg','Oth']
-      , grey:  ['Confidence','Auto','Jitter','Dopamine']}
+      , grey:  ['Confidence','Auto','Jitter','Dopamine','sF','sB','sM','VL','QuitStatsOne']}
   },
 labels: {
   labelMappings: {
@@ -969,13 +969,13 @@ labels: {
       focus:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
       anxiety:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
       impair:[6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,0.50,-0.50,-1.00],
-      confidence:[5.00,4.00,3.00,2.00,1.00,0.00],
-      auto:[5.00,4.00,3.00,2.00,1.00,0.00],
-      jitter:[5.00,4.00,3.00,2.00,1.00,0.00],
-      dopamine:[5.00,4.00,3.00,2.00,1.00,0.00],
-      change:[5.00,4.00,3.00,2.00,1.00,0.00],
-      degree:[5.00,4.00,3.00,2.00,1.00,0.00],
-      other: [5.00,4.00,3.00,2.00,1.00,0.00]
+      confidence:[5.00,4.00,3.00,2.00,1.00,0.00,0.50],
+      auto:[5.00,4.00,3.00,2.00,1.00,0.00,0.50],
+      jitter:[5.00,4.00,3.00,2.00,1.00,0.00,0.50],
+      dopamine:[5.00,4.00,3.00,2.00,1.00,0.00,0.50],
+      change:[5.00,4.00,3.00,2.00,1.00,0.00,0.50],
+      degree:[5.00,4.00,3.00,2.00,1.00,0.00,0.50],
+      other: [5.00,4.00,3.00,2.00,1.00,0.00,0.50]
     },
     rapidValues: [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,'',0.25,-0.25,'',0.50,-0.50],
 //     rapidValues: [6,'',5,4.5,'',4,3.5,'',3,2.5,'',2,1.5,'',1,0.5,'',0],
@@ -6725,6 +6725,7 @@ document.addEventListener('click', function(ev){
 <!-- Running Average: dynamic toolbar button injection -->
 <script>
 // Timestamp: 2025/10/18 00:00:00
+// BOOKMARK DEC2025
 (function(){
   function ensureRunningAverageButton(){
     if (document.getElementById('runningAverageBtn')) return;
