@@ -498,7 +498,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 
 <meta charset="utf-8"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E">
-<title>statpack v1.37.0 r2755</title>
+<title>statpack v1.40 r2778</title>
 
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 
@@ -919,9 +919,9 @@ const CONFIG = Object.freeze({
     colorSets: {
       green: ['Rush','Mood','Social','Score','Weighted','5Max','Max','VL'],
       gold:  ['Energy','Focus'],
-      red:   ['Anxiety','Impair','Min']
-      , blue:  ['Change','D2','O2','change','Deg','Oth','Jitter']
-      , grey:  ['Confidence','Auto','Dopamine','QuickStatsOne','scaleMood','sB','sF']}
+      red:   ['Anxiety','Impair','Min'],
+      blue:  ['Change','D2','O2','change','Deg','Oth','Jitter'],
+     grey:  ['Confidence','Auto','Dopamine','QuickStatsOne','scaleMood','sB','sF']}
   },
 labels: {
   labelMappings: {
@@ -1819,12 +1819,13 @@ function findHeader(header, names){
 }
 
 // Schema mapping for app-exported CSV
+// BOOKMARK DEC25
 function mapSchema(header){
   const need = {
     ts: ["Timestamp"],
     since: ["Since Dose","Since"],
     elapsed: ["Elapsed"],
-    info: ["Info"],
+    info: ["Info","Phase"],
     scale: ["Scale"],
     drug: ["Drug"],
     qty: ["Qty","QTY"],
@@ -1838,25 +1839,61 @@ function mapSchema(header){
     sM: ["scaleMood","sM"],
     sB: ["scaleBad","sB"],
     sF: ["scaleFocus","sF"],
-    last: ["Custom Notes","Last"],
+    last: ["Custom Notes","Last","customNotes","last"],
     notes: ["Notes"],
     weighted: ["Weighted"],
     score5: ["Score5","5Max"],
     goodSum: ["Good Sum","GS"],
-    rushSum: ["Rush Sum"],
+    rushSum: ["Rush Sum","Rush"],
     rushLabel: ["Rush Label"],
-    moodSum: ["Mood Sum"],
+    moodSum: ["Mood Sum","moodSum"],
     moodLabel: ["Mood Label"],
-    socialSum: ["Social Sum"],
+    socialSum: ["Social Sum","socialSum"],
     socialLabel: ["Social Label"],
-    energySum: ["Energy Sum"],
+    energySum: ["Energy Sum","energySum"],
     energyLabel: ["Energy Label"],
-    focusSum: ["Focus Sum"],
+    focusSum: ["Focus Sum","focusSum"],
     focusLabel: ["Focus Label"],
-    anxietySum: ["Anxiety Sum"],
+    anxietySum: ["Anxiety Sum","anxietySum"],
     anxietyLabel: ["Anxiety Label"],
-    impairSum: ["Impair Sum"],
+    impairSum: ["Impair Sum","impairSum"],
     impairLabel: ["Impair Label"]
+//     ts: ["Timestamp"],
+//     since: ["Since Dose","Since"],
+//     elapsed: ["Elapsed"],
+//     info: ["Info"],
+//     scale: ["Scale"],
+//     drug: ["Drug"],
+//     qty: ["Qty","QTY"],
+//     roa: ["ROA","Detail"],
+//     score: ["Score"],
+//     max: ["Max"],
+//     min: ["Min"],
+//     maxp: ["Max %","Max%","Max Percent"],
+//     minp: ["Min %","Min%","Min Percent"],
+//     valence: ["Valence","VL"],
+//     sM: ["scaleMood","sM"],
+//     sB: ["scaleBad","sB"],
+//     sF: ["scaleFocus","sF"],
+//     last: ["Custom Notes","Last"],
+//     notes: ["Notes"],
+//     weighted: ["Weighted"],
+//     score5: ["Score5","5Max"],
+//     goodSum: ["Good Sum","GS"],
+//     rushSum: ["Rush Sum"],
+//     rushLabel: ["Rush Label"],
+//     moodSum: ["Mood Sum"],
+//     moodLabel: ["Mood Label"],
+//     socialSum: ["Social Sum"],
+//     socialLabel: ["Social Label"],
+//     energySum: ["Energy Sum"],
+//     energyLabel: ["Energy Label"],
+//     focusSum: ["Focus Sum"],
+//     focusLabel: ["Focus Label"],
+//     anxietySum: ["Anxiety Sum"],
+//     anxietyLabel: ["Anxiety Label"],
+//     impairSum: ["Impair Sum"],
+//     impairLabel: ["Impair Label"]
   };
   const map = {};
   const missing = [];
@@ -1902,6 +1939,13 @@ function rowsToLogData(rows, mapped){
     };
     // metric sums + labels
     const metricPairs = [
+//       ["rush","rushSum","rushLabel"],
+//       ["mood","moodSum","moodLabel"],
+//       ["social","socialSum","socialLabel"],
+//       ["energy","energySum","energyLabel"],
+//       ["focus","focusSum","focusLabel"],
+//       ["anxiety","anxietySum","anxietyLabel"],
+//       ["impair","impairSum","impairLabel"],
       ["rush","rushSum","rushLabel"],
       ["mood","moodSum","moodLabel"],
       ["social","socialSum","socialLabel"],
@@ -2638,7 +2682,9 @@ function exportPopupCSV(){
 window.createSummaryPopupTable = createSummaryPopupTable;
 window.toggleAutoSummary = toggleAutoSummary;
 </script>
+<!-- 
 <button class="ctrl-btn" id="backfillBtnGlobal">Backfill</button>
+ -->
 <script>
 // Group note buttons by colour into separate rows (no colour/style changes)
 (function(){
@@ -4297,7 +4343,7 @@ function applyRapidScoresAndAddStay(){
 <div id="autoSliderDModal" class="modal" style="display:none;">
   <div class="modal-content" style="max-width: 95vw;">
     <span class="close" data-close="#autoSliderDModal">&times;</span>
-    <h2>\1 3\2 (auto every 30s)</h2>
+    <h2> 3 (auto every 30s)</h2>
     <div style="margin: 8px 0;">
       <button id="autoDForceAppend">Append now</button>
       <span id="autoDStatus" style="margin-left:11px; font-size:0.9em; opacity:0.8;"></span>
@@ -4310,8 +4356,6 @@ function applyRapidScoresAndAddStay(){
     </table>
   </div>
 </div>
-
-
 
 <script>
 // ===== Utility: open/close modals
@@ -4400,6 +4444,7 @@ function rowToObj(tr, col){
     InputSource: cell('Input Source')
   };
 }
+//BOOKMARK DEC2025 table headers
 
 // ===== Auto Slider C: last 5 non-auto rows (exclude Input Source that starts with "Auto")
 function refreshAutoSliderC(){
@@ -4505,7 +4550,10 @@ window.addEventListener('load', function(){
 </script>
 
 
-<!-- ===== Added: Auto Slider C/D modals (tables only) & Review modal ===== -->
+
+<!-- 
+// Added: Auto Slider C/D modals (tables only) & Review modal
+ -->
 <div id="autoSliderCModal" style="display:none;">
   <h3 style="margin:6px 0;">Auto Slider C (snapshot mean of last 5 rows)</h3>
   <table id="autoSliderCTable">
@@ -4542,7 +4590,6 @@ window.addEventListener('load', function(){
   </div>
 </div>
 <!-- ===== End added modals ===== -->
-
 <script>
 (function(){
   var autoSliderA2Timer = null, LS_KEY_A2 = 'autoSliderA2_rows';
@@ -4658,11 +4705,9 @@ window.addEventListener('load', function(){
 })();
 </script>
 
-
-<!-- ===== Auto Entries & Rolling Average (modal-based) ===== -->
-
-
-<!-- Auto Entries Modal (uses shared .modal/.modal-content pattern) -->
+// <!-- ===== Auto Entries & Rolling Average (modal-based) ===== -->
+// 
+// <!-- Auto Entries Modal (uses shared .modal/.modal-content pattern) -->
 <div id="autoEntriesModal" style="display:none;">
   <div class="modal-content" style="max-width: 95vw;">
     <span class="close" data-close="#autoEntriesModal">&times;</span>
@@ -4684,7 +4729,9 @@ window.addEventListener('load', function(){
   </div>
 </div>
 
-<!-- Rolling Average Modal (uses shared .modal/.modal-content pattern) -->
+<!-- 
+ Rolling Average Modal (uses shared .modal/.modal-content pattern)
+ -->
 <div id="rollingAverageModal" class="modal" style="display:none;">
   <div class="modal-content" style="max-width: 95vw;">
     <span class="close" data-close="#rollingAverageModal">&times;</span>
@@ -4851,7 +4898,6 @@ function(){
 }();
 </script>
 
-
 <!-- STS: Buttons (auto-injected) -->
 <div id="sts-roaming-buttons" style="padding:8px; display:flex; gap:8px; flex-wrap:wrap;">
   <button id="roamingEntriesBtn" type="button" onclick="openRoamingEntries && openRoamingEntries()">Roaming Entries</button>
@@ -4886,6 +4932,7 @@ function(){
 </div>
 
 <script>
+// BOOKMARK DEC25
 (function(){
   const METRICS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair"];
   const EXTRA_COLS = ["Score","Min","Max"];
@@ -5086,10 +5133,7 @@ function(){
   window.stopRoamingEntries = stop;
 })();
 </script>
-<!-- /STS: Roaming Entries (auto-injected) -->
-
 <!-- STS: Roaming Average (auto-injected) -->
-
 
 <div id="roamingAverageModal" class="sts-modal" role="dialog" aria-labelledby="roamingAverageTitle" aria-modal="true">
   <div class="sts-box" role="document">
@@ -5282,7 +5326,6 @@ function(){
 </script>
 <!-- /STS: Roaming Average (auto-injected) -->
 
-<!-- STS: DecemberAutoOne (auto-injected) -->
 
 <div id="decAutoOneModal" class="sts-modal" role="dialog" aria-labelledby="decAutoOneTitle" aria-modal="true" style="display:none;">
   <div class="sts-box" role="document">
@@ -5346,10 +5389,14 @@ function STS_isRedoseRow(row) {
   }
   return false;
 }
+</script>
+<!-- 
 // Build segments from visible rows.
 // New segment starts if EITHER:
 // 1) Since timer resets (current since < previous since), OR
 // 2) Row indicates a redose via STS_isRedoseRow().
+ -->
+<script>
 function STS_STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
   const segments = [];
   let cur = [];
@@ -5471,7 +5518,6 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
 }
 </script>
 
-
 <!-- Rated Popup Modal -->
 <div id="ratedPopupModal">
   <div id="ratedPopupBackdrop"></div>
@@ -5489,7 +5535,7 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
 </div>
 
 
-<!-- All Rated Popup Modal -->
+ <!-- All Rated Popup Modal -->
 <div id="allRatedPopupModal" style="display:none; position:fixed; inset:0; z-index:10000;">
   <div id="allRatedPopupBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
   <div id="allRatedPopupCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
@@ -5554,182 +5600,646 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
       </thead>
       <tbody></tbody>
     </table>
-  </div>
+
+    <h3 style="margin-top:12px; font-size:13px;">Summary rows (dose-aligned / 5m / 15m / hourly)</h3>
+    <table id="allRated5MinutesSummaryTable">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Window</th>
+          <th>Drug</th>
+          <th>Rush</th>
+          <th>Mood</th>
+          <th>Social</th>
+          <th>Energy</th>
+          <th>Focus</th>
+          <th>Anxiety</th>
+          <th>Impair</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3 style="margin-top:12px; font-size:13px;">Drug Analysis (per dose block &amp; hour)</h3>
+    <table id="drugAnalysisTable">
+      <thead>
+        <tr>
+          <th>Drug</th>
+          <th>Hour Window</th>
+          <th>Rush (max)</th>
+          <th>Mood (mode)</th>
+          <th>Social (median)</th>
+          <th>Energy (avg)</th>
+          <th>Focus (avg)</th>
+          <th>Anxiety (avg)</th>
+          <th>Impair (avg)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+ </div>
 </div>
 
-
-<!-- All Rated Popups (styled like original) -->
 <script>
+// <!-- All Rated Popups (styled like original) -->
 (function(){
   // ---- helpers ----
-  function ensureTableBody(sel){const tb=document.querySelector(sel);if(tb) tb.innerHTML='';return tb;}
-  function rowHtml(labelSet){ return (
-    `<td class="cat ${labelSet.cls}"><span class="badge ${labelSet.cls}">${labelSet.label}</span></td>`
-  );}
+  function ensureTableBody(sel){
+    const tb = document.querySelector(sel);
+    if (tb) tb.innerHTML = '';
+    return tb;
+  }
+
+  function rowHtml(labelSet){
+    if (!labelSet) return '<td></td>';
+    return (
+      `<td class="cat ${labelSet.cls}"><span class="badge ${labelSet.cls}">${labelSet.label}</span></td>`
+    );
+  }
+
+  //BOOKMARK DEC2025
   function computeCat10(val){
-    if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
-    if(val<=3) return {label:'Lower',cls:'verylow'};
-    if(val<=5) return {label:'Moderate',cls:'low'};
-    if(val<=7) return {label:'Strong',cls:'medium'};
-    if(val<=8.5) return {label:'Very Strong',cls:'high'};
-    return {label:'Extreme',cls:'veryhigh'};
-//BOOKMARK DEC2025
-//   function computeCat10(val){
-//     if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
-//     if(val<=2) return {label:'Very Low',cls:'verylow'};
-//     if(val<=4) return {label:'Low',cls:'low'};
-//     if(val<=6) return {label:'Medium',cls:'medium'};
-//     if(val<=8) return {label:'High',cls:'high'};
-//     return {label:'Very High',cls:'veryhigh'};
+    if (!Number.isFinite(val) || val === 0) return { label: 'None',      cls: 'none'     };
+    if (val <= 3)                            return { label: 'Very Low',  cls: 'verylow'  };
+    if (val <= 5)                            return { label: 'Low',       cls: 'low'      };
+    if (val <= 7.5)                            return { label: 'Medium',    cls: 'medium'   };
+    if (val <= 8.5)                            return { label: 'High',      cls: 'high'     };
+    return                                       { label: 'Very High', cls: 'veryhigh' };
   }
-  // ---- OutOf10 ----
-  
-function renderAllRatedOutOf10Popup(){
-  window.syncLogDataFromTable && window.syncLogDataFromTable();
-  var tb = document.querySelector('#allRatedOutOf10PopupTable tbody');
-  if (!tb) return;
-  var src = Array.isArray(window.logData) ? window.logData : [];
-  var rows = [];
-  src.forEach(function(r){
-    var t = r.timestamp || r.Time || r.DateTime || r['Date/Time'] || '';
-    var cells = [];
-    if (typeof computeCat10 === 'function'){
-      cells = computeCat10(r); // existing per-metric categoriser
-    }else{
-      ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min','Weighted','5Max'].forEach(function(k){
-        cells.push('<td>'+ (r[k] != null ? r[k] : '') +'</td>');
-      });
-    }
-    rows.push('<tr><td>'+t+'</td>'+cells.join('')+'</tr>');
-  });
-  tb.innerHTML = rows.join('');
-}
-
-</td>`+
-        rowHtml(computeCat10(r.rushSum*2))+
-        rowHtml(computeCat10(r.moodSum*2))+
-        rowHtml(computeCat10(r.socialSum*2))+
-        rowHtml(computeCat10(r.energySum*2))+
-        rowHtml(computeCat10(r.focusSum*2))+
-        rowHtml(computeCat10(computeRatingCategory('anxiety',r.anxietySum).val*2||r.anxietySum*2))+ /* fall back */
-        rowHtml(computeCat10(computeRatingCategory('impair',r.impairSum).val*2||r.impairSum*2))+
-      `</tr>`);
-    });
-    tb.innerHTML = rows.join('');
-  }
-  window.openAllRatedOutOf10Popup = function(){
-    renderAllRatedOutOf10Popup();
-    const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='block';
-    const bd=document.getElementById('allRatedOutOf10PopupBackdrop');if(bd)bd.onclick=closeAllRatedOutOf10Popup;
-  };
-  window.closeAllRatedOutOf10Popup = function(){
-    const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='none';
-  };
-
-  // ---- 5‑Minute ----
-  
-function fiveMinBuckets(){
-  window.syncLogDataFromTable && window.syncLogDataFromTable();
-  var src = Array.isArray(window.logData) ? window.logData.slice() : [];
-  if (!src.length) return [];
-
-  var map = new Map();
-  for (var i=0;i<src.length;i++){
-    var r = src[i] || {};
-    var ts = parseTimestamp(r.timestamp);
-    var bin = window.bucket5min(ts);
-    if (bin == null){
-      // try alternate fields
-      var alt = r.Time || r.DateTime || r['Date/Time'] || r.ts || r.time || '';
-      ts = parseTimestamp(alt);
-      bin = window.bucket5min(ts);
-    }
-    if (bin == null) continue; // cannot place this row
-
-    if (!map.has(bin)) map.set(bin, []);
-    map.get(bin).push(r);
+  function toHalfStepDown(v){
+    if (!Number.isFinite(v)) return null;
+    return Math.floor(v * 2) / 2;
   }
 
-  // Convert to sorted bucket array
-  var out = Array.from(map.entries()).sort(function(a,b){return a[0]-b[0];}).map(function(e){
-    return { bin: e[0], rows: e[1] };
-  });
-  return out;
-}
 
-;
-    const startT = new Date(src[0].timestamp||0).getTime();
-    src.forEach(r=>{
-      const ts = new Date(r.timestamp||0).getTime();
-      const diff = Math.max(1,Math.floor((ts-startT)/300000)); // 1‑based bin index
-      (res[diff]=res[diff]||[]).push(r);
-    });
-    const out=[];
-    Object.keys(res).sort((a,b)=>a-b).forEach(k=>{
-      const list=res[k], agg={rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
-      list.forEach(r=>{
-        agg.rush+=r.rushSum||0; agg.mood+=r.moodSum||0; agg.social+=r.socialSum||0; agg.energy+=r.energySum||0;
-        agg.focus+=r.focusSum||0; agg.anxiety+=r.anxietySum||0; agg.impair+=r.impairSum||0;
-      });
-      for(const f in agg){ agg[f]/=list.length; } // average
-      out.push({offset:+k,values:agg});
-    });
-    return out;
-  }
-  
-function renderAllRated5MinutesPopup(){
-  window.syncLogDataFromTable && window.syncLogDataFromTable();
-  var tb = document.querySelector('#allRated5MinutesPopupTable tbody');
-  if (!tb) return;
-  var buckets = fiveMinBuckets();
-  var rows = [];
-  buckets.forEach(function(b){
-    // header row for bucket (optional)
-    var startEpoch = b.bin * 300000; // ms
-    var endEpoch = startEpoch + 299999;
-    var startStr = new Date(startEpoch).toLocaleString();
-    var endStr = new Date(endEpoch).toLocaleString();
-    rows.push('<tr class="bucket"><td colspan="99">5‑min bucket: '+startStr+' – '+endStr+' ('+b.rows.length+' rows)</td></tr>');
-    b.rows.forEach(function(r){
+    var METRIC_KEYS = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair'];
+// ---- OutOf10 ----
+  function renderAllRatedOutOf10Popup(){
+    window.syncLogDataFromTable && window.syncLogDataFromTable();
+    var tb = document.querySelector('#allRatedOutOf10PopupTable tbody');
+    if (!tb) return;
+
+    var src  = Array.isArray(window.logData) ? window.logData : [];
+    var rows = [];
+
+    src.forEach(function(r){
       var t = r.timestamp || r.Time || r.DateTime || r['Date/Time'] || '';
-      // Build cells for rated metrics (existing compute function if present)
-      var cells = [];
-      if (typeof computeCategoryCells === 'function'){
-        cells = computeCategoryCells(r); // project-specific; if exists
-      }else{
-        // fallback: dump known ratings if present
-        ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min','Weighted','5Max'].forEach(function(k){
-          cells.push('<td>'+ (r[k] != null ? r[k] : '') +'</td>');
-        });
+
+      // Helper: safely parse number, otherwise null
+      function getNum(field){
+        var v = r[field];
+        if (v === '' || v == null) return null;
+        var n = Number(v);
+        return Number.isFinite(n) ? n : null;
       }
+
+      // Adjust these field names if your log uses different headers
+      var metricFields = ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min','Weighted','5Max'];
+
+      var cells = metricFields.map(function(field){
+        var val = getNum(field);
+        if (val == null) return '<td></td>';
+        // If you still want to scale (e.g. val * 2), do it here: computeCat10(val * 2)
+        return rowHtml(computeCat10(val));
+      });
+
       rows.push('<tr><td>'+t+'</td>'+cells.join('')+'</tr>');
     });
-  });
-  tb.innerHTML = rows.join('');
-}
 
-</td>`+
-        rowHtml(computeCat10(b.values.rush+5))+
-        rowHtml(computeCat10(b.values.mood+5))+
-        rowHtml(computeCat10(b.values.social+5))+
-        rowHtml(computeCat10(b.values.energy+5))+
-        rowHtml(computeCat10(b.values.focus+5))+
-        rowHtml(computeCat10(b.values.anxiety+5))+
-        rowHtml(computeCat10(b.values.impair+5))+
-      `</tr>`);
-    });
     tb.innerHTML = rows.join('');
   }
-  
-window.openAllRated5MinutesPopup = function(){
-  renderAllRated5MinutesPopup();
-  var modal = document.getElementById('allRated5MinutesPopupModal');
-  if (modal) modal.style.display = 'block';
-};
 
-;
+  window.openAllRatedOutOf10Popup = function(){
+    renderAllRatedOutOf10Popup();
+    const m  = document.getElementById('allRatedOutOf10PopupModal');
+    if (m) m.style.display = 'block';
+    const bd = document.getElementById('allRatedOutOf10PopupBackdrop');
+    if (bd) bd.onclick = window.closeAllRatedOutOf10Popup;
+  };
+
+  window.closeAllRatedOutOf10Popup = function(){
+    const m = document.getElementById('allRatedOutOf10PopupModal');
+    if (m) m.style.display = 'none';
+  };
+
+  // ~~~~ 5-Minute ~~~~
+  function fiveMinBuckets(){
+    window.syncLogDataFromTable && window.syncLogDataFromTable();
+    var src = Array.isArray(window.logData) ? window.logData.slice() : [];
+    if (!src.length) return [];
+
+    var map = new Map();
+    for (var i = 0; i < src.length; i++){
+      var r  = src[i] || {};
+      var ts = parseTimestamp(r.timestamp);
+      var bin = window.bucket5min(ts);
+      if (bin == null){
+        // try alternate fields
+        var alt = r.Time || r.DateTime || r['Date/Time'] || r.ts || r.time || '';
+        ts  = parseTimestamp(alt);
+        bin = window.bucket5min(ts);
+      }
+      if (bin == null) continue; // cannot place this row
+
+      if (!map.has(bin)) map.set(bin, []);
+      map.get(bin).push(r);
+    }
+
+    // Convert to sorted bucket array
+    var out = Array.from(map.entries())
+      .sort(function(a,b){ return a[0] - b[0]; })
+      .map(function(e){
+        return { bin: e[0], rows: e[1] };
+      });
+    return out;
+  }
+  function collect5MinSummaryFromBuckets(buckets){
+    window.syncLogDataFromTable && window.syncLogDataFromTable();
+    var src = Array.isArray(window.logData) ? window.logData.slice() : [];
+    if (!src.length) return { summaryRows: [], drugAnalysisRows: [] };
+
+    // Build sorted records with numeric timestamps
+    var records = [];
+    for (var i = 0; i < src.length; i++){
+      var r = src[i] || {};
+      var ts = parseTimestamp(
+        r.timestamp || r.Timestamp || r.Time || r['Date/Time'] || r.ts || r.time || ''
+      );
+      if (!Number.isFinite(ts)) continue;
+      records.push({ row: r, ts: ts });
+    }
+    records.sort(function(a, b){ return a.ts - b.ts; });
+
+    function getFieldCI(row, name){
+      if (!row) return null;
+      if (row[name] != null) return row[name];
+      var lname = String(name).toLowerCase();
+      for (var k in row){
+        if (!Object.prototype.hasOwnProperty.call(row, k)) continue;
+        if (String(k).toLowerCase() === lname) return row[k];
+      }
+      return null;
+    }
+
+    function isTimerResetRow(row){
+      var sinceRaw   = getFieldCI(row, 'Since');
+      var elapsedRaw = getFieldCI(row, 'Elapsed');
+      var sinceStr   = sinceRaw != null ? String(sinceRaw).trim() : '';
+      var elapsedStr = elapsedRaw != null ? String(elapsedRaw).trim() : '';
+      var zeros = ['00:00:00','0:00:00','0:0:0'];
+      return zeros.indexOf(sinceStr) !== -1 && zeros.indexOf(elapsedStr) !== -1;
+    }
+
+    function isDoseEventRow(row){
+      var qtyRaw = getFieldCI(row, 'QTY');
+      if (qtyRaw == null) qtyRaw = getFieldCI(row, 'Qty');
+      var qty  = Number(qtyRaw);
+      var drug = getFieldCI(row, 'Drug');
+      return !!drug && Number.isFinite(qty) && qty > 0;
+    }
+
+    function statsForArray(arr){
+      var xs = arr.filter(function(v){ return Number.isFinite(v); })
+                  .slice()
+                  .sort(function(a,b){ return a - b; });
+      var n = xs.length;
+      if (!n) return null;
+
+      var sum = xs.reduce(function(a,b){ return a + b; }, 0);
+      var mean = sum / n;
+      var min = xs[0];
+      var max = xs[n-1];
+
+      var median;
+      if (n % 2){
+        median = xs[(n-1)/2];
+      } else {
+        median = (xs[n/2 - 1] + xs[n/2]) / 2;
+      }
+
+      var mode = xs[0];
+      var bestCount = 1;
+      var currentVal = xs[0];
+      var currentCount = 1;
+      for (var i2 = 1; i2 < n; i2++){
+        if (xs[i2] === currentVal){
+          currentCount++;
+        } else {
+          if (currentCount > bestCount){
+            bestCount = currentCount;
+            mode = currentVal;
+          }
+          currentVal = xs[i2];
+          currentCount = 1;
+        }
+      }
+      if (currentCount > bestCount){
+        mode = currentVal;
+      }
+
+      var meanSq = xs.reduce(function(a,b){ return a + b*b; }, 0) / n;
+      var variance = meanSq - mean*mean;
+      var std = Math.sqrt(variance < 0 ? 0 : variance);
+
+      return { n: n, sum: sum, mean: mean, min: min, max: max, median: median, mode: mode, std: std };
+    }
+
+    function roundDown1Decimal(v){
+      if (!Number.isFinite(v)) return null;
+      return Math.floor(v * 10) / 10;
+    }
+
+    function roundDownToHalfFromMean(v){
+      var one = roundDown1Decimal(v);
+      if (one == null) return null;
+      return Math.floor(one * 2) / 2;
+    }
+
+    function getMetricNumeric(row, metricKey){
+      if (!row) return null;
+      var key = String(metricKey || '').toLowerCase();
+      for (var k in row){
+        if (!Object.prototype.hasOwnProperty.call(row, k)) continue;
+        var lk = String(k).toLowerCase();
+        if (lk === key || lk.indexOf(key + ' ') === 0 || lk.indexOf(key) === 0){
+          var n = Number(row[k]);
+          if (Number.isFinite(n)) return n;
+        }
+      }
+      return null;
+    }
+
+    function fmtWindow(startMs, endMs){
+      var s = new Date(startMs);
+      var e = new Date(endMs);
+      return s.toLocaleString() + ' – ' + e.toLocaleString();
+    }
+
+    var summaryRows = [];
+
+    // ---- Timer resets, doses, and dose-aligned 5-minute summaries ----
+    var fiveMinMs = 5 * 60 * 1000;
+    for (var idx = 0; idx < records.length; idx++){
+      var rec = records[idx];
+      var row = rec.row;
+      var ts  = rec.ts;
+
+      if (isTimerResetRow(row)){
+        var metricsReset = {};
+        METRIC_KEYS.forEach(function(m){
+          var v = getMetricNumeric(row, m);
+          if (Number.isFinite(v)){
+            metricsReset[m] = { text: v.toFixed(2), value: v };
+          }
+        });
+        summaryRows.push({
+          type: 'timer-reset',
+          typeLabel: 'Timer reset',
+          windowLabel: new Date(ts).toLocaleString(),
+          drug: getFieldCI(row, 'Drug') || '',
+          metrics: metricsReset,
+          sortTs: ts
+        });
+        continue;
+      }
+
+      if (isDoseEventRow(row)){
+        var metricsDose = {};
+        METRIC_KEYS.forEach(function(m){
+          var v2 = getMetricNumeric(row, m);
+          if (Number.isFinite(v2)){
+            metricsDose[m] = { text: v2.toFixed(2), value: v2 };
+          }
+        });
+        var drugName = getFieldCI(row, 'Drug') || '';
+        summaryRows.push({
+          type: 'dose',
+          typeLabel: 'Dose',
+          windowLabel: new Date(ts).toLocaleString(),
+          drug: drugName,
+          metrics: metricsDose,
+          sortTs: ts
+        });
+
+        // Dose-aligned 5-minute windows, stop when we hit a timer reset or run out of rows
+        var kWin = 0;
+        var doneDose = false;
+        while (!doneDose){
+          var winStart = ts + kWin * fiveMinMs;
+          var winEnd   = winStart + fiveMinMs;
+          if (winStart > records[records.length - 1].ts){
+            break;
+          }
+
+          var bucketRows = [];
+          for (var j = idx; j < records.length; j++){
+            var rec2 = records[j];
+            if (rec2.ts < winStart) continue;
+            if (rec2.ts >= winEnd) break;
+            if (isTimerResetRow(rec2.row)){
+              doneDose = true;
+              break;
+            }
+            bucketRows.push(rec2.row);
+          }
+          if (!bucketRows.length){
+            break;
+          }
+
+          var metrics5m = {};
+          METRIC_KEYS.forEach(function(m){
+            var vals = bucketRows.map(function(br){ return getMetricNumeric(br, m); })
+                                 .filter(function(v){ return Number.isFinite(v); });
+            if (!vals.length) return;
+            var sum = vals.reduce(function(a,b){ return a + b; }, 0);
+            var mean = sum / vals.length;
+            var halfStep = roundDownToHalfFromMean(mean);
+            var cat = halfStep != null ? computeCat10(halfStep) : null;
+            var text;
+            if (cat){
+              text = roundDown1Decimal(mean).toFixed(1) + ' (' + cat.label + ')';
+            } else {
+              text = roundDown1Decimal(mean).toFixed(1);
+            }
+            metrics5m[m] = { text: text, value: mean };
+          });
+
+          summaryRows.push({
+            type: '5m',
+            typeLabel: '5m avg',
+            windowLabel: fmtWindow(winStart, winEnd),
+            drug: drugName,
+            metrics: metrics5m,
+            sortTs: winStart
+          });
+
+          kWin++;
+        }
+      }
+    }
+
+    // ---- 15-minute peak rows (global) ----
+    var fifteenMs = 15 * 60 * 1000;
+    if (records.length){
+      var firstTs = records[0].ts;
+      var lastTs  = records[records.length - 1].ts;
+      for (var start = firstTs; start <= lastTs; start += fifteenMs){
+        var end = start + fifteenMs;
+        var bucket = [];
+        for (var rIdx = 0; rIdx < records.length; rIdx++){
+          var rt = records[rIdx].ts;
+          if (rt < start) continue;
+          if (rt >= end) break;
+          bucket.push(records[rIdx].row);
+        }
+        if (!bucket.length) continue;
+
+        var metrics15 = {};
+        METRIC_KEYS.forEach(function(m){
+          var vals = bucket.map(function(br){ return getMetricNumeric(br, m); })
+                           .filter(function(v){ return Number.isFinite(v); });
+          if (!vals.length) return;
+          var max = Math.max.apply(null, vals);
+          metrics15[m] = { text: max.toFixed(2), value: max };
+        });
+
+        summaryRows.push({
+          type: '15m',
+          typeLabel: '15m peak',
+          windowLabel: fmtWindow(start, end),
+          drug: '',
+          metrics: metrics15,
+          sortTs: start
+        });
+      }
+    }
+
+    // ---- Hourly stats rows (global) ----
+    var hourMs = 60 * 60 * 1000;
+    if (records.length){
+      var firstH = records[0].ts;
+      var lastH  = records[records.length - 1].ts;
+      for (var hStart = firstH; hStart <= lastH; hStart += hourMs){
+        var hEnd = hStart + hourMs;
+        var hBucket = [];
+        for (var hIdx = 0; hIdx < records.length; hIdx++){
+          var ht = records[hIdx].ts;
+          if (ht < hStart) continue;
+          if (ht >= hEnd) break;
+          hBucket.push(records[hIdx].row);
+        }
+        if (!hBucket.length) continue;
+
+        var metricsH = {};
+        METRIC_KEYS.forEach(function(m){
+          var vals = hBucket.map(function(br){ return getMetricNumeric(br, m); })
+                            .filter(function(v){ return Number.isFinite(v); });
+          if (!vals.length) return;
+          var s = statsForArray(vals);
+          if (!s) return;
+          var txt = 'max ' + s.max.toFixed(2) +
+                    ', min ' + s.min.toFixed(2) +
+                    ', mode ' + s.mode.toFixed(2) +
+                    ', median ' + s.median.toFixed(2) +
+                    ', sd ' + s.std.toFixed(2);
+          metricsH[m] = { text: txt, value: s.mean };
+        });
+
+        summaryRows.push({
+          type: 'hour',
+          typeLabel: 'Hourly stats',
+          windowLabel: fmtWindow(hStart, hEnd),
+          drug: '',
+          metrics: metricsH,
+          sortTs: hStart
+        });
+      }
+    }
+
+    // ---- Drug analysis rows (per dose block & hour) ----
+    function buildDrugAnalysisRows(){
+      var blocks = [];
+      var currentRecords = null;
+      var currentDrug = null;
+
+      for (var i3 = 0; i3 < records.length; i3++){
+        var rec3 = records[i3];
+        var rw = rec3.row;
+        if (isTimerResetRow(rw)){
+          currentRecords = null;
+          currentDrug = null;
+          continue;
+        }
+        if (isDoseEventRow(rw) && !currentRecords){
+          currentRecords = [];
+          currentDrug = getFieldCI(rw, 'Drug') || 'Unknown';
+          blocks.push({ drug: currentDrug, records: currentRecords });
+        }
+        if (currentRecords){
+          currentRecords.push(rec3);
+        }
+      }
+
+      var out = [];
+      for (var b = 0; b < blocks.length; b++){
+        var block = blocks[b];
+        var recs = block.records;
+        if (!recs || !recs.length) continue;
+        var bFirst = recs[0].ts;
+        var bLast  = recs[recs.length - 1].ts;
+        for (var sStart = bFirst; sStart <= bLast; sStart += hourMs){
+          var sEnd = sStart + hourMs;
+          var sBucket = [];
+          for (var bi = 0; bi < recs.length; bi++){
+            var bt = recs[bi].ts;
+            if (bt < sStart) continue;
+            if (bt >= sEnd) break;
+            sBucket.push(recs[bi].row);
+          }
+          if (!sBucket.length) continue;
+
+          var perMetric = {};
+          METRIC_KEYS.forEach(function(m){
+            var vals = sBucket.map(function(br){ return getMetricNumeric(br, m); })
+                              .filter(function(v){ return Number.isFinite(v); });
+            if (!vals.length) return;
+            perMetric[m] = statsForArray(vals);
+          });
+
+          var rush    = perMetric.Rush    ? perMetric.Rush.max    : null;
+          var mood    = perMetric.Mood    ? perMetric.Mood.mode   : null;
+          var social  = perMetric.Social  ? perMetric.Social.median: null;
+          var energy  = perMetric.Energy  ? perMetric.Energy.mean : null;
+          var focus   = perMetric.Focus   ? perMetric.Focus.mean  : null;
+          var anxiety = perMetric.Anxiety ? perMetric.Anxiety.mean: null;
+          var impair  = perMetric.Impair  ? perMetric.Impair.mean : null;
+
+          out.push({
+            drug: block.drug,
+            start: sStart,
+            end: sEnd,
+            metrics: {
+              Rush: rush,
+              Mood: mood,
+              Social: social,
+              Energy: energy,
+              Focus: focus,
+              Anxiety: anxiety,
+              Impair: impair
+            }
+          });
+        }
+      }
+      return out;
+    }
+
+    var drugRows = buildDrugAnalysisRows();
+
+    // sort summary rows chronologically
+    summaryRows.sort(function(a, b){
+      return (a.sortTs || 0) - (b.sortTs || 0);
+    });
+
+    return { summaryRows: summaryRows, drugAnalysisRows: drugRows };
+  }
+
+
+  function renderAllRated5MinutesPopup(){
+    window.syncLogDataFromTable && window.syncLogDataFromTable();
+    var tb        = document.querySelector('#allRated5MinutesPopupTable tbody');
+    var summaryTb = document.querySelector('#allRated5MinutesSummaryTable tbody');
+    if (!tb) return;
+    if (summaryTb) summaryTb.innerHTML = '';
+
+    var buckets = fiveMinBuckets();
+    var rows    = [];
+
+    buckets.forEach(function(b){
+      // header row for bucket (optional)
+      var startEpoch = b.bin * 300000; // ms
+      var endEpoch   = startEpoch + 299999;
+      var startStr   = new Date(startEpoch).toLocaleString();
+      var endStr     = new Date(endEpoch).toLocaleString();
+      rows.push('<tr class="bucket"><td colspan="99">5-min bucket: '+
+                startStr+' – '+endStr+' ('+b.rows.length+' rows)</td></tr>');
+
+      b.rows.forEach(function(r){
+        var t = r.timestamp || r.Time || r.DateTime || r['Date/Time'] || '';
+        var cells = [];
+
+        if (typeof computeCategoryCells === 'function'){
+          // project-specific; if exists, it should return an array of <td>…</td> strings
+          cells = computeCategoryCells(r);
+        } else {
+          // fallback: dump known ratings if present
+          ['Rush','Mood','Social','Energy','Focus','Anxiety','Impair','Score','Max','Min','Weighted','5Max']
+            .forEach(function(k){
+              cells.push('<td>' + (r[k] != null ? r[k] : '') + '</td>');
+            });
+        }
+
+        rows.push('<tr><td>'+t+'</td>'+cells.join('')+'</tr>');
+      });
+    });
+
+    tb.innerHTML = rows.join('');
+
+    var summaryData = collect5MinSummaryFromBuckets(buckets) || {};
+    if (summaryTb){
+      var sRows = summaryData.summaryRows || [];
+      var out = sRows.map(function(r){
+        var cells = [];
+        cells.push('<td>' + (r.typeLabel || '') + '</td>');
+        cells.push('<td>' + (r.windowLabel || '') + '</td>');
+        cells.push('<td>' + (r.drug || '') + '</td>');
+        METRIC_KEYS.forEach(function(m){
+          var mm = r.metrics && r.metrics[m];
+          cells.push('<td>' + (mm && mm.text != null ? mm.text : '') + '</td>');
+        });
+        return '<tr>' + cells.join('') + '</tr>';
+      });
+      summaryTb.innerHTML = out.join('');
+    }
+
+    var drugTb = document.querySelector('#drugAnalysisTable tbody');
+    if (drugTb && summaryData.drugAnalysisRows){
+      var dRows = summaryData.drugAnalysisRows || [];
+      var dout = dRows.map(function(r){
+        var cells = [];
+        cells.push('<td>' + (r.drug || '') + '</td>');
+        var winStr = '';
+        if (Number.isFinite(r.start) && Number.isFinite(r.end)){
+          winStr = new Date(r.start).toLocaleString() + ' – ' + new Date(r.end).toLocaleString();
+        }
+        cells.push('<td>' + winStr + '</td>');
+        function fmtVal(v){
+          return Number.isFinite(v) ? v.toFixed(2) : '';
+        }
+        var met = r.metrics || {};
+        cells.push('<td>' + fmtVal(met.Rush) + '</td>');
+        cells.push('<td>' + fmtVal(met.Mood) + '</td>');
+        cells.push('<td>' + fmtVal(met.Social) + '</td>');
+        cells.push('<td>' + fmtVal(met.Energy) + '</td>');
+        cells.push('<td>' + fmtVal(met.Focus) + '</td>');
+        cells.push('<td>' + fmtVal(met.Anxiety) + '</td>');
+        cells.push('<td>' + fmtVal(met.Impair) + '</td>');
+        return '<tr>' + cells.join('') + '</tr>';
+      });
+      drugTb.innerHTML = dout.join('');
+    }
+  }
+
+
+  window.openAllRated5MinutesPopup = function(){
+    renderAllRated5MinutesPopup();
+    var modal = document.getElementById('allRated5MinutesPopupModal');
+    if (modal) modal.style.display = 'block';
+  };
+
   window.closeAllRated5MinutesPopup = function(){
-    const m=document.getElementById('allRated5MinutesPopupModal');if(m)m.style.display='none';
+    const m = document.getElementById('allRated5MinutesPopupModal');
+    if (m) m.style.display = 'none';
   };
 })();
 </script>
@@ -5953,9 +6463,8 @@ window.openAllRated5MinutesPopup = function(){
   obs.observe(document.body, {childList:true, subtree:true});
 })();
 </script>
-
-
 <!-- All Rated 5‑Minute (/10) Popup Modal -->
+
 <div id="allRated5MinutesOutOf10PopupModal" style="display:none; position:fixed; inset:0; z-index:10000;">
   <div id="allRated5MinutesOutOf10PopupBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
   <div id="allRated5MinutesOutOf10PopupCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:#fff; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid #007aff;">
@@ -6145,6 +6654,9 @@ document.addEventListener("DOMContentLoaded", function(){
   });
 });
 </script>
+<!-- 
+// BOOKMARK DEC 2025 valence
+ -->
 <script>
 (function(){
   if (typeof window.computeScaleFocusFromNotes !== "function") {
@@ -6414,7 +6926,6 @@ window.openAllRated10MinutesPopup = function(){
         col.appendChild(t);
         RUSH_MODE_VALUES.forEach(v=>{
           const b = document.createElement('button');
-b
           const label = getRushModeLabel(metric, v);
           b.innerText = `${v}: ${label}`;
           b.onclick = ()=>{
@@ -6551,7 +7062,9 @@ b
     }catch(e){ console.warn(e); }
   };
 
-})();</script>
+})();
+
+</script>
 
 
 
@@ -6580,8 +7093,8 @@ BOOKMARK SHORT MODE BUTTON SIZE was 168x36
  -->
 <style id="short-mode-size-override">
   #shortModeModal .score-column button {
-    width: 144px;
-    height: 30px;
+    width: 168px;
+    height: 36px;
     font-size: 14px;
   }
 </style>
@@ -6591,7 +7104,9 @@ BOOKMARK SHORT MODE BUTTON SIZE was 168x36
 
 <!-- Legacy Unlocked toolbar injection removed (2025/10/31). Permanent header button is canonical. -->
 
-
+<!-- 
+</script>
+ -->
 
 <script id="dose-review-segmentation">
 (function(){
@@ -7130,6 +7645,7 @@ window.backfillAll === 'function') window.backfillAll();
     targetTbodyId: 'autoCBody'     // tbody id
   }, CONFIG.popups.fiveMinuteAverager || {});
 
+//BOOKMARK DEC2025 VALENCE
   const COL = { // column indices for #logTable (0-based)
     Timestamp: 1,
     Phase: 4,
@@ -8778,21 +9294,21 @@ function STS_STS_buildDoseSegmentsOnEitherTimerReset(rows) {
   function rowHtml(labelSet){ return (
     `<td class="cat ${labelSet.cls}"><span class="badge ${labelSet.cls}">${labelSet.label}</span></td>`
   );}
-  function computeCat10(val){
-    if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
-    if(val<=3) return {label:'Lower',cls:'verylow'};
-    if(val<=5) return {label:'Moderate',cls:'low'};
-    if(val<=7) return {label:'Strong',cls:'medium'};
-    if(val<=8.5) return {label:'Very Strong',cls:'high'};
-    return {label:'Extreme',cls:'veryhigh'};
-//BOOKMARK DEC2025
 //   function computeCat10(val){
 //     if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
-//     if(val<=2) return {label:'Very Low',cls:'verylow'};
-//     if(val<=4) return {label:'Low',cls:'low'};
-//     if(val<=6) return {label:'Medium',cls:'medium'};
-//     if(val<=8) return {label:'High',cls:'high'};
-//     return {label:'Very High',cls:'veryhigh'};
+//     if(val<=3) return {label:'Lower',cls:'verylow'};
+//     if(val<=5) return {label:'Moderate',cls:'low'};
+//     if(val<=7) return {label:'Strong',cls:'medium'};
+//     if(val<=8.5) return {label:'Very Strong',cls:'high'};
+//     return {label:'Extreme',cls:'veryhigh'};
+//BOOKMARK DEC2025
+  function computeCat10(val){
+    if(!Number.isFinite(val)||val===0) return {label:'None',cls:'none'};
+    if(val<=2) return {label:'Very Low',cls:'verylow'};
+    if(val<=4) return {label:'Low',cls:'low'};
+    if(val<=6) return {label:'Medium',cls:'medium'};
+    if(val<=8) return {label:'High',cls:'high'};
+    return {label:'Very High',cls:'veryhigh'};
   }
   // ---- OutOf10 ----
   
@@ -8816,19 +9332,6 @@ function renderAllRatedOutOf10Popup(){
   });
   tb.innerHTML = rows.join('');
 }
-
-</td>`+
-        rowHtml(computeCat10(r.rushSum*2))+
-        rowHtml(computeCat10(r.moodSum*2))+
-        rowHtml(computeCat10(r.socialSum*2))+
-        rowHtml(computeCat10(r.energySum*2))+
-        rowHtml(computeCat10(r.focusSum*2))+
-        rowHtml(computeCat10(computeRatingCategory('anxiety',r.anxietySum).val*2||r.anxietySum*2))+ /* fall back */
-        rowHtml(computeCat10(computeRatingCategory('impair',r.impairSum).val*2||r.impairSum*2))+
-      `</tr>`);
-    });
-    tb.innerHTML = rows.join('');
-  }
   window.openAllRatedOutOf10Popup = function(){
     renderAllRatedOutOf10Popup();
     const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='block';
@@ -8919,20 +9422,6 @@ function renderAllRated5MinutesPopup(){
   });
   tb.innerHTML = rows.join('');
 }
-
-</td>`+
-        rowHtml(computeCat10(b.values.rush+5))+
-        rowHtml(computeCat10(b.values.mood+5))+
-        rowHtml(computeCat10(b.values.social+5))+
-        rowHtml(computeCat10(b.values.energy+5))+
-        rowHtml(computeCat10(b.values.focus+5))+
-        rowHtml(computeCat10(b.values.anxiety+5))+
-        rowHtml(computeCat10(b.values.impair+5))+
-      `</tr>`);
-    });
-    tb.innerHTML = rows.join('');
-  }
-  
 window.openAllRated5MinutesPopup = function(){
   renderAllRated5MinutesPopup();
   var modal = document.getElementById('allRated5MinutesPopupModal');
@@ -9335,6 +9824,7 @@ function fiveMinBucketsLocal(){
 })();
 </script>
 
+<!-- 
 <script>
 document.addEventListener("click", function(e){
   var t = e.target;
@@ -9345,6 +9835,7 @@ document.addEventListener("click", function(e){
   }
 });
 </script>
+ -->
 <script>
 document.addEventListener("DOMContentLoaded", function(){
   var thead = document.querySelectorAll('#logTable thead th');
@@ -9626,7 +10117,6 @@ window.openAllRated10MinutesPopup = function(){
         col.appendChild(t);
         RUSH_MODE_VALUES.forEach(v=>{
           const b = document.createElement('button');
-b
           const label = getRushModeLabel(metric, v);
           b.innerText = `${v}: ${label}`;
           b.onclick = ()=>{
@@ -9792,8 +10282,8 @@ BOOKMARK SHORT MODE BUTTON SIZE was 168x36
  -->
 <style id="short-mode-size-override">
   #shortModeModal .score-column button {
-    width: 144px;
-    height: 30px;
+    width: 168px;
+    height: 36px;
     font-size: 14px;
   }
 </style>
@@ -9953,7 +10443,7 @@ document.addEventListener('click', function(ev){
   function ensureRunningAverageButton(){
     if (document.getElementById('runningAverageBtn')) return;
     var btn = document.createElement('button');
-btn
+// btn
     btn.id = 'runningAverageBtn';
     btn.type = 'button';
     btn.textContent = 'Running Average';
@@ -10193,6 +10683,7 @@ btn
 <!-- /STS: Running Average -->
 
 <!-- Patch: Expose global Backfill and unify callers -->
+<!-- 
 <script>
 // Timestamp: 2025/10/18 00:00:00
 (function(){
@@ -10233,6 +10724,7 @@ window.backfillAll === 'function') window.backfillAll();
   }, true);
 })();
 </script>
+ -->
 
 <!-- Statistical Analysis Daily Modal -->
 <div id="statAnalysisDailyModal" style="display:none; position:fixed; inset:0; z-index:10000;">
@@ -11186,9 +11678,18 @@ segments.forEach((seg, idx) => {
     { field: 'anxietySum', label: 'Anxiety Sum' },
     { field: 'impairSum',  label: 'Impair Sum' }
   ];
+//   const METRICS = [
+//     { field: 'rushSum',    label: 'Rush Sum' },
+//     { field: 'moodSum',    label: 'Mood Sum' },
+//     { field: 'socialSum',  label: 'Social Sum' },
+//     { field: 'energySum',  label: 'Energy Sum' },
+//     { field: 'focusSum',   label: 'Focus Sum' },
+//     { field: 'anxietySum', label: 'Anxiety Sum' },
+//     { field: 'impairSum',  label: 'Impair Sum' }
+//   ];
 
   // Column of discrete numeric buttons per metric.
-  // BOOKMARK unlcoked mode metrics
+  // BOOKMARK unlocked mode metrics
   // Render `null` as a visual divider.
   const VALUES = CONFIG.values;
 
@@ -11241,7 +11742,9 @@ segments.forEach((seg, idx) => {
     buildMetricRows();
     buildNotes();
   }
+</script>
 
+<script>
   function buildMetricRows() {
     const host = document.getElementById('umMetrics');
     if (!host) return;
@@ -11281,7 +11784,6 @@ segments.forEach((seg, idx) => {
           return;
         }
         const b = document.createElement('button');
-b
         b.type = 'button';
         b.dataset.field = m.field;
         b.dataset.val = String(v);
@@ -11324,7 +11826,6 @@ b
     const labels = scrapeExistingNotes() || FALLBACK_NOTES;
     labels.forEach((lbl) => {
       const b = document.createElement('button');
-b
       b.type = 'button';
       b.textContent = lbl;
       b.dataset.note = lbl;
@@ -11436,7 +11937,6 @@ b
 </script>
 
 <!-- Legacy Unlocked toolbar injection removed (2025/10/31). Permanent header button is canonical. -->
- \1
 <script>
 function openEmotionModal() {
     document.getElementById('emotionModal').style.display = 'block';
@@ -11457,7 +11957,11 @@ function buildEmotionButtons() {
     ];
     emotions.forEach(word => {
         const btn = document.cr
-// <script>
+</script>
+<!-- 
+// BOOKMARK DEC25
+ -->
+<script>
 /* === Metric completeness helpers (2025/10/26 00:00:00) === */
 const MAIN_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair'];
 
@@ -12184,11 +12688,11 @@ function hmsToSeconds(hmsText) {
   if (!m) return null;
   return (+m[1])*3600 + (+m[2])*60 + (+m[3]);
 }
-function parseNum(x) {
-  if (x == null) return null;
-  const n = Number(String(x).trim());
-  return Number.isFinite(n) ? n : null;
-}
+// function parseNum(x) {
+//   if (x == null) return null;
+//   const n = Number(String(x).trim());
+//   return Number.isFinite(n) ? n : null;
+// }
 function floorTo5MinMs(dateObj) {
   const ms = dateObj.getTime(), five = 5*60*1000;
   return Math.floor(ms/five)*five;
@@ -12581,6 +13085,7 @@ function appendPerDoseToDoseReviews_EXACT(){
     return idxs;
   }
 
+// BOOKMARK DEC25
   // Override readMainRowsExact with pair-sum derivation
   window.readMainRowsExact = function(){
     const table = document.querySelector("#logTable");
@@ -12605,11 +13110,11 @@ function appendPerDoseToDoseReviews_EXACT(){
       "5Max": indicesByExactName(norm, "5max")[0] ?? -1
     };
 
-    function parseNum(x){
-      if (x == null) return null;
-      const n = Number(String(x).trim());
-      return Number.isFinite(n) ? n : null;
-    }
+//     function parseNum(x){
+//       if (x == null) return null;
+//       const n = Number(String(x).trim());
+//       return Number.isFinite(n) ? n : null;
+//     }
     function parseRowTimestamp(tsText) {
       if (!tsText) return null;
       const t = String(tsText).trim();
@@ -12664,6 +13169,8 @@ function appendPerDoseToDoseReviews_EXACT(){
       }
 
       // Singles
+      
+//      BOOKMARK DEC2025
       metrics["Score"]    = (singleIdxs["Score"]>=0) ? parseNum(tds[singleIdxs["Score"]]?.textContent) : null;
       metrics["Min"]      = (singleIdxs["Min"]>=0) ? parseNum(tds[singleIdxs["Min"]]?.textContent) : null;
       metrics["Max"]      = (singleIdxs["Max"]>=0) ? parseNum(tds[singleIdxs["Max"]]?.textContent) : null;
@@ -13160,7 +13667,8 @@ function _appendPerDoseToDoseReviews(){
 // ──────────────────────────────────────────────────────────────────────────────
 (function(){
   // Columns we will extract (must match data-col in main table rows)
-  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"]; const ALL_COLS = ["Time","Since Dose", ...NUM_COLS];
+  const NUM_COLS = ["Rush","Mood","Social","Energy","Focus","Anxiety","Impair","Score","Max","Min","Weighted","5Max"];
+  const ALL_COLS = ["Time","Since Dose", ...NUM_COLS];
 
   // Attempt to find the main table reliably
   function getMainTable(){
@@ -14678,14 +15186,14 @@ function applyUnlockedAndAddStay(){
 //     anxiety: [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00],
 //     impair:  [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00],
 //     __default: [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00]
-    rush:    [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
-    mood:    [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
-    social:  [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
-    energy:  [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
-    focus:   [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
-    anxiety: [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
-    impair:  [8.00,4.00,2.00,1.00,0.50,0.25,0.00],
-    __default: [8.00,4.00,2.00,1.00,0.50,0.25,0.00]
+    rush:    [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25],
+    mood:    [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25],
+    social:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25],
+    energy:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25],
+    focus:   [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25],
+    anxiety: [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25],
+    impair:  [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25],
+    __default: [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25]
   };
 
   // Per-metric labels for Short Mode
@@ -14697,13 +15205,13 @@ function applyUnlockedAndAddStay(){
 //   focus: { 6.00: 'Laser', 5.00: 'Wired', 4.00: 'Obsessive', 3.00: 'Strong Focus', 2.00: 'Locked/Fixated', 1.00: 'Some/Attentive', 0.00: 'None/Scattered', 0.50: '+' },
 //   anxiety: { 6.00: 'Despair', 5.00: 'Panic', 4.00: 'Paranoia + Physical', 3.00: 'Adverse + Affecting', 2.00: 'Distracting', 1.00: 'Ignorable', 0.00: 'None', 0.50: '+' },
 //   impair: { 6.00: 'Damage', 5.00: 'Crippled', 4.00: 'Impacting Behaviour', 3.00: 'Affected + Adverse', 2.00: 'Hindrance', 1.00: 'Minor/Side', 0.00: 'None', 0.50: '+' },
-  rush: { 8.00: 'Extreme', 4.00: 'Obvious', 2.00: 'Clear', 1.00: 'Yes', 0.50: 'Maybe', 0.00: 'None', 0.25: '+', 0.75: '++', 1.50: '+++' },
-  mood: { 8.00: 'Autopilot', 4.00: 'Euphoric', 2.00: 'Good', 1.00: 'Distinct', 0.50: 'Thought', 0.00: 'No Change', 0.25: '+', 0.75: '++', 1.50: '+++' },
-  social: { 8.00: 'Disinhibited', 4.00: 'Outgoing', 2.00: 'Natural', 1.00: 'Push', 0.50: 'Want', 0.00: 'Avoidant', 0.25: '+', 0.75: '++', 1.50: '+++' },
-  energy: { 8.00: 'Manic', 4.00: 'Hyperactive', 2.00: 'Energetic', 1.00: 'Moderate', 0.50: 'Some', 0.00: 'Low', 0.25: '+', 0.75: '++', 1.50: '+++' },
-  focus: { 8.00: 'Wired', 4.00: 'Obsessive', 2.00: 'Focused', 1.00: 'Concentrating', 0.50: 'Some', 0.00: 'Low', 0.25: '+', 0.75: '++', 1.50: '+++' },
-  anxiety: { 8.00: 'Panic', 4.00: 'Fear', 2.00: 'Hindered', 1.00: 'Distracting', 0.50: 'Forgettable', 0.00: 'Negligible', 0.25: '+', 0.75: '++', 1.50: '+++' },
-  impair: { 8.00: 'Damage', 4.00: 'Crippled', 2.00: 'Impacting', 1.00: 'Affecting', 0.50: 'Distracting', 0.00: 'None', 0.25: '+', 0.75: '++', 1.50: '+++' },
+  rush: { 6.00: 'Overwhelming', 5.00: 'Extreme', 4.00: 'Intense/Frantic', 3.00: 'Clear/Good', 2.00: 'Significant/Certain', 1.00: 'Maybe/Mild', 0.00: 'None', 0.50: '+', 0.25: '+' },
+  mood: { 6.00: 'Hindsight', 5.00: 'Euphoric', 4.00: 'Obvious/Outgoing', 3.00: 'Clear/Good', 2.00: 'Distinct/Significant', 1.00: 'Noticed/Some', 0.00: 'No Change', 0.50: '+', 0.25: '+' },
+  social: { 6.00: 'Autopilot', 5.00: 'Disinhibited', 4.00: 'Flow/Empathy', 3.00: 'Sociable/Natural', 2.00: 'Desire/Urge', 1.00: 'Push/Capabkle', 0.00: 'No/Avoidant', 0.50: '+', 0.25: '+' },
+  energy: { 6.00: 'Overdrive', 5.00: 'Manic', 4.00: 'Hyperactive', 3.00: 'High/Energetic', 2.00: 'Moderate/Push', 1.00: 'Some/Alert', 0.00: 'No/Tired', 0.50: '+', 0.25: '+' },
+  focus: { 6.00: 'Laser', 5.00: 'Wired', 4.00: 'Obsessive', 3.00: 'Strong Focus', 2.00: 'Locked/Fixated', 1.00: 'Some/Attentive', 0.00: 'None/Scattered', 0.50: '+', 0.25: '+' },
+  anxiety: { 6.00: 'Despair', 5.00: 'Panic', 4.00: 'Paranoia/Physical', 3.00: 'Affecting/Feel', 2.00: 'Distract/Constant', 1.00: 'Ignorable', 0.00: 'None', 0.50: '+', 0.25: '+' },
+  impair: { 6.00: 'Damage', 5.00: 'Crippled', 4.00: 'Severe', 3.00: 'Impacting/Behaviour', 2.00: 'Hinder/Affect', 1.00: 'Minor/Side', 0.00: 'None', 0.50: '+', 0.25: '+' },
   };
 
   const shortModeSelections = Object.create(null);
@@ -14711,11 +15219,11 @@ function applyUnlockedAndAddStay(){
   function getShortModeValuesForMetric(metric){
     try{
       const v = SHORT_MODE_VALUES[metric];
-      return Array.isArray(v) ? v : (SHORT_MODE_VALUES.__default || [8.00,4.00,2.00,1.00,0.50,0.25,0.00]);
+      return Array.isArray(v) ? v : (SHORT_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25]);
     }catch(e){
       console.warn(e);
 //       return SHORT_MODE_VALUES.__default || [6.00,5.50,5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00];
-      return SHORT_MODE_VALUES.__default || [8.00,4.00,2.00,1.00,0.50,0.25,0.00];
+      return SHORT_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'',0.50,0.25];
     }
   }
 
@@ -15826,10 +16334,11 @@ btn.classList.add('metric-btn');
   window.applyModeButtonSizeTo = applyModeButtonSizeTo;
 })();
 </script>
-
-<!-- Backfill Control (2025/11/01 13:25:00) -->
 <button id="backfillControlBtn" type="button">Backfill All (5/15/60)</button>
+
 <script>
+
+// <!-- Backfill Control (2025/11/01 13:25:00) -->
 (() => {
   'use strict';
   const CFG = {
@@ -16059,7 +16568,9 @@ btn.classList.add('metric-btn');
 })();
 </script>
 
-<!-- === Metric Button Order Preferences (auto-injected, 2025/11/05 08:00:00 AEST) === -->
+<!-- 
+=== Metric Button Order Preferences (auto-injected, 2025/11/05 08:00:00 AEST) ===
+ -->
 <style>
   #btnOrderGear{position:fixed; right:68px; bottom:18px; z-index:9999; width:42px; height:42px; border-radius:50%;
     border:1px solid rgba(0,0,0,0.2); background:#fff; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,0.2);
@@ -16099,7 +16610,9 @@ btn.classList.add('metric-btn');
   </div>
 </div>
 <button id="btnOrderGear" title="Button Order">⚙︎</button>
+
 <script>
+
 (function(){
   // Parse helper: supports numbers and empty-string token '' for gaps
   function parseList(str){
@@ -16645,7 +17158,11 @@ btn.classList.add('metric-btn');
   </div>
 </div>
 
+<!-- 
+</script>
+ -->
 <script>
+
 // Festival Mode Script
 (function(){
   'use strict';
