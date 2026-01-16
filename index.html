@@ -78,6 +78,26 @@ CONFIG.notesScoring = Object.assign({
   combineMode: "sum",
   // Optional clamp, e.g. {min: -10, max: 10}
   clamp: null,
+  // Hidden token scoring (CapsTokens) feeding into GS via Notes delta.
+  // Tokens are matched as: starts with a capital letter and is bounded by whitespace or string end.
+  // Configure per-token levels in tokenLevels, e.g. { Positive: 'high', Negative: 'low' }.
+  tokenScoring: {
+    enabled: true,
+    // Baseline numeric score used when a token has no explicit level (and for delta).
+    baselineScore: 1.00,
+    // Numeric scores for low/baseline/high.
+    levelScores: { low: 0.50, baseline: 1.00, high: 2.00 },
+    // Map token -> 'low' | 'baseline' | 'high' (case-sensitive token keys).
+    tokenLevels: {},
+    // If both tokens appear, treat Negative as dominant (suppresses Positive).
+    negativeWinsOverPositive: true,
+    // If true, only count one instance of each token per row (recommended).
+    dedupePerRow: true,
+    // Clamp token-derived delta, e.g. {min:-5,max:5}, or null.
+    clamp: null
+  },
+  // Hidden per-button waiting score (dataset only; not rendered).
+  waitingScoreDefault: 1.00,
   // Rules: each rule has {match: /regex/i OR "string", points: number}
   // Example starter rules (edit freely):
   rules: [
@@ -91,10 +111,15 @@ function computeGoodSumNotesDelta(row){
   try{
     const cfg = (window.CONFIG && CONFIG.notesScoring) ? CONFIG.notesScoring : null;
     if (!cfg || !cfg.enabled) return 0;
+
     const srcFields = Array.isArray(cfg.sourceFields) && cfg.sourceFields.length ? cfg.sourceFields : ["notes"];
     const text = srcFields.map(k => (row && row[k] != null) ? String(row[k]) : "").join(" ").trim();
     if (!text) return 0;
 
+    // --- Helper: round to 2dp (as requested) ---
+    const round2 = (n)=> Math.round((Number(n) || 0) * 100) / 100;
+
+    // --- 1) Rule-based scoring (existing behaviour) ---
     let acc = 0;
     const mode = String(cfg.combineMode || "sum").toLowerCase();
     const rules = Array.isArray(cfg.rules) ? cfg.rules : [];
@@ -114,19 +139,76 @@ function computeGoodSumNotesDelta(row){
       }
     }
 
+    // --- 2) Hidden token scoring feeding into GS via delta ---
+    // Tokens: start with capital letter, then alnum/underscore, bounded by whitespace or end.
+    // This matches your note-button style tokens (e.g. Positive, Negative, Last5Mins, DarkRoom).
+    const tcfg = cfg.tokenScoring || null;
+    if (tcfg && tcfg.enabled){
+      const baseline = Number(tcfg.baselineScore);
+      const levelScores = (tcfg.levelScores && typeof tcfg.levelScores === 'object') ? tcfg.levelScores : {};
+      const tokenLevels = (tcfg.tokenLevels && typeof tcfg.tokenLevels === 'object') ? tcfg.tokenLevels : {};
+      const scoreForLevel = (lvl)=>{
+        const s = Number(levelScores[lvl]);
+        return isFinite(s) ? s : (isFinite(baseline) ? baseline : 1.0);
+      };
+
+      const tokenRe = /(?:^|\s)([A-Z][A-Za-z0-9_]*)(?=\s|$)/g;
+      const found = [];
+      let m;
+      while ((m = tokenRe.exec(text)) !== null){
+        const tok = m[1];
+        if (tok) found.push(tok);
+      }
+
+      // Optional de-dup (recommended for tags)
+      const tokens = (tcfg.dedupePerRow) ? Array.from(new Set(found)) : found;
+
+      // Dominance: if both Positive and Negative appear, suppress Positive when configured.
+      if (tcfg.negativeWinsOverPositive){
+        const hasNeg = tokens.includes('Negative');
+        const hasPos = tokens.includes('Positive');
+        if (hasNeg && hasPos){
+          for (let i=tokens.length-1;i>=0;i--){
+            if (tokens[i] === 'Positive') tokens.splice(i,1);
+          }
+        }
+      }
+
+      let tokenDelta = 0;
+      for (const tok of tokens){
+        const lvl = tokenLevels[tok] || 'baseline';
+        const s = scoreForLevel(lvl);
+        if (!isFinite(s)) continue;
+        const b = isFinite(baseline) ? baseline : 1.0;
+        tokenDelta += (s - b);
+      }
+
+      if (tcfg.clamp && typeof tcfg.clamp === 'object'){
+        const mn = Number(tcfg.clamp.min);
+        const mx = Number(tcfg.clamp.max);
+        if (isFinite(mn)) tokenDelta = Math.max(mn, tokenDelta);
+        if (isFinite(mx)) tokenDelta = Math.min(mx, tokenDelta);
+      }
+
+      if (isFinite(tokenDelta)) acc += tokenDelta;
+    }
+
+    // --- Clamp + finalise ---
     if (cfg.clamp && typeof cfg.clamp === "object"){
       const mn = Number(cfg.clamp.min);
       const mx = Number(cfg.clamp.max);
       if (isFinite(mn)) acc = Math.max(mn, acc);
       if (isFinite(mx)) acc = Math.min(mx, acc);
     }
+
     if (!isFinite(acc)) acc = 0;
-    return acc;
+    return round2(acc);
   } catch(e){
     console.warn("computeGoodSumNotesDelta failed:", e);
     return 0;
   }
 }
+
 
 function applyGoodSumComposed(row){
   try{
@@ -574,7 +656,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 </style>
 <meta charset="utf-8"/>
 <link href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E" rel="icon"/>
-<title>statpack v1.70 r3200</title>
+<title>statpack v1.70.2 r3206</title>
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 <!-- 
 BOOKMARK DEC2025 CALCULATION FORMULA 5MAX
@@ -760,6 +842,90 @@ BOOKMARK FOR SCORING WINDOW SIZES
 <div id="columnChooserList"></div>
 </div>
 <button id="colChooserToggle" style="position:fixed; top:70px; right:20px; z-index:10000;">Columns</button>
+
+<!-- STS: UI map / help popup (auto-injected) -->
+<button id="stsHelpBtn" type="button" style="position:fixed; top:70px; right:164px; z-index:10000;">Help</button>
+<div id="stsHelpModal" style="display:none; position:fixed; inset:0; z-index:10000;">
+  <div id="stsHelpBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,0.45);"></div>
+  <div id="stsHelpCard" style="position:relative; margin:6vh auto; width:min(1100px,95vw); max-height:88vh; overflow:auto; background:var(--card,#fff); color:var(--text,#111); border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.25); padding:16px; border:2px solid var(--brand,#007aff);">
+    <div class="sts-drag-handle" style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;">
+      <h2 style="margin:0;">UI map</h2>
+      <button id="stsHelpCloseBtn" type="button">Close</button>
+    </div>
+    <div id="stsHelpBody" style="font-size:13px; line-height:1.45;">
+      <h3 style="margin:10px 0 6px 0;">Summaries</h3>
+      <ul>
+        <li><b>Summary 5m / 15m / 60m</b>: opens the rolling summary popup for the selected window via <code>setSummaryWindowAndOpen(min)</code>.</li>
+        <li><b>Backfill All (5/15/60)</b>: inserts rolling-summary rows into the Summary tables using the main log table as the source (<code>#backfillControlBtn</code>).</li>
+      </ul>
+
+      <h3 style="margin:10px 0 6px 0;">Modes</h3>
+      <ul>
+        <li><b>Unlocked Mode</b>: opens <code>#unlockedModeModal</code> (expanded value grid / labels).</li>
+        <li><b>Rush Mode</b>: opens <code>#rushModeModal</code> (fast multi-metric selection).</li>
+        <li><b>Fast / New / Short / Festival</b>: mode-specific entry modals (each writes values + labels into the main entry inputs, then optionally adds a row).</li>
+      </ul>
+
+      <h3 style="margin:10px 0 6px 0;">Averages &amp; analysis</h3>
+      <ul>
+        <li><b>Sliding Average</b>: <code>openSlidingAverage()</code> shows a moving-window average table (<code>#slidingAvgModal</code>).</li>
+        <li><b>Rolling Average</b>: <code>openRollingAverage()</code> runs the rolling-average view (separate from the Sliding Average modal).</li>
+        <li><b>Running Average</b>: live/accumulating average view (see <code>openRunningAverage</code> / related sections).</li>
+        <li><b>Statistical Analysis</b>: summary stats modal; hourly and daily variants use 60-minute buckets and date grouping.</li>
+      </ul>
+
+      <h3 style="margin:10px 0 6px 0;">Auto</h3>
+      <ul>
+        <li><b>Auto</b>: toggles auto-summary generation (<code>toggleAutoSummary()</code>).</li>
+        <li><b>Auto Entries</b>: view/control of automatic entry creation.</li>
+        <li><b>Auto Sliders A/B/A2/C/D</b>: quick-review modals, typically showing recent rows with different filters (auto vs non-auto, last-N, etc.).</li>
+      </ul>
+
+      <h3 style="margin:10px 0 6px 0;">Reviews &amp; rated popups</h3>
+      <ul>
+        <li><b>Dose Reviews</b>: <code>openDoseReviews()</code> modal summarising dose windows and dose-event derived summaries.</li>
+        <li><b>All Rated 5-Minute</b>: bucketed view of rated rows by 5-minute windows.</li>
+        <li><b>All Rated (Rows)</b> / <b>All Rated /10</b> / <b>All Rated 5m /10</b>: aggregate views in different scales / bucket sizes.</li>
+        <li><b>Rated Popup</b>: on-demand rated-row viewer (<code>#ratedPopupModal</code>).</li>
+      </ul>
+
+      <h3 style="margin:10px 0 6px 0;">Scoring toggles</h3>
+      <ul>
+        <li><b>Adjust dual-select (−0.5)</b>: when enabled (<code>#dualSelToggle</code>), dual selections apply a −0.5 adjustment per the CONFIG setting.</li>
+        <li><b>GS from Notes</b>: button <i>Recompute GS from Notes</i> recomputes the GS column using <code>CONFIG.notesScoring</code>.</li>
+      </ul>
+
+      <p style="margin-top:12px; opacity:0.85;">Tip: this popup is draggable by the header.</p>
+    </div>
+  </div>
+</div>
+<script id="sts-help-js">
+(function(){
+  'use strict';
+  function openHelp(){
+    const m = document.getElementById('stsHelpModal');
+    if (m) m.style.display = 'block';
+  }
+  function closeHelp(){
+    const m = document.getElementById('stsHelpModal');
+    if (m) m.style.display = 'none';
+  }
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = document.getElementById('stsHelpBtn');
+    const closeBtn = document.getElementById('stsHelpCloseBtn');
+    const backdrop = document.getElementById('stsHelpBackdrop');
+    if (btn) btn.addEventListener('click', openHelp);
+    if (closeBtn) closeBtn.addEventListener('click', closeHelp);
+    if (backdrop) backdrop.addEventListener('click', closeHelp);
+    document.addEventListener('keydown', (ev)=>{
+      if (ev.key === 'Escape') closeHelp();
+    });
+  });
+  window.openSTSHelp = openHelp;
+  window.closeSTSHelp = closeHelp;
+})();
+</script>
+<!-- /STS: UI map / help popup -->
 <div class="summary-controls">
 <button id="summary60Btn" onclick="setSummaryWindowAndOpen(60)">Summary 60m</button>
 <button id="unlockedModeBtn" title="Open Unlocked Mode" type="button">Unlocked Mode</button>
@@ -1045,6 +1211,15 @@ const CONFIG = Object.freeze({
       'Weighted': 10,
       '5Max': 10
     },
+    timeShade: {
+      enabled: true,
+      // Columns to shade by time-of-day or duration
+      cols: ['Timestamp','Since','Elapsed'],
+      // 23:59:59 = 86,399 seconds (cap for full intensity)
+      capSeconds: 14400,
+      // Deep light blue (matches iOS-ish blue)
+      rgb: [0, 122, 255]
+    },
   /* --- dual-selection behaviour toggle --- */
   dualSelectionAdjust: { enabled: false, delta: 0.5 },
 
@@ -1058,7 +1233,7 @@ const CONFIG = Object.freeze({
 labels: {
   labelMappings: {
   rush: { 6.00: 'Overwhelming', 5.50: 'Manic', 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Intense', 3.50: 'Euphoric', 3.00: 'Euphoric', 2.50: 'Energetic', 2.00: 'Distinct', 1.50: 'Feel', 1.00: 'Mental', 0.55: 'Noticed', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'No Rush', 0.40: '++', 0.20: '+' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Autopilot', 4.50: 'Euphoria', 4.00: 'Obvious', 3.50: 'Very Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Positive', 1.00: 'Noticed', 0.55: 'Maybe', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'No Change', 0.40: '++', 0.20: '+' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Euphoric', 4.00: 'Obvious', 3.50: 'Very Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Positive', 1.00: 'Noticed', 0.55: 'Maybe', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'No Change', 0.40: '++', 0.20: '+' },
   social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Empathetic', 4.00: 'Outgoing', 3.50: 'Empathy', 3.00: 'Flowing', 2.50: 'Push', 2.00: 'Sociable', 1.50: 'Want', 1.00: 'Noticed', 0.55: 'Think', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'No/Avoidant', 0.40: '++', 0.20: '+' },
   energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Wired', 4.00: 'Hyperactive', 3.50: 'Active', 3.00: 'Energetic', 2.50: 'Pushed', 2.00: 'Increased', 1.50: 'Some', 1.00: 'Noticed', 0.55: 'Functional', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'None/Tired', 0.40: '++', 0.20: '+' },
   focus: { 6.00: 'Super', 5.50: 'Wired', 5.00: 'Laser', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Obsessive', 3.00: 'Focused', 2.50: 'Motivated', 2.00: 'Improved', 1.50: 'Some', 1.00: 'Some', 0.55: 'Effort', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'None/Scattered', 0.40: '++', 0.20: '+' },
@@ -1081,7 +1256,7 @@ labels: {
     }
 , rapidLabels: {
   rush: { 6.00: 'Overwhelming', 5.50: 'Manic', 5.00: 'Extreme', 4.50: 'Frenzied', 4.00: 'Intense', 3.50: 'Euphoric', 3.00: 'Euphoric', 2.50: 'Energetic', 2.00: 'Distinct', 1.50: 'Feel', 1.00: 'Mental', 0.55: 'Noticed', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'No Rush', 0.40: '++', 0.20: '+' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Autopilot', 4.50: 'Euphoria', 4.00: 'Obvious', 3.50: 'Very Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Positive', 1.00: 'Noticed', 0.55: 'Maybe', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'No Change', 0.40: '++', 0.20: '+' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Euphoric', 4.00: 'Obvious', 3.50: 'Very Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Positive', 1.00: 'Noticed', 0.55: 'Maybe', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'No Change', 0.40: '++', 0.20: '+' },
   social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Empathetic', 4.00: 'Outgoing', 3.50: 'Empathy', 3.00: 'Flowing', 2.50: 'Push', 2.00: 'Sociable', 1.50: 'Want', 1.00: 'Noticed', 0.55: 'Think', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'No/Avoidant', 0.40: '++', 0.20: '+' },
   energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Wired', 4.00: 'Hyperactive', 3.50: 'Active', 3.00: 'Energetic', 2.50: 'Pushed', 2.00: 'Increased', 1.50: 'Some', 1.00: 'Noticed', 0.55: 'Functional', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'None/Tired', 0.40: '++', 0.20: '+' },
   focus: { 6.00: 'Super', 5.50: 'Wired', 5.00: 'Laser', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Obsessive', 3.00: 'Focused', 2.50: 'Motivated', 2.00: 'Improved', 1.50: 'Some', 1.00: 'Some', 0.55: 'Effort', 0.75: '+++', 0.50: '++', 0.25: '+', 0.00: 'None/Scattered', 0.40: '++', 0.20: '+' },
@@ -1180,8 +1355,47 @@ function tagRowCells(tr) {
   });
 }
 
+
+const TIME_SHADE = CONFIG.ui.timeShade || null;
+
+function timeShadeBg(colName, value) {
+  if (!TIME_SHADE || TIME_SHADE.enabled === false) return '';
+  const cols = Array.isArray(TIME_SHADE.cols) ? TIME_SHADE.cols : ['Timestamp','Since','Elapsed'];
+  if (!cols.includes(colName)) return '';
+
+  const capSeconds = Number.isFinite(Number(TIME_SHADE.capSeconds)) ? Number(TIME_SHADE.capSeconds) : 14400;
+  const rgb = (Array.isArray(TIME_SHADE.rgb) && TIME_SHADE.rgb.length === 3) ? TIME_SHADE.rgb : [0, 122, 255];
+
+  let sec = null;
+
+  if (colName === 'Timestamp') {
+    const d = (typeof SP !== 'undefined' && SP.parseStamp) ? SP.parseStamp(value) : null;
+    if (!d) return '';
+    sec = (d.getHours() * 3600) + (d.getMinutes() * 60) + d.getSeconds();
+  } else {
+    // Accept any hour width: H:MM:SS, HH:MM:SS, 123:45:56, etc.
+    const s = String(value ?? '').trim();
+    const m = s.match(/^(\d+):(\d{2}):(\d{2})$/);
+    if (!m) return '';
+    const h = Number(m[1]), mi = Number(m[2]), se = Number(m[3]);
+    if (![h, mi, se].every(Number.isFinite)) return '';
+    sec = (h * 3600) + (mi * 60) + se;
+  }
+
+  if (!Number.isFinite(sec)) return '';
+  const clamped = Math.min(Math.max(sec, 0), capSeconds);
+  const opacity = capSeconds > 0 ? (clamped / capSeconds) : 0;
+  return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${opacity})`;
+}
+
 function cellBgFor(colName, value) {
   if (NO_SHADE.has(colName)) return '';
+
+  // Special-case time gradient shading (Timestamp / Since / Elapsed)
+  const tbg = timeShadeBg(colName, value);
+  if (tbg) return tbg;
+
+  // Existing numeric shading path (unchanged)
   const num = Number(value);
   if (!Number.isFinite(num)) return '';
   const cap = (SHADE_CAP[colName] !== undefined) ? SHADE_CAP[colName] : 6;
@@ -15397,14 +15611,14 @@ window.applyShortModeAndAdd = function(){
   // Per-metric values for Fast Mode
 //   BOOKMARK FAST MODE LABELS AND VALUES
   const FAST_MODE_VALUES = {
-    rush:    [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50],
-    mood:    [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50],
-    social:  [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50],
-    energy:  [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50],
-    focus:   [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50],
-    anxiety: [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50],
-    impair:  [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50],
-    __default: [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50]
+    rush:    [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50],
+    mood:    [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50],
+    social:  [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50],
+    energy:  [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50],
+    focus:   [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50],
+    anxiety: [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50],
+    impair:  [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50],
+    __default: [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50]
   };
 
   // Fast Mode-specific labels used on buttons and written into the table
@@ -15432,7 +15646,7 @@ window.applyShortModeAndAdd = function(){
   function getValuesForMetric(metric){
     const v = FAST_MODE_VALUES[metric];
 //     return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [6.00,5.00,4.00,3.00,2.00,1.00,0.00,'-----',0.50,-0.50,0.50,-0.50]);
-    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [5.00,4.00,3.00,2.00,1.00,0.00,0.50,0.25,-0.25,-0.50]);
+    return Array.isArray(v) ? v : (FAST_MODE_VALUES.__default || [5.00,4.50,4.00,3.50,3.00,2.50,2.00,1.50,1.00,0.50,0.00,0.50,0.25,-0.25,-0.50]);
     }
 
   function getFastModeLabel(metric, value){
@@ -15849,7 +16063,7 @@ window.applyShortModeAndAdd = function(){
 // BOOKMARK RAPID 2 VALUES
   const mirrorValues = (CONFIG.buttons.rapidValues && Array.isArray(CONFIG.buttons.rapidValues))
     ? CONFIG.buttons.rapidValues.slice()
-    : [5,3,1,0];
+    : [10,9,8,7,6,5,4,3,2,1,0];
 //     : [6,5,4.5,4,3.5,3,2,1,0];
 
   const mirrorMetrics = (CONFIG.buttons.rapidMetrics && Array.isArray(CONFIG.buttons.rapidMetrics))
@@ -17165,7 +17379,7 @@ function captureOnce(){
   // Festival Mode label mappings (per-metric)
   const FESTIVAL_MODE_LABELS = {
   rush: { 6.00: 'Overwhelming', 5.50: 'Manic', 5.00: 'Extreme', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Euphoric', 3.00: 'Energetic', 2.50: 'Physical', 2.00: 'Feel', 1.50: 'Mental', 1.00: 'Noticed', 0.50: 'Minor', 0.00: 'No Rush', 0.40: '+', 0.20: '+', 0.25: '+', 0.75: '+', 5.12: 'Overwhelming', 4.48: 'Extreme', 3.84: 'Very High', 3.24: 'High', 2.56: 'Mid-High', 2.24: 'Moderate', 1.92: 'Low-Mid', 0.96: 'Low', 0.16: 'Minimal' },
-  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Autopilot', 4.50: 'Euphoria', 4.00: 'Obvious', 3.50: 'Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Positive', 1.00: 'Noticed', 0.50: 'Maybe', 0.00: 'No Change', 0.40: '+', 0.20: '+', 0.25: '+', 0.75: '+', 5.12: 'Overwhelming', 4.48: 'Extreme', 3.84: 'Very High', 3.24: 'High', 2.56: 'Mid-High', 2.24: 'Moderate', 1.92: 'Low-Mid', 0.96: 'Low', 0.16: 'Minimal' },
+  mood: { 6.00: 'Autopilot', 5.50: 'Euphoria', 5.00: 'Euphoria', 4.50: 'Euphoric', 4.00: 'Obvious', 3.50: 'Good', 3.00: 'Clear', 2.50: 'Distinct', 2.00: 'Felt', 1.50: 'Positive', 1.00: 'Noticed', 0.50: 'Maybe', 0.00: 'No Change', 0.40: '+', 0.20: '+', 0.25: '+', 0.75: '+', 5.12: 'Overwhelming', 4.48: 'Extreme', 3.84: 'Very High', 3.24: 'High', 2.56: 'Mid-High', 2.24: 'Moderate', 1.92: 'Low-Mid', 0.96: 'Low', 0.16: 'Minimal' },
   social: { 6.00: 'Autopilot', 5.50: 'Disinhibited', 5.00: 'Disinhibited', 4.50: 'Empathetic', 4.00: 'Outgoing', 3.50: 'Empathy', 3.00: 'Ease', 2.50: 'Pushed', 2.00: 'Sociable', 1.50: 'Want', 1.00: 'Noticed', 0.50: 'Think', 0.00: 'No/Avoidant', 0.40: '+', 0.20: '+', 0.25: '+', 0.75: '+', 5.12: 'Overwhelming', 4.48: 'Extreme', 3.84: 'Very High', 3.24: 'High', 2.56: 'Mid-High', 2.24: 'Moderate', 1.92: 'Low-Mid', 0.96: 'Low', 0.16: 'Minimal' },
   energy: { 6.00: 'Overdrive', 5.50: 'Manic', 5.00: 'Manic', 4.50: 'Wired', 4.00: 'Hyperactive', 3.50: 'Active', 3.00: 'Energetic', 2.50: 'Pushed', 2.00: 'Increased', 1.50: 'Some', 1.00: 'Noticed', 0.50: 'Functional', 0.00: 'None/Tired', 0.40: '+', 0.20: '+', 0.25: '+', 0.75: '+', 5.12: 'Overwhelming', 4.48: 'Extreme', 3.84: 'Very High', 3.24: 'High', 2.56: 'Mid-High', 2.24: 'Moderate', 1.92: 'Low-Mid', 0.96: 'Low', 0.16: 'Minimal' },
   focus: { 6.00: 'Super', 5.50: 'Wired', 5.00: 'Laser', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Obsessive', 3.00: 'Focused', 2.50: 'Motivated', 2.00: 'Improved', 1.50: 'Some', 1.00: 'Some', 0.50: 'Effort', 0.00: 'None/Scattered', 0.40: '+', 0.20: '+', 0.25: '+', 0.75: '+', 5.12: 'Overwhelming', 4.48: 'Extreme', 3.84: 'Very High', 3.24: 'High', 2.56: 'Mid-High', 2.24: 'Moderate', 1.92: 'Low-Mid', 0.96: 'Low', 0.16: 'Minimal' },
