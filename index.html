@@ -83,6 +83,8 @@ CONFIG.notesScoring = Object.assign({
   // Configure per-token levels in tokenLevels, e.g. { Positive: 'high', Negative: 'low' }.
   tokenScoring: {
     enabled: true,
+    // Where to read tokens from (independent of rules sourceFields). Default: Notes + Last.
+    sourceFields: ["notes", "customNotes"],
     // Baseline numeric score used when a token has no explicit level (and for delta).
     baselineScore: 1.00,
     // Numeric scores for low/baseline/high.
@@ -112,9 +114,19 @@ function computeGoodSumNotesDelta(row){
     const cfg = (window.CONFIG && CONFIG.notesScoring) ? CONFIG.notesScoring : null;
     if (!cfg || !cfg.enabled) return 0;
 
+    const getText = (fields)=> (Array.isArray(fields) ? fields : []).map(k => (row && row[k] != null) ? String(row[k]) : "").join(" ").trim();
+
+    // Text used for rule-based scoring
     const srcFields = Array.isArray(cfg.sourceFields) && cfg.sourceFields.length ? cfg.sourceFields : ["notes"];
-    const text = srcFields.map(k => (row && row[k] != null) ? String(row[k]) : "").join(" ").trim();
-    if (!text) return 0;
+    const rulesText = getText(srcFields);
+
+    const tcfg = cfg.tokenScoring || null;
+
+    // Token scoring may draw from a different set of fields (Notes + Last by default)
+    const tokenSrcFields = (tcfg && Array.isArray(tcfg.sourceFields) && tcfg.sourceFields.length) ? tcfg.sourceFields : srcFields;
+    const tokenText = getText(tokenSrcFields);
+
+    if (!rulesText && !(tcfg && tcfg.enabled && tokenText)) return 0;
 
     // --- Helper: round to 2dp (as requested) ---
     const round2 = (n)=> Math.round((Number(n) || 0) * 100) / 100;
@@ -130,7 +142,7 @@ function computeGoodSumNotesDelta(row){
       else if (typeof rule.match === "string" && rule.match.trim()) re = new RegExp(rule.match, "i");
       if (!re) continue;
 
-      if (re.test(text)){
+      if (re.test(rulesText)){
         const pts = Number(rule.points || 0);
         if (!isFinite(pts)) continue;
         if (mode === "max") acc = Math.max(acc, pts);
@@ -142,7 +154,6 @@ function computeGoodSumNotesDelta(row){
     // --- 2) Hidden token scoring feeding into GS via delta ---
     // Tokens: start with capital letter, then alnum/underscore, bounded by whitespace or end.
     // This matches your note-button style tokens (e.g. Positive, Negative, Last5Mins, DarkRoom).
-    const tcfg = cfg.tokenScoring || null;
     if (tcfg && tcfg.enabled){
       const baseline = Number(tcfg.baselineScore);
       const levelScores = (tcfg.levelScores && typeof tcfg.levelScores === 'object') ? tcfg.levelScores : {};
@@ -155,7 +166,7 @@ function computeGoodSumNotesDelta(row){
       const tokenRe = /(?:^|\s)([A-Z][A-Za-z0-9_]*)(?=\s|$)/g;
       const found = [];
       let m;
-      while ((m = tokenRe.exec(text)) !== null){
+      while ((m = tokenRe.exec(tokenText)) !== null){
         const tok = m[1];
         if (tok) found.push(tok);
       }
@@ -656,7 +667,7 @@ BOOKMARK LOGTABLE CSS FOR FIXED WIDTH
 </style>
 <meta charset="utf-8"/>
 <link href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27/%3E" rel="icon"/>
-<title>statpack v1.70.2 r3206</title>
+<title>statpack v1.70.3 r3210</title>
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
 <!-- 
 BOOKMARK DEC2025 CALCULATION FORMULA 5MAX
@@ -2380,12 +2391,18 @@ function mergeAppendDedupeSort(existing, incoming){
   return out;
 }
 
+// Token heuristic used by Dose Reviews/segmenting to detect dose-related notes
+function doseToken(s){
+  if (s == null) return false;
+  return /\b(hit|redose|dose|finished|md-?pihp|2me-?pihp|a-?pihp|3f-?pihp|a-?php|a-?pvp|cathinone|meth|mdma|2-?mmc|3-?mmc|4-?mmc|mephedrone|dust|speed|cocaine|crack|thc|weed|alcohol|benzodiazepine|diazepam|alprazolam|bromazolam|lsd)\b/i.test(String(s));
+}
+
 // Helper: determine if a row (log entry) is effectively empty/blank (all key numbers 0/NaN/absent)
 function isNonEmptyLogRow(r){
   if (!r) return false;
 
   // Keep explicit dose markers even if metrics are zero
-  const doseToken = (s) => !!(s && /(hit|redose|dose|finished|md-?pihp|2me-?pihp|a-?pihp|3f-?pihp|a-?php|a-?pvp|cathinone|meth|mdma|2-?mmc|3-?mmc|4-?mmc|mephedrone|dust|speed|cocaine|crack|thc|weed|alcohol|benzodiazepine|diazepam|alprazolam|bromazolam|lsd)/i.test(String(s)));
+  const doseToken = (s) => !!(s && /\b(hit|redose|dose|finished|md-?pihp|2me-?pihp|a-?pihp|3f-?pihp|a-?php|a-?pvp|cathinone|meth|mdma|2-?mmc|3-?mmc|4-?mmc|mephedrone|dust|speed|cocaine|crack|thc|weed|alcohol|benzodiazepine|diazepam|alprazolam|bromazolam|lsd)\b/i.test(String(s)));
   if ((r.drug && String(r.drug).trim() !== '') || doseToken(r.notes) || doseToken(r.info)) {
     return true;
   }
@@ -2598,6 +2615,17 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <!-- removed fixed-position block for summary buttons (replaced by .summary-controls) -->
+
+<script>
+(function(){
+  window.CFG = window.CFG || {
+    mainTableSelector: '#logTable',
+    tsHeaderNames: ['Timestamp','Time'],
+    windowsMin: [1,5,15,60],
+    summaryTableByMin: {1:'autoSliderATable',5:'summary5Table',15:'summary15Table',60:'summary60Table'}
+  };
+})();
+</script>
 <script>
 // === Summary Core (revised to read ONLY from main table) ===
 
@@ -2828,9 +2856,7 @@ function computeCompositeFromMeans(M){
   const btn = document.getElementById('backfillBtn');
   if (btn){
     btn.addEventListener('click', function(ev){
-      if (typeof /* legacy backfill implementation superseded on 2025/10/31 START */
-window.backfillAll === 'function') window.backfillAll(ev);
-/* legacy backfill implementation superseded on 2025/10/31 END */
+      if (typeof window.backfillAll === 'function') window.backfillAll(ev);
     });
   }
 });
@@ -2843,15 +2869,18 @@ function appendSummaryRowToTable(tableId, d, M, C, opts){
 
   // Skip if summary is empty/blank
   if (!isNonEmptySummary(M, C)) { return; }
-const table = document.getElementById(tableId);
+  const table = document.getElementById(tableId);
   if (!table) return;
-  const tbody = table.querySelector('tbody'); if (!tbody) return;
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
   const suffix = (opts && opts.labelSuffix) ? opts.labelSuffix : "";
+
   const row = [
     formatMinuteLabel(d) + suffix,
     M?.rush, M?.mood, M?.social, M?.energy, M?.focus, M?.anxiety, M?.impair,
     C?.score, C?.max, C?.min, C?.weighted, C?.fiveMax
   ];
+
   const tr = document.createElement("tr");
   tr.innerHTML = row.map((v,i)=>{
     const name = SUMMARY_COLUMNS[i];
@@ -2862,6 +2891,7 @@ const table = document.getElementById(tableId);
     const val = isNum ? num.toFixed(2) : (v ?? '');
     return `<td${bg?` style="background-color:${bg};"`:''}>${val}</td>`;
   }).join("");
+
   // Tooltips for Max/Min (percent of 10)
   const cells = tr.children;
   const idxMax = SUMMARY_COLUMNS.indexOf('Max');
@@ -2946,7 +2976,6 @@ function ensureSummaryPopup(){
   const controls = document.createElement("div");
 
   const exportBtn = document.createElement("button");
-exportBtn
   exportBtn.textContent = "Export CSV";
   exportBtn.onclick = exportPopupCSV;
 
@@ -2957,7 +2986,6 @@ autoBtn
   autoBtn.onclick = toggleAutoSummary;
 
   const closeBtn = document.createElement("button");
-closeBtn
   closeBtn.textContent = "×";
   closeBtn.style.marginLeft = "8px";
   closeBtn.onclick = ()=>popup.remove();
@@ -3137,7 +3165,9 @@ window.toggleAutoSummary = toggleAutoSummary;
         // Ensure width/spacing remains tidy but do not alter colours
         btn.style.margin = '0';
         row.appendChild(btn);
-  });
+      });
+    });
+
   });
 
 
@@ -3154,7 +3184,7 @@ window.toggleAutoSummary = toggleAutoSummary;
     if (visible) h.delete(col); else h.add(col);
     const arr = Array.from(h);
     saveHidden(arr);
-    const table = getMainTable();
+    const table = (typeof window.STS_COLUMN_VIS === 'object' && window.STS_COLUMN_VIS && typeof window.STS_COLUMN_VIS.getMainTable === 'function') ? window.STS_COLUMN_VIS.getMainTable() : (document.getElementById('logTable') || document.getElementById('mainLogTable'));
     applyHidden(table, arr);
   };
 
@@ -3481,11 +3511,9 @@ function snapshotWithExtras(){
     head.innerHTML = `<strong>Statistical Analysis (60m)</strong>`;
     const controls = document.createElement("div");
     const exportBtn = document.createElement("button");
-exportBtn
     exportBtn.textContent = "Export CSV";
     exportBtn.onclick = exportStatHourCSV;
     const closeBtn = document.createElement("button");
-closeBtn
     closeBtn.textContent = "×";
     closeBtn.style.marginLeft = "8px";
     closeBtn.onclick = ()=>popup.remove();
@@ -3723,7 +3751,6 @@ closeBtn
     'Anxiety','Anxiety Label',
     'Impair','Impair Label'
   ];
-
   function ensureSignificant5mPopup(){
     let popup = document.getElementById("significant5mPopup");
     if (popup) return popup;
@@ -3739,11 +3766,9 @@ closeBtn
     head.innerHTML = `<strong>Summary Significant 5m</strong>`;
     const controls = document.createElement("div");
     const exportBtn = document.createElement("button");
-exportBtn
     exportBtn.textContent = "Export CSV";
     exportBtn.onclick = exportSignificant5mCSV;
     const closeBtn = document.createElement("button");
-closeBtn
     closeBtn.textContent = "×";
     closeBtn.style.marginLeft = "8px";
     closeBtn.onclick = ()=>popup.remove();
@@ -4052,20 +4077,21 @@ closeBtn
     try{
       var tbl = document.getElementById(tblId);
       if(!tbl) return;
-      var ths = Array.from(tbl.querySelectorAll('thead th')).map(th=>th.textContent.trim());
-      // Ensure headers include TotalScore/TotalWeighted (already patched in thead)
       var tbody = tbl.querySelector('tbody');
       if(!tbody) return;
+      // NOTE: This hook is intentionally conservative; it only reads cells.
       Array.from(tbody.querySelectorAll('tr')).forEach(function(tr){
         var data = {};
         Array.from(tr.children).forEach(function(td){
           var col = td.getAttribute('data-col') || td.textContent.trim();
-          var val = parseFloat(td.getAttribute('data-value')||td.textContent)||NaN;
-          data[col] = val;
-  });
+          var raw = td.getAttribute('data-value') || td.textContent;
+          var val = parseFloat(raw);
+          data[col] = Number.isFinite(val) ? val : NaN;
+        });
+        void data;
+      });
     }catch(e){}
   }
-  // Run after openAutoSlider* calls by hooking them lightly (no-op safe)
   ['autoSliderATable','autoSliderBTable','autoSliderCTable','autoSliderDTable'].forEach(function(id){
     try{ postfillTotalsInTable(id); }catch(e){}
   });
@@ -4351,21 +4377,15 @@ Tick to show a column. Untick to hide. This uses the same setting as the Columns
       if (!metricTitleEl) return;
       const metric = metricTitleEl.textContent.trim().toLowerCase();
       col.querySelectorAll('button').forEach(btn => {
-        // Expect formats like "3: High" or "3 High" or just "3"
-        const raw = btn.textContent.trim();
-        // Try to extract leading numeric
-        let m = raw.match(/^(-?\d+(?:\.\d+)?)/);
-        let valueStr = m ? m[1] : (btn.dataset && btn.dataset.value ? String(btn.dataset.value) : '');
+        const raw = (btn.textContent || '').trim();
+        const m = raw.match(/^(-?\d+(?:\.\d+)?)/);
+        const valueStr = m ? m[1] : ((btn.dataset && btn.dataset.value) ? String(btn.dataset.value) : '');
         if (!valueStr) return;
         const lbl = getLabel(metric, valueStr);
-        // Keep numeric + label per user's instruction (do NOT hide numbers)
-        if (lbl) {
-          btn.textContent = `${valueStr}: ${lbl}`;
-        } else {
-          btn.textContent = `${valueStr}`;
-        }
-        btn.dataset.value = valueStr; // ensure stored
-  });
+        btn.textContent = lbl ? `${valueStr}: ${lbl}` : `${valueStr}`;
+        if (btn.dataset) btn.dataset.value = valueStr;
+      });
+    });
   }
 
   // Wrap original buildButtons so we can re-label after render without touching core logic
@@ -4539,7 +4559,8 @@ Tick to show a column. Untick to hide. This uses the same setting as the Columns
         else if (typeof LABEL_OVERRIDES === 'object' && LABEL_OVERRIDES[metric] && LABEL_OVERRIDES[metric].hasOwnProperty(v)) source = 'defaultOverride';
         else if (labelMappings && labelMappings[metric] && labelMappings[metric].hasOwnProperty(v)) source = 'defaultMap';
         rows.push([metric, v, label, source]);
-  });
+      });
+    });
     const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n');
     const blob = new Blob([`version=1\n` + csv], {type:'text/csv'});
     const a = document.createElement('a');
@@ -5282,10 +5303,13 @@ function readCurrentSelections(){
     return {Rush:0,Mood:0,Social:0,Energy:0,Focus:0,Anxiety:0,Impair:0,Weighted:0,Score5:0};
   }
 
-
+  }
+  // Expose for other modules (idempotent)
+  if (!window.readCurrentSelections) window.readCurrentSelections = readCurrentSelections;
+})();
 </script>
 <script>
-function(){
+(function(){
   function setDToLast3(){
     var d = document.getElementById('autoSliderDModal');
     if (!d) return;
@@ -5306,7 +5330,7 @@ function(){
   } else {
     setDToLast3();
   }
-}();
+})();
 </script>
 <!-- STS: Buttons (auto-injected) -->
 <div id="sts-roaming-buttons" style="padding:8px; display:flex; gap:8px; flex-wrap:wrap;">
@@ -7595,7 +7619,6 @@ document.addEventListener('click', function(ev){
   function ensureRunningAverageButton(){
     if (document.getElementById('runningAverageBtn')) return;
     var btn = document.createElement('button');
-btn
     btn.id = 'runningAverageBtn';
     btn.type = 'button';
     btn.textContent = 'Running Average';
@@ -7612,7 +7635,7 @@ btn
       document.querySelector('#controls'),
       document.querySelector('header'),
       document.body
-    ];
+      ];
     for (var i=0;i<targets.length;i++){
       if (targets[i]){ targets[i].appendChild(btn); return; }
     }
@@ -7859,9 +7882,7 @@ window.backfillAll = function(){
       var el = ev.target;
       if (!el || !el.id) return;
       if (el.id === 'backfillBtnGlobal' || el.id === 'backfillBtn' || /^backfillBtn\d+$/.test(el.id)) {
-        if (typeof /* legacy backfill implementation superseded on 2025/10/31 START */
-window.backfillAll === 'function') window.backfillAll();
-/* legacy backfill implementation superseded on 2025/10/31 END */
+        if (typeof window.backfillAll === 'function') window.backfillAll();
       }
     }catch(e){}
   }, true);
@@ -7961,6 +7982,8 @@ window.backfillAll === 'function') window.backfillAll();
 (function(){
   // ---- Config ----
   window.CONFIG = window.CONFIG || {};
+  CONFIG.popups = CONFIG.popups || {};
+  CONFIG.popups = CONFIG.popups || {};
   CONFIG.popups = CONFIG.popups || {};
   CONFIG.popups.fiveMinuteAverager = Object.assign({
     enabled: true,                 // master toggle
@@ -8422,23 +8445,6 @@ function statsOf(arr){
     mode: modeVal
   };
 }
-;
-    const n = arr.length;
-    let sum = 0, lo = +arr[0], hi = +arr[0];
-    for (let i=0;i<n;i++){
-      const v = +arr[i];
-      if (!Number.isFinite(v)) continue;
-      sum += v;
-      if (v < lo) lo = v;
-      if (v > hi) hi = v;
-    }
-    return {
-      avg: sum / n,
-      med: medianOf(arr),
-      min: lo,
-      max: hi
-    };
-  }
 
   // Compute segments from logData
   
@@ -8611,8 +8617,7 @@ function pushSummaryRow(tbody, label, segIdx, segMeta){
     segMeta.drug  || "",
     segMeta.qty   || "",
     segMeta.notes || ""
-  ];
-
+      ];
   for (let i = 0; i < headers.length; i++){
     const td = document.createElement('td');
     td.textContent = cells[i] != null ? String(cells[i]) : '';
@@ -8627,7 +8632,9 @@ function pushSummaryRow(tbody, label, segIdx, segMeta){
   } catch (e) {}
 
   tbody.appendChild(tr);
-}function renderDoseWindows(rows, idxs){
+}
+
+function renderDoseWindows(rows, idxs){
   var html = '<h4 style="margin:10px 0 6px 0;">5-minute Summaries after Each Dose Event</h4>';
   html += '<table class="striped" style="width:100%; border-collapse:collapse;">' +
           '<thead><tr><th>#</th><th>Start Time</th><th>Rows</th><th>Duration (s)</th>' +
@@ -8674,7 +8681,7 @@ function pushSummaryRow(tbody, label, segIdx, segMeta){
   function stretches(rows){ var out=[], start=0; for(var i=1;i<rows.length;i++){ if(rows[i].ts<=rows[i-1].ts){ out.push({i0:start,i1:i-1}); start=i; } } out.push({i0:start,i1:rows.length-1}); return out; }
   function renderStretches(rows, segs){ var html='<h4 style=\"margin:10px 0 6px 0;\">Stretch Summaries (before each timer reset)</h4>'; html+='<table class=\"striped\" style=\"width:100%; border-collapse:collapse;\"><thead><tr><th>#</th><th>Start</th><th>End</th><th>Rows</th><th>Duration (min)</th><th>Rush μ</th><th>Mood μ</th><th>Energy μ</th><th>Focus μ</th><th>Social μ</th><th>Anxiety μ</th><th>Impair μ</th></tr></thead><tbody>'; segs.forEach(function(seg,k){ var sub=rows.slice(seg.i0, seg.i1+1); var dur=sub.length?(sub[sub.length-1].ts-sub[0].ts)/(60*1000):0; function meanOf(f){ var a=sub.map(f).filter(function(v){return Number.isFinite(v);}); return a.length? a.reduce(function(s,x){return s+x;},0)/a.length : 0; } html+='<tr><td>'+(k+1)+'</td><td>'+new Date(sub[0].ts).toLocaleTimeString('en-AU',{hour12:false})+'</td><td>'+new Date(sub[sub.length-1].ts).toLocaleTimeString('en-AU',{hour12:false})+'</td><td>'+sub.length+'</td><td>'+dur.toFixed(2)+'</td><td>'+meanOf(function(r){return r.rush;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.mood;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.energy;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.focus;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.social;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.anxiety;}).toFixed(2)+'</td><td>'+meanOf(function(r){return r.impair;}).toFixed(2)+'</td></tr>'; }); html+='</tbody></table>'; return html; }
   
-window.openReview = function(){
+if (typeof window.openReview !== 'function') if (typeof window.openReview !== 'function') window.openReview = function(){
   var rows = rowsFromMain();
   var html = '';
   html += renderStats(rows);
@@ -8699,8 +8706,7 @@ window.openReview = function(){
   var modal = document.getElementById('reviewModal');
   if (modal) modal.style.display = 'block';
 };
-
-  window.exportReviewCSV=function(){ var rows=rowsFromMain(); var metrics=['rush','mood','social','energy','focus','anxiety','impair']; var head=['metric','count','sum','mean','mode','median','stdev']; var out=[head.join(',')]; metrics.forEach(function(m){ var s=basicStats(rows.map(function(r){return r[m];})); out.push([m,s.count,s.sum.toFixed(2),s.mean.toFixed(2),s.mode??'',s.median.toFixed(2),s.stdev.toFixed(2)].join(',')); }); var blob=new Blob([out.join('\\n')],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='review_stats.csv'; a.click(); URL.revokeObjectURL(a.href); };
+if (typeof window.exportReviewCSV !== 'function')   if (typeof window.exportReviewCSV !== 'function') window.exportReviewCSV=function(){ var rows=rowsFromMain(); var metrics=['rush','mood','social','energy','focus','anxiety','impair']; var head=['metric','count','sum','mean','mode','median','stdev']; var out=[head.join(',')]; metrics.forEach(function(m){ var s=basicStats(rows.map(function(r){return r[m];})); out.push([m,s.count,s.sum.toFixed(2),s.mean.toFixed(2),s.mode??'',s.median.toFixed(2),s.stdev.toFixed(2)].join(',')); }); var blob=new Blob([out.join('\\n')],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='review_stats.csv'; a.click(); URL.revokeObjectURL(a.href); };
 })();
 </script>
 <!-- ===== Auto Entries & Rolling Average (modal-based) ===== -->
@@ -8813,10 +8819,13 @@ function readCurrentSelections(){
     return {Rush:0,Mood:0,Social:0,Energy:0,Focus:0,Anxiety:0,Impair:0,Weighted:0,Score5:0};
   }
 
-
+  }
+  // Expose for other modules (idempotent)
+  if (!window.readCurrentSelections) window.readCurrentSelections = readCurrentSelections;
+})();
 </script>
 <script>
-function(){
+(function(){
   function setDToLast3(){
     var d = document.getElementById('autoSliderDModal');
     if (!d) return;
@@ -8837,7 +8846,7 @@ function(){
   } else {
     setDToLast3();
   }
-}();
+})();
 </script>
 <!-- STS: Buttons (auto-injected) -->
 
@@ -9427,12 +9436,12 @@ function renderAllRatedOutOf10Popup(){
   });
   tb.innerHTML = rows.join('');
 }
-  window.openAllRatedOutOf10Popup = function(){
+  if (typeof window.openAllRatedOutOf10Popup !== 'function') window.openAllRatedOutOf10Popup = function(){
     renderAllRatedOutOf10Popup();
     const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='block';
     const bd=document.getElementById('allRatedOutOf10PopupBackdrop');if(bd)bd.onclick=closeAllRatedOutOf10Popup;
   };
-  window.closeAllRatedOutOf10Popup = function(){
+  if (typeof window.closeAllRatedOutOf10Popup !== 'function') window.closeAllRatedOutOf10Popup = function(){
     const m=document.getElementById('allRatedOutOf10PopupModal');if(m)m.style.display='none';
   };
 
@@ -9467,26 +9476,7 @@ function fiveMinBuckets(){
   return out;
 }
 
-;
-    const startT = new Date(src[0].timestamp||0).getTime();
-    src.forEach(r=>{
-      const ts = new Date(r.timestamp||0).getTime();
-      const diff = Math.max(1,Math.floor((ts-startT)/300000)); // 1‑based bin index
-      (res[diff]=res[diff]||[]).push(r);
-    });
-    const out=[];
-    Object.keys(res).sort((a,b)=>a-b).forEach(k=>{
-      const list=res[k], agg={rush:0,mood:0,social:0,energy:0,focus:0,anxiety:0,impair:0};
-      list.forEach(r=>{
-        agg.rush+=r.rushSum||0; agg.mood+=r.moodSum||0; agg.social+=r.socialSum||0; agg.energy+=r.energySum||0;
-        agg.focus+=r.focusSum||0; agg.anxiety+=r.anxietySum||0; agg.impair+=r.impairSum||0;
-      });
-      for(const f in agg){ agg[f]/=list.length; } // average
-      out.push({offset:+k,values:agg});
-    });
-    return out;
-  }
-  
+
 function renderAllRated5MinutesPopup(){
   window.syncLogDataFromTable && window.syncLogDataFromTable();
   var tb = document.querySelector('#allRated5MinutesPopupTable tbody');
@@ -10158,7 +10148,7 @@ BOOKMARK SHORT MODE BUTTON SIZE was 168x36
       document.querySelector('#controls'),
       document.querySelector('header'),
       document.body
-    ];
+      ];
     for (var i=0;i<targets.length;i++){
       if (targets[i]){ targets[i].appendChild(btn); return; }
     }
@@ -10375,9 +10365,7 @@ window.backfillAll = function(){
       var el = ev.target;
       if (!el || !el.id) return;
       if (el.id === 'backfillBtnGlobal' || el.id === 'backfillBtn' || /^backfillBtn\d+$/.test(el.id)) {
-        if (typeof /* legacy backfill implementation superseded on 2025/10/31 START */
-window.backfillAll === 'function') window.backfillAll();
-/* legacy backfill implementation superseded on 2025/10/31 END */
+        if (typeof window.backfillAll === 'function') window.backfillAll();
       }
     }catch(e){}
   }, true);
@@ -10459,6 +10447,8 @@ window.backfillAll === 'function') window.backfillAll();
 (function(){
   // ---- Config ----
   window.CONFIG = window.CONFIG || {};
+  CONFIG.popups = CONFIG.popups || {};
+  CONFIG.popups = CONFIG.popups || {};
   CONFIG.popups = CONFIG.popups || {};
   CONFIG.popups.fiveMinuteAverager = Object.assign({
     enabled: true,                 // master toggle
@@ -10919,23 +10909,6 @@ function statsOf(arr){
     mode: modeVal
   };
 }
-;
-    const n = arr.length;
-    let sum = 0, lo = +arr[0], hi = +arr[0];
-    for (let i=0;i<n;i++){
-      const v = +arr[i];
-      if (!Number.isFinite(v)) continue;
-      sum += v;
-      if (v < lo) lo = v;
-      if (v > hi) hi = v;
-    }
-    return {
-      avg: sum / n,
-      med: medianOf(arr),
-      min: lo,
-      max: hi
-    };
-  }
 
   // Compute segments from logData
   
@@ -11064,7 +11037,7 @@ function pushSummaryRow(tbody, label, segIdx, segMeta){
       fmt2(vals.rush), fmt2(vals.mood), fmt2(vals.social), fmt2(vals.energy), fmt2(vals.focus),
       fmt2(vals.anxiety), fmt2(vals.impair),
       fmt2(vals.score), fmt2(vals.max), fmt2(vals.min), fmt2(vals.weighted), fmt2(vals.fiveMax)
-    ];
+      ];
     for (let i=0;i<headers.length;i++){
       const td = document.createElement('td');
       td.textContent = cells[i] != null ? String(cells[i]) : '';
@@ -11302,6 +11275,7 @@ segments.forEach((seg, idx) => {
     { field: 'anxietySum', label: 'Anxiety Sum' },
     { field: 'impairSum',  label: 'Impair Sum' }
   ];
+
 //   const METRICS = [
 //     { field: 'rushSum',    label: 'Rush Sum' },
 //     { field: 'moodSum',    label: 'Mood Sum' },
@@ -11366,8 +11340,7 @@ segments.forEach((seg, idx) => {
     buildMetricRows();
     buildNotes();
   }
-</script>
-<script>
+
   function buildMetricRows() {
     const host = document.getElementById('umMetrics');
     if (!host) return;
@@ -11376,7 +11349,7 @@ segments.forEach((seg, idx) => {
     host.style.flexDirection = 'column';
     host.style.gap = '10px';
 
-    METRICS.forEach((m) => {
+  METRICS.forEach((m) => {
       const section = document.createElement('div');
       section.style.display = 'flex';
       section.style.flexDirection = 'column';
@@ -11569,6 +11542,7 @@ function closeEmotionModal() {
 }
 function buildEmotionButtons() {
     const container = document.getElementById("emotionButtons");
+    if (!container) return;
     if (container.childNodes.length > 0) return; // Avoid rebuilding
     const emotions = [
         "Joy","Happy","Cheerful","Content","Proud","Optimistic","Excited","Energetic","Affectionate","Compassionate","Peaceful","Relieved","Satisfied","Love",
@@ -11578,96 +11552,92 @@ function buildEmotionButtons() {
         "Surprise","Amazed","Startled","Stunned","Confused","Shocked","Speechless","Awestruck","Overcome","Perplexed","Disillusioned"
     ];
     emotions.forEach(word => {
-        const btn = document.cr
-</script>
-<!-- 
-// BOOKMARK DEC25
- -->
-<script>
-/* === Metric completeness helpers (2025/10/26 00:00:00) === */
-const MAIN_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair'];
-
-/** Return how many of the seven main metrics are completed on a TR element. */
-function countCompletedMetricsFromRow(tr){
-  let n = 0;
-  for (const f of MAIN_FIELDS){
-    const td = tr.querySelector(`td[data-field="${f}Sum"]`);
-    if (!td) continue;
-    const hasDataValue = td.hasAttribute('data-value') && td.getAttribute('data-value').trim() !== '';
-    const hasText = (td.textContent || '').trim() !== '';
-    if (hasDataValue || hasText) n++;
-  }
-  return n;
-}
-
-/** Return how many of the seven main metrics are completed on a plain entry object (e.g., CSV/imported). */
-function countCompletedMetricsFromEntry(e){
-  let n = 0;
-  for (const f of MAIN_FIELDS){
-    const lbl = e && typeof e[`${f}Label`] === 'string' ? e[`${f}Label`].trim() : '';
-    const hasLabel = lbl !== '';
-    const val = e ? e[`${f}Sum`] : null;
-    const hasValue = Number.isFinite(+val);
-    if (hasLabel || hasValue) n++;
-  }
-  return n;
-}
-
-/** True if at least seven main metrics are completed. */
-function hasAtLeastSeven(eOrTr){
-  if (eOrTr && eOrTr.nodeType === 1) return countCompletedMetricsFromRow(eOrTr) >= 7;
-  return countCompletedMetricsFromEntry(eOrTr) >= 7;
-}
-</script>
-<script>
-/* === Metric completeness helpers (2025/10/26 00:00:00) === */
-const MAIN_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair'];
-
-/** Return how many of the seven main metrics are completed on a TR element. */
-function countCompletedMetricsFromRow(tr){
-  let n = 0;
-  for (const f of MAIN_FIELDS){
-    const td = tr.querySelector(`td[data-field="${f}Sum"]`);
-    if (!td) continue;
-    const hasDataValue = td.hasAttribute('data-value') && td.getAttribute('data-value').trim() !== '';
-    const hasText = (td.textContent || '').trim() !== '';
-    if (hasDataValue || hasText) n++;
-  }
-  return n;
-}
-
-/** Return how many of the seven main metrics are completed on a plain entry object (e.g., CSV/imported). */
-function countCompletedMetricsFromEntry(e){
-  let n = 0;
-  for (const f of MAIN_FIELDS){
-    const lbl = e && typeof e[`${f}Label`] === 'string' ? e[`${f}Label`].trim() : '';
-    const hasLabel = lbl !== '';
-    const val = e ? e[`${f}Sum`] : null;
-    const hasValue = Number.isFinite(+val);
-    if (hasLabel || hasValue) n++;
-  }
-  return n;
-}
-
-/** True if at least seven main metrics are completed. */
-function hasAtLeastSeven(eOrTr){
-  if (eOrTr && eOrTr.nodeType === 1) return countCompletedMetricsFromRow(eOrTr) >= 7;
-  return countCompletedMetricsFromEntry(eOrTr) >= 7;
-}
-</script>
-<script>
-eateElement('button');
+        const btn = document.createElement('button');
         btn.textContent = word;
         btn.className = 'note-btn';
         btn.style.minWidth = '80px';
         btn.onclick = () => {
             const notes = document.getElementById('notesInput');
+            if (!notes) return;
             if (!notes.value.includes(word)) {
                 notes.value = (notes.value + ' ' + word).trim();
             }
         };
         container.appendChild(btn);
     });
+}
+</script>
+<!-- 
+// BOOKMARK DEC25
+ -->
+<script>
+/* === Metric completeness helpers (2025/10/26 00:00:00) === */
+var MAIN_FIELDS = window.MAIN_FIELDS || (window.MAIN_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair']);
+/** Return how many of the seven main metrics are completed on a TR element. */
+function countCompletedMetricsFromRow(tr){
+  let n = 0;
+  for (const f of MAIN_FIELDS){
+    const td = tr.querySelector(`td[data-field="${f}Sum"]`);
+    if (!td) continue;
+    const hasDataValue = td.hasAttribute('data-value') && td.getAttribute('data-value').trim() !== '';
+    const hasText = (td.textContent || '').trim() !== '';
+    if (hasDataValue || hasText) n++;
+  }
+  return n;
+}
+
+/** Return how many of the seven main metrics are completed on a plain entry object (e.g., CSV/imported). */
+function countCompletedMetricsFromEntry(e){
+  let n = 0;
+  for (const f of MAIN_FIELDS){
+    const lbl = e && typeof e[`${f}Label`] === 'string' ? e[`${f}Label`].trim() : '';
+    const hasLabel = lbl !== '';
+    const val = e ? e[`${f}Sum`] : null;
+    const hasValue = Number.isFinite(+val);
+    if (hasLabel || hasValue) n++;
+  }
+  return n;
+}
+
+/** True if at least seven main metrics are completed. */
+function hasAtLeastSeven(eOrTr){
+  if (eOrTr && eOrTr.nodeType === 1) return countCompletedMetricsFromRow(eOrTr) >= 7;
+  return countCompletedMetricsFromEntry(eOrTr) >= 7;
+}
+</script>
+<script>
+/* === Metric completeness helpers (2025/10/26 00:00:00) === */
+var MAIN_FIELDS = window.MAIN_FIELDS || (window.MAIN_FIELDS = ['rush','mood','social','energy','focus','anxiety','impair']);
+/** Return how many of the seven main metrics are completed on a TR element. */
+function countCompletedMetricsFromRow(tr){
+  let n = 0;
+  for (const f of MAIN_FIELDS){
+    const td = tr.querySelector(`td[data-field="${f}Sum"]`);
+    if (!td) continue;
+    const hasDataValue = td.hasAttribute('data-value') && td.getAttribute('data-value').trim() !== '';
+    const hasText = (td.textContent || '').trim() !== '';
+    if (hasDataValue || hasText) n++;
+  }
+  return n;
+}
+
+/** Return how many of the seven main metrics are completed on a plain entry object (e.g., CSV/imported). */
+function countCompletedMetricsFromEntry(e){
+  let n = 0;
+  for (const f of MAIN_FIELDS){
+    const lbl = e && typeof e[`${f}Label`] === 'string' ? e[`${f}Label`].trim() : '';
+    const hasLabel = lbl !== '';
+    const val = e ? e[`${f}Sum`] : null;
+    const hasValue = Number.isFinite(+val);
+    if (hasLabel || hasValue) n++;
+  }
+  return n;
+}
+
+/** True if at least seven main metrics are completed. */
+function hasAtLeastSeven(eOrTr){
+  if (eOrTr && eOrTr.nodeType === 1) return countCompletedMetricsFromRow(eOrTr) >= 7;
+  return countCompletedMetricsFromEntry(eOrTr) >= 7;
 }
 </script>
 <script>
@@ -12135,7 +12105,7 @@ function renderPerDose5MinTablesIntoCard(cardEl, perDoseData, metricNames) {
       '<th class="text-center">5Max Min</th>',
       '<th class="text-center">5Max Max</th>',
       '<th class="text-right">n</th>'
-    ];
+  ];
     thead.innerHTML = `<tr>${headerCells.join('')}</tr>`;
     table.appendChild(thead);
 
@@ -12268,7 +12238,6 @@ const METRIC_COLUMNS_EXACT = [
   "Rush Sum","Mood Sum","Social Sum","Energy Sum","Focus Sum","Anxiety Sum","Impair Sum",
   "Score","Min","Max","Weighted","5Max"
 ];
-
 function normaliseHeaderName(s){
   return String(s||"").toLowerCase().replace(/\s+/g," ").trim();
 }
@@ -12683,8 +12652,6 @@ function appendPerDoseToDoseReviews_EXACT(){
  */
 
 (function(){
-  ];
-
   function normaliseHeaderName(s){
     return String(s||"").toLowerCase().replace(/\s+/g," ").trim();
   }
@@ -12814,7 +12781,6 @@ function appendPerDoseToDoseReviews_EXACT(){
 /* Injected on 2025/11/05 00:00:02 (Australia/Sydney)
  * Raw averages (no +5), cell shading like main grid, multi-dose detection via Since/Elapsed rule.
  */
-];
 function _normHeader(s){ return String(s||"").toLowerCase().replace(/\s+/g," ").trim(); }
 function _getHeaderMap(table){
   const heads = Array.from(table.querySelectorAll("thead tr th")).map(th => th.textContent.trim());
@@ -13282,7 +13248,6 @@ function _appendPerDoseToDoseReviews(){
     {key:'jitter',     label:'Jitter',     cols:['Jitter']},
     {key:'dopamine',   label:'Dopamine',   cols:['Dopamine']}
   ];
-
   function isColVisible(col){
     try {
       return !!(window.STS_COLUMN_VIS && typeof STS_COLUMN_VIS.isVisible === 'function' && STS_COLUMN_VIS.isVisible(col));
@@ -13658,7 +13623,7 @@ function _appendPerDoseToDoseReviews(){
     const candidates = [
       "#dataTable", "#mainTable", "#logTable",
       "table[data-role='main']", ".main-table"
-    ];
+      ];
     for (const sel of candidates){
       const el = document.querySelector(sel);
       if (el) return el;
@@ -13797,7 +13762,7 @@ function _appendPerDoseToDoseReviews(){
       { label: "Average", fn: mean },
       { label: "Median",  fn: median },
       { label: "Minimum", fn: minv },
-      { label: "Maximum", fn: maxv },
+      { label: "Maximum", fn: maxv }
     ];
     const out = [];
     for (const s of summaries){
@@ -13957,7 +13922,7 @@ function segmentBySinceDose(visibleRows){
       { label: "Average (first 5 min)", fn: mean },
       { label: "Median (first 5 min)",  fn: median },
       { label: "Mode (first 5 min)",    fn: modev },
-      { label: "Maximum (first 5 min)", fn: maxv },
+      { label: "Maximum (first 5 min)", fn: maxv }
     ];
     const out = [];
     for (const s of summaries){
@@ -14469,7 +14434,7 @@ function closeAllRatedPopup(){
     if (typeof _origRender === 'function'){
       window.renderTable = function(){
         try {
-          const table = getMainTable();
+          const table = (typeof window.STS_COLUMN_VIS === 'object' && window.STS_COLUMN_VIS && typeof window.STS_COLUMN_VIS.getMainTable === 'function') ? window.STS_COLUMN_VIS.getMainTable() : (document.getElementById('logTable') || document.getElementById('mainLogTable'));
           if (!table) return _origRender.apply(this, arguments);
           _origRender.apply(this, arguments);
           const tbody = table.querySelector('tbody');
@@ -14664,7 +14629,7 @@ function closeAllRatedPopup(){
   }
 
   function buildChooser(){
-    const table = getMainTable();
+    const table = (typeof window.STS_COLUMN_VIS === 'object' && window.STS_COLUMN_VIS && typeof window.STS_COLUMN_VIS.getMainTable === 'function') ? window.STS_COLUMN_VIS.getMainTable() : (document.getElementById('logTable') || document.getElementById('mainLogTable'));
     if (!table) return;
     const list = document.getElementById('columnChooserList');
     if (!list) return;
@@ -14696,7 +14661,7 @@ function closeAllRatedPopup(){
     const btn = document.getElementById('colChooserToggle');
     const panel = document.getElementById('columnChooser');
     const close = document.getElementById('colChooserClose');
-    const table = getMainTable();
+    const table = (typeof window.STS_COLUMN_VIS === 'object' && window.STS_COLUMN_VIS && typeof window.STS_COLUMN_VIS.getMainTable === 'function') ? window.STS_COLUMN_VIS.getMainTable() : (document.getElementById('logTable') || document.getElementById('mainLogTable'));
     if (!btn || !panel) return;
 
     function open(){
@@ -14817,7 +14782,6 @@ btn.classList.add('metric-btn');
   } catch(e){}
 })();
 </script>
-<script>
 <style>
 /* Inputs/Textareas theme-aware */
 input[type="text"], input[type="number"], input[type="search"], input[type="time"], input[type="date"], textarea, select{
@@ -14864,7 +14828,6 @@ input[type="text"], input[type="number"], input[type="search"], input[type="time
   --metric-active: rgba(88,166,255,0.35);
 }
 </style>
-</script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   try {
@@ -14951,9 +14914,6 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     });
   });
-  </script>
-<script>
-
 
   // ===== Auto Slider C / D =====
   // UI: add minimal modals if missing
@@ -16517,13 +16477,6 @@ btn.classList.add('metric-btn');
   const dt = new Date(normalised);
   return isNaN(dt) ? null : dt;
 }
-    const s = (tsText||'').trim()
-      .replace(/-/g,'/')
-      .replace(/T/,' ')
-      .replace(/\.[0-9]+Z?$/,'');
-    const d = new Date(s);
-    return isNaN(d) ? null : d;
-  }
   function snapshotFromMainTable() {
   const table = document.querySelector(CFG.mainTableSelector);
   if (!table) return [];
@@ -16566,9 +16519,6 @@ btn.classList.add('metric-btn');
     console.warn('[Backfill] Snapshot empty. Headers=', headers, 'tsIdx=', tsIdx, 'rowCount=', rowEls.length);
   }
   return rows;
-}
-    rows.sort((a,b)=>a._ts-b._ts);
-    return rows;
   }
   function computeRollingMeans(snapshot, endMs, windowMin) {
     if (!snapshot.length) return null;
@@ -16665,7 +16615,7 @@ btn.classList.add('metric-btn');
       { id:'summary15Table', label:'Summary 15m' },
       { id:'summary60Table', label:'Summary 60m' }
     ];
-    const host = document.querySelector('#summaryArea') || document.body;
+    const host = document.querySelector('#summaryArea') || document.body;;
     targets.forEach(t=>{
       if (document.getElementById(t.id)) return;
       const wrap = document.createElement('div');
@@ -17374,8 +17324,7 @@ function captureOnce(){
   // Metrics covered by Festival Mode
   const FESTIVAL_MODE_METRICS = [
     'rush','mood','social','energy','focus','anxiety','impair'
-      ];
-
+  ];
   // Festival Mode label mappings (per-metric)
   const FESTIVAL_MODE_LABELS = {
   rush: { 6.00: 'Overwhelming', 5.50: 'Manic', 5.00: 'Extreme', 4.50: 'Wired', 4.00: 'Intense', 3.50: 'Euphoric', 3.00: 'Energetic', 2.50: 'Physical', 2.00: 'Feel', 1.50: 'Mental', 1.00: 'Noticed', 0.50: 'Minor', 0.00: 'No Rush', 0.40: '+', 0.20: '+', 0.25: '+', 0.75: '+', 5.12: 'Overwhelming', 4.48: 'Extreme', 3.84: 'Very High', 3.24: 'High', 2.56: 'Mid-High', 2.24: 'Moderate', 1.92: 'Low-Mid', 0.96: 'Low', 0.16: 'Minimal' },
